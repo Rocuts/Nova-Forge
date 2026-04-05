@@ -1,12 +1,25 @@
+"use client"
+import { motion } from "motion/react"
+import { RevealText } from "@/components/ui/RevealText"
 import { faqSection } from "@/content/landing"
+import { useSectionEntrance } from "@/hooks/useParallax"
+import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
 export function FAQ() {
+  const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
+  const skewY = useScrollVelocitySkew()
+
   return (
-    <section className="py-24 bg-surface-base relative z-10" id={faqSection.sectionId}>
+    <motion.section
+      ref={entranceRef}
+      style={{ opacity, y, scale, skewY }}
+      className="py-24 bg-surface-base relative z-10"
+      id={faqSection.sectionId}
+    >
       <div className="container px-4 mx-auto max-w-3xl">
-        <h2 className="font-heading text-3xl md:text-4xl font-medium mb-12 text-center">
+        <RevealText as="h2" className="font-heading text-3xl md:text-4xl font-medium mb-12 text-center" animateWeight>
           {faqSection.title}
-        </h2>
+        </RevealText>
         
         <div className="space-y-6">
           {faqSection.items.map((faq) => (
@@ -17,6 +30,6 @@ export function FAQ() {
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }

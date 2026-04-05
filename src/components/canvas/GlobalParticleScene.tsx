@@ -1,63 +1,94 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useEffect, Suspense } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing"
 import * as THREE from "three"
 import { BRAND_COLORS } from "@/lib/colors"
+import { useIsMobile } from "@/lib/useIsMobile"
 
-function ParticleField() {
+const PARTICLE_COUNT_DESKTOP = 3000
+const PARTICLE_COUNT_MOBILE = 1200
+
+function createParticlePositions(count: number) {
+  const array = new Float32Array(count * 3)
+  for (let i = 0; i < array.length; i++) {
+    array[i] = (Math.random() - 0.5) * 30
+    if (i % 3 === 1) {
+      array[i] = (Math.random() - 0.5) * 40
+    }
+  }
+  return array
+}
+
+function createParticleTexture() {
+  const canvas = document.createElement("canvas")
+  canvas.width = 64
+  canvas.height = 64
+  const context = canvas.getContext("2d")
+  if (context) {
+    const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32)
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
+    gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)")
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
+    context.fillStyle = gradient
+    context.beginPath()
+    context.arc(32, 32, 32, 0, Math.PI * 2)
+    context.fill()
+  }
+  return new THREE.CanvasTexture(canvas)
+}
+
+function ParticleField({ isMobile }: { isMobile: boolean }) {
   const pointsRef = useRef<THREE.Points>(null)
-  const particlesCount = 3000
+  const scrollSpeedRef = useRef(0)
+  const prevScrollRef = useRef(0)
 
-  // useMemo and Math.random can trigger impurity warnings. Using useState lazy initializer instead.
-  const [positions] = useState(() => {
-    const array = new Float32Array(particlesCount * 3)
-    for (let i = 0; i < array.length; i++) {
-      // Range from -15 to 15 to cover larger global screen area
-      array[i] = (Math.random() - 0.5) * 30 
-      // Distribute more vertically
-      if (i % 3 === 1) {
-        array[i] = (Math.random() - 0.5) * 40
-      }
-    }
-    return array
-  })
+  const particlesCount = isMobile ? PARTICLE_COUNT_MOBILE : PARTICLE_COUNT_DESKTOP
 
-  // Create a procedural soft circle texture
-  const particleTexture = useMemo(() => {
-    const canvas = document.createElement("canvas")
-    canvas.width = 64
-    canvas.height = 64
-    const context = canvas.getContext("2d")
-    if (context) {
-      const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32)
-      gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
-      gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)")
-      gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
-      
-      context.fillStyle = gradient
-      context.beginPath()
-      context.arc(32, 32, 32, 0, Math.PI * 2)
-      context.fill()
+  const positions = useMemo(() => createParticlePositions(particlesCount), [particlesCount])
+
+  const particleTexture = useMemo(() => createParticleTexture(), [])
+
+  // Dispose the CanvasTexture on unmount to prevent GPU memory leak
+  useEffect(() => {
+    return () => {
+      particleTexture.dispose()
     }
-    const texture = new THREE.CanvasTexture(canvas)
-    return texture
-  }, [])
+  }, [particleTexture])
 
   useFrame((state, delta) => {
     if (!pointsRef.current) return
-    
-    // Animation: Slow global rotation on its axes
-    pointsRef.current.rotation.y += delta * 0.02
-    pointsRef.current.rotation.x += delta * 0.01
 
-    // Interactivity: the container moves subtly towards the mouse
-    const targetX = state.pointer.x * 2.0 // Increased amplifier due to global scale
-    const targetY = state.pointer.y * 2.0
-    
-    // Linear interpolation for smoother movement
-    pointsRef.current.position.x += (targetX - pointsRef.current.position.x) * 0.02
-    pointsRef.current.position.y += (targetY - pointsRef.current.position.y) * 0.02
+    // Track scroll velocity to make particles react
+    const currentScroll = window.scrollY
+    const scrollDelta = currentScroll - prevScrollRef.current
+    prevScrollRef.current = currentScroll
+
+    // Smooth the scroll speed (eased accumulation)
+    scrollSpeedRef.current += (Math.abs(scrollDelta) * 0.003 - scrollSpeedRef.current) * 0.1
+
+    // Base rotation + scroll-boosted rotation
+    const scrollBoost = 1 + scrollSpeedRef.current * 8
+    pointsRef.current.rotation.y += delta * 0.02 * scrollBoost
+    pointsRef.current.rotation.x += delta * 0.01 * scrollBoost
+
+    // Scroll direction tilts the particle field
+    const targetTiltZ = scrollDelta * 0.0003
+    pointsRef.current.rotation.z += (targetTiltZ - pointsRef.current.rotation.z) * 0.05
+
+    // Mouse tracking (skip on mobile — pointer data is unreliable there)
+    if (!isMobile) {
+      const targetX = state.pointer.x * 2.0
+      const targetY = state.pointer.y * 2.0
+      pointsRef.current.position.x += (targetX - pointsRef.current.position.x) * 0.02
+      pointsRef.current.position.y += (targetY - pointsRef.current.position.y) * 0.02
+    }
+
+    // Subtle size pulse based on scroll velocity
+    const material = pointsRef.current.material as THREE.PointsMaterial
+    const targetSize = 0.08 + scrollSpeedRef.current * 0.15
+    material.size += (targetSize - material.size) * 0.1
   })
 
   return (
@@ -73,7 +104,7 @@ function ParticleField() {
         color={BRAND_COLORS.amber}
         map={particleTexture}
         transparent
-        opacity={0.6} // Slightly more transparent for global overlay
+        opacity={0.6}
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -83,17 +114,24 @@ function ParticleField() {
 }
 
 export default function GlobalParticleScene() {
+  const isMobile = useIsMobile()
+
   return (
     <Canvas
-      camera={{ position: [0, 0, 10], fov: 60 }} // Pulled back to see more particles
-      dpr={[1, 1.5]} // Optimized max dpr for full-screen particles
-      gl={{ antialias: false, alpha: true }} 
-      style={{ pointerEvents: 'none' }} // Crucial: Let clicks pass through to HTML
-      eventSource={typeof document !== 'undefined' ? document.body : undefined} // Track mouse globally
+      camera={{ position: [0, 0, 10], fov: 60 }}
+      dpr={isMobile ? [1, 1] : [1, 1.5]}
+      gl={{ antialias: false, alpha: true }}
+      style={{ pointerEvents: 'none' }}
+      eventSource={typeof document !== 'undefined' ? document.body : undefined}
     >
-      {/* Soft Ambient to illuminate particles if they had standard material, but PointsMaterial uses absolute color mostly */}
-      <ambientLight intensity={0.5} />
-      <ParticleField />
+      <Suspense fallback={null}>
+        <ambientLight intensity={0.5} />
+        <ParticleField isMobile={isMobile} />
+        <EffectComposer>
+          <Bloom luminanceThreshold={0.3} mipmapBlur intensity={isMobile ? 0.8 : 1.5} />
+          <Vignette eskil={false} offset={0.1} darkness={isMobile ? 0 : 0.8} />
+        </EffectComposer>
+      </Suspense>
     </Canvas>
   )
 }

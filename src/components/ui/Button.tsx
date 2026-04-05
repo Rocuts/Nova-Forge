@@ -2,6 +2,7 @@
 import { forwardRef } from "react"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
+import { MagneticButton } from "./MagneticButton"
 
 type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
   variant?: "primary" | "secondary" | "glass"
@@ -10,10 +11,11 @@ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"
   target?: string
   children: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+  magnetic?: boolean
 }
 
 export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", onClick, href, target, children, ...props }, ref) => {
+  ({ className, variant = "primary", size = "md", onClick, href, target, children, magnetic = false, ...props }, ref) => {
     const baseStyles = "inline-flex items-center justify-center rounded-[var(--radius-sm)] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-cyan disabled:pointer-events-none disabled:opacity-50"
 
     const variants = {
@@ -37,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
 
     if (href) {
       const isExternal = /^https?:\/\//.test(href) || href.startsWith("mailto:")
-      return (
+      const anchor = (
         <motion.a
           ref={ref as React.Ref<HTMLAnchorElement>}
           href={href}
@@ -51,9 +53,10 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
           {children}
         </motion.a>
       )
+      return magnetic ? <MagneticButton>{anchor}</MagneticButton> : anchor
     }
 
-    return (
+    const button = (
       <motion.button
         ref={ref as React.Ref<HTMLButtonElement>}
         type={props.type || "button"}
@@ -66,6 +69,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
         {children}
       </motion.button>
     )
+    return magnetic ? <MagneticButton>{button}</MagneticButton> : button
   }
 )
 Button.displayName = "Button"

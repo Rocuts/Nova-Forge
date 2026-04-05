@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "motion/react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { TransitionLink } from "@/components/ui/TransitionLink"
 import { siteConfig } from "@/config/site"
 import { navItems } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
@@ -44,9 +45,9 @@ export function Header() {
         className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-surface-base/80 backdrop-blur-md border-b border-surface-border" : "bg-transparent"}`}
       >
         <div className="container px-4 mx-auto max-w-7xl h-20 flex items-center justify-between">
-          <Link href="/" className="font-heading text-xl font-bold tracking-tight">
+          <TransitionLink href="/" className="font-heading text-xl font-bold tracking-tight">
             {siteConfig.name}.
-          </Link>
+          </TransitionLink>
 
           <nav className="hidden md:flex items-center gap-2 text-sm font-medium relative">
             {navItems.map((item) => (

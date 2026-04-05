@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { TransitionLink } from "@/components/ui/TransitionLink"
 import { siteConfig } from "@/config/site"
 import { navItems } from "@/content/landing"
 
@@ -38,8 +39,8 @@ export function Footer() {
           <div>
             <h4 className="font-medium text-white mb-4">Legal</h4>
             <ul className="space-y-3 text-text-secondary">
-              <li><Link href={siteConfig.legal.privacy} className="hover:text-white transition-colors">Privacidad</Link></li>
-              <li><Link href={siteConfig.legal.terms} className="hover:text-white transition-colors">Términos</Link></li>
+              <li><TransitionLink href={siteConfig.legal.privacy} className="hover:text-white transition-colors">Privacidad</TransitionLink></li>
+              <li><TransitionLink href={siteConfig.legal.terms} className="hover:text-white transition-colors">Términos</TransitionLink></li>
             </ul>
           </div>
         </div>

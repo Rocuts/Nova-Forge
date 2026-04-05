@@ -1,9 +1,13 @@
 /* Z-INDEX MAP:
- * z-0:  GlobalParticles (fixed background)
- * z-10: Main content (sections)
- * z-40: Mobile menu overlay (when open)
- * z-50: Header (fixed top)
- * z-50: ContactAssistant FAB + chat panel (fixed bottom-right)
+ * z-0:     GlobalParticles (fixed background)
+ * z-10:    Main content (sections)
+ * z-40:    Mobile menu overlay (when open)
+ * z-50:    Header (fixed top)
+ * z-50:    ContactAssistant FAB + chat panel (fixed bottom-right)
+ * z-50:    SoundToggle (fixed bottom-left)
+ * z-100:   Noise overlay (body::after, pointer-events: none)
+ * z-[9998]: IntroSequence overlay (removed from DOM after animation)
+ * z-9999:  CustomCursor (pointer-events: none)
  */
 
 import type { Metadata } from "next"
@@ -14,6 +18,10 @@ import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { ContactAssistant } from "@/components/sections/ContactAssistant"
 import { GlobalParticles } from "@/components/canvas/GlobalParticles"
+import { SmoothScroll } from "@/components/providers/SmoothScroll"
+import { CustomCursorWrapper } from "@/components/ui/CustomCursorWrapper"
+import { IntroSequenceWrapper } from "@/components/ui/IntroSequenceWrapper"
+import { SoundToggleWrapper } from "@/components/ui/SoundToggleWrapper"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" })
@@ -75,13 +83,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${inter.variable} ${outfit.variable} antialiased`} suppressHydrationWarning>
       <body className="bg-surface-base text-text-primary min-h-screen flex flex-col selection:bg-primary-cyan selection:text-black">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
-        {/* Global Particle Background */}
-        <GlobalParticles />
-        
-        <Header />
-        <main className="flex-1 flex flex-col relative z-10">{children}</main>
-        <ContactAssistant />
-        <Footer />
+        <SmoothScroll>
+          {/* Global Particle Background */}
+          <GlobalParticles />
+
+          <Header />
+          <main className="flex-1 flex flex-col relative z-10">{children}</main>
+          <ContactAssistant />
+          <Footer />
+        </SmoothScroll>
+        <IntroSequenceWrapper />
+        <CustomCursorWrapper />
+        <SoundToggleWrapper />
       </body>
     </html>
   )

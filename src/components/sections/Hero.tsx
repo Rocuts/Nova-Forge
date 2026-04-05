@@ -1,54 +1,93 @@
 "use client"
 import dynamic from "next/dynamic"
-import { useState, useEffect } from "react"
-import { motion } from "motion/react"
+import { useState, useEffect, useRef } from "react"
+import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { Button } from "@/components/ui/Button"
+import { CharReveal } from "@/components/ui/RevealText"
 import { heroContent } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
 
-// Dynamic import del canvas pesado. Se carga solo en cliente.
 const HeroCanvas = dynamic(() => import("../canvas/HeroScene"), { ssr: false })
 
 export function Hero() {
   const [reduceMotion, setReduceMotion] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  const scrollProgressRef = useRef(0)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  })
+
+  // Sync motion value to ref so the Canvas can read it without React context
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      scrollProgressRef.current = v
+    })
+    return unsubscribe
+  }, [scrollYProgress])
+
+  // Text rises faster than scroll — creates depth separation
+  const textY = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
+    { stiffness: 60, damping: 20 }
+  )
+  const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
+
+  // Canvas sinks slower — background layer effect
+  const canvasY = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, 150]),
+    { stiffness: 60, damping: 20 }
+  )
+  const canvasScale = useTransform(scrollYProgress, [0, 1], [1, 1.15])
+
+  // Radial glow expands as you scroll
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.5], [0.6, 0])
+  const glowScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.5])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduceMotion(mq.matches)
-
-    // Listener en caso de que el usuario cambie la preferencia dinámicamente
     const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches)
+    // Use queueMicrotask to avoid synchronous setState in effect body
+    queueMicrotask(() => {
+      setMounted(true)
+      setReduceMotion(mq.matches)
+    })
     mq.addEventListener("change", handler)
     return () => mq.removeEventListener("change", handler)
   }, [])
 
   return (
-    <section className="relative min-h-[120vh] flex items-start pt-32 pb-16 overflow-hidden">
-      {/* Background System */}
-      <div className="absolute inset-0 z-0">
+    <section ref={sectionRef} className="relative min-h-[120vh] flex items-start pt-32 pb-16 overflow-hidden">
+      {/* Background System — moves SLOWER (parallax depth layer) */}
+      <motion.div className="absolute inset-0 z-0" style={{ y: canvasY, scale: canvasScale }}>
         {mounted && !reduceMotion ? (
-           <HeroCanvas />
+          <HeroCanvas scrollProgressRef={scrollProgressRef} />
         ) : (
-           <div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50" />
         )}
-      </div>
+      </motion.div>
 
-      {/* Radial Gradient Overlay: Sutil cyan en el centro */}
-      <div
-        className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-cyan-dim via-transparent to-transparent opacity-60"
+      {/* Radial Gradient Overlay — fades and expands on scroll */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-cyan-dim via-transparent to-transparent"
+        style={{ opacity: glowOpacity, scale: glowScale }}
         aria-hidden="true"
       />
 
-      {/* Fade to Background Overlay: Transición suave en la base */}
+      {/* Fade to Background Overlay */}
       <div
         className="absolute bottom-0 left-0 w-full h-32 pointer-events-none -z-10 bg-gradient-to-t from-surface-base to-transparent"
         aria-hidden="true"
       />
 
-      <div className="container px-4 mx-auto relative z-10 w-full max-w-7xl pointer-events-none">
+      {/* Content — moves FASTER (foreground parallax layer) */}
+      <motion.div
+        className="container px-4 mx-auto relative z-10 w-full max-w-7xl pointer-events-none"
+        style={{ y: textY, opacity: textOpacity }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -67,17 +106,15 @@ export function Hero() {
             </span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="font-heading text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.0] mb-6"
-          >
-            {heroContent.titleLead} <br className="hidden md:block"/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-cyan via-accent-amber to-white">
+          <div className="font-heading text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.0] mb-6">
+            <CharReveal as="span" className="inline" delay={0.3}>
+              {heroContent.titleLead}
+            </CharReveal>
+            <br className="hidden md:block"/>
+            <CharReveal as="span" className="inline gradient-brand gradient-text" delay={0.5}>
               {heroContent.titleHighlight}
-            </span>
-          </motion.h1>
+            </CharReveal>
+          </div>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -111,7 +148,7 @@ export function Hero() {
             </Button>
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   )
 }
