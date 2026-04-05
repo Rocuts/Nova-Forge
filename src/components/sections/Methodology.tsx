@@ -43,12 +43,12 @@ function MethodStep({ step, index }: { step: typeof methodologySection.steps[num
       </motion.div>
 
       <div className="flex-1">
-        <h3 className="text-2xl font-medium mb-2">{step.title}</h3>
-        <p className="text-text-secondary text-lg">{step.desc}</p>
+        <h3 className="text-2xl font-bold mb-3 tracking-tight">{step.title}</h3>
+        <p className="text-slate-400 text-lg leading-relaxed">{step.desc}</p>
       </div>
 
-      {/* Glowing accent on hover */}
-      <div className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-r from-primary-cyan/5 via-transparent to-accent-amber/5" />
+      {/* Subtle Cyan accent on hover */}
+      <div className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-r from-primary-cyan/10 via-transparent to-transparent" />
     </motion.div>
   )
 }
@@ -65,11 +65,11 @@ export function Methodology() {
       id={methodologySection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-7xl">
-        <div className="mb-16">
-          <RevealText as="h2" className="font-heading text-3xl md:text-5xl font-medium mb-6" animateWeight>
+        <div className="mb-20 max-w-3xl">
+          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
             {methodologySection.title}
           </RevealText>
-          <p className="text-text-secondary text-lg md:text-xl max-w-2xl">
+          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
             {methodologySection.description}
           </p>
         </div>

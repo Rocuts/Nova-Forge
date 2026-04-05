@@ -40,11 +40,11 @@ export function Team() {
       className="py-24 bg-surface-base border-t border-surface-border/50 relative z-10"
     >
       <div className="container px-4 mx-auto max-w-7xl">
-        <div className="mb-16 max-w-2xl">
-          <RevealText as="h2" className="font-heading text-3xl md:text-5xl font-medium mb-6 tracking-tight" animateWeight>
+        <div className="mb-20 max-w-3xl">
+          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
             {teamSection.title}
           </RevealText>
-          <p className="text-text-secondary text-lg md:text-xl leading-relaxed">
+          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
             {teamSection.description}
           </p>
         </div>
@@ -70,14 +70,14 @@ export function Team() {
                   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
                 }}
               >
-                <GlassPanel className="text-center h-full">
+                <GlassPanel className="text-center h-full p-8 border-zinc-800">
                   <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 rounded-full bg-surface-elevated border border-surface-border flex items-center justify-center mb-6">
-                      <span className="text-2xl font-bold text-primary-cyan">{member.initials}</span>
+                    <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
+                      <span className="text-xl font-bold text-primary-cyan">{member.initials}</span>
                     </div>
-                    <h3 className="text-xl font-medium mb-1">{member.name}</h3>
-                    <p className="text-text-secondary text-sm mb-4">{member.role}</p>
-                    <p className="text-text-secondary text-base">{member.tagline}</p>
+                    <h3 className="text-xl font-bold mb-1 text-white">{member.name}</h3>
+                    <p className="text-primary-cyan/80 text-[10px] font-bold tracking-widest uppercase mb-4">{member.role}</p>
+                    <p className="text-slate-400 text-sm leading-relaxed">{member.tagline}</p>
                   </div>
                 </GlassPanel>
               </motion.div>

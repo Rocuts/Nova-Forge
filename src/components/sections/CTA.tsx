@@ -46,25 +46,26 @@ export function CTA() {
       />
 
       <motion.div
-        className="container px-4 mx-auto max-w-4xl text-center relative z-10"
+        className="container px-4 mx-auto max-w-5xl text-center relative z-10"
         style={{ y: textY }}
       >
-        <div className="font-heading text-4xl md:text-6xl font-black mb-8 tracking-tighter leading-tight">
+        <div className="font-heading text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
           <RevealText as="span" className="inline" animateWeight>
-            Hablemos de lo que tu negocio
+            Hablemos de lo que su negocio
           </RevealText>
           <br className="hidden md:block"/>
-          <span className="gradient-cta gradient-text">
+          <span className="gradient-brand gradient-text">
             {ctaSection.highlight}
           </span>
         </div>
 
-        <p className="text-xl text-text-secondary mb-12 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-slate-400 mb-14 max-w-2xl mx-auto leading-relaxed">
           {ctaSection.description}
         </p>
 
         <Button
           size="lg"
+          variant="primary"
           href={ctaSection.action.href}
           onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
         >
