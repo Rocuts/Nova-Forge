@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/Button"
 import { CharReveal } from "@/components/ui/RevealText"
 import { heroContent } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
+import { useIsMobile } from "@/lib/useIsMobile"
 
 const HeroCanvas = dynamic(() => import("../canvas/HeroScene"), { ssr: false })
 
 export function Hero() {
+  const isMobile = useIsMobile()
   const [reduceMotion, setReduceMotion] = useState(false)
   const [mounted, setMounted] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
@@ -32,14 +34,14 @@ export function Hero() {
   // Text rises faster than scroll — creates depth separation
   const textY = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, -200]),
-    { stiffness: 60, damping: 20 }
+    { stiffness: isMobile ? 40 : 60, damping: 20 }
   )
   const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   // Canvas sinks slower — background layer effect
   const canvasY = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, 150]),
-    { stiffness: 60, damping: 20 }
+    { stiffness: isMobile ? 40 : 60, damping: 20 }
   )
   const canvasScale = useTransform(scrollYProgress, [0, 1], [1, 1.15])
 
@@ -62,7 +64,10 @@ export function Hero() {
   return (
     <section ref={sectionRef} className="relative min-h-[120vh] flex items-start pt-32 pb-16 overflow-hidden">
       {/* Background System — moves SLOWER (parallax depth layer) */}
-      <motion.div className="absolute inset-0 z-0" style={{ y: canvasY, scale: canvasScale }}>
+      <motion.div 
+        className="absolute inset-0 z-0 will-change-transform" 
+        style={{ y: canvasY, scale: canvasScale }}
+      >
         {mounted && !reduceMotion ? (
           <HeroCanvas scrollProgressRef={scrollProgressRef} />
         ) : (
@@ -78,7 +83,7 @@ export function Hero() {
 
       {/* Content — moves FASTER (foreground parallax layer) */}
       <motion.div
-        className="container px-4 mx-auto relative z-10 w-full max-w-7xl pointer-events-none"
+        className="container px-4 mx-auto relative z-10 w-full max-w-7xl pointer-events-none will-change-transform"
         style={{ y: textY, opacity: textOpacity }}
       >
         <motion.div

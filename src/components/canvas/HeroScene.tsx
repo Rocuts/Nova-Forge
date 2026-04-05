@@ -52,14 +52,17 @@ const fragmentShader = /* glsl */ `
 function DissolvingIcosahedron({ progress }: { progress: React.MutableRefObject<number> }) {
   const pointsRef = useRef<THREE.Points>(null)
   const materialRef = useRef<THREE.ShaderMaterial>(null)
+  const isMobile = useIsMobile()
 
   const { positions, normals } = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2, 3)
+    // Reduce detail on mobile (2) vs desktop (3)
+    const detail = isMobile ? 2 : 3
+    const geo = new THREE.IcosahedronGeometry(2, detail)
     const pos = geo.attributes.position.array as Float32Array
     const norm = geo.attributes.normal.array as Float32Array
     geo.dispose()
     return { positions: new Float32Array(pos), normals: new Float32Array(norm) }
-  }, [])
+  }, [isMobile])
 
   // Memoize uniforms so Three.js reuses the same objects across renders
   const uniforms = useMemo(
@@ -73,13 +76,13 @@ function DissolvingIcosahedron({ progress }: { progress: React.MutableRefObject<
 
   useFrame((_, delta) => {
     if (!pointsRef.current || !materialRef.current) return
-    pointsRef.current.rotation.y += delta * 0.2
-    pointsRef.current.rotation.x += delta * 0.1
+    pointsRef.current.rotation.y += delta * (isMobile ? 0.15 : 0.2)
+    pointsRef.current.rotation.x += delta * (isMobile ? 0.08 : 0.1)
     materialRef.current.uniforms.uProgress.value = progress.current
   })
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+    <Float speed={isMobile ? 1.5 : 2} rotationIntensity={0.5} floatIntensity={1}>
       <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -118,7 +121,13 @@ export default function HeroScene({ scrollProgressRef }: HeroSceneProps) {
     <Canvas
       camera={{ position: [0, 0, 5], fov: 45 }}
       dpr={isMobile ? [1, 1] : [1, 1.5]}
-      gl={{ antialias: false, powerPreference: "high-performance" }}
+      gl={{ 
+        antialias: false, 
+        powerPreference: "high-performance",
+        alpha: true,
+        stencil: false,
+        depth: false
+      }}
     >
       <Suspense fallback={null}>
         <ambientLight intensity={0.2} />
@@ -126,8 +135,12 @@ export default function HeroScene({ scrollProgressRef }: HeroSceneProps) {
 
         <DissolvingIcosahedron progress={progressRef} />
 
-        <EffectComposer>
-          <Bloom luminanceThreshold={0.3} mipmapBlur={true} intensity={isMobile ? 1.0 : 2.0} />
+        <EffectComposer enableNormalPass={false} multisampling={isMobile ? 0 : 4}>
+          <Bloom 
+            luminanceThreshold={0.5} 
+            mipmapBlur={!isMobile} 
+            intensity={isMobile ? 0.5 : 2.0} 
+          />
           <ChromaticAberration
             blendFunction={BlendFunction.NORMAL}
             offset={isMobile ? CHROMATIC_OFFSET_NONE : CHROMATIC_OFFSET_DESKTOP}

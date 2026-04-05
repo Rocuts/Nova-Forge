@@ -7,8 +7,8 @@ import * as THREE from "three"
 import { BRAND_COLORS } from "@/lib/colors"
 import { useIsMobile } from "@/lib/useIsMobile"
 
-const PARTICLE_COUNT_DESKTOP = 3000
-const PARTICLE_COUNT_MOBILE = 1200
+const PARTICLE_COUNT_DESKTOP = 2000
+const PARTICLE_COUNT_MOBILE = 500
 
 function createParticlePositions(count: number) {
   const array = new Float32Array(count * 3)
@@ -101,7 +101,7 @@ function ParticleField({ isMobile }: { isMobile: boolean }) {
       </bufferGeometry>
       <pointsMaterial
         size={0.08}
-        color={BRAND_COLORS.amber}
+        color={BRAND_COLORS.cyan}
         map={particleTexture}
         transparent
         opacity={0.6}
@@ -127,8 +127,12 @@ export default function GlobalParticleScene() {
       <Suspense fallback={null}>
         <ambientLight intensity={0.5} />
         <ParticleField isMobile={isMobile} />
-        <EffectComposer>
-          <Bloom luminanceThreshold={0.3} mipmapBlur intensity={isMobile ? 0.8 : 1.5} />
+        <EffectComposer multisampling={isMobile ? 0 : 4}>
+          <Bloom 
+            luminanceThreshold={0.5} 
+            mipmapBlur={!isMobile} 
+            intensity={isMobile ? 0.3 : 1.5} 
+          />
           <Vignette eskil={false} offset={0.1} darkness={isMobile ? 0 : 0.8} />
         </EffectComposer>
       </Suspense>

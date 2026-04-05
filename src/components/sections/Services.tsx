@@ -8,6 +8,8 @@ import { servicesSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
+import { useIsMobile } from "@/lib/useIsMobile"
+
 const SERVICE_ICONS = {
   brain: BrainCircuit,
   cloud: Cloud,
@@ -22,6 +24,7 @@ const PARALLAX_OFFSETS = [40, 20, 60, 30, 50, 15]
 
 function ParallaxCard({ children, index }: { children: React.ReactNode; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -29,11 +32,11 @@ function ParallaxCard({ children, index }: { children: React.ReactNode; index: n
   const distance = PARALLAX_OFFSETS[index % PARALLAX_OFFSETS.length]
   const y = useSpring(
     useTransform(scrollYProgress, [0, 1], [distance, -distance]),
-    { stiffness: 80, damping: 25 }
+    { stiffness: isMobile ? 40 : 80, damping: 25 }
   )
 
   return (
-    <motion.div ref={ref} style={{ y }}>
+    <motion.div ref={ref} style={{ y }} className="will-change-transform">
       {children}
     </motion.div>
   )

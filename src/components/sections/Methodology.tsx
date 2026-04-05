@@ -6,8 +6,11 @@ import { methodologySection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
+import { useIsMobile } from "@/lib/useIsMobile"
+
 function MethodStep({ step, index }: { step: typeof methodologySection.steps[number]; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "center center"],
@@ -17,7 +20,7 @@ function MethodStep({ step, index }: { step: typeof methodologySection.steps[num
   const direction = index % 2 === 0 ? -1 : 1
   const x = useSpring(
     useTransform(scrollYProgress, [0, 1], [80 * direction, 0]),
-    { stiffness: 60, damping: 20 }
+    { stiffness: isMobile ? 40 : 60, damping: 20 }
   )
   const opacity = useTransform(scrollYProgress, [0, 0.4, 1], [0, 0.3, 1])
   const scale = useTransform(scrollYProgress, [0, 1], [0.92, 1])
@@ -25,14 +28,14 @@ function MethodStep({ step, index }: { step: typeof methodologySection.steps[num
   // The step number has its own parallax — floats slower
   const numY = useSpring(
     useTransform(scrollYProgress, [0, 1], [30, -10]),
-    { stiffness: 50, damping: 15 }
+    { stiffness: isMobile ? 30 : 50, damping: 15 }
   )
 
   return (
     <motion.div
       ref={ref}
       style={{ x, opacity, scale }}
-      className="relative flex flex-col md:flex-row md:items-center gap-6 p-8 rounded-[var(--radius-lg)] border border-surface-border bg-surface-elevated/20 hover:bg-surface-elevated/40 transition-colors duration-500"
+      className="relative flex flex-col md:flex-row md:items-center gap-6 p-8 rounded-[var(--radius-lg)] border border-surface-border bg-surface-elevated/20 hover:bg-surface-elevated/40 transition-colors duration-500 will-change-transform"
     >
       {/* Animated step number */}
       <motion.div
