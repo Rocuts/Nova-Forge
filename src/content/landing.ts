@@ -186,6 +186,12 @@ export const teamSection = {
       role: "Director de Desarrollo de Negocios",
       tagline: "Relaciones estratégicas y crecimiento comercial.",
     },
+    {
+      name: "Andres Rodriguez",
+      initials: "AR",
+      role: "Desarrollador Full Stack",
+      tagline: "Desarrollo de aplicaciones web y sistemas integrales.",
+    },
   ],
 } as const
 
