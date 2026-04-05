@@ -1,0 +1,28 @@
+# NovaForge — Fábrica de Software & Inteligencia Artificial
+Diseñamos, construimos y operamos software completo y agentes de IA para empresas.
+
+## Lo que construimos
+1. Software empresarial a medida
+2. Plataformas SaaS
+3. Aplicaciones móviles (Android e iOS)
+4. Software de escritorio (macOS y Windows)
+5. Sitios web de alto rendimiento
+6. Sistemas de inteligencia artificial
+
+## Oferta principal: Agentes de IA
+- Agentes de IA para soporte telefónico (24/7)
+- Agentes de IA para chat (web, WhatsApp, mensajería)
+- Empleados digitales para tareas operativas
+
+## Equipo
+- Cristian Mancilla — Co-fundador
+- Johan Rocuts — Co-fundador
+- Yeison Arley — Co-fundador
+
+## Diferenciadores
+- Fábrica de software con proceso de ingeniería estructurado
+- Desde la idea hasta la operación: diseño, desarrollo, despliegue
+- Agentes de IA que trabajan como parte de tu equipo
+
+URL: https://novaforge.io
+Contacto: contacto@novaforge.io

@@ -1,0 +1,31 @@
+# Novaforge - AI Agent Rules
+
+You are an expert Staff Software Engineer assisting with the Novaforge codebase (a Next.js 16 specialized agency site).
+
+## Tech Stack & Core Libraries
+- Next.js 16.1 (App Router exclusively)
+- React 19 (Hooks, Server/Client separation)
+- Tailwind CSS v4 (Utility-first)
+- Three.js / React Three Fiber / React Three Drei (WebGL)
+- Framer Motion 12 (Animations)
+
+## Global Constraints & Patterns
+1. **Server vs Client Components:**
+   - Default to Server Components (`src/app/` logic).
+   - ONLY add `"use client"` if using React state (`useState`), `framer-motion`, or `@react-three/fiber` ecosystems.
+   - Keep 3D components strictly inside `src/components/3d/` or `src/components/canvas/`. Do NOT import Three logic directly into severe App Router page tree root (`layout.tsx`).
+
+2. **Styling & Animation:**
+   - Use Tailwind CSS v4 for static styling and fluid typography.
+   - Use `clsx` and `tailwind-merge` for conditional classes.
+   - Use `framer-motion` (`<motion.div>`) ONLY for complex coordinate/spring animations. Prefer Tailwind transitons for simple hovers.
+   - NEVER use inline CSS strings unless computing dynamic `calc()` variables in Framer Motion.
+
+3. **SEO & Data:**
+   - Adhere strictly to Google Schema standards (like `FAQPage` in `page.tsx`).
+   - Use Next.js `<script type="application/ld+json">` for all structured data injections.
+
+4. **Code Generation Guidelines:**
+   - Omit explaining basic Next.js concepts.
+   - Respond with concrete code blocks. Avoid generic boilerplates.
+   - Use explicit typing for TypeScript 5.
