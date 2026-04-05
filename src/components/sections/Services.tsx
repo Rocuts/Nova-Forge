@@ -51,17 +51,17 @@ export function Services() {
       id={servicesSection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-7xl">
-        <div className="mb-16 max-w-2xl">
-          <RevealText as="h2" className="font-heading text-3xl md:text-5xl font-medium mb-6 tracking-tight" animateWeight>
+        <div className="mb-20 max-w-3xl">
+          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
             {servicesSection.title}
           </RevealText>
-          <p className="text-text-secondary text-lg md:text-xl leading-relaxed">
+          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
             {servicesSection.description}
           </p>
         </div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -69,7 +69,7 @@ export function Services() {
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.12 }
+              transition: { staggerChildren: 0.1 }
             }
           }}
         >
@@ -79,20 +79,21 @@ export function Services() {
               <ParallaxCard key={svc.title} index={i}>
                 <motion.div
                   variants={{
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
+                    hidden: { opacity: 0, y: 30, scale: 0.98 },
+                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } }
                   }}
+                  className="h-full"
                 >
-                  <GlassPanel className="group hover:border-primary-cyan/30 transition-colors duration-500 h-full">
-                    <div className="mb-6 opacity-80 group-hover:opacity-100 transition-opacity text-primary-cyan">
-                      <Icon size={40} className="stroke-[1.5]" />
+                  <GlassPanel className="group hover:border-primary-cyan/20 transition-all duration-500 h-full p-10 flex flex-col">
+                    <div className="mb-8 text-primary-cyan/80 group-hover:text-primary-cyan transition-colors">
+                      <Icon size={32} className="stroke-[1.25]" />
                     </div>
-                    <h3 className="text-2xl font-medium mb-3">{svc.title}</h3>
-                    <p className="text-text-secondary mb-8 text-lg">{svc.benefit}</p>
-                    <ul className="space-y-3">
+                    <h3 className="text-2xl font-bold mb-4 tracking-tight">{svc.title}</h3>
+                    <p className="text-slate-400 mb-8 text-base leading-relaxed">{svc.benefit}</p>
+                    <ul className="space-y-4 mt-auto">
                       {svc.bullets.map((bullet) => (
-                        <li key={bullet} className="flex items-center text-base text-text-secondary">
-                          <span className="w-1.5 h-1.5 rounded-full bg-accent-amber mr-4 opacity-70"></span>
+                        <li key={bullet} className="flex items-start text-sm text-slate-400/80 leading-snug">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan/40 mt-1.5 mr-4 shrink-0"></span>
                           {bullet}
                         </li>
                       ))}

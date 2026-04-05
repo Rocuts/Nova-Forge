@@ -65,7 +65,7 @@ function DissolvingIcosahedron({ progress }: { progress: React.MutableRefObject<
   const uniforms = useMemo(
     () => ({
       uProgress: { value: 0 },
-      uColor: { value: new THREE.Color(BRAND_COLORS.orangeRed) },
+      uColor: { value: new THREE.Color(BRAND_COLORS.slate) },
       uEmissive: { value: new THREE.Color(BRAND_COLORS.cyan) },
     }),
     [],

@@ -70,16 +70,9 @@ export function Hero() {
         )}
       </motion.div>
 
-      {/* Radial Gradient Overlay — fades and expands on scroll */}
+      {/* Subtlest background mesh — replaces red/yellow noise */}
       <motion.div
-        className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-cyan-dim via-transparent to-transparent"
-        style={{ opacity: glowOpacity, scale: glowScale }}
-        aria-hidden="true"
-      />
-
-      {/* Fade to Background Overlay */}
-      <div
-        className="absolute bottom-0 left-0 w-full h-32 pointer-events-none -z-10 bg-gradient-to-t from-surface-base to-transparent"
+        className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top,_#00f0ff05_0%,_transparent_50%)]"
         aria-hidden="true"
       />
 
@@ -92,26 +85,25 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.2 }}
-          className="max-w-4xl pointer-events-auto"
+          className="max-w-5xl pointer-events-auto"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-surface-border bg-surface-elevated/50 backdrop-blur-md mb-8"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-12"
           >
-            <span className="w-2 h-2 rounded-full bg-primary-cyan text-glow animate-pulse"></span>
-            <span className="text-sm font-medium tracking-wide text-primary-cyan">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan animate-pulse"></span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-cyan/80">
               {heroContent.eyebrow}
             </span>
           </motion.div>
 
-          <div className="font-heading text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.0] mb-6">
-            <CharReveal as="span" className="inline" delay={0.3}>
+          <div className="font-heading text-6xl md:text-8xl lg:text-[110px] font-bold tracking-tight leading-[0.9] mb-10">
+            <CharReveal as="span" className="inline block" delay={0.3}>
               {heroContent.titleLead}
             </CharReveal>
-            <br className="hidden md:block"/>
-            <CharReveal as="span" className="inline gradient-brand gradient-text" delay={0.5}>
+            <CharReveal as="span" className="inline block text-text-secondary" delay={0.5}>
               {heroContent.titleHighlight}
             </CharReveal>
           </div>
@@ -120,7 +112,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-xl md:text-2xl text-text-secondary max-w-2xl mb-10 leading-relaxed font-light"
+            className="text-lg md:text-xl text-slate-400 max-w-3xl mb-14 leading-relaxed font-normal"
           >
             {heroContent.description}
           </motion.p>
@@ -129,10 +121,11 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-5"
           >
             <Button
               size="lg"
+              variant="primary"
               href={heroContent.primaryAction.href}
               onClick={() => trackEvent(heroContent.primaryAction.analyticsEvent)}
             >
@@ -140,12 +133,22 @@ export function Hero() {
             </Button>
             <Button
               size="lg"
-              variant="glass"
+              variant="secondary"
               href={heroContent.secondaryAction.href}
               onClick={() => trackEvent(heroContent.secondaryAction.analyticsEvent)}
             >
               {heroContent.secondaryAction.label}
             </Button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="mt-8 flex items-center gap-2 text-text-secondary/60 text-sm font-medium tracking-tight"
+          >
+            <div className="w-1 h-1 rounded-full bg-primary-cyan/40" />
+            {heroContent.trustLine}
           </motion.div>
         </motion.div>
       </motion.div>

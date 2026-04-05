@@ -47,11 +47,11 @@ export function FlagshipAI() {
       className="py-24 bg-surface-base relative z-10 border-t border-surface-border/50"
     >
       <div className="container px-4 mx-auto max-w-7xl">
-        <div className="mb-16 max-w-2xl">
-          <RevealText as="h2" className="font-heading text-3xl md:text-5xl font-medium mb-6 tracking-tight" animateWeight>
+        <div className="mb-20 max-w-3xl">
+          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
             {flagshipAISection.title}
           </RevealText>
-          <p className="text-text-secondary text-lg md:text-xl leading-relaxed">
+          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
             {flagshipAISection.description}
           </p>
         </div>

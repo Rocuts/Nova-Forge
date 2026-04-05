@@ -19,15 +19,15 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
     const baseStyles = "inline-flex items-center justify-center rounded-[var(--radius-sm)] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-cyan disabled:pointer-events-none disabled:opacity-50"
 
     const variants = {
-      primary: "bg-white text-black hover:bg-gray-200 shadow-lg",
-      secondary: "border border-surface-border bg-transparent text-text-primary hover:bg-surface-border",
-      glass: "glass-panel text-text-primary hover:bg-surface-elevated/80"
+      primary: "bg-white text-black hover:bg-gray-100 shadow-[0_0_20px_rgba(255,255,255,0.1)]",
+      secondary: "border border-zinc-800 bg-transparent text-text-primary hover:bg-zinc-900 hover:border-zinc-700",
+      glass: "glass-panel text-text-primary hover:bg-surface-elevated/80 border-surface-border shadow-2xl"
     }
 
     const sizes = {
       sm: "px-4 py-2 text-xs",
-      md: "px-6 py-3 text-sm",
-      lg: "px-8 py-4 text-base"
+      md: "px-6 py-2.5 text-sm tracking-tight",
+      lg: "px-10 py-4 text-base tracking-tight"
     }
 
     const combinedClassName = cn(baseStyles, variants[variant], sizes[size], className)
