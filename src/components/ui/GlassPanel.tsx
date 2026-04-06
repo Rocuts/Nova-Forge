@@ -88,7 +88,7 @@ export const GlassPanel = ({ children, className }: { children: React.ReactNode;
         />
         {/* Content with counter-movement */}
         <motion.div
-          className="relative h-full w-full glass-panel rounded-[var(--radius-lg)] p-8 z-10 transition-colors duration-500 group-hover:bg-surface-elevated/40"
+          className="relative h-full w-full glass-panel rounded-[var(--radius-lg)] p-8 z-10 transition-all duration-500 group-hover:bg-white/[0.06] group-hover:border-white/[0.12]"
           style={{ x: contentX, y: contentY }}
         >
           {children}

@@ -128,10 +128,10 @@ export default function GlobalParticleScene() {
         <ambientLight intensity={0.5} />
         <ParticleField isMobile={isMobile} />
         <EffectComposer multisampling={isMobile ? 0 : 4}>
-          <Bloom 
-            luminanceThreshold={0.5} 
-            mipmapBlur={!isMobile} 
-            intensity={isMobile ? 0.3 : 1.5} 
+          <Bloom
+            luminanceThreshold={0.5}
+            mipmapBlur={!isMobile}
+            intensity={isMobile ? 0.3 : 1.5}
           />
           <Vignette eskil={false} offset={0.1} darkness={isMobile ? 0 : 0.8} />
         </EffectComposer>

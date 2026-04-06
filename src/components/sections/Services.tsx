@@ -50,7 +50,7 @@ export function Services() {
     <motion.section
       ref={entranceRef}
       style={{ opacity, y, scale, skewY }}
-      className="py-24 bg-surface-base relative z-10"
+      className="py-24 bg-surface-base/60 backdrop-blur-sm relative z-10"
       id={servicesSection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-7xl">

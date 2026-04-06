@@ -136,10 +136,10 @@ export default function HeroScene({ scrollProgressRef }: HeroSceneProps) {
         <DissolvingIcosahedron progress={progressRef} />
 
         <EffectComposer enableNormalPass={false} multisampling={isMobile ? 0 : 4}>
-          <Bloom 
-            luminanceThreshold={0.5} 
-            mipmapBlur={!isMobile} 
-            intensity={isMobile ? 0.5 : 2.0} 
+          <Bloom
+            luminanceThreshold={0.5}
+            mipmapBlur={!isMobile}
+            intensity={isMobile ? 0.5 : 2.0}
           />
           <ChromaticAberration
             blendFunction={BlendFunction.NORMAL}

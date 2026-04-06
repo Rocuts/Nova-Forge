@@ -37,7 +37,7 @@ export function Team() {
       ref={entranceRef}
       style={{ opacity, y, scale, skewY }}
       id={teamSection.sectionId}
-      className="py-24 bg-surface-base border-t border-surface-border/50 relative z-10"
+      className="py-24 bg-surface-base/60 backdrop-blur-sm border-t border-surface-border/50 relative z-10"
     >
       <div className="container px-4 mx-auto max-w-7xl">
         <div className="mb-20 max-w-3xl">

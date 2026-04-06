@@ -14,7 +14,7 @@ export function LegalPage({
   children,
 }: LegalPageProps) {
   return (
-    <section className="py-32 bg-surface-base relative z-10">
+    <section className="py-32 bg-surface-base/60 backdrop-blur-sm relative z-10">
       <div className="container px-4 mx-auto max-w-4xl">
         <div className="max-w-3xl mb-16">
           <p className="text-sm uppercase tracking-[0.2em] text-primary-cyan mb-4">

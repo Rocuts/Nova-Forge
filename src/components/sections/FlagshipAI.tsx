@@ -47,7 +47,7 @@ export function FlagshipAI() {
       ref={entranceRef}
       style={{ opacity, y, scale, skewY }}
       id={flagshipAISection.sectionId}
-      className="py-24 bg-surface-base relative z-10 border-t border-surface-border/50"
+      className="py-24 bg-surface-base/60 backdrop-blur-sm relative z-10 border-t border-surface-border/50"
     >
       <div className="container px-4 mx-auto max-w-7xl">
         <div className="mb-20 max-w-3xl">

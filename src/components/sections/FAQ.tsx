@@ -13,7 +13,7 @@ export function FAQ() {
     <motion.section
       ref={entranceRef}
       style={{ opacity, y, scale, skewY }}
-      className="py-24 bg-surface-base relative z-10"
+      className="py-24 bg-surface-base/60 backdrop-blur-sm relative z-10"
       id={faqSection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-4xl">
@@ -23,7 +23,7 @@ export function FAQ() {
         
         <div className="space-y-6">
           {faqSection.items.map((faq) => (
-            <div key={faq.question} className="p-8 rounded-[var(--radius-lg)] border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm shadow-xl">
+            <div key={faq.question} className="p-8 glass-panel rounded-[var(--radius-lg)]">
               <h3 className="text-xl font-bold mb-4 text-white tracking-tight">{faq.question}</h3>
               <p className="text-slate-400 leading-relaxed text-base">{faq.answer}</p>
             </div>

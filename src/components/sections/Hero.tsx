@@ -31,19 +31,16 @@ export function Hero() {
     return unsubscribe
   }, [scrollYProgress])
 
-  // Text rises faster than scroll — creates depth separation
+  // Text rises faster than scroll — cinematic depth separation
   const textY = useSpring(
     useTransform(scrollYProgress, [0, 1], [0, -200]),
-    { stiffness: isMobile ? 40 : 60, damping: 20 }
+    { stiffness: isMobile ? 80 : 50, damping: isMobile ? 25 : 20, mass: isMobile ? 0.3 : 0.8 }
   )
   const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
-  // Canvas sinks slower — background layer effect
-  const canvasY = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, 150]),
-    { stiffness: isMobile ? 40 : 60, damping: 20 }
-  )
+  // Canvas background — fades to subtle as you scroll past hero, never fully hidden
   const canvasScale = useTransform(scrollYProgress, [0, 1], [1, 1.15])
+  const canvasOpacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.4, 0.25])
 
   // Radial glow expands as you scroll
   const glowOpacity = useTransform(scrollYProgress, [0, 0.5], [0.6, 0])
@@ -63,10 +60,10 @@ export function Hero() {
 
   return (
     <section ref={sectionRef} className="relative min-h-[120vh] flex items-start pt-32 pb-16 overflow-hidden">
-      {/* Background System — moves SLOWER (parallax depth layer) */}
-      <motion.div 
-        className="absolute inset-0 z-0 will-change-transform" 
-        style={{ y: canvasY, scale: canvasScale }}
+      {/* Background System — fixed so the supernova stays visible throughout the page */}
+      <motion.div
+        className="fixed inset-0 z-0 pointer-events-none will-change-transform"
+        style={{ scale: canvasScale, opacity: canvasOpacity }}
       >
         {mounted && !reduceMotion ? (
           <HeroCanvas scrollProgressRef={scrollProgressRef} />
@@ -75,9 +72,16 @@ export function Hero() {
         )}
       </motion.div>
 
-      {/* Subtlest background mesh — replaces red/yellow noise */}
+      {/* Subtle dark veil — just enough contrast for text without killing the glow */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-b from-black/25 via-black/15 to-black/30"
+        aria-hidden="true"
+      />
+
+      {/* Radial glow — expands and fades as you scroll */}
       <motion.div
-        className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top,_#00f0ff05_0%,_transparent_50%)]"
+        className="absolute inset-0 pointer-events-none z-[1] bg-[radial-gradient(ellipse_at_top,_#00f0ff08_0%,_transparent_50%)]"
+        style={{ opacity: glowOpacity, scale: glowScale }}
         aria-hidden="true"
       />
 
@@ -104,11 +108,11 @@ export function Hero() {
             </span>
           </motion.div>
 
-          <div className="font-heading text-6xl md:text-8xl lg:text-[110px] font-bold tracking-tight leading-[0.9] mb-10">
-            <CharReveal as="span" className="inline block" delay={0.3}>
+          <div className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] font-bold tracking-tight leading-[1.05] mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)]">
+            <CharReveal as="span" className="block text-white" delay={0.3}>
               {heroContent.titleLead}
             </CharReveal>
-            <CharReveal as="span" className="inline block text-text-secondary" delay={0.5}>
+            <CharReveal as="span" className="block text-zinc-300" delay={0.5}>
               {heroContent.titleHighlight}
             </CharReveal>
           </div>
@@ -117,7 +121,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl text-slate-400 max-w-3xl mb-14 leading-relaxed font-normal"
+            className="text-lg md:text-xl text-slate-300 max-w-3xl mb-14 leading-relaxed font-normal drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
           >
             {heroContent.description}
           </motion.p>

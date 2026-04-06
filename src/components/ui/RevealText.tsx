@@ -147,7 +147,7 @@ export function CharReveal({
     )
   }, [])
 
-  const chars = children.split("")
+  const words = children.split(" ")
 
   if (prefersReducedMotion) {
     return (
@@ -156,6 +156,8 @@ export function CharReveal({
       </MotionTag>
     )
   }
+
+  let charIndex = 0
 
   return (
     <MotionTag
@@ -168,19 +170,29 @@ export function CharReveal({
       custom={delay}
       aria-label={children}
     >
-      {chars.map((char, i) => (
-        <span
-          key={`${char}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
-          style={{ perspective: 800 }}
-        >
-          <motion.span
-            className="inline-block"
-            style={{ transformOrigin: "bottom center" }}
-            variants={charVariants}
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
+      {words.map((word, wi) => (
+        <span key={`word-${wi}`} className="inline-flex overflow-hidden align-bottom whitespace-nowrap">
+          {word.split("").map((char) => {
+            const ci = charIndex++
+            return (
+              <span
+                key={`${char}-${ci}`}
+                className="inline-block overflow-hidden align-bottom"
+                style={{ perspective: 800 }}
+              >
+                <motion.span
+                  className="inline-block"
+                  style={{ transformOrigin: "bottom center" }}
+                  variants={charVariants}
+                >
+                  {char}
+                </motion.span>
+              </span>
+            )
+          })}
+          {wi < words.length - 1 && (
+            <span className="inline-block w-[0.3em]" />
+          )}
         </span>
       ))}
     </MotionTag>

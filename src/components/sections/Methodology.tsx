@@ -64,7 +64,7 @@ export function Methodology() {
     <motion.section
       ref={entranceRef}
       style={{ opacity, y, scale, skewY }}
-      className="py-24 bg-surface-base border-t border-surface-border/50 relative z-10"
+      className="py-24 bg-surface-base/60 backdrop-blur-sm border-t border-surface-border/50 relative z-10"
       id={methodologySection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-7xl">
