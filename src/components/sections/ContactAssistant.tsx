@@ -76,9 +76,8 @@ export function ContactAssistant() {
 
     setMessages((prev) => [...prev, userMessage, confirmationMessage])
 
-    const subject = encodeURIComponent("Consulta desde novaforge.io")
-    const body = encodeURIComponent(inputValue)
-    window.location.href = `${siteConfig.links.contact}?subject=${subject}&body=${body}`
+    const text = encodeURIComponent(inputValue)
+    window.open(`https://wa.me/573015244404?text=${text}`, "_blank")
 
     setInputValue("")
     setSent(true)

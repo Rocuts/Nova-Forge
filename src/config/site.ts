@@ -24,6 +24,7 @@ export const siteConfig = {
     linkedin: "https://linkedin.com/company/novaforge",
     scheduling: "/diagnostico",
     booking: "https://cal.com/novaforge/diagnostico",
+    whatsapp: "https://wa.me/573015244404",
     contact: `mailto:${contactEmail}`,
   },
 } as const

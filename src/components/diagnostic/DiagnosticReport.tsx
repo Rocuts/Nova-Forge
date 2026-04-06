@@ -68,9 +68,10 @@ export function DiagnosticReport({ content, isStreaming, contactName }: Diagnost
         <Button
           size="lg"
           variant="primary"
-          href={siteConfig.links.scheduling}
+          href={`https://wa.me/573015244404?text=${encodeURIComponent(`Hola, acabo de completar el diagnóstico técnico en NovaForge${contactName ? ` (${contactName})` : ""}. Me gustaría agendar una consulta estratégica.`)}`}
+          target="_blank"
         >
-          Agendar Consulta Estratégica
+          Agendar por WhatsApp
         </Button>
         <Button
           size="lg"
