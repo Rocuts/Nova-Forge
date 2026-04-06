@@ -10,10 +10,12 @@
     "test:e2e": "npx playwright test"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.50",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@studio-freight/lenis": "^1.0.42",
+    "ai": "^6.0.146",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
     "motion": "^12.35.2",
@@ -21,7 +23,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.5.0",
-    "three": "^0.170.0"
+    "three": "^0.170.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
