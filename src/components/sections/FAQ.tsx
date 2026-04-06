@@ -42,6 +42,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export function FAQ() {
+  const [isSectionOpen, setIsSectionOpen] = useState(false)
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 
@@ -53,15 +54,39 @@ export function FAQ() {
       id={faqSection.sectionId}
     >
       <div className="container px-4 mx-auto max-w-4xl">
-        <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-16 text-center tracking-tight" animateWeight>
-          {faqSection.title}
-        </RevealText>
+        <button
+          onClick={() => setIsSectionOpen(!isSectionOpen)}
+          className="w-full flex items-center justify-center gap-4 cursor-pointer group mb-8"
+        >
+          <h2 className="font-heading text-4xl md:text-6xl font-bold text-center tracking-tight">
+            {faqSection.title}
+          </h2>
+          <motion.span
+            animate={{ rotate: isSectionOpen ? 45 : 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="text-primary-cyan text-3xl md:text-4xl font-light shrink-0 group-hover:scale-110 transition-transform"
+          >
+            +
+          </motion.span>
+        </button>
 
-        <div className="space-y-4">
-          {faqSection.items.map((faq) => (
-            <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
-          ))}
-        </div>
+        <AnimatePresence initial={false}>
+          {isSectionOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-4 pt-8">
+                {faqSection.items.map((faq) => (
+                  <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.section>
   )
