@@ -9,6 +9,6 @@ export default function OpenGraphImage() {
   return createSocialImage({
     eyebrow: "Software de Precision Empresarial",
     title: "Construimos software. Desplegamos agentes de IA.",
-    description: siteConfig.description,
+    description: "Fábrica de software: aplicaciones empresariales, SaaS, apps móviles, software de escritorio y agentes de IA para operaciones de negocio.",
   })
 }

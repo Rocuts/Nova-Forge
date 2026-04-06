@@ -2,7 +2,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { faqSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
@@ -41,7 +40,13 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   )
 }
 
-export function FAQ() {
+interface FAQContent {
+  sectionId: string
+  title: string
+  items: readonly { question: string; answer: string }[]
+}
+
+export function FAQ({ content: faqSection }: { content: FAQContent }) {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 

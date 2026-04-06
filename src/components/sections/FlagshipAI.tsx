@@ -4,7 +4,6 @@ import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Phone, MessageSquare, UserCog } from "lucide-react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { flagshipAISection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
@@ -38,7 +37,15 @@ function ParallaxCard({ children, index }: { children: React.ReactNode; index: n
   )
 }
 
-export function FlagshipAI() {
+interface FlagshipAIContent {
+  sectionId: string
+  title: string
+  description: string
+  items: readonly { title: string; description: string; icon: keyof typeof OFFER_ICONS }[]
+  caption: string
+}
+
+export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAIContent }) {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 

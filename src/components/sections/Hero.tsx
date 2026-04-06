@@ -1,16 +1,25 @@
 "use client"
 import dynamic from "next/dynamic"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CharReveal } from "@/components/ui/RevealText"
-import { heroContent } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
 import { useIsMobile } from "@/lib/useIsMobile"
 
 const HeroCanvas = dynamic(() => import("../canvas/HeroScene"), { ssr: false })
 
-export function Hero() {
+interface HeroContent {
+  eyebrow: string
+  titleLead: string
+  titleHighlight: string
+  description: string
+  trustLine: string
+  primaryAction: { label: string; href: string; analyticsEvent: string }
+  secondaryAction: { label: string; href: string; analyticsEvent: string }
+}
+
+export function Hero({ content: heroContent }: { content: HeroContent }) {
   const isMobile = useIsMobile()
   const [reduceMotion, setReduceMotion] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -66,7 +75,9 @@ export function Hero() {
         style={{ scale: canvasScale, opacity: canvasOpacity }}
       >
         {mounted && !reduceMotion ? (
-          <HeroCanvas scrollProgressRef={scrollProgressRef} />
+          <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50" />}>
+            <HeroCanvas scrollProgressRef={scrollProgressRef} />
+          </Suspense>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50" />
         )}
@@ -108,7 +119,7 @@ export function Hero() {
             </span>
           </motion.div>
 
-          <div className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] font-bold tracking-tight leading-[1.05] mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)]">
+          <div className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)]">
             <CharReveal as="span" className="block text-white" delay={0.3}>
               {heroContent.titleLead}
             </CharReveal>
@@ -121,7 +132,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl text-slate-100 max-w-3xl mb-14 leading-relaxed font-normal drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]"
+            className="text-fluid-p text-slate-100 max-w-3xl mb-14 leading-relaxed font-normal drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]"
           >
             {heroContent.description}
           </motion.p>
@@ -130,7 +141,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-5"
+            className="flex flex-wrap items-center gap-5"
           >
             <Button
               size="lg"

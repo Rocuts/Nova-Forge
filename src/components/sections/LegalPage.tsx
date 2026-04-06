@@ -4,6 +4,7 @@ type LegalPageProps = {
   title: string
   description: string
   updatedAt: string
+  labels: { badge: string; lastUpdated: string }
   children: ReactNode
 }
 
@@ -11,6 +12,7 @@ export function LegalPage({
   title,
   description,
   updatedAt,
+  labels,
   children,
 }: LegalPageProps) {
   return (
@@ -18,7 +20,7 @@ export function LegalPage({
       <div className="container px-4 mx-auto max-w-4xl">
         <div className="max-w-3xl mb-16">
           <p className="text-sm uppercase tracking-[0.2em] text-primary-cyan mb-4">
-            Legal
+            {labels.badge}
           </p>
           <h1 className="font-heading text-4xl md:text-6xl font-black tracking-tight mb-6">
             {title}
@@ -27,7 +29,7 @@ export function LegalPage({
             {description}
           </p>
           <p className="text-sm text-text-secondary">
-            Última actualización: {updatedAt}
+            {labels.lastUpdated}: {updatedAt}
           </p>
         </div>
 

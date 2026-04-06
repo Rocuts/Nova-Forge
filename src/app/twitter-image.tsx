@@ -9,6 +9,6 @@ export default function TwitterImage() {
   return createSocialImage({
     eyebrow: "AI & Software Agency",
     title: "Diseñamos sistemas digitales completos para empresas.",
-    description: siteConfig.description,
+    description: "Fábrica de software: aplicaciones empresariales, SaaS, apps móviles, software de escritorio y agentes de IA para operaciones de negocio.",
   })
 }

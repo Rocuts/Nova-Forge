@@ -4,7 +4,6 @@ import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Cpu, BrainCircuit, Cloud, Smartphone, Monitor, Globe } from "lucide-react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { servicesSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
@@ -42,7 +41,14 @@ function ParallaxCard({ children, index }: { children: React.ReactNode; index: n
   )
 }
 
-export function Services() {
+interface ServicesContent {
+  sectionId: string
+  title: string
+  description: string
+  items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: keyof typeof SERVICE_ICONS }[]
+}
+
+export function Services({ content: servicesSection }: { content: ServicesContent }) {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 

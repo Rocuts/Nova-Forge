@@ -1,15 +1,36 @@
 "use client"
 import { motion } from "motion/react"
 import { Button } from "@/components/ui/Button"
-import { siteConfig } from "@/config/site"
 
-interface DiagnosticReportProps {
-  content: string
-  isStreaming: boolean
-  contactName: string
+interface ReportLabels {
+  badge: string
+  titleTemplate: string
+  titleFallback: string
+  subtitle: string
+  loading: string
+  whatsappMessage: string
+  whatsappButton: string
+  backButton: string
 }
 
-export function DiagnosticReport({ content, isStreaming, contactName }: DiagnosticReportProps) {
+interface DiagnosticReportProps {
+  reportContent: string
+  isStreaming: boolean
+  contactName: string
+  content: ReportLabels
+  locale: string
+}
+
+export function DiagnosticReport({ reportContent, isStreaming, contactName, content, locale }: DiagnosticReportProps) {
+  const title = contactName
+    ? content.titleTemplate.replace("{name}", contactName)
+    : content.titleFallback
+
+  const whatsappText = content.whatsappMessage.replace(
+    "{name}",
+    contactName ? ` (${contactName})` : ""
+  )
+
   return (
     <div className="space-y-10">
       <motion.div
@@ -20,14 +41,14 @@ export function DiagnosticReport({ content, isStreaming, contactName }: Diagnost
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-cyan/30 bg-primary-cyan/5 mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan animate-pulse" />
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-cyan/80">
-            Diagnóstico Generado
+            {content.badge}
           </span>
         </div>
 
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">
-          {contactName ? `Diagnóstico para ${contactName}` : "Su Diagnóstico Técnico"}
+          {title}
         </h2>
-        <p className="text-slate-400">Análisis personalizado basado en sus respuestas.</p>
+        <p className="text-slate-400">{content.subtitle}</p>
       </motion.div>
 
       <motion.div
@@ -45,12 +66,12 @@ export function DiagnosticReport({ content, isStreaming, contactName }: Diagnost
           prose-strong:text-primary-cyan prose-strong:font-semibold
           prose-ul:space-y-1
         ">
-          {content ? (
-            <div dangerouslySetInnerHTML={{ __html: formatMarkdown(content) }} />
+          {reportContent ? (
+            <div dangerouslySetInnerHTML={{ __html: formatMarkdown(reportContent) }} />
           ) : (
             <div className="flex items-center gap-3 text-slate-400">
               <div className="w-2 h-2 rounded-full bg-primary-cyan animate-pulse" />
-              Generando diagnóstico...
+              {content.loading}
             </div>
           )}
           {isStreaming && (
@@ -68,17 +89,17 @@ export function DiagnosticReport({ content, isStreaming, contactName }: Diagnost
         <Button
           size="lg"
           variant="primary"
-          href={`https://wa.me/573015244404?text=${encodeURIComponent(`Hola, acabo de completar el diagnóstico técnico en NovaForge${contactName ? ` (${contactName})` : ""}. Me gustaría agendar una consulta estratégica.`)}`}
+          href={`https://wa.me/573015244404?text=${encodeURIComponent(whatsappText)}`}
           target="_blank"
         >
-          Agendar por WhatsApp
+          {content.whatsappButton}
         </Button>
         <Button
           size="lg"
           variant="secondary"
-          href="/"
+          href={locale === "en" ? "/en" : "/"}
         >
-          Volver al Inicio
+          {content.backButton}
         </Button>
       </motion.div>
     </div>
@@ -87,18 +108,13 @@ export function DiagnosticReport({ content, isStreaming, contactName }: Diagnost
 
 function formatMarkdown(text: string): string {
   return text
-    // Headers
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    // Bold
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    // Lists
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`)
-    // Paragraphs
     .replace(/\n\n/g, '</p><p>')
     .replace(/^(?!<[hul])(.+)$/gm, '<p>$1</p>')
-    // Clean up empty paragraphs
     .replace(/<p><\/p>/g, '')
     .replace(/<p>(<[hul])/g, '$1')
     .replace(/(<\/[hul]\w*>)<\/p>/g, '$1')

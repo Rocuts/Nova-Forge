@@ -5,11 +5,20 @@ import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "motion/
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { TransitionLink } from "@/components/ui/TransitionLink"
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher"
 import { siteConfig } from "@/config/site"
-import { navItems } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
+import { buildLocalePath } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 
-export function Header() {
+interface NavContent {
+  items: readonly { name: string; href: string }[]
+  contact: string
+  schedule: string
+  menuLabel: string
+}
+
+export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredPath, setHoveredPath] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -36,6 +45,8 @@ export function Header() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [isMobileMenuOpen, closeMobileMenu])
 
+  const schedulingHref = buildLocalePath(locale as Locale, "/agendar")
+
   return (
     <>
       <motion.header
@@ -45,12 +56,12 @@ export function Header() {
         className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-surface-base/80 backdrop-blur-md border-b border-surface-border" : "bg-transparent"}`}
       >
         <div className="container px-4 mx-auto max-w-7xl h-20 flex items-center justify-between">
-          <TransitionLink href="/" className="font-heading text-xl font-bold tracking-tight">
+          <TransitionLink href={locale === "en" ? "/en" : "/"} className="font-heading text-xl font-bold tracking-tight">
             {siteConfig.name}.
           </TransitionLink>
 
           <nav className="hidden md:flex items-center gap-2 text-sm font-medium relative">
-            {navItems.map((item) => (
+            {nav.items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -72,7 +83,8 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher locale={locale} />
             <Button
               size="sm"
               variant="glass"
@@ -80,21 +92,21 @@ export function Header() {
               href={siteConfig.links.contact}
               onClick={() => trackEvent("contact_click")}
             >
-              Contacto
+              {nav.contact}
             </Button>
             <Button
               size="sm"
-              href={siteConfig.links.scheduling}
+              href={schedulingHref}
               onClick={() => trackEvent("scheduling_click")}
             >
-              Agendar
+              {nav.schedule}
             </Button>
             <button
               type="button"
               className="md:hidden p-2 text-text-secondary hover:text-white transition-colors"
               onClick={toggleMobileMenu}
               aria-expanded={isMobileMenuOpen}
-              aria-label="Menú de navegación"
+              aria-label={nav.menuLabel}
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -112,7 +124,7 @@ export function Header() {
             className="fixed top-20 left-0 right-0 z-40 md:hidden bg-surface-base/95 backdrop-blur-md border-b border-surface-border"
           >
             <div className="container px-4 mx-auto max-w-7xl py-4 flex flex-col gap-1">
-              {navItems.map((item) => (
+              {nav.items.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -134,19 +146,19 @@ export function Header() {
                     event.currentTarget.blur()
                   }}
                 >
-                  Contacto
+                  {nav.contact}
                 </Button>
                 <Button
                   size="sm"
                   className="w-full"
-                  href={siteConfig.links.scheduling}
+                  href={schedulingHref}
                   onClick={(event) => {
                     trackEvent("scheduling_click")
                     closeMobileMenu()
                     event.currentTarget.blur()
                   }}
                 >
-                  Agendar
+                  {nav.schedule}
                 </Button>
               </div>
             </div>

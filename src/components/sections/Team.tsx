@@ -3,7 +3,6 @@ import { useRef } from "react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { teamSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
@@ -28,7 +27,14 @@ function ParallaxMember({ children, index }: { children: React.ReactNode; index:
   )
 }
 
-export function Team() {
+interface TeamContent {
+  sectionId: string
+  title: string
+  description: string
+  members: readonly { name: string; initials: string; role: string; tagline: string }[]
+}
+
+export function Team({ content: teamSection }: { content: TeamContent }) {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 

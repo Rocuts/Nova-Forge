@@ -2,13 +2,25 @@
 import { useRef } from "react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { methodologySection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
 import { useIsMobile } from "@/lib/useIsMobile"
 
-function MethodStep({ step, index }: { step: typeof methodologySection.steps[number]; index: number }) {
+interface MethodologyStep {
+  num: string
+  title: string
+  desc: string
+}
+
+interface MethodologyContent {
+  sectionId: string
+  title: string
+  description: string
+  steps: readonly MethodologyStep[]
+}
+
+function MethodStep({ step, index }: { step: MethodologyStep; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const { scrollYProgress } = useScroll({
@@ -56,7 +68,7 @@ function MethodStep({ step, index }: { step: typeof methodologySection.steps[num
   )
 }
 
-export function Methodology() {
+export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
   const skewY = useScrollVelocitySkew()
 

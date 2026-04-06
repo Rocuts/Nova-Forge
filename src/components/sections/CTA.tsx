@@ -3,11 +3,17 @@ import { useRef } from "react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { RevealText } from "@/components/ui/RevealText"
-import { ctaSection } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
-export function CTA() {
+interface CTAContent {
+  lead: string
+  highlight: string
+  description: string
+  action: { label: string; href: string; analyticsEvent: string }
+}
+
+export function CTA({ content: ctaSection }: { content: CTAContent }) {
   const sectionRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -51,7 +57,7 @@ export function CTA() {
       >
         <div className="font-heading text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
           <RevealText as="span" className="inline" animateWeight>
-            Hablemos de lo que su negocio
+            {ctaSection.lead}
           </RevealText>
           <br className="hidden md:block"/>
           <span className="gradient-brand gradient-text">
