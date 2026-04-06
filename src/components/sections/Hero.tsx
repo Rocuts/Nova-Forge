@@ -121,7 +121,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl text-slate-300 max-w-3xl mb-14 leading-relaxed font-normal drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
+            className="text-lg md:text-xl text-slate-100 max-w-3xl mb-14 leading-relaxed font-normal drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]"
           >
             {heroContent.description}
           </motion.p>
