@@ -55,7 +55,7 @@ function Starfield() {
       <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
         <PointMaterial
           transparent
-          color={BRAND_COLORS.red}
+          color={BRAND_COLORS.cyan}
           size={0.005}
           sizeAttenuation={true}
           depthWrite={false}
