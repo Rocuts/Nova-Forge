@@ -96,7 +96,7 @@ export function ContactAssistant() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary-cyan text-black flex items-center justify-center shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] transition-shadow"
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-surface-elevated/80 border border-primary-cyan/40 text-primary-cyan flex items-center justify-center backdrop-blur-md shadow-[0_0_20px_rgba(0,229,255,0.15)] hover:shadow-[0_0_30px_rgba(0,229,255,0.3)] hover:bg-primary-cyan/10 transition-all"
             aria-label="Abrir contacto"
           >
             <MessageCircle size={24} className="stroke-[2.5]" />

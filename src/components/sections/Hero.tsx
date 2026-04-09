@@ -1,9 +1,10 @@
 "use client"
 import dynamic from "next/dynamic"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CharReveal } from "@/components/ui/RevealText"
+import { Typewriter } from "@/components/ui/Typewriter"
 import { heroContent } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
 import { useIsMobile } from "@/lib/useIsMobile"
@@ -69,7 +70,9 @@ export function Hero() {
         style={{ y: canvasY, scale: canvasScale }}
       >
         {mounted && !reduceMotion ? (
-          <HeroCanvas scrollProgressRef={scrollProgressRef} />
+          <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50 animate-pulse" />}>
+            <HeroCanvas scrollProgressRef={scrollProgressRef} />
+          </Suspense>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-surface-elevated to-surface-base opacity-50" />
         )}
@@ -80,6 +83,8 @@ export function Hero() {
         className="absolute inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top,_#00f0ff05_0%,_transparent_50%)]"
         aria-hidden="true"
       />
+      {/* 30% Black Overlay to crush aggressive glow and enhance text legibility */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-black/30" />
 
       {/* Content — moves FASTER (foreground parallax layer) */}
       <motion.div
@@ -90,25 +95,37 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.2 }}
-          className="max-w-5xl pointer-events-auto"
+          className="max-w-5xl pointer-events-auto relative"
         >
+          {/* Radial mask for text contrast */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-surface-base/50 blur-[120px] rounded-full pointer-events-none -z-10" />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm mb-12"
+            initial={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full mb-12 cursor-default"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan animate-pulse"></span>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-cyan/80">
-              {heroContent.eyebrow}
+            {/* Animated Gradient Border using background origin */}
+            <div className="absolute inset-0 rounded-full bg-zinc-950/80 backdrop-blur-xl border border-white/5 group-hover:border-primary-cyan/30 transition-colors duration-500 shadow-[inset_0_4px_20px_rgba(255,255,255,0.03),0_0_15px_rgba(0,229,255,0.05)] group-hover:shadow-[inset_0_4px_20px_rgba(255,255,255,0.05),0_0_30px_rgba(0,229,255,0.15)]" />
+            
+            {/* Glowing Dot / Pulse Container */}
+            <div className="relative flex items-center justify-center w-2 h-2 z-10 shrink-0">
+              <span className="absolute w-full h-full rounded-full bg-primary-cyan/50 animate-ping" style={{ animationDuration: '3s' }} />
+              <span className="relative w-1.5 h-1.5 rounded-full bg-[#00f0ff] shadow-[0_0_10px_#00f0ff]" />
+            </div>
+
+            {/* Text with dynamic glow and typewriter effect */}
+            <span className="relative z-10 text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-300 group-hover:text-white transition-colors duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_12px_rgba(0,240,255,0.4)]">
+              <Typewriter text={heroContent.eyebrow} speed={85} deleteSpeed={40} delayBeforeDelete={4000} />
             </span>
           </motion.div>
 
-          <div className="font-heading text-6xl md:text-8xl lg:text-[110px] font-bold tracking-tight leading-[0.9] mb-10">
-            <CharReveal as="span" className="inline block" delay={0.3}>
+          <div className="font-heading text-5xl md:text-7xl lg:text-[100px] font-bold tracking-tight leading-[1.05] mb-10 text-white drop-shadow-2xl">
+            <CharReveal as="span" className="inline" delay={0.3}>
               {heroContent.titleLead}
             </CharReveal>
-            <CharReveal as="span" className="inline block text-text-secondary" delay={0.5}>
+            {" "}
+            <CharReveal as="span" className="inline" delay={0.5}>
               {heroContent.titleHighlight}
             </CharReveal>
           </div>
@@ -117,7 +134,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl text-slate-400 max-w-3xl mb-14 leading-relaxed font-normal"
+            className="text-lg md:text-xl text-zinc-200 font-medium max-w-3xl mb-14 leading-relaxed"
           >
             {heroContent.description}
           </motion.p>
@@ -147,13 +164,18 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mt-8 flex items-center gap-2 text-text-secondary/60 text-sm font-medium tracking-tight"
+            initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
+            className="mt-12 flex items-center gap-4 w-fit px-2"
           >
-            <div className="w-1 h-1 rounded-full bg-primary-cyan/40" />
-            {heroContent.trustLine}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-primary-cyan/80" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary-cyan shadow-[0_0_10px_#00f0ff] animate-pulse" />
+            </div>
+            <span className="text-zinc-300 text-sm font-semibold tracking-wide drop-shadow-md">
+              {heroContent.trustLine}
+            </span>
           </motion.div>
         </motion.div>
       </motion.div>

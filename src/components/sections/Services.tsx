@@ -2,13 +2,11 @@
 import { useRef } from "react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Cpu, BrainCircuit, Cloud, Smartphone, Monitor, Globe } from "lucide-react"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
+import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { servicesSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
-
-import { useIsMobile } from "@/lib/useIsMobile"
 
 const SERVICE_ICONS = {
   brain: BrainCircuit,
@@ -18,29 +16,6 @@ const SERVICE_ICONS = {
   monitor: Monitor,
   smartphone: Smartphone,
 } as const
-
-// Each card gets a different parallax speed for depth
-const PARALLAX_OFFSETS = [40, 20, 60, 30, 50, 15]
-
-function ParallaxCard({ children, index }: { children: React.ReactNode; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-  const distance = PARALLAX_OFFSETS[index % PARALLAX_OFFSETS.length]
-  const y = useSpring(
-    useTransform(scrollYProgress, [0, 1], [distance, -distance]),
-    { stiffness: isMobile ? 40 : 80, damping: 25 }
-  )
-
-  return (
-    <motion.div ref={ref} style={{ y }} className="will-change-transform">
-      {children}
-    </motion.div>
-  )
-}
 
 export function Services() {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
@@ -79,31 +54,35 @@ export function Services() {
           {servicesSection.items.map((svc, i) => {
             const Icon = SERVICE_ICONS[svc.icon]
             return (
-              <ParallaxCard key={svc.title} index={i}>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 30, scale: 0.98 },
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } }
-                  }}
-                  className="h-full"
-                >
-                  <GlassPanel className="group hover:border-primary-cyan/20 transition-all duration-500 h-full p-10 flex flex-col">
-                    <div className="mb-8 text-primary-cyan/80 group-hover:text-primary-cyan transition-colors">
-                      <Icon size={32} className="stroke-[1.25]" />
+              <motion.div
+                key={svc.title}
+                variants={{
+                  hidden: { opacity: 0, y: 30, scale: 0.98 },
+                  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } }
+                }}
+                className="h-full"
+              >
+                <GlassPanel className="group relative overflow-hidden border border-surface-border hover:border-primary-cyan/50 hover:shadow-[0_20px_40px_-15px_rgba(0,229,255,0.2)] hover:-translate-y-2 transition-all duration-500 h-full">
+                  <div className="flex flex-col h-full w-full relative z-10">
+                    {/* Glowing animated background sweep */}
+                    <div className="absolute inset-[-4rem] bg-gradient-to-br from-primary-cyan/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none translate-y-8 group-hover:translate-y-0" />
+                    
+                    <div className="relative z-10 mb-8 w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-primary-cyan group-hover:border-primary-cyan/50 group-hover:bg-primary-cyan/[0.05] transition-all duration-500 group-hover:shadow-[inset_0_0_20px_rgba(0,229,255,0.2),0_0_15px_rgba(0,229,255,0.1)]">
+                      <Icon size={28} className="stroke-[1.5] transition-transform duration-500 group-hover:scale-110" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 tracking-tight">{svc.title}</h3>
-                    <p className="text-slate-400 mb-8 text-base leading-relaxed">{svc.benefit}</p>
-                    <ul className="space-y-4 mt-auto">
+                    <h3 className="text-2xl font-bold mb-4 tracking-tight group-hover:text-white transition-colors relative z-10">{svc.title}</h3>
+                    <p className="text-slate-400 mb-8 text-base leading-relaxed group-hover:text-slate-300 transition-colors relative z-10">{svc.benefit}</p>
+                    <ul className="space-y-4 mt-auto relative z-10">
                       {svc.bullets.map((bullet) => (
-                        <li key={bullet} className="flex items-start text-sm text-slate-400/80 leading-snug">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan/40 mt-1.5 mr-4 shrink-0"></span>
+                        <li key={bullet} className="flex items-start text-sm text-slate-400/80 leading-snug group-hover:text-slate-300 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan/40 group-hover:bg-primary-cyan group-hover:shadow-[0_0_8px_rgba(0,229,255,0.8)] transition-all mt-1.5 mr-4 shrink-0"></span>
                           {bullet}
                         </li>
                       ))}
                     </ul>
-                  </GlassPanel>
-                </motion.div>
-              </ParallaxCard>
+                  </div>
+                </GlassPanel>
+              </motion.div>
             )
           })}
         </motion.div>

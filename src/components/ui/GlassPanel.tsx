@@ -30,7 +30,7 @@ export const GlassPanel = ({ children, className }: { children: React.ReactNode;
   const glowBackground = useMotionTemplate`
     radial-gradient(
       650px circle at ${mouseX}px ${mouseY}px,
-      rgba(255, 59, 48, 0.15),
+      rgba(0, 240, 255, 0.15),
       transparent 80%
     )
   `
@@ -73,6 +73,7 @@ export const GlassPanel = ({ children, className }: { children: React.ReactNode;
       }}
     >
       <motion.div
+        className="w-full h-full"
         style={{
           rotateX,
           rotateY,

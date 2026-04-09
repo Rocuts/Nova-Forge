@@ -45,8 +45,8 @@ export function Header() {
         className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-surface-base/80 backdrop-blur-md border-b border-surface-border" : "bg-transparent"}`}
       >
         <div className="container px-4 mx-auto max-w-7xl h-20 flex items-center justify-between">
-          <TransitionLink href="/" className="font-heading text-xl font-bold tracking-tight">
-            {siteConfig.name}.
+          <TransitionLink href="/" className="font-heading text-xl font-bold tracking-tight whitespace-nowrap">
+            {siteConfig.name}
           </TransitionLink>
 
           <nav className="hidden md:flex items-center gap-2 text-sm font-medium relative">
@@ -54,7 +54,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative px-4 py-2 text-text-secondary hover:text-white transition-colors duration-200"
+                className="relative px-4 py-2 text-zinc-200 font-semibold hover:text-white transition-colors duration-200"
                 onMouseEnter={() => setHoveredPath(item.href)}
                 onMouseLeave={() => setHoveredPath(null)}
               >

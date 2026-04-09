@@ -2,41 +2,17 @@
 import { useRef } from "react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Phone, MessageSquare, UserCog } from "lucide-react"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
+import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { flagshipAISection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
-
-import { useIsMobile } from "@/lib/useIsMobile"
 
 const OFFER_ICONS = {
   message: MessageSquare,
   operations: UserCog,
   phone: Phone,
 } as const
-
-const PARALLAX_OFFSETS = [50, 25, 45]
-
-function ParallaxCard({ children, index }: { children: React.ReactNode; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-  const distance = PARALLAX_OFFSETS[index % PARALLAX_OFFSETS.length]
-  const y = useSpring(
-    useTransform(scrollYProgress, [0, 1], [distance, -distance]),
-    { stiffness: isMobile ? 40 : 80, damping: 25 }
-  )
-
-  return (
-    <motion.div ref={ref} style={{ y }} className="will-change-transform">
-      {children}
-    </motion.div>
-  )
-}
 
 export function FlagshipAI() {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
@@ -75,22 +51,24 @@ export function FlagshipAI() {
           {flagshipAISection.items.map((offer, i) => {
             const Icon = OFFER_ICONS[offer.icon]
             return (
-              <ParallaxCard key={offer.title} index={i}>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
-                  }}
-                >
-                  <GlassPanel className="group hover:border-primary-cyan/30 transition-colors duration-500 h-full">
+              <motion.div
+                key={offer.title}
+                variants={{
+                  hidden: { opacity: 0, y: 40, scale: 0.95 },
+                  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
+                }}
+                className="h-full"
+              >
+                <GlassPanel className="group hover:border-primary-cyan/30 transition-colors duration-500 h-full">
+                  <div className="flex flex-col h-full w-full">
                     <div className="mb-6 opacity-80 group-hover:opacity-100 transition-opacity text-primary-cyan">
                       <Icon size={40} className="stroke-[1.5]" />
                     </div>
                     <h3 className="text-2xl font-medium mb-3">{offer.title}</h3>
-                    <p className="text-text-secondary text-lg">{offer.description}</p>
-                  </GlassPanel>
-                </motion.div>
-              </ParallaxCard>
+                    <p className="text-text-secondary text-lg mt-auto">{offer.description}</p>
+                  </div>
+                </GlassPanel>
+              </motion.div>
             )
           })}
         </motion.div>

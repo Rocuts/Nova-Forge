@@ -1,32 +1,11 @@
 "use client"
 import { useRef } from "react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
+import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { teamSection } from "@/content/landing"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
-
-const PARALLAX_OFFSETS = [35, 55, 20, 45]
-
-function ParallaxMember({ children, index }: { children: React.ReactNode; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-  const distance = PARALLAX_OFFSETS[index % PARALLAX_OFFSETS.length]
-  const y = useSpring(
-    useTransform(scrollYProgress, [0, 1], [distance, -distance]),
-    { stiffness: 80, damping: 25 }
-  )
-
-  return (
-    <motion.div ref={ref} style={{ y }}>
-      {children}
-    </motion.div>
-  )
-}
 
 export function Team() {
   const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
@@ -63,25 +42,25 @@ export function Team() {
           }}
         >
           {teamSection.members.map((member, i) => (
-            <ParallaxMember key={member.name} index={i}>
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 40, scale: 0.95 },
-                  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
-                }}
-              >
-                <GlassPanel className="text-center h-full p-8 border-zinc-800">
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-                      <span className="text-xl font-bold text-primary-cyan">{member.initials}</span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-1 text-white">{member.name}</h3>
-                    <p className="text-primary-cyan/80 text-[10px] font-bold tracking-widest uppercase mb-4">{member.role}</p>
-                    <p className="text-slate-400 text-sm leading-relaxed">{member.tagline}</p>
+            <motion.div
+              key={member.name}
+              variants={{
+                hidden: { opacity: 0, y: 40, scale: 0.95 },
+                visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
+              }}
+              className="h-full"
+            >
+              <GlassPanel className="text-center h-full border-zinc-800">
+                <div className="flex flex-col items-center h-full w-full">
+                  <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 shrink-0">
+                    <span className="text-xl font-bold text-primary-cyan">{member.initials}</span>
                   </div>
-                </GlassPanel>
-              </motion.div>
-            </ParallaxMember>
+                  <h3 className="text-xl font-bold mb-1 text-white">{member.name}</h3>
+                  <p className="text-primary-cyan/80 text-[10px] font-bold tracking-widest uppercase mb-4">{member.role}</p>
+                  <p className="text-slate-400 text-sm leading-relaxed mt-auto">{member.tagline}</p>
+                </div>
+              </GlassPanel>
+            </motion.div>
           ))}
         </motion.div>
       </div>

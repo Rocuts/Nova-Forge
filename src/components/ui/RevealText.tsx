@@ -88,7 +88,7 @@ export function RevealText({
       {words.map((word, i) => (
         <span
           key={`${word}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
+          className="inline-block overflow-hidden align-bottom pb-[0.2em] -mb-[0.2em]"
         >
           <motion.span className="inline-block" variants={wordVariants}>
             {word}
@@ -147,7 +147,7 @@ export function CharReveal({
     )
   }, [])
 
-  const chars = children.split("")
+  const words = children.split(" ")
 
   if (prefersReducedMotion) {
     return (
@@ -168,19 +168,26 @@ export function CharReveal({
       custom={delay}
       aria-label={children}
     >
-      {chars.map((char, i) => (
-        <span
-          key={`${char}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
-          style={{ perspective: 800 }}
-        >
-          <motion.span
-            className="inline-block"
-            style={{ transformOrigin: "bottom center" }}
-            variants={charVariants}
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
+      {words.map((word, wordIndex) => (
+        <span key={`word-${wordIndex}`}>
+          <span className="inline-block whitespace-nowrap">
+            {word.split("").map((char, charIndex) => (
+              <span
+                key={`${char}-${charIndex}`}
+                className="inline-block overflow-hidden align-bottom pb-[0.2em] -mb-[0.2em]"
+                style={{ perspective: 800 }}
+              >
+                <motion.span
+                  className="inline-block"
+                  style={{ transformOrigin: "bottom center" }}
+                  variants={charVariants}
+                >
+                  {char}
+                </motion.span>
+              </span>
+            ))}
+          </span>
+          {wordIndex < words.length - 1 && " "}
         </span>
       ))}
     </MotionTag>
