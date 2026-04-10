@@ -35,6 +35,7 @@ export function CTA() {
 
   return (
     <motion.section
+      id="contacto"
       ref={sectionRef}
       style={{ scale, opacity, skewY }}
       className="py-32 bg-surface-base relative border-t border-surface-border z-10 overflow-hidden"

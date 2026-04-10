@@ -23,6 +23,6 @@ export const siteConfig = {
     twitter: "https://twitter.com/novaforge",
     linkedin: "https://linkedin.com/company/novaforge",
     scheduling: "https://cal.com/novaforge/diagnostico",
-    contact: `mailto:${contactEmail}`,
+    contact: "#contacto",
   },
 } as const
