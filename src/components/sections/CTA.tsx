@@ -1,7 +1,7 @@
 "use client"
 import { useRef } from "react"
 import { motion, useScroll, useTransform, useSpring } from "motion/react"
-import { Button } from "@/components/ui/Button"
+import { ContactForm } from "@/components/ui/ContactForm"
 import { RevealText } from "@/components/ui/RevealText"
 import { ctaSection } from "@/content/landing"
 import { trackEvent } from "@/lib/analytics"
@@ -63,14 +63,9 @@ export function CTA() {
           {ctaSection.description}
         </p>
 
-        <Button
-          size="lg"
-          variant="primary"
-          href={ctaSection.action.href}
-          onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
-        >
-          {ctaSection.action.label}
-        </Button>
+        <div className="mt-8 relative z-20">
+          <ContactForm />
+        </div>
       </motion.div>
     </motion.section>
   )
