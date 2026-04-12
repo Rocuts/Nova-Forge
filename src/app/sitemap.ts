@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/sistemas-criticos", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/inteligencia-operativa", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/automatizacion-gobierno", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/enriquecimiento-datos", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/extraccion-datos", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/inversores", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/nosotros", priority: 0.7, changeFrequency: "monthly" as const },
   ]
@@ -32,6 +34,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/en/critical-systems", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/operational-intelligence", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/government-automation", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/data-enrichment", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/data-extraction", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/investors", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/en/about", priority: 0.7, changeFrequency: "monthly" as const },
   ]

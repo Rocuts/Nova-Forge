@@ -13,6 +13,8 @@ const es = {
           { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
           { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
           { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
+          { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde 75+ fuentes" },
+          { name: "Extracción de Datos", href: "/extraccion-datos", description: "Scrapers con IA para OSINT y registros públicos" },
         ],
       },
       {
@@ -131,6 +133,30 @@ const es = {
         ],
         icon: "governance",
         href: "/automatizacion-gobierno",
+      },
+      {
+        title: "Enriquecimiento de Datos e Inteligencia",
+        benefit:
+          "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado desde 75+ fuentes.",
+        bullets: [
+          "Enriquecimiento Multi-Fuente en Tiempo Real",
+          "Perfilamiento Firmográfico y de Contactos",
+          "Cumplimiento GDPR y Residencia Soberana de Datos",
+        ],
+        icon: "enrichment",
+        href: "/enriquecimiento-datos",
+      },
+      {
+        title: "Extracción de Datos a Escala",
+        benefit:
+          "Recolecte datos de cualquier fuente pública con extractores potenciados por IA y trazabilidad completa.",
+        bullets: [
+          "Scrapers Adaptativos con IA",
+          "OSINT e Inteligencia de Fuentes Abiertas",
+          "Monitoreo Regulatorio y de Registros Públicos",
+        ],
+        icon: "scraper",
+        href: "/extraccion-datos",
       },
     ],
   },
@@ -297,6 +323,8 @@ const es = {
       { name: "IA Soberana", href: "/soberania-ia" },
       { name: "Ciberseguridad", href: "/ciberseguridad" },
       { name: "Fuerza de Trabajo Digital", href: "/fuerza-digital" },
+      { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos" },
+      { name: "Extracción de Datos", href: "/extraccion-datos" },
     ],
     company: "Empresa",
     companyLinks: [
@@ -676,6 +704,54 @@ const es = {
         title: "Modernice su operación",
         description: "Agende una consulta sobre automatización de procesos.",
         action: { label: "Agendar Consulta", href: "/agendar" },
+      },
+    },
+    dataEnrichment: {
+      eyebrow: "ENRIQUECIMIENTO DE DATOS",
+      title: "Datos fragmentados convertidos en inteligencia decisiva.",
+      subtitle: "Enriquecimiento automatizado desde 75+ fuentes autorizadas.",
+      description: "Conectamos sus registros con más de 75 fuentes de datos autorizadas para transformar información incompleta en perfiles verificados y accionables — ya sea para calificar proveedores, consolidar registros ciudadanos o construir pipeline comercial. Hosting soberano, cumplimiento regulatorio y actualización en tiempo real incluidos.",
+      features: [
+        { title: "Enriquecimiento Multi-Fuente en Cascada", description: "Cadena secuencial de 75+ proveedores de datos para maximizar cobertura y precisión en cada registro." },
+        { title: "Perfilamiento Firmográfico Completo", description: "Datos de contacto, estructura organizacional, ingresos, tecnología utilizada y señales de compra para cada cuenta." },
+        { title: "Detección de Intención de Compra", description: "Identificación de cuentas que están investigando activamente soluciones relevantes mediante señales de comportamiento." },
+        { title: "Scoring con IA", description: "Clasificación automática de leads por ajuste, intención y probabilidad de conversión." },
+        { title: "Sincronización con CRM/ERP", description: "Integración bidireccional con Salesforce, HubSpot y sistemas internos con deduplicación automática." },
+        { title: "Cumplimiento y Auditoría", description: "Trazabilidad completa de cada dato recolectado, cumplimiento GDPR/CCPA y opciones de residencia soberana." },
+      ],
+      capabilities: [
+        { title: "Adquisición de Inteligencia", items: ["Descubrimiento de Contactos y Organigramas", "Perfilamiento Firmográfico y Tecnográfico", "Señales de Intención desde Actividad Web"] },
+        { title: "Operaciones de Datos", items: ["Enriquecimiento en Cascada Multi-Proveedor", "Deduplicación y Normalización", "Ciclos de Actualización Programados"] },
+        { title: "Integración y Cumplimiento", items: ["Conectores Nativos CRM/ERP", "Control de Acceso Granular", "Residencia Soberana de Datos"] },
+      ],
+      cta: {
+        title: "Active su inteligencia de datos",
+        description: "Agende una demostración de enriquecimiento sobre sus propios registros.",
+        action: { label: "Agendar Demostración", href: "/agendar" },
+      },
+    },
+    dataExtraction: {
+      eyebrow: "EXTRACCIÓN DE DATOS",
+      title: "Recolecte cualquier fuente pública. A cualquier escala.",
+      subtitle: "Extractores con IA para OSINT, monitoreo regulatorio e inteligencia competitiva.",
+      description: "Desplegamos colectores potenciados por IA que operan en la web abierta, portales gubernamentales y registros públicos — entregando inteligencia limpia y estructurada a sus sistemas en tiempo real. Diseñado para OSINT, monitoreo regulatorio y programas de registros públicos a escala nacional con trazabilidad completa y despliegue soberano.",
+      features: [
+        { title: "Extracción Estructurada a Escala", description: "Conversión de páginas web, PDFs y documentos no estructurados en datos limpios con 95%+ de precisión." },
+        { title: "Parseo Adaptativo con IA", description: "Modelos de lenguaje que se adaptan a cambios de layout sin mantenimiento manual de selectores." },
+        { title: "Infraestructura de Proxies Global", description: "Red de millones de IPs residenciales en 195+ países para recolección sin bloqueos." },
+        { title: "OSINT e Inteligencia de Amenazas", description: "Recolección sistemática de foros, redes sociales y superficies de la dark web para agencias de inteligencia." },
+        { title: "Monitoreo Regulatorio", description: "Seguimiento de cambios en legislación, listas de sanciones y bases de datos de licencias entre jurisdicciones." },
+        { title: "Programación y Alertas", description: "Ejecuciones automatizadas con detección de fallos, monitoreo de cambios y notificaciones." },
+      ],
+      capabilities: [
+        { title: "Infraestructura de Recolección", items: ["Red Global de Proxies", "Renderizado Headless Browser", "Resolución Automática de CAPTCHAs"] },
+        { title: "Extracción y Transformación", items: ["Parsers Adaptativos con IA", "Templates para 1,000+ Fuentes", "Pipelines de Extracción Personalizados"] },
+        { title: "Entrega y Gobierno", items: ["Entrega via API/Webhook/S3", "Logging de Proveniencia Completo", "Redacción de PII y Cumplimiento"] },
+      ],
+      cta: {
+        title: "Despliegue sus colectores",
+        description: "Agende una evaluación de sus necesidades de extracción de datos.",
+        action: { label: "Agendar Evaluación", href: "/agendar" },
       },
     },
   },

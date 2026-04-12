@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
       { source: "/en/government-automation", destination: "/en/automatizacion-gobierno" },
       { source: "/en/investors", destination: "/en/inversores" },
       { source: "/en/about", destination: "/en/nosotros" },
+      { source: "/en/data-enrichment", destination: "/en/enriquecimiento-datos" },
+      { source: "/en/data-extraction", destination: "/en/extraccion-datos" },
     ];
   },
 };

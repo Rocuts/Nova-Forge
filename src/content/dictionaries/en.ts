@@ -13,6 +13,8 @@ const en = {
           { name: "Sovereign AI", href: "/soberania-ia", description: "AI infrastructure under your total control" },
           { name: "Cybersecurity", href: "/ciberseguridad", description: "Autonomous defense with AI agents" },
           { name: "Digital Workforce", href: "/fuerza-digital", description: "Executive assistants across all channels" },
+          { name: "Data Enrichment", href: "/enriquecimiento-datos", description: "Actionable intelligence from 75+ sources" },
+          { name: "Data Extraction", href: "/extraccion-datos", description: "AI scrapers for OSINT and public records" },
         ],
       },
       {
@@ -131,6 +133,30 @@ const en = {
         ],
         icon: "governance",
         href: "/automatizacion-gobierno",
+      },
+      {
+        title: "Data Enrichment & Intelligence",
+        benefit:
+          "Transform fragmented records into actionable intelligence with automated enrichment from 75+ sources.",
+        bullets: [
+          "Real-Time Multi-Source Enrichment",
+          "Firmographic & Contact Profiling",
+          "GDPR Compliance & Sovereign Data Residency",
+        ],
+        icon: "enrichment",
+        href: "/enriquecimiento-datos",
+      },
+      {
+        title: "Data Extraction at Scale",
+        benefit:
+          "Collect data from any public source with AI-powered extractors and full audit trails.",
+        bullets: [
+          "AI-Adaptive Scrapers",
+          "OSINT & Open Source Intelligence",
+          "Regulatory & Public Records Monitoring",
+        ],
+        icon: "scraper",
+        href: "/extraccion-datos",
       },
     ],
   },
@@ -297,6 +323,8 @@ const en = {
       { name: "Sovereign AI", href: "/soberania-ia" },
       { name: "Cybersecurity", href: "/ciberseguridad" },
       { name: "Digital Workforce", href: "/fuerza-digital" },
+      { name: "Data Enrichment", href: "/enriquecimiento-datos" },
+      { name: "Data Extraction", href: "/extraccion-datos" },
     ],
     company: "Company",
     companyLinks: [
@@ -676,6 +704,54 @@ const en = {
         title: "Modernize your operation",
         description: "Schedule a consultation on process automation.",
         action: { label: "Schedule Consultation", href: "/agendar" },
+      },
+    },
+    dataEnrichment: {
+      eyebrow: "DATA ENRICHMENT",
+      title: "Fragmented data turned into decisive intelligence.",
+      subtitle: "Automated enrichment from 75+ authoritative sources.",
+      description: "We connect your records with 75+ authoritative data sources to transform incomplete information into verified, actionable profiles — whether qualifying vendors, consolidating citizen records, or building commercial pipeline. Sovereign hosting, regulatory compliance, and real-time refresh included.",
+      features: [
+        { title: "Waterfall Multi-Source Enrichment", description: "Sequential chain of 75+ data providers to maximize coverage and accuracy on every record." },
+        { title: "Full Firmographic Profiling", description: "Contact data, organizational structure, revenue, technology stack, and buying signals for each account." },
+        { title: "Buying Intent Detection", description: "Identification of accounts actively researching relevant solutions through behavioral signals." },
+        { title: "AI-Powered Scoring", description: "Automatic lead classification by fit, intent, and conversion probability." },
+        { title: "CRM/ERP Synchronization", description: "Bidirectional integration with Salesforce, HubSpot, and internal systems with automatic deduplication." },
+        { title: "Compliance & Audit", description: "Full traceability of every collected data point, GDPR/CCPA compliance, and sovereign residency options." },
+      ],
+      capabilities: [
+        { title: "Intelligence Acquisition", items: ["Contact & Org Chart Discovery", "Firmographic & Technographic Profiling", "Intent Signals from Web Activity"] },
+        { title: "Data Operations", items: ["Multi-Provider Waterfall Enrichment", "Deduplication & Normalization", "Scheduled Refresh Cycles"] },
+        { title: "Integration & Compliance", items: ["Native CRM/ERP Connectors", "Granular Access Control", "Sovereign Data Residency"] },
+      ],
+      cta: {
+        title: "Activate your data intelligence",
+        description: "Schedule a demo of enrichment on your own records.",
+        action: { label: "Schedule Demo", href: "/agendar" },
+      },
+    },
+    dataExtraction: {
+      eyebrow: "DATA EXTRACTION",
+      title: "Collect any public source. At any scale.",
+      subtitle: "AI-powered extractors for OSINT, regulatory monitoring, and competitive intelligence.",
+      description: "We deploy AI-powered collectors across the open web, government portals, and public registries — returning clean, structured intelligence to your systems in real time. Purpose-built for OSINT, regulatory monitoring, and large-scale public records programs with full audit trails and sovereign deployment options.",
+      features: [
+        { title: "Structured Extraction at Scale", description: "Conversion of web pages, PDFs, and unstructured documents into clean data with 95%+ accuracy." },
+        { title: "AI-Adaptive Parsing", description: "Language models that adapt to layout changes without manual selector maintenance." },
+        { title: "Global Proxy Infrastructure", description: "Network of millions of residential IPs across 195+ countries for unblocked collection." },
+        { title: "OSINT & Threat Intelligence", description: "Systematic collection from forums, social media, and dark web surfaces for intelligence agencies." },
+        { title: "Regulatory Monitoring", description: "Tracking changes in legislation, sanctions lists, and license databases across jurisdictions." },
+        { title: "Scheduling & Alerts", description: "Automated runs with failure detection, change monitoring, and notifications." },
+      ],
+      capabilities: [
+        { title: "Collection Infrastructure", items: ["Global Proxy Network", "Headless Browser Rendering", "Automatic CAPTCHA Resolution"] },
+        { title: "Extraction & Transformation", items: ["AI-Adaptive Parsers", "Templates for 1,000+ Sources", "Custom Extraction Pipelines"] },
+        { title: "Delivery & Governance", items: ["API/Webhook/S3 Delivery", "Full Provenance Logging", "PII Redaction & Compliance"] },
+      ],
+      cta: {
+        title: "Deploy your collectors",
+        description: "Schedule an evaluation of your data extraction needs.",
+        action: { label: "Schedule Evaluation", href: "/agendar" },
       },
     },
   },

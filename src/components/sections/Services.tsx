@@ -7,6 +7,8 @@ import {
   IconServer2,
   IconChartDots3,
   IconBuildingBank,
+  IconDatabaseSearch,
+  IconSpider,
 } from "@tabler/icons-react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
@@ -19,6 +21,8 @@ const SERVICE_ICONS = {
   systems: IconServer2,
   intelligence: IconChartDots3,
   governance: IconBuildingBank,
+  enrichment: IconDatabaseSearch,
+  scraper: IconSpider,
 } as const
 
 interface ServicesContent {

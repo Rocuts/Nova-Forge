@@ -21,6 +21,8 @@ export const pathMap: Record<string, Record<Locale, string>> = {
   "/automatizacion-gobierno": { es: "/automatizacion-gobierno", en: "/government-automation" },
   "/inversores": { es: "/inversores", en: "/investors" },
   "/nosotros": { es: "/nosotros", en: "/about" },
+  "/enriquecimiento-datos": { es: "/enriquecimiento-datos", en: "/data-enrichment" },
+  "/extraccion-datos": { es: "/extraccion-datos", en: "/data-extraction" },
 }
 
 export function buildLocalePath(locale: Locale, internalPath: string): string {
