@@ -1,10 +1,12 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { usePathname } from "next/navigation"
 import Lenis from "@studio-freight/lenis"
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -28,6 +30,14 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       lenisRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true })
+    } else {
+      window.scrollTo(0, 0)
+    }
+  }, [pathname])
 
   return <>{children}</>
 }
