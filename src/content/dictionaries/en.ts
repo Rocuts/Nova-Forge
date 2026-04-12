@@ -520,7 +520,7 @@ const en = {
       capabilities: [
         { title: "Infrastructure", items: ["Sovereign Cloud / On-Premise", "Dedicated GPU Clusters", "Air-Gapped Networks"] },
         { title: "Models", items: ["Open Source LLM Fine-Tuning", "RAG on Internal Documentation", "Private Multimodal Models"] },
-        { title: "Governance", items: ["Granular Access Control", "Immutable Audit Logs", "GDPR / SOC2 / ISO Compliance"] },
+        { title: "Governance", items: ["Granular Access Control", "Immutable Audit Logs", "Compliance-Ready Architecture"] },
       ],
       cta: {
         title: "Bring AI inside your perimeter",

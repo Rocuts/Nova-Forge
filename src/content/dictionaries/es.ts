@@ -520,7 +520,7 @@ const es = {
       capabilities: [
         { title: "Infraestructura", items: ["Cloud Soberana / On-Premise", "GPU Clusters Dedicados", "Redes Aisladas (Air-Gap)"] },
         { title: "Modelos", items: ["Fine-tuning de LLMs Open Source", "RAG sobre Documentación Interna", "Modelos Multimodales Privados"] },
-        { title: "Gobierno", items: ["Control de Acceso Granular", "Logs de Auditoría Inmutables", "Cumplimiento GDPR / SOC2 / ISO"] },
+        { title: "Gobierno", items: ["Control de Acceso Granular", "Logs de Auditoría Inmutables", "Arquitectura Lista para Cumplimiento Regulatorio"] },
       ],
       cta: {
         title: "Lleve la IA a su perímetro",
