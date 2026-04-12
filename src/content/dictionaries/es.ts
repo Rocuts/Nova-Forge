@@ -265,6 +265,17 @@ const es = {
   credibility: {
     title: "Stack Tecnológico de Grado Enterprise",
   },
+  techStack: {
+    sectionId: "tecnologias",
+    title: "Nuestro Stack Tecnológico",
+    categories: [
+      { name: "Inteligencia Artificial", items: ["Claude", "GPT-4", "Gemini", "LLaMA", "PyTorch", "LangChain"] },
+      { name: "Nube e Infraestructura", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Docker", "Terraform"] },
+      { name: "Desarrollo y Plataformas", items: ["Next.js", "React", "TypeScript", "Node.js", "Python", "Go"] },
+      { name: "Ciberseguridad", items: ["Zero Trust", "SIEM", "Threat Intelligence", "Penetration Testing", "SOC", "WAF"] },
+      { name: "Datos y Analítica", items: ["PostgreSQL", "Redis", "Elasticsearch", "Apache Kafka", "Grafana", "dbt"] },
+    ],
+  },
   metrics: {
     title: "Resultados Cuantificables",
     description:

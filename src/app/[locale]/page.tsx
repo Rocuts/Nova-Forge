@@ -9,6 +9,7 @@ import { notFound } from "next/navigation"
 const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
 const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
 const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
+const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
 const Metrics = dynamic(() => import("@/components/sections/Metrics").then(m => ({ default: m.Metrics })))
 const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
 
@@ -46,6 +47,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Services content={dict.services} />
       <FlagshipAI content={dict.flagshipAI} />
       <Methodology content={dict.methodology} />
+      <TechStack content={dict.techStack} />
       <Metrics content={dict.metrics} />
       <CTA content={ctaContent} />
     </>
