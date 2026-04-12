@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og"
-
 import { siteConfig } from "@/config/site"
 
 export const socialImageSize = {
@@ -28,8 +27,7 @@ export function createSocialImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background:
-            "radial-gradient(circle at top left, rgba(0,229,255,0.18), transparent 35%), linear-gradient(135deg, #000000 0%, #080808 45%, #130a0a 100%)",
+          background: "#0a0a0a",
           color: "#ffffff",
         }}
       >
@@ -49,18 +47,20 @@ export function createSocialImage({
           >
             <div
               style={{
-                fontSize: 28,
-                letterSpacing: "0.25em",
+                fontSize: 14,
+                letterSpacing: "0.3em",
                 textTransform: "uppercase",
-                color: "#00e5ff",
+                color: "#a3a3a3",
+                fontWeight: 700,
               }}
             >
               {eyebrow}
             </div>
             <div
               style={{
-                fontSize: 36,
-                color: "rgba(255,255,255,0.82)",
+                fontSize: 32,
+                color: "#ffffff",
+                fontWeight: 600,
               }}
             >
               {siteConfig.name}
@@ -69,20 +69,20 @@ export function createSocialImage({
 
           <div
             style={{
-              width: 104,
-              height: 104,
-              borderRadius: 28,
+              width: 80,
+              height: 80,
+              borderRadius: 8,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "1px solid rgba(255,69,0,0.35)",
-              background: "rgba(255,255,255,0.03)",
-              color: "#00e5ff",
-              fontSize: 52,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.05)",
+              color: "#ffffff",
+              fontSize: 36,
               fontWeight: 700,
             }}
           >
-            N
+            NF
           </div>
         </div>
 
@@ -90,24 +90,25 @@ export function createSocialImage({
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "26px",
+            gap: "24px",
             maxWidth: 900,
           }}
         >
           <div
             style={{
-              fontSize: 78,
-              lineHeight: 1,
-              fontWeight: 800,
+              fontSize: 64,
+              lineHeight: 1.05,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
             }}
           >
             {title}
           </div>
           <div
             style={{
-              fontSize: 32,
-              lineHeight: 1.35,
-              color: "rgba(255,255,255,0.76)",
+              fontSize: 24,
+              lineHeight: 1.4,
+              color: "#a3a3a3",
             }}
           >
             {description}
@@ -118,17 +119,17 @@ export function createSocialImage({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            fontSize: 24,
-            color: "rgba(255,255,255,0.62)",
+            gap: "12px",
+            fontSize: 18,
+            color: "#525252",
           }}
         >
           <div
             style={{
-              width: 12,
-              height: 12,
+              width: 6,
+              height: 6,
               borderRadius: 999,
-              background: "#ff9500",
+              background: "#a3a3a3",
             }}
           />
           {siteConfig.url.replace(/^https?:\/\//, "")}

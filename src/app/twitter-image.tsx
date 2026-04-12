@@ -1,14 +1,14 @@
 import { siteConfig } from "@/config/site"
 import { createSocialImage, socialImageSize } from "@/lib/social-image"
 
-export const alt = `${siteConfig.name} en X`
+export const alt = `${siteConfig.name} — Enterprise Software Engineering`
 export const size = socialImageSize
 export const contentType = "image/png"
 
 export default function TwitterImage() {
   return createSocialImage({
-    eyebrow: "AI & Software Agency",
-    title: "Diseñamos sistemas digitales completos para empresas.",
-    description: "Fábrica de software: aplicaciones empresariales, SaaS, apps móviles, software de escritorio y agentes de IA para operaciones de negocio.",
+    eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
+    title: "We build digital sovereignty, cyber defense, and autonomous operations.",
+    description: "Mission-critical software engineering, sovereign AI, agentic cybersecurity, and autonomous operations for enterprise and government.",
   })
 }
