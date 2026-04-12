@@ -6,7 +6,7 @@
     }
   </style>
   <g transform="rotate(45 12 12)">
-    <rect class="shape" x="4" y="4" width="16" height="7" />
-    <rect class="shape" x="4" y="13" width="16" height="7" />
+    <rect class="shape" x="4" y="4" width="16" height="7" rx="1" />
+    <rect class="shape" x="4" y="13" width="16" height="7" rx="1" />
   </g>
 </svg>

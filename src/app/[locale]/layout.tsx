@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       },
     },
     icons: {
-      icon: "/icon.svg",
+      icon: { url: "/icon.svg", type: "image/svg+xml" },
       shortcut: "/icon.svg",
       apple: "/icon.svg",
     },
