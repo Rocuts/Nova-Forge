@@ -5,22 +5,34 @@ import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 
 const ICON_MAP: Record<string, string> = {
-  "Claude Opus 4": "simple-icons:anthropic",
-  "Gemini 2.5": "simple-icons:googlegemini",
-  "LLaMA 4": "simple-icons:meta",
+  // AI
+  "Anthropic": "simple-icons:anthropic",
+  "OpenAI": "simple-icons:openai",
+  "Google Gemini": "simple-icons:googlegemini",
+  "Meta LLaMA": "simple-icons:meta",
+  "DeepSeek": "simple-icons:deepseek",
+  "Mistral": "simple-icons:mistral",
+  "Hugging Face": "simple-icons:huggingface",
+  "OpenClaw": "simple-icons:openai",
+  "n8n": "simple-icons:n8n",
+  "LangChain": "simple-icons:langchain",
   "PyTorch": "simple-icons:pytorch",
+  "Ollama": "simple-icons:ollama",
+  // Cloud
   "AWS": "simple-icons:amazonwebservices",
   "Google Cloud": "simple-icons:googlecloud",
   "Microsoft Azure": "simple-icons:microsoftazure",
   "Kubernetes": "simple-icons:kubernetes",
   "Terraform": "simple-icons:terraform",
   "Pulumi": "simple-icons:pulumi",
+  // Dev
   "Next.js 16": "simple-icons:nextdotjs",
   "React 19": "simple-icons:react",
   "TypeScript 5": "simple-icons:typescript",
   "Bun": "simple-icons:bun",
   "Rust": "simple-icons:rust",
   "Go": "simple-icons:go",
+  // Data
   "PostgreSQL": "simple-icons:postgresql",
   "ClickHouse": "simple-icons:clickhouse",
   "Apache Kafka": "simple-icons:apachekafka",

@@ -270,7 +270,7 @@ const es = {
     sectionId: "tecnologias",
     title: "Nuestro Stack Tecnológico",
     categories: [
-      { name: "Inteligencia Artificial", items: ["Claude Opus 4", "Gemini 2.5", "LLaMA 4", "DeepSeek R2", "PyTorch", "LangGraph"] },
+      { name: "Inteligencia Artificial", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "OpenClaw", "n8n", "LangChain", "PyTorch", "Ollama"] },
       { name: "Nube e Infraestructura", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
       { name: "Desarrollo y Plataformas", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
       { name: "Ciberseguridad", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "SOC Automation", "WAF"] },
