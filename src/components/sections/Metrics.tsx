@@ -92,7 +92,7 @@ export function Metrics({ content }: { content: MetricsContent }) {
                   }}
                   className="p-10 bg-[#141414] border border-[#1a1a1a] rounded-[6px]"
                 >
-                  <div className="text-7xl md:text-8xl font-bold text-white mb-4 tracking-tighter">
+                  <div className="text-5xl font-bold text-white mb-4 tracking-tighter">
                     <AnimatedNumber value={value} suffix={suffix} />
                   </div>
                   <div className="text-[#a3a3a3] text-sm font-medium leading-snug">
