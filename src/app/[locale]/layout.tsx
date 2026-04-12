@@ -97,7 +97,7 @@ export default async function LocaleLayout({ params, children }: Props) {
         <SmoothScroll>
           <Header nav={dict.nav} locale={locale} />
           <main className="flex-1 flex flex-col relative">{children}</main>
-          <Footer content={dict.footer} nav={dict.nav} locale={locale} />
+          <Footer content={dict.footer} locale={locale} />
         </SmoothScroll>
       </body>
     </html>

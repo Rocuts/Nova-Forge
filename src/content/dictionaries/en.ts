@@ -256,7 +256,19 @@ const en = {
   footer: {
     tagline:
       "Enterprise software engineering. Platforms, systems, and AI automation.",
-    navigation: "Navigation",
+    platform: "Platform",
+    platformLinks: [
+      { name: "Sovereign AI", href: "/soberania-ia" },
+      { name: "Cybersecurity", href: "/ciberseguridad" },
+      { name: "Digital Workforce", href: "/fuerza-digital" },
+    ],
+    company: "Company",
+    companyLinks: [
+      { name: "Capabilities", href: "#capacidades" },
+      { name: "Methodology", href: "#metodologia" },
+      { name: "Diagnostic", href: "/diagnostico" },
+      { name: "Schedule", href: "/agendar" },
+    ],
     legal: "Legal",
     privacy: "Privacy",
     terms: "Terms",

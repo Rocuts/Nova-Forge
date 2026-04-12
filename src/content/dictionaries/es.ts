@@ -256,7 +256,19 @@ const es = {
   footer: {
     tagline:
       "Ingeniería de software enterprise. Plataformas, sistemas y automatización con IA.",
-    navigation: "Navegación",
+    platform: "Plataforma",
+    platformLinks: [
+      { name: "IA Soberana", href: "/soberania-ia" },
+      { name: "Ciberseguridad", href: "/ciberseguridad" },
+      { name: "Fuerza de Trabajo Digital", href: "/fuerza-digital" },
+    ],
+    company: "Empresa",
+    companyLinks: [
+      { name: "Capacidades", href: "#capacidades" },
+      { name: "Metodología", href: "#metodologia" },
+      { name: "Diagnóstico", href: "/diagnostico" },
+      { name: "Agendar", href: "/agendar" },
+    ],
     legal: "Legal",
     privacy: "Privacidad",
     terms: "Términos",
