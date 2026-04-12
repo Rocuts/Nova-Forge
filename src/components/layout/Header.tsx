@@ -53,6 +53,22 @@ function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
   )
 }
 
+function getMegaMenuLabels(locale: string) {
+  const isEN = locale === "en"
+  return {
+    navigation: isEN ? "NAVIGATION" : "NAVEGACIÓN",
+    platform: isEN ? "PLATFORM" : "PLATAFORMA",
+    about: isEN ? "ABOUT NOVAFORGE" : "SOBRE NOVAFORGE",
+    contact: isEN ? "CONTACT" : "CONTACTO",
+    learnMore: isEN ? "Learn more" : "Conocer más",
+    aboutText: isEN
+      ? "We build software infrastructure, sovereign AI, and agentic cybersecurity for governments and organizations operating under the most demanding standards."
+      : "Construimos infraestructura de software, IA soberana y ciberseguridad agéntica para gobiernos y organizaciones que operan bajo los estándares más exigentes.",
+    company: isEN ? "Company" : "Empresa",
+    investors: isEN ? "Investors" : "Inversores",
+  }
+}
+
 export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
@@ -94,10 +110,16 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   }, [isMegaMenuOpen])
 
   const schedulingHref = buildLocalePath(locale as Locale, "/agendar")
+  const labels = getMegaMenuLabels(locale)
 
   // Separate items with children (mega menu columns) from direct links
   const columnItems = nav.items.filter((item) => item.children)
   const directItems = nav.items.filter((item) => !item.children)
+
+  // Collect all product links (children of column items) for the flat nav list
+  const allProductLinks = columnItems.flatMap(
+    (item) => item.children?.map((child) => ({ ...child })) ?? []
+  )
 
   return (
     <>
@@ -107,7 +129,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
           isMegaMenuOpen
-            ? "bg-white"
+            ? "bg-[#0a0a0a] border-b border-white/10"
             : isScrolled
               ? "bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5]"
               : "bg-white"
@@ -117,9 +139,16 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
           {/* Left: Logo */}
           <TransitionLink
             href={locale === "en" ? "/en" : "/"}
-            className="flex items-center gap-2 font-heading text-lg font-semibold tracking-tight text-[#0a0a0a] group"
+            className={`flex items-center gap-2 font-heading text-lg font-semibold tracking-tight group transition-colors duration-300 ${
+              isMegaMenuOpen ? "text-white" : "text-[#0a0a0a]"
+            }`}
           >
-            <BrandLogo size={24} className="text-[#0a0a0a]" />
+            <BrandLogo
+              size={24}
+              className={`transition-colors duration-300 ${
+                isMegaMenuOpen ? "text-white" : "text-[#0a0a0a]"
+              }`}
+            />
             <span>{siteConfig.name}</span>
           </TransitionLink>
 
@@ -131,7 +160,11 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                   key={item.name}
                   type="button"
                   onClick={toggleMegaMenu}
-                  className="px-4 py-2 text-[#525252] hover:text-[#0a0a0a] transition-colors duration-200"
+                  className={`px-4 py-2 transition-colors duration-200 ${
+                    isMegaMenuOpen
+                      ? "text-white/60 hover:text-white"
+                      : "text-[#525252] hover:text-[#0a0a0a]"
+                  }`}
                 >
                   {item.name}
                 </button>
@@ -139,7 +172,11 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                 <Link
                   key={item.name}
                   href={item.href ? resolveHref(locale, item.href) : "#"}
-                  className="px-4 py-2 text-[#525252] hover:text-[#0a0a0a] transition-colors duration-200"
+                  className={`px-4 py-2 transition-colors duration-200 ${
+                    isMegaMenuOpen
+                      ? "text-white/60 hover:text-white"
+                      : "text-[#525252] hover:text-[#0a0a0a]"
+                  }`}
                 >
                   {item.name}
                 </Link>
@@ -149,10 +186,23 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-3">
-            <LanguageSwitcher locale={locale} />
+            <div
+              className={`transition-colors duration-300 ${
+                isMegaMenuOpen
+                  ? "[&_a]:text-white/70 [&_a]:border-white/20 [&_a:hover]:text-white [&_a:hover]:border-white/40"
+                  : ""
+              }`}
+            >
+              <LanguageSwitcher locale={locale} />
+            </div>
             <Button
               size="sm"
-              variant="primary"
+              variant={isMegaMenuOpen ? "secondary" : "primary"}
+              className={
+                isMegaMenuOpen
+                  ? "border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50"
+                  : ""
+              }
               href={schedulingHref}
               onClick={() => trackEvent("scheduling_click")}
             >
@@ -165,8 +215,8 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
               aria-label={nav.menuLabel}
               className={`w-10 h-10 rounded-[6px] flex items-center justify-center transition-all duration-200 ${
                 isMegaMenuOpen
-                  ? "bg-[#0a0a0a] text-white"
-                  : "bg-[#f5f5f5] text-[#525252] hover:bg-[#0a0a0a] hover:text-white"
+                  ? "bg-white/10 text-white border border-white/20"
+                  : "bg-[#f5f5f5] text-[#525252] hover:bg-[#e5e5e5] hover:text-[#0a0a0a]"
               }`}
             >
               <HamburgerIcon isOpen={isMegaMenuOpen} />
@@ -175,7 +225,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
         </div>
       </motion.header>
 
-      {/* Mega menu overlay */}
+      {/* Mega menu overlay — DARK */}
       <AnimatePresence>
         {isMegaMenuOpen && (
           <motion.div
@@ -183,61 +233,99 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: megaMenuEase }}
-            className="fixed inset-0 top-16 z-40 bg-white overflow-y-auto"
+            className="fixed inset-0 top-16 z-40 bg-[#0a0a0a] text-white overflow-y-auto"
           >
+            {/* Thin separator line */}
+            <div className="border-t border-white/10" />
+
             <div className="container px-6 mx-auto max-w-7xl py-12">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {/* Column items from nav (Plataforma, Soluciones) */}
-                {columnItems.map((item) => (
-                  <div key={item.name}>
-                    <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mb-6">
-                      {item.name}
-                    </h3>
-                    <div className="flex flex-col">
-                      {item.children?.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={resolveHref(locale, child.href)}
-                          onClick={closeMegaMenu}
-                          className="block py-3 group/link"
-                        >
-                          <span className="text-lg font-medium text-[#0a0a0a] group-hover/link:text-[#525252] transition-colors">
-                            {child.name}
-                          </span>
-                          {child.description && (
-                            <span className="block text-sm text-[#525252] mt-1">
-                              {child.description}
-                            </span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Third column: direct links + contact */}
+                {/* Column 1: NAVIGATION — flat list of all links */}
                 <div>
-                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mb-6">
-                    {directItems[0]?.name ?? "Empresa"}
+                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
+                    {labels.navigation}
                   </h3>
                   <div className="flex flex-col">
+                    {allProductLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={resolveHref(locale, link.href)}
+                        onClick={closeMegaMenu}
+                        className="block py-2 group/link"
+                      >
+                        <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-white hover:text-[#a3a3a3] transition-colors">
+                          <span className="text-[#525252] mr-2">&#8627;</span>
+                          {link.name}
+                        </span>
+                      </Link>
+                    ))}
+                    {/* Direct links (Empresa, Inversores) without arrows */}
                     {directItems.map((item) => (
                       <Link
                         key={item.name}
                         href={item.href ? resolveHref(locale, item.href) : "#"}
                         onClick={closeMegaMenu}
-                        className="block py-3"
+                        className="block py-2 mt-1"
                       >
-                        <span className="text-lg font-medium text-[#0a0a0a] hover:text-[#525252] transition-colors">
+                        <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-white hover:text-[#a3a3a3] transition-colors">
                           {item.name}
                         </span>
                       </Link>
                     ))}
                   </div>
+                </div>
 
-                  <div className="mt-8">
-                    <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mb-4">
-                      {nav.contact}
+                {/* Column 2: PLATFORM — products with descriptions */}
+                <div>
+                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
+                    {labels.platform}
+                  </h3>
+                  <div className="flex flex-col">
+                    {allProductLinks.map((link, i) => (
+                      <Link
+                        key={link.href}
+                        href={resolveHref(locale, link.href)}
+                        onClick={closeMegaMenu}
+                        className={`block py-4 group/desc ${
+                          i < allProductLinks.length - 1
+                            ? "border-b border-white/5"
+                            : ""
+                        }`}
+                      >
+                        <span className="text-base font-medium text-white group-hover/desc:text-[#a3a3a3] transition-colors">
+                          <span className="text-[#525252] mr-1.5">&#8627;</span>
+                          {link.name}
+                        </span>
+                        {link.description && (
+                          <span className="block text-sm text-[#525252] mt-1">
+                            {link.description}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 3: ABOUT + CONTACT */}
+                <div>
+                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
+                    {labels.about}
+                  </h3>
+                  <p className="text-base text-[#a3a3a3] leading-relaxed mb-6">
+                    {labels.aboutText}
+                  </p>
+                  <Link
+                    href={resolveHref(locale, "/nosotros")}
+                    onClick={closeMegaMenu}
+                    className="inline-block text-sm text-white hover:text-[#a3a3a3] border-b border-white/20 pb-0.5 transition-colors"
+                  >
+                    <span className="text-[#525252] mr-1.5">&#8627;</span>
+                    {labels.learnMore}
+                  </Link>
+
+                  <div className="mt-10">
+                    <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-4">
+                      {labels.contact}
                     </h3>
                     <a
                       href={siteConfig.links.contact}
@@ -245,7 +333,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                         trackEvent("contact_click")
                         closeMegaMenu()
                       }}
-                      className="text-lg font-medium text-[#0a0a0a] hover:text-[#525252] transition-colors"
+                      className="text-base font-medium text-white hover:text-[#a3a3a3] transition-colors"
                     >
                       {siteConfig.contactEmail}
                     </a>
@@ -255,9 +343,9 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             </div>
 
             {/* Bottom bar */}
-            <div className="border-t border-[#e5e5e5]">
+            <div className="border-t border-white/10 mt-12">
               <div className="container px-6 mx-auto max-w-7xl py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <span className="text-sm text-[#a3a3a3]">
+                <span className="text-sm text-[#525252]">
                   &copy; {new Date().getFullYear()} {siteConfig.legalName}
                 </span>
                 <div className="flex items-center gap-4 text-sm">
@@ -265,16 +353,16 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                     href={siteConfig.links.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#525252] hover:text-[#0a0a0a] transition-colors"
+                    className="text-[#525252] hover:text-white transition-colors"
                   >
                     Twitter / X
                   </a>
-                  <span className="text-[#e5e5e5]">&middot;</span>
+                  <span className="text-white/10">&middot;</span>
                   <a
                     href={siteConfig.links.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#525252] hover:text-[#0a0a0a] transition-colors"
+                    className="text-[#525252] hover:text-white transition-colors"
                   >
                     LinkedIn
                   </a>
