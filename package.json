@@ -14,8 +14,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
-    "@studio-freight/lenis": "^1.0.42",
-    "@tabler/icons-react": "^3.41.1",
+"@tabler/icons-react": "^3.41.1",
     "ai": "^6.0.146",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
@@ -27,6 +26,12 @@
     "three": "^0.170.0",
     "zod": "^4.3.6"
   },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",

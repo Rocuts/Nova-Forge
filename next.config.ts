@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  experimental: {
+    optimizePackageImports: ["@tabler/icons-react", "motion/react", "lucide-react"],
+  },
   async rewrites() {
     return [
       // English slug aliases → internal [locale] routes
