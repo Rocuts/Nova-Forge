@@ -135,7 +135,7 @@ const es = {
         href: "/automatizacion-gobierno",
       },
       {
-        title: "Enriquecimiento de Datos e Inteligencia",
+        title: "Enriquecimiento de Datos",
         benefit:
           "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado desde 75+ fuentes.",
         bullets: [

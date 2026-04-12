@@ -135,7 +135,7 @@ const en = {
         href: "/automatizacion-gobierno",
       },
       {
-        title: "Data Enrichment & Intelligence",
+        title: "Data Enrichment",
         benefit:
           "Transform fragmented records into actionable intelligence with automated enrichment from 75+ sources.",
         bullets: [
