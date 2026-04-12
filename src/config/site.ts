@@ -1,5 +1,9 @@
 const contactEmail = "contacto@novaforge.io"
-const siteUrl = "https://novaforge.io"
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "https://novaforge.io"
 
 export const siteConfig = {
   name: "NovaForge",

@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       siteName: siteConfig.name,
       images: [
         {
-          url: siteConfig.images.social,
+          url: `${siteConfig.url}/opengraph-image`,
           width: 1200,
           height: 630,
           alt: `${siteConfig.name} — ${dict.meta.titleSuffix}`,
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       card: "summary_large_image",
       title: siteConfig.name,
       description: dict.meta.description,
-      images: [siteConfig.images.twitter],
+      images: [`${siteConfig.url}/twitter-image`],
     },
   }
 }
