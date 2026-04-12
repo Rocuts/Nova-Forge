@@ -1,15 +1,14 @@
 "use client"
-import { motion } from "motion/react"
+import { useState, useEffect, useCallback } from "react"
+import { motion, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
-import { CharReveal } from "@/components/ui/RevealText"
 import { trackEvent } from "@/lib/analytics"
-import HeroCanvas from "@/components/3d/HeroCanvas"
-import { Suspense } from "react"
 
 interface HeroContent {
   eyebrow: string
   titleLead: string
   titleHighlight: string
+  titleRotating?: readonly string[]
   description: string
   trustLine: string
   primaryAction: { label: string; href: string; analyticsEvent: string }
@@ -18,13 +17,24 @@ interface HeroContent {
 
 const stagger = (i: number) => ({ delay: 0.15 * i, duration: 0.6, ease: "easeOut" as const })
 
+const ROTATE_INTERVAL = 3000
+
 export function Hero({ content: heroContent }: { content: HeroContent }) {
+  const phrases = heroContent.titleRotating ?? [heroContent.titleHighlight]
+  const [index, setIndex] = useState(0)
+
+  const next = useCallback(() => {
+    setIndex((prev) => (prev + 1) % phrases.length)
+  }, [phrases.length])
+
+  useEffect(() => {
+    if (phrases.length <= 1) return
+    const timer = setInterval(next, ROTATE_INTERVAL)
+    return () => clearInterval(timer)
+  }, [next, phrases.length])
+
   return (
     <section className="relative min-h-screen flex items-center bg-white overflow-hidden">
-      <Suspense fallback={null}>
-        <HeroCanvas />
-      </Suspense>
-
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
         {/* Eyebrow */}
         <motion.div
@@ -46,12 +56,21 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           transition={stagger(1)}
           className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-10"
         >
-          <CharReveal as="span" className="block text-[#0a0a0a]" delay={0.15}>
-            {heroContent.titleLead}
-          </CharReveal>
-          <CharReveal as="span" className="block text-[#525252]" delay={0.3}>
-            {heroContent.titleHighlight}
-          </CharReveal>
+          <span className="block text-[#0a0a0a]">{heroContent.titleLead}</span>
+          <span className="block overflow-hidden relative" style={{ height: "1.15em" }}>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={phrases[index]}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: "0%", opacity: 1 }}
+                exit={{ y: "-100%", opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="block text-[#525252]"
+              >
+                {phrases[index]}
+              </motion.span>
+            </AnimatePresence>
+          </span>
         </motion.div>
 
         {/* Description */}
@@ -88,7 +107,6 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             {heroContent.secondaryAction.label}
           </Button>
         </motion.div>
-
       </div>
     </section>
   )

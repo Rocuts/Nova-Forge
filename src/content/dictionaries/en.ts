@@ -20,8 +20,14 @@ const en = {
   },
   hero: {
     eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
-    titleLead: "Unbreakable systems for",
+    titleLead: "We build",
     titleHighlight: "digital sovereignty.",
+    titleRotating: [
+      "digital sovereignty.",
+      "cyber defense.",
+      "autonomous operations.",
+      "critical systems.",
+    ],
     description:
       "We build sovereign AI infrastructure, agentic cybersecurity systems, and autonomous operations platforms for governments and organizations operating under the world's most demanding standards.",
     trustLine:

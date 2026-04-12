@@ -20,8 +20,14 @@ const es = {
   },
   hero: {
     eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
-    titleLead: "Sistemas blindados para",
-    titleHighlight: "la soberanía digital.",
+    titleLead: "Construimos",
+    titleHighlight: "soberanía digital.",
+    titleRotating: [
+      "soberanía digital.",
+      "defensa cibernética.",
+      "operaciones autónomas.",
+      "sistemas críticos.",
+    ],
     description:
       "Construimos infraestructura de IA soberana, sistemas de ciberseguridad agéntica y plataformas de operaciones autónomas para gobiernos y organizaciones que operan bajo los estándares más exigentes del mundo.",
     trustLine:
