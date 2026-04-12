@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test'
-import { heroContent, navItems } from '../src/content/landing'
+import es from '../src/content/dictionaries/es'
+
+const heroContent = es.hero
+const navItems = es.nav.items
 
 test('homepage loads and renders all sections', async ({ page }) => {
   await page.goto('/')
@@ -49,5 +52,5 @@ test('CTA buttons have real destinations', async ({ page }) => {
   }
 
   const servicesLink = page.getByRole('link', { name: heroContent.secondaryAction.label })
-  await expect(servicesLink).toHaveAttribute('href', '#servicios')
+  await expect(servicesLink).toHaveAttribute('href', heroContent.secondaryAction.href)
 })
