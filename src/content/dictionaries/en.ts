@@ -229,6 +229,7 @@ const en = {
   faq: {
     sectionId: "faq",
     title: "Frequently Asked Questions",
+    subtitle: "Everything you need to know to get started.",
     items: [
       {
         question: "What does sovereign AI mean and why is it relevant to my organization?",
@@ -269,11 +270,11 @@ const en = {
     sectionId: "technologies",
     title: "Our Technology Stack",
     categories: [
-      { name: "Artificial Intelligence", items: ["Claude", "GPT-4", "Gemini", "LLaMA", "PyTorch", "LangChain"] },
-      { name: "Cloud & Infrastructure", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Docker", "Terraform"] },
-      { name: "Development & Platforms", items: ["Next.js", "React", "TypeScript", "Node.js", "Python", "Go"] },
-      { name: "Cybersecurity", items: ["Zero Trust", "SIEM", "Threat Intelligence", "Penetration Testing", "SOC", "WAF"] },
-      { name: "Data & Analytics", items: ["PostgreSQL", "Redis", "Elasticsearch", "Apache Kafka", "Grafana", "dbt"] },
+      { name: "Artificial Intelligence", items: ["Claude Opus 4", "Gemini 2.5", "LLaMA 4", "DeepSeek R2", "PyTorch", "LangGraph"] },
+      { name: "Cloud & Infrastructure", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
+      { name: "Development & Platforms", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
+      { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "SOC Automation", "WAF"] },
+      { name: "Data & Analytics", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
     ],
   },
   metrics: {

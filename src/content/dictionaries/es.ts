@@ -229,6 +229,7 @@ const es = {
   faq: {
     sectionId: "faq",
     title: "Preguntas Frecuentes",
+    subtitle: "Todo lo que necesita saber para empezar.",
     items: [
       {
         question: "¿Qué significa IA soberana y por qué es relevante para mi organización?",
@@ -269,11 +270,11 @@ const es = {
     sectionId: "tecnologias",
     title: "Nuestro Stack Tecnológico",
     categories: [
-      { name: "Inteligencia Artificial", items: ["Claude", "GPT-4", "Gemini", "LLaMA", "PyTorch", "LangChain"] },
-      { name: "Nube e Infraestructura", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Docker", "Terraform"] },
-      { name: "Desarrollo y Plataformas", items: ["Next.js", "React", "TypeScript", "Node.js", "Python", "Go"] },
-      { name: "Ciberseguridad", items: ["Zero Trust", "SIEM", "Threat Intelligence", "Penetration Testing", "SOC", "WAF"] },
-      { name: "Datos y Analítica", items: ["PostgreSQL", "Redis", "Elasticsearch", "Apache Kafka", "Grafana", "dbt"] },
+      { name: "Inteligencia Artificial", items: ["Claude Opus 4", "Gemini 2.5", "LLaMA 4", "DeepSeek R2", "PyTorch", "LangGraph"] },
+      { name: "Nube e Infraestructura", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
+      { name: "Desarrollo y Plataformas", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
+      { name: "Ciberseguridad", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "SOC Automation", "WAF"] },
+      { name: "Datos y Analítica", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
     ],
   },
   metrics: {
