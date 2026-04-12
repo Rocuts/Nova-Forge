@@ -2,9 +2,10 @@ import { Hero } from "@/components/sections/Hero"
 import { Services } from "@/components/sections/Services"
 import { FlagshipAI } from "@/components/sections/FlagshipAI"
 import { Methodology } from "@/components/sections/Methodology"
-import { Team } from "@/components/sections/Team"
-import { FAQ } from "@/components/sections/FAQ"
+import { Metrics } from "@/components/sections/Metrics"
+import { Investors } from "@/components/sections/Investors"
 import { CTA } from "@/components/sections/CTA"
+import { TrustBar } from "@/components/sections/TrustBar"
 import { getDictionary } from "@/content/dictionaries"
 import { isValidLocale, buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
@@ -15,19 +16,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isValidLocale(locale)) notFound()
 
   const dict = await getDictionary(locale as Locale)
-
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: dict.faq.items.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  }
 
   const heroContent = {
     ...dict.hero,
@@ -51,13 +39,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <Hero content={heroContent} />
+      <TrustBar />
       <Services content={dict.services} />
       <FlagshipAI content={dict.flagshipAI} />
       <Methodology content={dict.methodology} />
-      <Team content={dict.team} />
-      <FAQ content={dict.faq} />
+      <Metrics content={dict.metrics} />
+      <Investors content={dict.investors} />
       <CTA content={ctaContent} />
     </>
   )

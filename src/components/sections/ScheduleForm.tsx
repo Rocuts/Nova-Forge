@@ -92,17 +92,17 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="glass-panel rounded-2xl border border-surface-border p-8 md:p-10"
+            className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-8 md:p-10"
           >
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               {/* Name */}
               <div>
                 <label
                   htmlFor="schedule-name"
-                  className="block text-sm font-medium text-slate-300 mb-2"
+                  className="block text-sm font-medium text-[#525252] mb-2"
                 >
                   {content.nameLabel}{" "}
-                  <span className="text-primary-cyan">*</span>
+                  <span className="text-[#0a0a0a]">*</span>
                 </label>
                 <input
                   ref={nameRef}
@@ -113,7 +113,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={content.namePlaceholder}
-                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all"
                 />
               </div>
 
@@ -121,10 +121,10 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
               <div>
                 <label
                   htmlFor="schedule-email"
-                  className="block text-sm font-medium text-slate-300 mb-2"
+                  className="block text-sm font-medium text-[#525252] mb-2"
                 >
                   {content.emailLabel}{" "}
-                  <span className="text-primary-cyan">*</span>
+                  <span className="text-[#0a0a0a]">*</span>
                 </label>
                 <input
                   id="schedule-email"
@@ -134,7 +134,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={content.emailPlaceholder}
-                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all"
                   aria-invalid={email.length > 0 && !isEmailValid}
                 />
               </div>
@@ -143,7 +143,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
               <div>
                 <label
                   htmlFor="schedule-company"
-                  className="block text-sm font-medium text-slate-300 mb-2"
+                  className="block text-sm font-medium text-[#525252] mb-2"
                 >
                   {content.companyLabel}
                 </label>
@@ -154,15 +154,15 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder={content.companyPlaceholder}
-                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm"
+                  className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all"
                 />
               </div>
 
               {/* Topic (chip-based single select) */}
               <fieldset>
-                <legend className="block text-sm font-medium text-slate-300 mb-3">
+                <legend className="block text-sm font-medium text-[#525252] mb-3">
                   {content.topicLabel}{" "}
-                  <span className="text-primary-cyan">*</span>
+                  <span className="text-[#0a0a0a]">*</span>
                 </legend>
                 <div className="flex flex-wrap gap-3" role="radiogroup">
                   {content.topics.map((t) => {
@@ -174,10 +174,10 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                         role="radio"
                         aria-checked={isSelected}
                         onClick={() => setTopic(t)}
-                        className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer ${
+                        className={`px-4 py-2.5 rounded-[6px] border text-sm font-medium transition-all duration-200 cursor-pointer ${
                           isSelected
-                            ? "border-primary-cyan/60 bg-primary-cyan/10 text-primary-cyan shadow-[0_0_12px_rgba(0,240,255,0.15)]"
-                            : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]"
+                            ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
+                            : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#0a0a0a]/30 hover:bg-[#f8f8f8]"
                         }`}
                       >
                         {t}
@@ -191,7 +191,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
               <div>
                 <label
                   htmlFor="schedule-message"
-                  className="block text-sm font-medium text-slate-300 mb-2"
+                  className="block text-sm font-medium text-[#525252] mb-2"
                 >
                   {content.messageLabel}
                 </label>
@@ -201,7 +201,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder={content.messagePlaceholder}
-                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm resize-none"
+                  className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
                 />
               </div>
 
@@ -225,7 +225,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="glass-panel rounded-2xl border border-surface-border p-10 md:p-14 text-center outline-none"
+            className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-10 md:p-14 text-center outline-none"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -236,12 +236,12 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                 damping: 20,
                 delay: 0.15,
               }}
-              className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary-cyan/15 flex items-center justify-center"
+              className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#f8f8f8] border border-[#e5e5e5] flex items-center justify-center"
             >
-              <CalendarCheck className="w-8 h-8 text-primary-cyan" />
+              <CalendarCheck className="w-8 h-8 text-[#0a0a0a]" />
             </motion.div>
 
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-3">
               {content.successTitle}
             </h2>
             <p className="text-text-secondary mb-8 max-w-md mx-auto">

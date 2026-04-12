@@ -1,31 +1,29 @@
 "use client"
-import { useRef, useEffect, useState } from "react"
-import { motion, useScroll, useTransform } from "motion/react"
+import { useEffect, useState } from "react"
+import { motion } from "motion/react"
 import type { ElementType } from "react"
 
-/* ── shared types ────────────────────────────────────────────────── */
+/* -- shared types --------------------------------------------------------- */
 interface RevealTextProps {
   children: string
   as?: "h1" | "h2" | "h3" | "h4" | "p" | "span"
   className?: string
   delay?: number
-  /** Animate font-weight from 300→700 as element scrolls into view (requires variable font) */
-  animateWeight?: boolean
 }
 
-/* ── word-level reveal (sections) ────────────────────────────────── */
+/* -- word-level reveal (sections) ----------------------------------------- */
 const wordContainerVariants = {
   hidden: {},
   visible: (delay: number) => ({
-    transition: { staggerChildren: 0.08, delayChildren: delay },
+    transition: { staggerChildren: 0.06, delayChildren: delay },
   }),
 }
 
 const wordVariants = {
-  hidden: { y: "110%" },
+  hidden: { y: "100%" },
   visible: {
     y: "0%",
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   },
 }
 
@@ -34,7 +32,6 @@ export function RevealText({
   as: Tag = "h2",
   className = "",
   delay = 0,
-  animateWeight = false,
 }: RevealTextProps) {
   const MotionTag = motion.create(Tag as ElementType) as React.ComponentType<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,23 +48,11 @@ export function RevealText({
     )
   }, [])
 
-  const weightRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: animateWeight ? weightRef : undefined,
-    offset: ["start end", "end 0.5"],
-  })
-  const fontWeight = useTransform(scrollYProgress, [0, 1], [300, 700])
-
   const words = children.split(" ")
 
   if (prefersReducedMotion) {
     return (
-      <MotionTag
-        ref={animateWeight ? weightRef : undefined}
-        className={className}
-        style={animateWeight ? { fontWeight } : undefined}
-        aria-label={children}
-      >
+      <MotionTag className={className} aria-label={children}>
         {children}
       </MotionTag>
     )
@@ -75,13 +60,11 @@ export function RevealText({
 
   return (
     <MotionTag
-      ref={animateWeight ? weightRef : undefined}
       className={className}
-      style={animateWeight ? { fontWeight } : undefined}
       variants={wordContainerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: true, margin: "-10px" }}
       custom={delay}
       aria-label={children}
     >
@@ -102,27 +85,23 @@ export function RevealText({
   )
 }
 
-/* ── character-level reveal (hero) ───────────────────────────────── */
+/* -- character-level reveal (hero) ---------------------------------------- */
 const charContainerVariants = {
   hidden: {},
   visible: (delay: number) => ({
-    transition: { staggerChildren: 0.015, delayChildren: delay },
+    transition: { staggerChildren: 0.02, delayChildren: delay },
   }),
 }
 
 const charVariants = {
   hidden: {
     y: "100%",
-    rotateX: 90,
     opacity: 0,
-    filter: "blur(4px)",
   },
   visible: {
     y: "0%",
-    rotateX: 0,
     opacity: 1,
-    filter: "blur(0px)",
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   },
 }
 
@@ -162,11 +141,10 @@ export function CharReveal({
   return (
     <MotionTag
       className={className}
-      style={{ perspective: 800 }}
       variants={charContainerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: true, margin: "-10px" }}
       custom={delay}
       aria-label={children}
     >
@@ -178,7 +156,6 @@ export function CharReveal({
               <span
                 key={`${char}-${ci}`}
                 className="inline-block overflow-hidden align-bottom"
-                style={{ perspective: 800 }}
               >
                 <motion.span
                   className="inline-block"

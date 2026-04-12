@@ -1,8 +1,8 @@
 const es = {
   meta: {
-    titleSuffix: "Software de Precisión Empresarial",
+    titleSuffix: "Ingeniería de Software, IA Soberana y Ciberseguridad",
     description:
-      "Fábrica de software: aplicaciones empresariales, SaaS, apps móviles, software de escritorio y agentes de IA para operaciones de negocio.",
+      "Ingeniería de software mission-critical, inteligencia artificial soberana, ciberseguridad agéntica y operaciones autónomas para enterprise y gobierno.",
     ogLocale: "es_ES",
   },
   nav: {
@@ -12,19 +12,20 @@ const es = {
       { name: "Estándar NovaForge", href: "#metodologia" },
       { name: "Equipo", href: "#equipo" },
       { name: "FAQ", href: "#faq" },
+      { name: "Inversores", href: "#inversores" },
     ],
     contact: "Contacto",
     schedule: "Agendar",
     menuLabel: "Menú de navegación",
   },
   hero: {
-    eyebrow: "Ingeniería de Sistemas Autónomos",
-    titleLead: "Escale su capacidad operativa",
-    titleHighlight: "mediante inteligencia y software.",
+    eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
+    titleLead: "Sistemas blindados para",
+    titleHighlight: "la soberanía digital.",
     description:
-      "Transformamos procesos manuales en flujos de trabajo autónomos. Desde plataformas SaaS hasta empleados digitales de IA, desarrollamos la infraestructura tecnológica de alto rendimiento que su organización necesita para liderar.",
+      "Construimos infraestructura de IA soberana, sistemas de ciberseguridad agéntica y plataformas de operaciones autónomas para gobiernos y organizaciones que operan bajo los estándares más exigentes del mundo.",
     trustLine:
-      "Ingeniería de grado empresarial diseñada para la era de la autonomía.",
+      "Ingeniería de precisión para operaciones críticas de estado y empresa.",
     primaryAction: {
       label: "Iniciar Consulta Técnica",
       analyticsEvent: "hero_cta_primary",
@@ -39,103 +40,103 @@ const es = {
     sectionId: "capacidades",
     title: "Capacidades de Ingeniería",
     description:
-      "Diseñamos, desarrollamos y operamos sistemas digitales completos. Sin soluciones genéricas, solo arquitectura de alto rendimiento adaptada a sus objetivos de negocio.",
+      "Diseñamos, desplegamos y operamos sistemas de software, inteligencia artificial y ciberseguridad para organizaciones donde la falla no es una opción.",
     items: [
       {
-        title: "Sistemas Empresariales a Medida",
+        title: "IA Soberana para Enterprise y Gobierno",
         benefit:
-          "Sistemas robustos diseñados para centralizar y optimizar operaciones complejas.",
+          "Infraestructura de inteligencia artificial que opera dentro de su perímetro, bajo su control total.",
         bullets: [
-          "Arquitectura Cloud Nativa",
-          "Gestión de Datos Críticos",
-          "Integración de Sistemas Legacy",
+          "Despliegue On-Premise o Cloud Soberana",
+          "Modelos de Lenguaje Privados (LLM)",
+          "Cumplimiento Regulatorio y Auditoría",
         ],
-        icon: "cpu",
+        icon: "sovereign",
       },
       {
-        title: "Plataformas SaaS Escalables",
+        title: "Ciberseguridad Agéntica con IA",
         benefit:
-          "Productos de software diseñados para el modelo de suscripción y escala global.",
+          "Agentes autónomos que auditan, detectan y responden a amenazas antes de que escalen.",
         bullets: [
-          "Arquitectura Multi-tenant",
-          "Facturación y Pagos Integrados",
-          "Paneles Analíticos en Tiempo Real",
+          "Auditorías de Superficie de Ataque",
+          "Detección de Amenazas en Tiempo Real",
+          "Respuesta Autónoma a Incidentes",
         ],
-        icon: "cloud",
+        icon: "shield",
       },
       {
-        title: "Aplicaciones Móviles de Alto Rendimiento",
+        title: "Personal Ejecutivo con IA",
         benefit:
-          "Experiencias nativas fluidas que extienden su ecosistema digital.",
+          "Equipo de operaciones autónomo que trabaja 24/7 en sus canales: WhatsApp, Slack, Teams, email.",
         bullets: [
-          "Desarrollo Nativo iOS/Android",
-          "Optimización de Rendimiento",
-          "UX de Grado Enterprise",
+          "Asistentes Ejecutivos Siempre Activos",
+          "Gestión de Agenda y Comunicaciones",
+          "Integración con Todos sus Canales",
         ],
-        icon: "smartphone",
+        icon: "assistant",
       },
       {
-        title: "Sistemas de Escritorio",
+        title: "Arquitectura de Sistemas Críticos",
         benefit:
-          "Aplicaciones potentes para macOS y Windows integradas en el entorno local.",
+          "Plataformas de software diseñadas para operar bajo los estándares más altos de disponibilidad.",
         bullets: [
-          "Rendimiento de Hardware Nativo",
-          "Sincronización Fuera de Línea",
-          "Automatización de Tareas Locales",
+          "Arquitectura de Alta Disponibilidad",
+          "Infraestructura Zero-Trust",
+          "Sistemas Distribuidos y Resilientes",
         ],
-        icon: "monitor",
+        icon: "systems",
       },
       {
-        title: "Ecosistemas Web Avanzados",
+        title: "Plataformas de Inteligencia Operativa",
         benefit:
-          "Presencia digital optimizada para conversiones y alto tráfico.",
+          "Centros de comando que unifican datos, métricas y decisiones en una sola interfaz.",
         bullets: [
-          "Optimización de Latencia",
-          "SEO Técnico Avanzado",
-          "Arquitectura Serverless",
+          "Dashboards de Mando en Tiempo Real",
+          "Integración de Fuentes de Datos",
+          "Análisis Predictivo y Alertas",
         ],
-        icon: "globe",
+        icon: "intelligence",
       },
       {
-        title: "Sistemas de Inteligencia Aplicada",
+        title: "Automatización de Procesos de Gobierno",
         benefit:
-          "Automatización inteligente que reduce drásticamente la carga operativa.",
+          "Digitalización de flujos gubernamentales y corporativos con trazabilidad completa.",
         bullets: [
-          "Lógica de Negocio mediante Agentes",
-          "Procesamiento de Lenguaje Natural",
-          "Análisis Predictivo de Datos",
+          "Workflows Regulatorios Automatizados",
+          "Trazabilidad y Cadena de Custodia Digital",
+          "Interoperabilidad entre Sistemas Públicos",
         ],
-        icon: "brain",
+        icon: "governance",
       },
     ],
   },
   flagshipAI: {
     sectionId: "sistemas-ia",
-    title: "Sistemas de IA de Grado Empresarial",
+    title: "Despliegue de IA Soberana",
     description:
-      "Desplegamos empleados digitales que ejecutan tareas, atienden clientes y operan bajo su lógica de negocio las 24 horas del día, con precisión quirúrgica.",
+      "Su organización necesita inteligencia artificial que opere bajo sus reglas, en su infraestructura, con sus datos. No dependencias externas, no riesgos de terceros.",
     items: [
       {
-        title: "Agentes de Voz para Operaciones",
+        title: "Agentes de Defensa Cibernética",
         description:
-          "Atención telefónica inteligente capaz de resolver trámites, agendar citas y escalar casos complejos a humanos en tiempo real.",
-        icon: "phone",
+          "IA que monitorea su superficie de ataque, identifica vulnerabilidades y ejecuta protocolos de respuesta sin intervención humana.",
+        icon: "cyber",
       },
       {
-        title: "Agentes de Chat Conversacional",
+        title: "Fuerza de Trabajo Digital",
         description:
-          "Resolución de consultas instantánea en Web, WhatsApp o Slack, extrayendo información directamente de su base de conocimiento interna.",
-        icon: "message",
+          "Asistentes ejecutivos con IA desplegados en todos sus canales de comunicación: gestión de agenda, triaje de información y coordinación operativa.",
+        icon: "workforce",
       },
       {
-        title: "Automatización de Procesos Autónomos",
+        title: "Infraestructura de IA On-Premise",
         description:
-          "Agentes que ejecutan flujos de trabajo completos: desde entradas de datos hasta generación de reportes e integración de APIs sin intervención humana.",
-        icon: "operations",
+          "Modelos de lenguaje, pipelines de datos y agentes autónomos operando dentro de su perímetro de seguridad, con soberanía total sobre los datos.",
+        icon: "infra",
       },
     ],
     caption:
-      "Ingeniería invisible para el usuario. Impacto medible para el negocio.",
+      "Control total. Soberanía completa. Impacto medible.",
   },
   methodology: {
     sectionId: "metodologia",
@@ -206,35 +207,34 @@ const es = {
     title: "Preguntas Frecuentes",
     items: [
       {
-        question: "¿Qué tipo de soluciones tecnológicas desarrollan?",
+        question: "¿Qué significa IA soberana y por qué es relevante para mi organización?",
         answer:
-          "Desarrollamos ecosistemas digitales completos: software empresarial a medida, SaaS multiplataforma, aplicaciones móviles nativas y sistemas integrados con inteligencia artificial autónoma.",
+          "IA soberana significa que los modelos de lenguaje, los datos de entrenamiento y los pipelines de inferencia operan dentro de su infraestructura — sin dependencias de APIs externas ni exposición de datos sensibles a terceros. Es esencial para gobierno, defensa, finanzas y cualquier organización con requisitos de cumplimiento regulatorio estricto.",
       },
       {
-        question: "¿Cuál es el retorno de inversión de la IA en mi negocio?",
+        question: "¿Cómo funciona la ciberseguridad agéntica con IA?",
         answer:
-          "Nuestros agentes reducen el costo operativo hasta en un 80% en tareas repetitivas de soporte y gestión, permitiendo que su equipo humano se enfoque en decisiones estratégicas de alto valor.",
+          "Desplegamos agentes autónomos que ejecutan auditorías continuas de su superficie de ataque, analizan patrones de tráfico, detectan anomalías y pueden ejecutar protocolos de respuesta a incidentes en tiempo real — reduciendo drásticamente el tiempo de detección y respuesta frente a amenazas.",
       },
       {
-        question:
-          "¿Tienen experiencia trabajando con industrias fuera de tecnología?",
+        question: "¿Qué es el servicio de Personal Ejecutivo con IA?",
         answer:
-          "Sí. Trabajamos con empresas de manufactura, logística, finanzas y servicios que buscan modernizar sus flujos de trabajo y automatizar su operación mediante ingeniería de precisión.",
+          "Es un equipo de operaciones autónomo potenciado por inteligencia artificial que trabaja 24/7 integrado en sus canales existentes — WhatsApp, Slack, Teams, email. Gestiona agendas, clasifica comunicaciones, coordina equipos y ejecuta tareas administrativas con la precisión de un asistente ejecutivo de alto nivel.",
       },
       {
-        question: "¿Cuánto tiempo toma entregar un sistema completo?",
+        question: "¿Trabajan con organizaciones gubernamentales y de defensa?",
         answer:
-          "Nuestra metodología permite desplegar MVPs funcionales y robustos en 8-12 semanas, escalando la solución mediante ciclos incrementales de alto impacto.",
+          "Sí. Nuestra infraestructura y metodología están diseñadas para cumplir con los estándares de seguridad y trazabilidad que exigen las instituciones gubernamentales, de defensa y del sector financiero regulado.",
       },
     ],
   },
   cta: {
-    lead: "Hablemos de lo que su negocio",
-    highlight: "necesita ejecutar.",
+    lead: "Hablemos de",
+    highlight: "su próximo sistema.",
     description:
-      "Sea un producto nuevo o la optimización total de su operación de IA: agenda una evaluación técnica y hablemos de resultados.",
+      "Agende una evaluación técnica. Sin compromiso, sin templates genéricos — una conversación sobre lo que su operación necesita.",
     action: {
-      label: "Iniciar Diagnóstico Técnico",
+      label: "Agendar Evaluación",
       analyticsEvent: "cta_final_click",
     },
   },
@@ -242,11 +242,11 @@ const es = {
     title: "Stack Tecnológico de Grado Enterprise",
   },
   metrics: {
-    title: "Impacto Cuantificable",
+    title: "Resultados Cuantificables",
     description:
-      "No diseñamos para premios de estética. Construimos para maximizar la eficiencia operativa, aumentar la conversión y desplegar sistemas de alta disponibilidad que escalan con su negocio.",
-    kpiLabel: "Métricas auditadas de proyectos Enterprise",
-    optimizationLabel: "Optimización Real",
+      "Construimos para maximizar eficiencia operativa y desplegar sistemas de alta disponibilidad que escalan con su negocio.",
+    kpiLabel: "Métricas auditadas",
+    optimizationLabel: "Optimización Continua",
     kpis: [
       { value: "40%", label: "Reducción promedio en Time-to-Market" },
       { value: "99.9%", label: "Uptime en arquitecturas cloud-native" },
@@ -255,7 +255,7 @@ const es = {
   },
   footer: {
     tagline:
-      "Fábrica de software. Aplicaciones empresariales, plataformas SaaS y agentes de IA.",
+      "Ingeniería de software enterprise. Plataformas, sistemas y automatización con IA.",
     navigation: "Navegación",
     legal: "Legal",
     privacy: "Privacidad",
@@ -490,6 +490,100 @@ const es = {
       "Evaluando proveedores",
       "Listo para iniciar",
     ],
+  },
+  products: {
+    sovereignAI: {
+      eyebrow: "IA SOBERANA",
+      title: "Su inteligencia artificial. Su infraestructura. Su control.",
+      subtitle: "Despliegue de IA enterprise que no depende de terceros.",
+      description: "Diseñamos y operamos infraestructura de inteligencia artificial que funciona dentro de su perímetro de seguridad. Modelos de lenguaje privados, pipelines de datos soberanos y agentes autónomos bajo su gobierno total.",
+      features: [
+        { title: "Modelos de Lenguaje Privados", description: "Entrenamiento, fine-tuning y despliegue de LLMs dentro de su infraestructura. Sin datos saliendo de su perímetro." },
+        { title: "Inferencia On-Premise", description: "Procesamiento de IA en sus propios servidores o cloud soberana con latencia mínima y control total." },
+        { title: "Cumplimiento Regulatorio", description: "Arquitectura diseñada para cumplir con marcos regulatorios nacionales e internacionales de protección de datos." },
+        { title: "Pipelines de Datos Soberanos", description: "Flujos de ingesta, transformación y análisis que operan exclusivamente dentro de su jurisdicción." },
+        { title: "Agentes Autónomos Internos", description: "Despliegue de agentes de IA que ejecutan tareas operativas sin exposición a servicios externos." },
+        { title: "Auditoría y Trazabilidad", description: "Registro completo de cada decisión, inferencia y acción ejecutada por los sistemas de IA." },
+      ],
+      capabilities: [
+        { title: "Infraestructura", items: ["Cloud Soberana / On-Premise", "GPU Clusters Dedicados", "Redes Aisladas (Air-Gap)"] },
+        { title: "Modelos", items: ["Fine-tuning de LLMs Open Source", "RAG sobre Documentación Interna", "Modelos Multimodales Privados"] },
+        { title: "Gobierno", items: ["Control de Acceso Granular", "Logs de Auditoría Inmutables", "Cumplimiento GDPR / SOC2 / ISO"] },
+      ],
+      cta: {
+        title: "Lleve la IA a su perímetro",
+        description: "Agende una evaluación técnica para diseñar su infraestructura de IA soberana.",
+        action: { label: "Agendar Evaluación", href: "/agendar" },
+      },
+    },
+    cybersecurity: {
+      eyebrow: "CIBERSEGURIDAD AGÉNTICA",
+      title: "Defensa autónoma. Respuesta en tiempo real.",
+      subtitle: "Agentes de IA que protegen su superficie de ataque 24/7.",
+      description: "Desplegamos sistemas de ciberseguridad potenciados por inteligencia artificial que auditan, detectan y responden a amenazas de forma autónoma — antes de que un humano pueda reaccionar.",
+      features: [
+        { title: "Auditoría de Superficie de Ataque", description: "Escaneo continuo y automatizado de todos los vectores de exposición de su organización." },
+        { title: "Detección de Amenazas con IA", description: "Análisis de patrones de tráfico, comportamiento anómalo y señales de compromiso en tiempo real." },
+        { title: "Respuesta Autónoma a Incidentes", description: "Ejecución de protocolos de contención y remediación sin intervención humana." },
+        { title: "Análisis de Vulnerabilidades", description: "Identificación proactiva de debilidades en aplicaciones, redes e infraestructura." },
+        { title: "Simulación de Ataques (Red Team)", description: "Ejercicios de penetración automatizados para validar la postura de seguridad." },
+        { title: "Centro de Operaciones de Seguridad", description: "SOC potenciado por IA con dashboards de mando, alertas y escalamiento inteligente." },
+      ],
+      capabilities: [
+        { title: "Detección", items: ["Análisis de Tráfico en Tiempo Real", "Correlación de Eventos (SIEM)", "Threat Intelligence Feeds"] },
+        { title: "Respuesta", items: ["Contención Automatizada", "Playbooks de Incidentes", "Forensics Digital"] },
+        { title: "Prevención", items: ["Penetration Testing Continuo", "Hardening de Infraestructura", "Zero-Trust Architecture"] },
+      ],
+      cta: {
+        title: "Blinde su operación",
+        description: "Solicite una auditoría de superficie de ataque para su organización.",
+        action: { label: "Solicitar Auditoría", href: "/agendar" },
+      },
+    },
+    digitalWorkforce: {
+      eyebrow: "FUERZA DE TRABAJO DIGITAL",
+      title: "Un equipo ejecutivo que nunca descansa.",
+      subtitle: "Asistentes de IA desplegados en todos sus canales.",
+      description: "Construimos y operamos equipos de trabajo digitales potenciados por IA que se integran en WhatsApp, Slack, Teams, email y cualquier canal de su organización. Gestión de agenda, triaje de comunicaciones, coordinación operativa — con la precisión de un asistente ejecutivo senior.",
+      features: [
+        { title: "Asistente Ejecutivo 24/7", description: "Gestión inteligente de agenda, emails y comunicaciones con priorización automática." },
+        { title: "Integración Multicanal", description: "Despliegue en WhatsApp, Slack, Microsoft Teams, email, SMS y canales internos." },
+        { title: "Triaje de Información", description: "Clasificación automática de mensajes, documentos y solicitudes por urgencia y contexto." },
+        { title: "Coordinación de Equipos", description: "Seguimiento de tareas, recordatorios y sincronización entre departamentos." },
+        { title: "Base de Conocimiento Interna", description: "Respuestas instantáneas desde la documentación y políticas de su organización." },
+        { title: "Reportes Ejecutivos", description: "Generación automática de resúmenes, métricas y reportes de gestión." },
+      ],
+      capabilities: [
+        { title: "Canales", items: ["WhatsApp Business", "Slack & Microsoft Teams", "Email, SMS & Voz"] },
+        { title: "Capacidades", items: ["Gestión de Agenda Inteligente", "Procesamiento de Documentos", "Workflows Automatizados"] },
+        { title: "Gobierno", items: ["Políticas de Acceso por Rol", "Auditoría de Conversaciones", "Datos en su Infraestructura"] },
+      ],
+      cta: {
+        title: "Active su equipo digital",
+        description: "Agende una demostración de cómo la IA puede operar sus comunicaciones.",
+        action: { label: "Agendar Demostración", href: "/agendar" },
+      },
+    },
+  },
+  investors: {
+    sectionId: "inversores",
+    eyebrow: "RESPALDO INSTITUCIONAL",
+    title: "Construido para escalar.",
+    description: "Infraestructura de ingeniería respaldada por capital estratégico y una visión de largo plazo en IA soberana y ciberseguridad enterprise.",
+    stats: [
+      { value: "$2M+", label: "En contratos enterprise activos" },
+      { value: "99.9%", label: "Uptime en sistemas desplegados" },
+      { value: "4", label: "Industrias reguladas atendidas" },
+    ],
+    quote: {
+      text: "La soberanía digital no es una opción — es una necesidad estratégica para toda organización que opera con datos sensibles.",
+      author: "Johan Rocuts",
+      role: "CEO, NovaForge",
+    },
+    cta: {
+      label: "Contactar para inversión",
+      href: "mailto:contacto@novaforge.io",
+    },
   },
   schedule: {
     badge: "Agendar Reunión",

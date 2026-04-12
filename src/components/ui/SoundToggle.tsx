@@ -9,7 +9,7 @@ export function SoundToggle() {
     <button
       onClick={toggleMute}
       aria-label={muted ? "Activar sonido" : "Silenciar sonido"}
-      className="fixed bottom-6 left-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-base/80 backdrop-blur-sm text-text-secondary hover:text-text-primary hover:border-primary-cyan/40 transition-all duration-300 cursor-pointer"
+      className="fixed bottom-6 left-6 z-50 flex h-10 w-10 items-center justify-center rounded-[6px] border border-[#e5e5e5] bg-white text-[#525252] hover:text-[#0a0a0a] hover:border-[#a3a3a3] transition-all duration-300 cursor-pointer"
     >
       {muted ? (
         <svg

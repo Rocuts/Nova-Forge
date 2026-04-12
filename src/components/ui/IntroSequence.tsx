@@ -88,7 +88,7 @@ export function IntroSequence() {
             </div>
             {/* Progress line */}
             <motion.div
-              className="h-[2px] bg-primary-cyan mt-4 mx-auto"
+              className="h-[2px] bg-[#0a0a0a] mt-4 mx-auto"
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1.2, ease: "easeInOut" }}

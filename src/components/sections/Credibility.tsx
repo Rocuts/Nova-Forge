@@ -6,7 +6,7 @@ export function Credibility({ content }: { content: CredibilityContent }) {
   const stack = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "PostgreSQL", "AWS", "Three.js"]
 
   return (
-    <section className="py-24 bg-surface-base/60 backdrop-blur-sm border-t border-surface-border/50 relative z-10">
+    <section className="py-24 bg-white border-t border-[#e5e5e5] relative z-10">
       <div className="container px-4 mx-auto max-w-7xl text-center">
         <h2 className="font-heading text-2xl md:text-3xl font-medium mb-12 text-text-secondary">
           {content.title}
@@ -16,7 +16,7 @@ export function Credibility({ content }: { content: CredibilityContent }) {
           {stack.map((tech, i) => (
             <div
               key={i}
-              className="px-6 py-3 rounded-full border border-surface-border bg-surface-elevated/30 text-text-primary/70 font-medium tracking-wide hover:text-white hover:border-primary-cyan/50 hover:bg-primary-cyan/5 transition-all cursor-default"
+              className="px-6 py-3 rounded-[6px] border border-[#e5e5e5] bg-[#f8f8f8] text-[#525252] font-medium tracking-wide hover:text-[#0a0a0a] hover:border-[#0a0a0a]/30 transition-all cursor-default"
             >
               {tech}
             </div>

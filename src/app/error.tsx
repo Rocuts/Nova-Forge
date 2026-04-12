@@ -14,17 +14,17 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4">
+    <div className="min-h-[60vh] flex items-center justify-center px-4 bg-white">
       <div className="text-center max-w-md">
-        <h2 className="font-heading text-2xl font-bold mb-4">
+        <h2 className="font-heading text-2xl font-bold text-[#0a0a0a] mb-4">
           Algo salió mal
         </h2>
-        <p className="text-text-secondary mb-8 text-sm leading-relaxed">
+        <p className="text-[#525252] mb-8 text-sm leading-relaxed">
           Ocurrió un error inesperado. Por favor, intenta de nuevo.
         </p>
         <button
           onClick={reset}
-          className="px-6 py-2.5 bg-white text-black text-sm font-medium rounded-full hover:bg-white/90 transition-colors"
+          className="px-6 py-2.5 bg-[#0a0a0a] text-white text-sm font-medium rounded-full hover:bg-[#171717] transition-colors"
         >
           Reintentar
         </button>

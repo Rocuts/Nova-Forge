@@ -1,11 +1,7 @@
 "use client"
-import { useRef } from "react"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
+import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
-import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
-
-import { useIsMobile } from "@/lib/useIsMobile"
 
 interface MethodologyStep {
   num: string
@@ -20,83 +16,62 @@ interface MethodologyContent {
   steps: readonly MethodologyStep[]
 }
 
-function MethodStep({ step, index }: { step: MethodologyStep; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "center center"],
-  })
-
-  // Each step slides in from alternating sides with different timing
-  const direction = index % 2 === 0 ? -1 : 1
-  const x = useSpring(
-    useTransform(scrollYProgress, [0, 1], [80 * direction, 0]),
-    { stiffness: isMobile ? 40 : 60, damping: 20 }
-  )
-  const opacity = useTransform(scrollYProgress, [0, 0.4, 1], [0, 0.3, 1])
-  const scale = useTransform(scrollYProgress, [0, 1], [0.92, 1])
-
-  // The step number has its own parallax — floats slower
-  const numY = useSpring(
-    useTransform(scrollYProgress, [0, 1], [30, -10]),
-    { stiffness: isMobile ? 30 : 50, damping: 15 }
-  )
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ x, opacity, scale }}
-      className="relative flex flex-col md:flex-row md:items-center gap-6 p-8 rounded-[var(--radius-lg)] border border-surface-border bg-surface-elevated/20 hover:bg-surface-elevated/40 transition-colors duration-500 will-change-transform"
-    >
-      {/* Animated step number */}
-      <motion.div
-        style={{ y: numY }}
-        className="gradient-accent gradient-text opacity-80 font-heading text-6xl font-black w-24 shrink-0"
-      >
-        {step.num}
-      </motion.div>
-
-      <div className="flex-1">
-        <h3 className="text-2xl font-bold mb-3 tracking-tight">{step.title}</h3>
-        <p className="text-slate-400 text-lg leading-relaxed">{step.desc}</p>
-      </div>
-
-      {/* Subtle Cyan accent on hover */}
-      <div className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-r from-primary-cyan/10 via-transparent to-transparent" />
-    </motion.div>
-  )
-}
-
 export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
-  const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
-  const skewY = useScrollVelocitySkew()
+  const { ref: entranceRef, opacity, y } = useSectionEntrance()
 
   return (
     <motion.section
       ref={entranceRef}
-      style={{ opacity, y, scale, skewY }}
-      className="py-24 bg-surface-base/60 backdrop-blur-sm border-t border-surface-border/50 relative z-10"
+      style={{ opacity, y }}
+      className="py-32 bg-white border-t border-[#e5e5e5] relative z-10"
       id={methodologySection.sectionId}
     >
-      <div className="container px-4 mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 max-w-3xl">
-          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
+          <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
             {methodologySection.title}
           </RevealText>
-          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
+          <p className="text-[#525252] text-lg md:text-xl leading-relaxed">
             {methodologySection.description}
           </p>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {methodologySection.steps.map((step, i) => (
-            <MethodStep
-              key={step.num}
-              step={step}
-              index={i}
-            />
-          ))}
+        <div className="relative">
+          {/* Horizontal connector line */}
+          <div className="hidden md:block absolute top-0 left-0 right-0 h-[1px] bg-[#e5e5e5]" />
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.15 },
+              },
+            }}
+          >
+            {methodologySection.steps.map((step) => (
+              <motion.div
+                key={step.num}
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+                }}
+                className="pt-6 md:pt-0"
+              >
+                {/* Node dot on the line */}
+                <div className="hidden md:block w-2 h-2 rounded-full bg-[#0a0a0a] -mt-1 mb-8" />
+                <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mb-3">
+                  Fase {step.num}
+                </p>
+                <h3 className="text-lg font-semibold text-[#0a0a0a] mb-3 tracking-tight">{step.title}</h3>
+                <p className="text-sm text-[#525252] leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </motion.section>

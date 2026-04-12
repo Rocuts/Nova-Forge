@@ -7,7 +7,7 @@ import { useScroll, useTransform, useSpring } from "motion/react"
  * Scroll-linked parallax: element moves by `distance` px over its viewport traversal.
  * Positive distance = moves down relative to scroll; negative = moves up.
  */
-export function useParallax(distance: number = 80) {
+export function useParallax(distance: number = 30) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -23,7 +23,7 @@ export function useParallax(distance: number = 80) {
 /**
  * Scroll-linked scale: element scales from `from` to `to` as it enters viewport.
  */
-export function useScrollScale(from: number = 0.92, to: number = 1) {
+export function useScrollScale(from: number = 0.97, to: number = 1) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -52,7 +52,7 @@ export function useScrollOpacity(start: number = 0, end: number = 1) {
 }
 
 /**
- * Combined parallax + scale for dramatic section entrances.
+ * Combined parallax + scale for subtle section entrances.
  */
 export function useSectionEntrance() {
   const ref = useRef<HTMLDivElement>(null)
@@ -61,9 +61,9 @@ export function useSectionEntrance() {
     offset: ["start end", "start 0.3"],
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], [60, 0])
+  const y = useTransform(scrollYProgress, [0, 1], [30, 0])
   const opacity = useTransform(scrollYProgress, [0, 0.6, 1], [0, 0.8, 1])
-  const scale = useTransform(scrollYProgress, [0, 1], [0.96, 1])
+  const scale = useTransform(scrollYProgress, [0, 1], [0.98, 1])
 
   const smoothY = useSpring(y, { stiffness: 80, damping: 25 })
   const smoothScale = useSpring(scale, { stiffness: 80, damping: 25 })

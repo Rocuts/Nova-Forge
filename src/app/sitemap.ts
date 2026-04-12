@@ -10,6 +10,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/diagnostico", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/privacidad", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/terminos", priority: 0.4, changeFrequency: "yearly" as const },
+    { path: "/soberania-ia", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/ciberseguridad", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/fuerza-digital", priority: 0.8, changeFrequency: "monthly" as const },
   ]
 
   const enPages = [
@@ -18,6 +21,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/en/diagnostics", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/en/privacy", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/en/terms", priority: 0.4, changeFrequency: "yearly" as const },
+    { path: "/en/sovereign-ai", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/cybersecurity", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/digital-workforce", priority: 0.8, changeFrequency: "monthly" as const },
   ]
 
   return [...esPages, ...enPages].map((page) => ({

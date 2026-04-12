@@ -16,10 +16,10 @@ export function LegalPage({
   children,
 }: LegalPageProps) {
   return (
-    <section className="py-32 bg-surface-base/60 backdrop-blur-sm relative z-10">
+    <section className="py-32 bg-white relative z-10">
       <div className="container px-4 mx-auto max-w-4xl">
         <div className="max-w-3xl mb-16">
-          <p className="text-sm uppercase tracking-[0.2em] text-primary-cyan mb-4">
+          <p className="text-sm uppercase tracking-[0.2em] text-[#0a0a0a] bg-[#f8f8f8] inline-block px-3 py-1 rounded-[6px] mb-4">
             {labels.badge}
           </p>
           <h1 className="font-heading text-4xl md:text-6xl font-black tracking-tight mb-6">

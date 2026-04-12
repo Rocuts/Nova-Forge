@@ -38,44 +38,44 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-cyan/30 bg-primary-cyan/5 mb-6">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan animate-pulse" />
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-cyan/80">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[6px] border border-[#e5e5e5] bg-[#f8f8f8] mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0a0a0a]" />
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">
             {content.badge}
           </span>
         </div>
 
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">
           {title}
         </h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="glass-panel rounded-[var(--radius-lg)] p-8 md:p-10"
+        className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-8 md:p-10"
       >
-        <div className="prose prose-invert prose-sm md:prose-base max-w-none
-          prose-headings:font-heading prose-headings:text-white prose-headings:tracking-tight
+        <div className="prose prose-sm md:prose-base max-w-none
+          prose-headings:font-heading prose-headings:text-[#0a0a0a] prose-headings:tracking-tight
           prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-8 prose-h2:mb-4
           prose-h3:text-lg prose-h3:md:text-xl prose-h3:mt-6 prose-h3:mb-3
-          prose-p:text-slate-300 prose-p:leading-relaxed
-          prose-li:text-slate-300
-          prose-strong:text-primary-cyan prose-strong:font-semibold
+          prose-p:text-[#525252] prose-p:leading-relaxed
+          prose-li:text-[#525252]
+          prose-strong:text-[#0a0a0a] prose-strong:font-semibold
           prose-ul:space-y-1
         ">
           {reportContent ? (
             <div dangerouslySetInnerHTML={{ __html: formatMarkdown(reportContent) }} />
           ) : (
-            <div className="flex items-center gap-3 text-slate-400">
-              <div className="w-2 h-2 rounded-full bg-primary-cyan animate-pulse" />
+            <div className="flex items-center gap-3 text-[#a3a3a3]">
+              <div className="w-2 h-2 rounded-full bg-[#0a0a0a] animate-pulse" />
               {content.loading}
             </div>
           )}
           {isStreaming && (
-            <span className="inline-block w-2 h-5 bg-primary-cyan/60 animate-pulse ml-0.5" />
+            <span className="inline-block w-2 h-5 bg-[#a3a3a3] animate-pulse ml-0.5" />
           )}
         </div>
       </motion.div>

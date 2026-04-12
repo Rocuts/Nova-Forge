@@ -1,16 +1,5 @@
-/* Z-INDEX MAP:
- * z-0:     GlobalParticles (fixed background)
- * z-10:    Main content (sections)
- * z-40:    Mobile menu overlay (when open)
- * z-50:    Header (fixed top)
- * z-50:    SoundToggle (fixed bottom-left)
- * z-100:   Noise overlay (body::after, pointer-events: none)
- * z-[9998]: IntroSequence overlay (removed from DOM after animation)
- * z-9999:  CustomCursor (pointer-events: none)
- */
-
 import type { Metadata } from "next"
-import { Inter, Outfit } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import "../globals.css"
 import { siteConfig } from "@/config/site"
 import { isValidLocale, locales, localePrefix } from "@/lib/i18n"
@@ -18,15 +7,11 @@ import type { Locale } from "@/lib/i18n"
 import { getDictionary } from "@/content/dictionaries"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
-import { GlobalParticles } from "@/components/canvas/GlobalParticles"
 import { SmoothScroll } from "@/components/providers/SmoothScroll"
-import { CustomCursorWrapper } from "@/components/ui/CustomCursorWrapper"
-import { IntroSequenceWrapper } from "@/components/ui/IntroSequenceWrapper"
-import { SoundToggleWrapper } from "@/components/ui/SoundToggleWrapper"
 import { notFound } from "next/navigation"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" })
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -106,18 +91,14 @@ export default async function LocaleLayout({ params, children }: Props) {
   }
 
   return (
-    <html lang={locale} className={`${inter.variable} ${outfit.variable} antialiased`} suppressHydrationWarning>
-      <body className="bg-surface-base text-text-primary min-h-screen flex flex-col selection:bg-primary-cyan selection:text-black">
+    <html lang={locale} className={`${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+      <body className="bg-white text-[#0a0a0a] min-h-screen flex flex-col" suppressHydrationWarning>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         <SmoothScroll>
-          <GlobalParticles />
           <Header nav={dict.nav} locale={locale} />
-          <main className="flex-1 flex flex-col relative z-10">{children}</main>
+          <main className="flex-1 flex flex-col relative">{children}</main>
           <Footer content={dict.footer} nav={dict.nav} locale={locale} />
         </SmoothScroll>
-        <IntroSequenceWrapper />
-        <CustomCursorWrapper />
-        <SoundToggleWrapper />
       </body>
     </html>
   )

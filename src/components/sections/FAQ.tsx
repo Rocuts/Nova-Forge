@@ -3,22 +3,21 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
-import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="glass-panel rounded-[var(--radius-lg)] overflow-hidden">
+    <div className="border-b border-[#e5e5e5]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-8 text-left cursor-pointer"
+        className="w-full flex items-center justify-between py-8 text-left cursor-pointer"
       >
-        <h3 className="text-xl font-bold text-white tracking-tight pr-4">{question}</h3>
+        <h3 className="text-lg font-semibold text-[#0a0a0a] pr-4">{question}</h3>
         <motion.span
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="text-primary-cyan text-2xl font-light shrink-0"
+          className="text-[#a3a3a3] text-2xl font-light shrink-0"
         >
           +
         </motion.span>
@@ -32,7 +31,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="px-8 pb-8 text-slate-400 leading-relaxed text-base">{answer}</p>
+            <p className="pb-8 text-[#525252] text-base leading-relaxed">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -47,22 +46,21 @@ interface FAQContent {
 }
 
 export function FAQ({ content: faqSection }: { content: FAQContent }) {
-  const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
-  const skewY = useScrollVelocitySkew()
+  const { ref: entranceRef, opacity, y } = useSectionEntrance()
 
   return (
     <motion.section
       ref={entranceRef}
-      style={{ opacity, y, scale, skewY }}
-      className="py-24 bg-surface-base/60 backdrop-blur-sm relative z-10"
+      style={{ opacity, y }}
+      className="py-32 bg-white relative z-10"
       id={faqSection.sectionId}
     >
-      <div className="container px-4 mx-auto max-w-4xl">
-        <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-16 text-center tracking-tight" animateWeight>
+      <div className="mx-auto max-w-4xl px-6">
+        <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-16 text-center tracking-tight text-[#0a0a0a]">
           {faqSection.title}
         </RevealText>
 
-        <div className="space-y-4">
+        <div>
           {faqSection.items.map((faq) => (
             <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
           ))}

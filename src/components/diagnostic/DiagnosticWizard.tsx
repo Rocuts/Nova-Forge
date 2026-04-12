@@ -168,31 +168,31 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
             <div key={step.id} className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                 i < currentStep
-                  ? "bg-primary-cyan/20 text-primary-cyan border border-primary-cyan/40"
+                  ? "bg-[#f8f8f8] text-[#0a0a0a] border border-[#0a0a0a]"
                   : i === currentStep
-                    ? "bg-primary-cyan text-black"
-                    : "bg-white/5 text-slate-500 border border-white/10"
+                    ? "bg-[#0a0a0a] text-white"
+                    : "bg-[#f8f8f8] text-[#a3a3a3] border border-[#e5e5e5]"
               }`}>
                 {i < currentStep ? "\u2713" : i + 1}
               </div>
               <span className={`text-xs font-medium hidden sm:block transition-colors ${
-                i <= currentStep ? "text-slate-200" : "text-slate-500"
+                i <= currentStep ? "text-[#0a0a0a]" : "text-[#a3a3a3]"
               }`}>
                 {step.label}
               </span>
             </div>
           ))}
         </div>
-        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+        <div className="h-1 bg-[#e5e5e5] rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-primary-cyan to-accent-blue rounded-full"
+            className="h-full bg-[#0a0a0a] rounded-full"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           />
         </div>
       </div>
 
-      <div className="glass-panel rounded-[var(--radius-lg)] p-8 md:p-10 min-h-[400px]">
+      <div className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-8 md:p-10 min-h-[400px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentStep}

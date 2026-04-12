@@ -88,10 +88,10 @@ function SelectChip({
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer ${
+      className={`px-4 py-2.5 rounded-[6px] border text-sm font-medium transition-all duration-200 cursor-pointer ${
         selected
-          ? "border-primary-cyan/60 bg-primary-cyan/10 text-primary-cyan shadow-[0_0_12px_rgba(0,240,255,0.15)]"
-          : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]"
+          ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
+          : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#a3a3a3] hover:bg-[#f8f8f8]"
       }`}
     >
       {label}
@@ -138,8 +138,8 @@ function InputField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">
-        {label} {required && <span className="text-primary-cyan">*</span>}
+      <label className="block text-sm font-medium text-[#525252] mb-2">
+        {label} {required && <span className="text-[#0a0a0a]">*</span>}
       </label>
       <input
         type={type}
@@ -147,7 +147,7 @@ function InputField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm"
+        className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all"
       />
     </div>
   )
@@ -157,20 +157,20 @@ export function StepCompany({ answers, update, content, options }: StepCompanyPr
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">{content.title}</h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <InputField label={content.companyLabel} value={answers.companyName} onChange={(v) => update({ companyName: v })} placeholder={content.companyPlaceholder} />
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.industryLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.industryLabel}</label>
         <SingleSelect options={options.industries} value={answers.industry} onChange={(v) => update({ industry: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.teamSizeLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.teamSizeLabel}</label>
         <SingleSelect options={options.teamSizes} value={answers.teamSize} onChange={(v) => update({ teamSize: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.roleLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.roleLabel}</label>
         <SingleSelect options={options.roles} value={answers.role} onChange={(v) => update({ role: v })} />
       </div>
     </div>
@@ -181,19 +181,19 @@ export function StepTechStack({ answers, update, content, options }: StepTechSta
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">{content.title}</h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.stackLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.stackLabel}</label>
         <MultiSelectChips options={options.techStack} selected={answers.currentStack} onChange={(v) => update({ currentStack: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.cloudLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.cloudLabel}</label>
         <SingleSelect options={options.cloudProviders} value={answers.cloudProvider} onChange={(v) => update({ cloudProvider: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.aiLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.aiLabel}</label>
         <SingleSelect options={options.aiMaturity} value={answers.aiMaturity} onChange={(v) => update({ aiMaturity: v })} />
       </div>
     </div>
@@ -204,18 +204,18 @@ export function StepPainPoints({ answers, update, content, options }: StepPainPo
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">{content.title}</h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <MultiSelectChips options={options.painPoints} selected={answers.painPoints} onChange={(v) => update({ painPoints: v })} />
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">{content.detailLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-2">{content.detailLabel}</label>
         <textarea
           value={answers.painDetails}
           onChange={(e) => update({ painDetails: e.target.value })}
           placeholder={content.detailPlaceholder}
           rows={3}
-          className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm resize-none"
+          className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
         />
       </div>
     </div>
@@ -226,20 +226,20 @@ export function StepGoals({ answers, update, content, options }: StepGoalsProps)
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">{content.title}</h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <MultiSelectChips options={options.goals} selected={answers.goals} onChange={(v) => update({ goals: v })} />
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.budgetLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.budgetLabel}</label>
         <SingleSelect options={options.budgetRanges} value={answers.budgetRange} onChange={(v) => update({ budgetRange: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.timelineLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.timelineLabel}</label>
         <SingleSelect options={options.timelines} value={answers.timeline} onChange={(v) => update({ timeline: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">{content.decisionLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-3">{content.decisionLabel}</label>
         <SingleSelect options={options.decisionStages} value={answers.decisionStage} onChange={(v) => update({ decisionStage: v })} />
       </div>
     </div>
@@ -250,20 +250,20 @@ export function StepContact({ answers, update, content }: StepContactProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-2">{content.title}</h2>
-        <p className="text-slate-400">{content.subtitle}</p>
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
+        <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <InputField label={content.nameLabel} value={answers.contactName} onChange={(v) => update({ contactName: v })} placeholder={content.namePlaceholder} required />
       <InputField label={content.emailLabel} value={answers.contactEmail} onChange={(v) => update({ contactEmail: v })} placeholder={content.emailPlaceholder} type="email" required />
       <InputField label={content.websiteLabel} value={answers.contactWebsite} onChange={(v) => update({ contactWebsite: v })} placeholder={content.websitePlaceholder} />
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">{content.notesLabel}</label>
+        <label className="block text-sm font-medium text-[#525252] mb-2">{content.notesLabel}</label>
         <textarea
           value={answers.additionalNotes}
           onChange={(e) => update({ additionalNotes: e.target.value })}
           placeholder={content.notesPlaceholder}
           rows={3}
-          className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus:outline-none focus:border-primary-cyan/50 focus:ring-1 focus:ring-primary-cyan/30 transition-all backdrop-blur-sm resize-none"
+          className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
         />
       </div>
     </div>

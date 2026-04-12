@@ -16,8 +16,8 @@ export function useScrollVelocitySkew(): MotionValue<number> {
   const { scrollY } = useScroll()
   const scrollVelocity = useVelocity(scrollY)
 
-  // Map velocity to skew degrees, clamped
-  const skewY = useTransform(scrollVelocity, [-3000, 0, 3000], [-2, 0, 2])
+  // Map velocity to skew degrees, clamped — nearly imperceptible but adds life
+  const skewY = useTransform(scrollVelocity, [-3000, 0, 3000], [-0.5, 0, 0.5])
 
   // Spring for smooth return
   const smoothSkew = useSpring(skewY, { stiffness: 100, damping: 30 })

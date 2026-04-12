@@ -1,8 +1,8 @@
 const en = {
   meta: {
-    titleSuffix: "Enterprise Precision Software",
+    titleSuffix: "Software Engineering, Sovereign AI & Cybersecurity",
     description:
-      "Software factory: enterprise applications, SaaS, mobile apps, desktop software, and AI agents for business operations.",
+      "Mission-critical software engineering, sovereign artificial intelligence, agentic cybersecurity, and autonomous operations for enterprise and government.",
     ogLocale: "en_US",
   },
   nav: {
@@ -12,19 +12,20 @@ const en = {
       { name: "NovaForge Standard", href: "#metodologia" },
       { name: "Team", href: "#equipo" },
       { name: "FAQ", href: "#faq" },
+      { name: "Investors", href: "#investors" },
     ],
     contact: "Contact",
     schedule: "Schedule",
     menuLabel: "Navigation menu",
   },
   hero: {
-    eyebrow: "Autonomous Systems Engineering",
-    titleLead: "Scale your operational capacity",
-    titleHighlight: "through intelligence and software.",
+    eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
+    titleLead: "Unbreakable systems for",
+    titleHighlight: "digital sovereignty.",
     description:
-      "We transform manual processes into autonomous workflows. From SaaS platforms to AI digital employees, we build the high-performance technology infrastructure your organization needs to lead.",
+      "We build sovereign AI infrastructure, agentic cybersecurity systems, and autonomous operations platforms for governments and organizations operating under the world's most demanding standards.",
     trustLine:
-      "Enterprise-grade engineering designed for the age of autonomy.",
+      "Precision engineering for critical state and enterprise operations.",
     primaryAction: {
       label: "Start Technical Consultation",
       analyticsEvent: "hero_cta_primary",
@@ -39,103 +40,103 @@ const en = {
     sectionId: "capacidades",
     title: "Engineering Capabilities",
     description:
-      "We design, develop, and operate complete digital systems. No generic solutions -- only high-performance architecture tailored to your business objectives.",
+      "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option.",
     items: [
       {
-        title: "Custom Enterprise Systems",
+        title: "Sovereign AI for Enterprise & Government",
         benefit:
-          "Robust systems designed to centralize and optimize complex operations.",
+          "Artificial intelligence infrastructure that operates within your perimeter, under your total control.",
         bullets: [
-          "Cloud-Native Architecture",
-          "Critical Data Management",
-          "Legacy System Integration",
+          "On-Premise or Sovereign Cloud Deployment",
+          "Private Language Models (LLM)",
+          "Regulatory Compliance & Audit",
         ],
-        icon: "cpu",
+        icon: "sovereign",
       },
       {
-        title: "Scalable SaaS Platforms",
+        title: "Agentic Cybersecurity with AI",
         benefit:
-          "Software products built for the subscription model and global scale.",
+          "Autonomous agents that audit, detect, and respond to threats before they escalate.",
         bullets: [
-          "Multi-tenant Architecture",
-          "Integrated Billing & Payments",
-          "Real-Time Analytics Dashboards",
+          "Attack Surface Audits",
+          "Real-Time Threat Detection",
+          "Autonomous Incident Response",
         ],
-        icon: "cloud",
+        icon: "shield",
       },
       {
-        title: "High-Performance Mobile Applications",
+        title: "AI Executive Staff",
         benefit:
-          "Fluid native experiences that extend your digital ecosystem.",
+          "Autonomous operations team working 24/7 across your channels: WhatsApp, Slack, Teams, email.",
         bullets: [
-          "Native iOS/Android Development",
-          "Performance Optimization",
-          "Enterprise-Grade UX",
+          "Always-On Executive Assistants",
+          "Calendar & Communications Management",
+          "Integration Across All Your Channels",
         ],
-        icon: "smartphone",
+        icon: "assistant",
       },
       {
-        title: "Desktop Systems",
+        title: "Critical Systems Architecture",
         benefit:
-          "Powerful applications for macOS and Windows integrated into the local environment.",
+          "Software platforms engineered to operate under the highest availability standards.",
         bullets: [
-          "Native Hardware Performance",
-          "Offline Synchronization",
-          "Local Task Automation",
+          "High-Availability Architecture",
+          "Zero-Trust Infrastructure",
+          "Distributed & Resilient Systems",
         ],
-        icon: "monitor",
+        icon: "systems",
       },
       {
-        title: "Advanced Web Ecosystems",
+        title: "Operational Intelligence Platforms",
         benefit:
-          "Digital presence optimized for conversions and high traffic.",
+          "Command centers that unify data, metrics, and decisions into a single interface.",
         bullets: [
-          "Latency Optimization",
-          "Advanced Technical SEO",
-          "Serverless Architecture",
+          "Real-Time Command Dashboards",
+          "Data Source Integration",
+          "Predictive Analytics & Alerts",
         ],
-        icon: "globe",
+        icon: "intelligence",
       },
       {
-        title: "Applied Intelligence Systems",
+        title: "Government Process Automation",
         benefit:
-          "Intelligent automation that drastically reduces operational overhead.",
+          "Digitization of government and corporate workflows with full traceability.",
         bullets: [
-          "Agent-Based Business Logic",
-          "Natural Language Processing",
-          "Predictive Data Analytics",
+          "Automated Regulatory Workflows",
+          "Digital Chain of Custody & Traceability",
+          "Public Systems Interoperability",
         ],
-        icon: "brain",
+        icon: "governance",
       },
     ],
   },
   flagshipAI: {
     sectionId: "sistemas-ia",
-    title: "Enterprise-Grade AI Systems",
+    title: "Sovereign AI Deployment",
     description:
-      "We deploy digital employees that execute tasks, serve customers, and operate under your business logic 24/7 with surgical precision.",
+      "Your organization needs artificial intelligence that operates under your rules, on your infrastructure, with your data. No external dependencies, no third-party risks.",
     items: [
       {
-        title: "Voice Agents for Operations",
+        title: "Cyber Defense Agents",
         description:
-          "Intelligent phone support capable of resolving procedures, scheduling appointments, and escalating complex cases to humans in real time.",
-        icon: "phone",
+          "AI that monitors your attack surface, identifies vulnerabilities, and executes response protocols without human intervention.",
+        icon: "cyber",
       },
       {
-        title: "Conversational Chat Agents",
+        title: "Digital Workforce",
         description:
-          "Instant query resolution on Web, WhatsApp, or Slack, pulling information directly from your internal knowledge base.",
-        icon: "message",
+          "AI executive assistants deployed across all your communication channels: calendar management, information triage, and operational coordination.",
+        icon: "workforce",
       },
       {
-        title: "Autonomous Process Automation",
+        title: "On-Premise AI Infrastructure",
         description:
-          "Agents that execute complete workflows: from data entry to report generation and API integration without human intervention.",
-        icon: "operations",
+          "Language models, data pipelines, and autonomous agents operating within your security perimeter with total data sovereignty.",
+        icon: "infra",
       },
     ],
     caption:
-      "Engineering invisible to the user. Measurable impact for the business.",
+      "Total control. Complete sovereignty. Measurable impact.",
   },
   methodology: {
     sectionId: "metodologia",
@@ -206,35 +207,34 @@ const en = {
     title: "Frequently Asked Questions",
     items: [
       {
-        question: "What types of technology solutions do you build?",
+        question: "What does sovereign AI mean and why is it relevant to my organization?",
         answer:
-          "We build complete digital ecosystems: custom enterprise software, cross-platform SaaS, native mobile applications, and systems integrated with autonomous artificial intelligence.",
+          "Sovereign AI means your language models, training data, and inference pipelines operate within your infrastructure — no external API dependencies, no sensitive data exposure to third parties. It's essential for government, defense, finance, and any organization with strict regulatory compliance requirements.",
       },
       {
-        question: "What is the ROI of AI for my business?",
+        question: "How does agentic cybersecurity with AI work?",
         answer:
-          "Our agents reduce operational costs by up to 80% on repetitive support and management tasks, freeing your team to focus on high-value strategic decisions.",
+          "We deploy autonomous agents that execute continuous audits of your attack surface, analyze traffic patterns, detect anomalies, and can execute incident response protocols in real time — drastically reducing detection and response times against threats.",
       },
       {
-        question:
-          "Do you have experience working with industries outside of tech?",
+        question: "What is the AI Executive Staff service?",
         answer:
-          "Yes. We work with companies in manufacturing, logistics, finance, and services that seek to modernize their workflows and automate operations through precision engineering.",
+          "It's an autonomous operations team powered by artificial intelligence that works 24/7 integrated into your existing channels — WhatsApp, Slack, Teams, email. It manages calendars, triages communications, coordinates teams, and executes administrative tasks with the precision of a senior executive assistant.",
       },
       {
-        question: "How long does it take to deliver a complete system?",
+        question: "Do you work with government and defense organizations?",
         answer:
-          "Our methodology enables us to deploy functional, robust MVPs in 8-12 weeks, scaling the solution through high-impact incremental cycles.",
+          "Yes. Our infrastructure and methodology are designed to meet the security and traceability standards required by government institutions, defense agencies, and regulated financial sector organizations.",
       },
     ],
   },
   cta: {
-    lead: "Let's talk about what your business",
-    highlight: "needs to execute.",
+    lead: "Let's discuss",
+    highlight: "your next system.",
     description:
-      "Whether it's a new product or a full optimization of your AI operations -- schedule a technical evaluation and let's talk results.",
+      "Schedule a technical evaluation. No commitment, no generic templates — a conversation about what your operation needs.",
     action: {
-      label: "Start Technical Diagnostic",
+      label: "Schedule Evaluation",
       analyticsEvent: "cta_final_click",
     },
   },
@@ -242,11 +242,11 @@ const en = {
     title: "Enterprise-Grade Technology Stack",
   },
   metrics: {
-    title: "Quantifiable Impact",
+    title: "Quantifiable Results",
     description:
-      "We don't design for aesthetic awards. We build to maximize operational efficiency, increase conversion, and deploy high-availability systems that scale with your business.",
-    kpiLabel: "Audited metrics from Enterprise projects",
-    optimizationLabel: "Real Optimization",
+      "We build to maximize operational efficiency and deploy high-availability systems that scale with your business.",
+    kpiLabel: "Audited metrics",
+    optimizationLabel: "Continuous Optimization",
     kpis: [
       { value: "40%", label: "Average reduction in Time-to-Market" },
       { value: "99.9%", label: "Uptime on cloud-native architectures" },
@@ -255,7 +255,7 @@ const en = {
   },
   footer: {
     tagline:
-      "Software factory. Enterprise applications, SaaS platforms, and AI agents.",
+      "Enterprise software engineering. Platforms, systems, and AI automation.",
     navigation: "Navigation",
     legal: "Legal",
     privacy: "Privacy",
@@ -490,6 +490,100 @@ const en = {
       "Evaluating providers",
       "Ready to proceed",
     ],
+  },
+  products: {
+    sovereignAI: {
+      eyebrow: "SOVEREIGN AI",
+      title: "Your artificial intelligence. Your infrastructure. Your control.",
+      subtitle: "Enterprise AI deployment with zero third-party dependencies.",
+      description: "We design and operate artificial intelligence infrastructure that runs within your security perimeter. Private language models, sovereign data pipelines, and autonomous agents under your complete governance.",
+      features: [
+        { title: "Private Language Models", description: "Training, fine-tuning, and deployment of LLMs within your infrastructure. No data leaving your perimeter." },
+        { title: "On-Premise Inference", description: "AI processing on your own servers or sovereign cloud with minimal latency and total control." },
+        { title: "Regulatory Compliance", description: "Architecture designed to comply with national and international data protection regulatory frameworks." },
+        { title: "Sovereign Data Pipelines", description: "Ingestion, transformation, and analysis workflows that operate exclusively within your jurisdiction." },
+        { title: "Internal Autonomous Agents", description: "Deployment of AI agents that execute operational tasks without exposure to external services." },
+        { title: "Audit and Traceability", description: "Complete record of every decision, inference, and action executed by the AI systems." },
+      ],
+      capabilities: [
+        { title: "Infrastructure", items: ["Sovereign Cloud / On-Premise", "Dedicated GPU Clusters", "Air-Gapped Networks"] },
+        { title: "Models", items: ["Open Source LLM Fine-Tuning", "RAG on Internal Documentation", "Private Multimodal Models"] },
+        { title: "Governance", items: ["Granular Access Control", "Immutable Audit Logs", "GDPR / SOC2 / ISO Compliance"] },
+      ],
+      cta: {
+        title: "Bring AI inside your perimeter",
+        description: "Schedule a technical assessment to design your sovereign AI infrastructure.",
+        action: { label: "Schedule Assessment", href: "/agendar" },
+      },
+    },
+    cybersecurity: {
+      eyebrow: "AGENTIC CYBERSECURITY",
+      title: "Autonomous defense. Real-time response.",
+      subtitle: "AI agents protecting your attack surface 24/7.",
+      description: "We deploy AI-powered cybersecurity systems that audit, detect, and respond to threats autonomously — before a human can react.",
+      features: [
+        { title: "Attack Surface Audit", description: "Continuous, automated scanning of all exposure vectors across your organization." },
+        { title: "AI-Powered Threat Detection", description: "Real-time analysis of traffic patterns, anomalous behavior, and compromise indicators." },
+        { title: "Autonomous Incident Response", description: "Execution of containment and remediation protocols without human intervention." },
+        { title: "Vulnerability Analysis", description: "Proactive identification of weaknesses in applications, networks, and infrastructure." },
+        { title: "Attack Simulation (Red Team)", description: "Automated penetration exercises to validate your security posture." },
+        { title: "Security Operations Center", description: "AI-powered SOC with command dashboards, alerts, and intelligent escalation." },
+      ],
+      capabilities: [
+        { title: "Detection", items: ["Real-Time Traffic Analysis", "Event Correlation (SIEM)", "Threat Intelligence Feeds"] },
+        { title: "Response", items: ["Automated Containment", "Incident Playbooks", "Digital Forensics"] },
+        { title: "Prevention", items: ["Continuous Penetration Testing", "Infrastructure Hardening", "Zero-Trust Architecture"] },
+      ],
+      cta: {
+        title: "Fortify your operation",
+        description: "Request an attack surface audit for your organization.",
+        action: { label: "Request Audit", href: "/agendar" },
+      },
+    },
+    digitalWorkforce: {
+      eyebrow: "DIGITAL WORKFORCE",
+      title: "An executive team that never rests.",
+      subtitle: "AI assistants deployed across all your channels.",
+      description: "We build and operate AI-powered digital work teams that integrate with WhatsApp, Slack, Teams, email, and any channel in your organization. Calendar management, communications triage, operational coordination — with the precision of a senior executive assistant.",
+      features: [
+        { title: "24/7 Executive Assistant", description: "Intelligent management of calendars, emails, and communications with automatic prioritization." },
+        { title: "Multichannel Integration", description: "Deployment across WhatsApp, Slack, Microsoft Teams, email, SMS, and internal channels." },
+        { title: "Information Triage", description: "Automatic classification of messages, documents, and requests by urgency and context." },
+        { title: "Team Coordination", description: "Task tracking, reminders, and synchronization across departments." },
+        { title: "Internal Knowledge Base", description: "Instant answers from your organization's documentation and policies." },
+        { title: "Executive Reports", description: "Automatic generation of summaries, metrics, and management reports." },
+      ],
+      capabilities: [
+        { title: "Channels", items: ["WhatsApp Business", "Slack & Microsoft Teams", "Email, SMS & Voice"] },
+        { title: "Capabilities", items: ["Intelligent Calendar Management", "Document Processing", "Automated Workflows"] },
+        { title: "Governance", items: ["Role-Based Access Policies", "Conversation Audit", "Data on Your Infrastructure"] },
+      ],
+      cta: {
+        title: "Activate your digital team",
+        description: "Schedule a demonstration of how AI can operate your communications.",
+        action: { label: "Schedule Demonstration", href: "/agendar" },
+      },
+    },
+  },
+  investors: {
+    sectionId: "investors",
+    eyebrow: "INSTITUTIONAL BACKING",
+    title: "Built to scale.",
+    description: "Engineering infrastructure backed by strategic capital and a long-term vision in sovereign AI and enterprise cybersecurity.",
+    stats: [
+      { value: "$2M+", label: "In active enterprise contracts" },
+      { value: "99.9%", label: "Uptime on deployed systems" },
+      { value: "4", label: "Regulated industries served" },
+    ],
+    quote: {
+      text: "Digital sovereignty is not an option — it's a strategic necessity for every organization operating with sensitive data.",
+      author: "Johan Rocuts",
+      role: "CEO, NovaForge",
+    },
+    cta: {
+      label: "Contact for investment",
+      href: "mailto:contacto@novaforge.io",
+    },
   },
   schedule: {
     badge: "Schedule a Meeting",

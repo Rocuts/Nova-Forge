@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { MagneticButton } from "./MagneticButton"
 
 type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
-  variant?: "primary" | "secondary" | "glass"
+  variant?: "primary" | "secondary" | "ghost"
   size?: "sm" | "md" | "lg"
   href?: string
   target?: string
@@ -16,18 +16,18 @@ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"
 
 export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", onClick, href, target, children, magnetic = false, ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center rounded-[var(--radius-sm)] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-cyan disabled:pointer-events-none disabled:opacity-50"
+    const baseStyles = "inline-flex items-center justify-center rounded-[2px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 
     const variants = {
-      primary: "bg-white text-black hover:bg-gray-100 shadow-[0_0_20px_rgba(255,255,255,0.1)]",
-      secondary: "border border-zinc-800 bg-transparent text-text-primary hover:bg-zinc-900 hover:border-zinc-700",
-      glass: "glass-panel text-text-primary hover:bg-surface-elevated/80 border-surface-border shadow-2xl"
+      primary: "bg-[#0a0a0a] text-white hover:bg-[#1a1a1a]",
+      secondary: "border border-[#d4d4d4] bg-transparent text-[#0a0a0a] hover:bg-[#f5f5f5] hover:border-[#a3a3a3]",
+      ghost: "bg-transparent text-[#525252] hover:text-[#0a0a0a] hover:bg-[#f5f5f5]",
     }
 
     const sizes = {
-      sm: "px-4 py-2 text-xs",
-      md: "px-6 py-2.5 text-sm tracking-tight",
-      lg: "px-10 py-4 text-base tracking-tight"
+      sm: "px-5 py-2.5 text-xs font-medium tracking-wide",
+      md: "px-7 py-3 text-sm font-medium",
+      lg: "px-10 py-4 text-base font-medium",
     }
 
     const combinedClassName = cn(baseStyles, variants[variant], sizes[size], className)

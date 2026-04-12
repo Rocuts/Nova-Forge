@@ -1,41 +1,14 @@
 "use client"
-import { useRef } from "react"
-import { GlassPanel } from "@/components/ui/GlassPanel"
-import { Phone, MessageSquare, UserCog } from "lucide-react"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
+import { IconCyber, IconWorkforce, IconInfra } from "@/components/ui/Icons"
+import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
-import { useScrollVelocitySkew } from "@/hooks/useScrollVelocity"
-
-import { useIsMobile } from "@/lib/useIsMobile"
 
 const OFFER_ICONS = {
-  message: MessageSquare,
-  operations: UserCog,
-  phone: Phone,
+  cyber: IconCyber,
+  workforce: IconWorkforce,
+  infra: IconInfra,
 } as const
-
-const PARALLAX_OFFSETS = [50, 25, 45]
-
-function ParallaxCard({ children, index }: { children: React.ReactNode; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-  const distance = PARALLAX_OFFSETS[index % PARALLAX_OFFSETS.length]
-  const y = useSpring(
-    useTransform(scrollYProgress, [0, 1], [distance, -distance]),
-    { stiffness: isMobile ? 40 : 80, damping: 25 }
-  )
-
-  return (
-    <motion.div ref={ref} style={{ y }} className="will-change-transform">
-      {children}
-    </motion.div>
-  )
-}
 
 interface FlagshipAIContent {
   sectionId: string
@@ -46,22 +19,21 @@ interface FlagshipAIContent {
 }
 
 export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAIContent }) {
-  const { ref: entranceRef, opacity, y, scale } = useSectionEntrance()
-  const skewY = useScrollVelocitySkew()
+  const { ref: entranceRef, opacity, y } = useSectionEntrance()
 
   return (
     <motion.section
       ref={entranceRef}
-      style={{ opacity, y, scale, skewY }}
+      style={{ opacity, y }}
       id={flagshipAISection.sectionId}
-      className="py-24 bg-surface-base/60 backdrop-blur-sm relative z-10 border-t border-surface-border/50"
+      className="py-32 bg-[#0a0a0a] relative z-10"
     >
-      <div className="container px-4 mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 max-w-3xl">
-          <RevealText as="h2" className="font-heading text-4xl md:text-6xl font-bold mb-8 tracking-tight" animateWeight>
+          <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-white">
             {flagshipAISection.title}
           </RevealText>
-          <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
+          <p className="text-[#a3a3a3] text-lg md:text-xl leading-relaxed">
             {flagshipAISection.description}
           </p>
         </div>
@@ -75,34 +47,32 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.12 }
-            }
+              transition: { staggerChildren: 0.12 },
+            },
           }}
         >
-          {flagshipAISection.items.map((offer, i) => {
+          {flagshipAISection.items.map((offer) => {
             const Icon = OFFER_ICONS[offer.icon]
             return (
-              <ParallaxCard key={offer.title} index={i}>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } }
-                  }}
-                >
-                  <GlassPanel className="group hover:border-primary-cyan/30 transition-colors duration-500 h-full">
-                    <div className="mb-6 opacity-80 group-hover:opacity-100 transition-opacity text-primary-cyan">
-                      <Icon size={40} className="stroke-[1.5]" />
-                    </div>
-                    <h3 className="text-2xl font-medium mb-3">{offer.title}</h3>
-                    <p className="text-text-secondary text-lg">{offer.description}</p>
-                  </GlassPanel>
-                </motion.div>
-              </ParallaxCard>
+              <motion.div
+                key={offer.title}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+                }}
+                className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-12 hover:border-[#2a2a2a] transition-colors duration-300"
+              >
+                <div className="mb-8 text-white">
+                  <Icon size={36} />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4 text-white">{offer.title}</h3>
+                <p className="text-[#a3a3a3] text-base leading-relaxed">{offer.description}</p>
+              </motion.div>
             )
           })}
         </motion.div>
 
-        <p className="text-text-secondary text-center text-lg mt-12">
+        <p className="text-[#a3a3a3] text-center text-base mt-14">
           {flagshipAISection.caption}
         </p>
       </div>

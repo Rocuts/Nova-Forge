@@ -39,16 +39,16 @@ export default async function SchedulePage({ params }: Props) {
     <section className="py-32 relative z-10 min-h-screen">
       <div className="container px-4 mx-auto max-w-2xl">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-cyan/30 bg-primary-cyan/5 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-cyan animate-pulse" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-cyan/80">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[6px] border border-[#e5e5e5] bg-[#f8f8f8] mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0a0a0a]" />
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#0a0a0a]">
               {dict.schedule.badge}
             </span>
           </div>
           <h1 className="font-heading text-4xl md:text-6xl font-bold tracking-tight mb-6">
             {dict.schedule.pageTitle}
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-[#525252] max-w-2xl mx-auto leading-relaxed">
             {dict.schedule.pageSubtitle}
           </p>
         </div>

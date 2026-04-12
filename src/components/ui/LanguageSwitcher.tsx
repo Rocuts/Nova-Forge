@@ -44,7 +44,7 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   return (
     <Link
       href={targetPath}
-      className="px-3 py-1.5 text-[11px] font-bold tracking-[0.15em] uppercase text-text-secondary hover:text-white border border-surface-border hover:border-primary-cyan/40 rounded-full transition-all duration-200"
+      className="px-3 py-1.5 text-[11px] font-bold tracking-[0.15em] uppercase text-[#525252] hover:text-[#0a0a0a] hover:font-semibold border border-[#e5e5e5] hover:border-[#0a0a0a]/30 rounded-[6px] transition-all duration-200"
       aria-label={locale === "es" ? "Switch to English" : "Cambiar a Español"}
     >
       {locale === "es" ? "EN" : "ES"}

@@ -20,7 +20,6 @@ interface NavContent {
 
 export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [hoveredPath, setHoveredPath] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { scrollY } = useScroll()
 
@@ -52,33 +51,22 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-surface-base/80 backdrop-blur-md border-b border-surface-border" : "bg-transparent"}`}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5]" : "bg-transparent"}`}
       >
-        <div className="container px-4 mx-auto max-w-7xl h-20 flex items-center justify-between">
-          <TransitionLink href={locale === "en" ? "/en" : "/"} className="font-heading text-xl font-bold tracking-tight">
+        <div className="container px-4 mx-auto max-w-7xl h-16 flex items-center justify-between">
+          <TransitionLink href={locale === "en" ? "/en" : "/"} className="font-heading text-lg font-semibold tracking-tight text-[#0a0a0a]">
             {siteConfig.name}.
           </TransitionLink>
 
-          <nav className="hidden md:flex items-center gap-2 text-sm font-medium relative">
+          <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             {nav.items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative px-4 py-2 text-text-secondary hover:text-white transition-colors duration-200"
-                onMouseEnter={() => setHoveredPath(item.href)}
-                onMouseLeave={() => setHoveredPath(null)}
+                className="px-4 py-2 text-[#525252] hover:text-[#0a0a0a] transition-colors duration-200"
               >
-                <span className="relative z-10">{item.name}</span>
-                {hoveredPath === item.href && (
-                  <motion.span
-                    layoutId="navbar-hover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-surface-elevated/80 border border-surface-border backdrop-blur-md rounded-full -z-0"
-                  />
-                )}
+                {item.name}
               </Link>
             ))}
           </nav>
@@ -87,7 +75,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             <LanguageSwitcher locale={locale} />
             <Button
               size="sm"
-              variant="glass"
+              variant="ghost"
               className="hidden sm:inline-flex"
               href={siteConfig.links.contact}
               onClick={() => trackEvent("contact_click")}
@@ -96,6 +84,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             </Button>
             <Button
               size="sm"
+              variant="primary"
               href={schedulingHref}
               onClick={() => trackEvent("scheduling_click")}
             >
@@ -103,7 +92,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             </Button>
             <button
               type="button"
-              className="md:hidden p-2 text-text-secondary hover:text-white transition-colors"
+              className="md:hidden p-2 text-[#525252] hover:text-[#0a0a0a] transition-colors"
               onClick={toggleMobileMenu}
               aria-expanded={isMobileMenuOpen}
               aria-label={nav.menuLabel}
@@ -121,7 +110,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-20 left-0 right-0 z-40 md:hidden bg-surface-base/95 backdrop-blur-md border-b border-surface-border"
+            className="fixed top-16 left-0 right-0 z-40 md:hidden bg-white border-b border-[#e5e5e5]"
           >
             <div className="container px-4 mx-auto max-w-7xl py-4 flex flex-col gap-1">
               {nav.items.map((item) => (
@@ -129,15 +118,15 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className="px-4 py-3 text-sm font-medium text-text-secondary hover:text-white hover:bg-surface-elevated/50 rounded-lg transition-colors"
+                  className="px-4 py-3 text-sm font-medium text-[#525252] hover:text-[#0a0a0a] hover:bg-[#f5f5f5] rounded-lg transition-colors"
                 >
                   {item.name}
                 </Link>
               ))}
-              <div className="border-t border-surface-border mt-2 pt-3 flex flex-col gap-2">
+              <div className="border-t border-[#e5e5e5] mt-2 pt-3 flex flex-col gap-2">
                 <Button
                   size="sm"
-                  variant="glass"
+                  variant="ghost"
                   className="w-full"
                   href={siteConfig.links.contact}
                   onClick={(event) => {
@@ -150,6 +139,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                 </Button>
                 <Button
                   size="sm"
+                  variant="primary"
                   className="w-full"
                   href={schedulingHref}
                   onClick={(event) => {
