@@ -10,7 +10,6 @@ const Services = dynamic(() => import("@/components/sections/Services").then(m =
 const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
 const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
 const Metrics = dynamic(() => import("@/components/sections/Metrics").then(m => ({ default: m.Metrics })))
-const Investors = dynamic(() => import("@/components/sections/Investors").then(m => ({ default: m.Investors })))
 const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
 
 
@@ -48,7 +47,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <FlagshipAI content={dict.flagshipAI} />
       <Methodology content={dict.methodology} />
       <Metrics content={dict.metrics} />
-      <Investors content={dict.investors} />
       <CTA content={ctaContent} />
     </>
   )

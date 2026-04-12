@@ -7,12 +7,24 @@ const es = {
   },
   nav: {
     items: [
-      { name: "Capacidades", href: "#capacidades" },
-      { name: "Sistemas de IA", href: "#sistemas-ia" },
-      { name: "Estándar NovaForge", href: "#metodologia" },
-      { name: "Equipo", href: "#equipo" },
-      { name: "FAQ", href: "#faq" },
-      { name: "Inversores", href: "#inversores" },
+      {
+        name: "Plataforma",
+        children: [
+          { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
+          { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
+          { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
+        ],
+      },
+      {
+        name: "Soluciones",
+        children: [
+          { name: "Sistemas Críticos", href: "/sistemas-criticos", description: "Arquitectura de alta disponibilidad" },
+          { name: "Inteligencia Operativa", href: "/inteligencia-operativa", description: "Centros de comando y datos unificados" },
+          { name: "Automatización de Gobierno", href: "/automatizacion-gobierno", description: "Workflows gubernamentales digitalizados" },
+        ],
+      },
+      { name: "Empresa", href: "/nosotros" },
+      { name: "Inversores", href: "/inversores" },
     ],
     contact: "Contacto",
     schedule: "Agendar",
@@ -276,8 +288,8 @@ const es = {
     ],
     company: "Empresa",
     companyLinks: [
-      { name: "Capacidades", href: "#capacidades" },
-      { name: "Metodología", href: "#metodologia" },
+      { name: "Sobre Nosotros", href: "/nosotros" },
+      { name: "Inversores", href: "/inversores" },
       { name: "Diagnóstico", href: "/diagnostico" },
       { name: "Agendar", href: "/agendar" },
     ],
@@ -673,6 +685,92 @@ const es = {
     cta: {
       label: "Contactar para inversión",
       href: "mailto:contacto@novaforge.io",
+    },
+  },
+  investorsPage: {
+    eyebrow: "INVERSORES",
+    title: "Infraestructura para la era de la soberanía digital.",
+    subtitle: "Estamos construyendo la capa de software, inteligencia artificial y ciberseguridad que gobiernos y empresas necesitan para operar con independencia tecnológica total.",
+    thesis: {
+      title: "Tesis de Inversión",
+      paragraphs: [
+        "El mundo se mueve hacia la soberanía digital. Gobiernos y grandes corporaciones ya no pueden depender de infraestructura de terceros para sus operaciones más sensibles. La inteligencia artificial, la ciberseguridad y la automatización de procesos críticos deben operar dentro del perímetro de cada organización.",
+        "NovaForge construye exactamente eso: la infraestructura de software que permite a organizaciones de alta exigencia operar con IA soberana, defenderse con agentes autónomos de ciberseguridad y automatizar flujos de trabajo regulados con trazabilidad completa.",
+        "Nuestro enfoque combina ingeniería de sistemas de alto nivel con despliegue on-premise, modelos de lenguaje privados y arquitectura Zero-Trust — todo diseñado para los estándares más exigentes del mercado enterprise y gubernamental.",
+      ],
+    },
+    market: {
+      title: "Oportunidad de Mercado",
+      description: "Tres verticales en crecimiento exponencial convergen en nuestra propuesta de valor.",
+      segments: [
+        { title: "IA Soberana Enterprise", description: "Organizaciones migrando de APIs de IA públicas a infraestructura privada por regulación, seguridad y control de datos sensibles." },
+        { title: "Ciberseguridad Agéntica", description: "La próxima generación de defensa cibernética: agentes autónomos que detectan y responden en tiempo real, sin intervención humana." },
+        { title: "Automatización Gubernamental", description: "Gobiernos digitalizando flujos de trabajo críticos con requisitos estrictos de trazabilidad, cumplimiento y soberanía de datos." },
+      ],
+    },
+    team: {
+      title: "Equipo Fundador",
+      description: "Ingeniería y estrategia detrás de NovaForge.",
+      members: [
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad. Lidera el diseño técnico de todas las soluciones de NovaForge." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala. Define la visión de producto y la estrategia de mercado de NovaForge en el sector enterprise y gobierno." },
+        { name: "Yeison Arley", initials: "YA", role: "Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B. Gestiona las relaciones comerciales y la expansión de NovaForge en industrias reguladas." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento. Construye las interfaces y sistemas que conectan la tecnología de NovaForge con los usuarios finales." },
+      ],
+    },
+    vision: {
+      quote: "La soberanía digital no es una tendencia — es el estándar inevitable para toda organización que opera con datos sensibles. Estamos construyendo la infraestructura que lo hace posible.",
+      author: "Johan Rocuts",
+      role: "CEO, NovaForge",
+    },
+    cta: {
+      title: "Hablemos",
+      description: "Si comparte nuestra visión sobre el futuro de la soberanía digital, nos encantaría conversar.",
+      email: "contacto@novaforge.io",
+      action: { label: "Contactar", href: "mailto:contacto@novaforge.io" },
+    },
+  },
+  aboutPage: {
+    eyebrow: "SOBRE NOSOTROS",
+    title: "Ingeniería de precisión para la era digital.",
+    subtitle: "Somos un equipo de ingenieros y estrategas construyendo la infraestructura tecnológica que gobiernos y empresas necesitan para operar con soberanía, seguridad y autonomía.",
+    mission: {
+      title: "Nuestra Misión",
+      description: "Construir software mission-critical, sistemas de inteligencia artificial soberana y plataformas de ciberseguridad agéntica que permitan a organizaciones de alta exigencia operar con independencia tecnológica total. No vendemos humo ni soluciones genéricas. Diseñamos, desarrollamos y operamos infraestructura que funciona bajo los estándares más altos del mundo.",
+    },
+    methodology: {
+      title: "Estándar NovaForge",
+      description: "Nuestro proceso de ingeniería está diseñado para eliminar la incertidumbre y garantizar la entrega de valor en cada despliegue.",
+      steps: [
+        { num: "01", title: "Diagnóstico y Auditoría Técnica", desc: "Análisis exhaustivo de su infraestructura actual y definición de objetivos de negocio." },
+        { num: "02", title: "Arquitectura de Sistemas y Datos", desc: "Modelado de la solución técnica para asegurar escalabilidad y mantenibilidad a largo plazo." },
+        { num: "03", title: "Ingeniería y Desarrollo", desc: "Construcción del core del sistema e integración de lógica inteligente personalizada." },
+        { num: "04", title: "Validación y QA", desc: "Pruebas de estrés y seguridad para garantizar un despliegue sin interrupciones." },
+        { num: "05", title: "Operación y Evolución", desc: "Monitoreo estratégico, optimización y soporte técnico especializado." },
+      ],
+    },
+    team: {
+      title: "Nuestro Equipo",
+      description: "Ingeniería y estrategia detrás de NovaForge.",
+      members: [
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala con enfoque en mercados enterprise y gobierno." },
+        { name: "Yeison Arley", initials: "YA", role: "Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B para industrias reguladas." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento y sistemas de interfaz enterprise." },
+      ],
+    },
+    values: {
+      title: "Principios",
+      items: [
+        { title: "Precisión sobre velocidad", description: "Cada línea de código, cada decisión de arquitectura y cada despliegue está diseñado para durar." },
+        { title: "Soberanía como estándar", description: "La independencia tecnológica de nuestros clientes no es negociable." },
+        { title: "Ingeniería sobre promesas", description: "Entregamos infraestructura funcional, no presentaciones con roadmaps especulativos." },
+      ],
+    },
+    cta: {
+      title: "Construyamos juntos.",
+      description: "Si su organización necesita infraestructura tecnológica de alto nivel, hablemos.",
+      action: { label: "Agendar Evaluación", href: "/agendar" },
     },
   },
   schedule: {

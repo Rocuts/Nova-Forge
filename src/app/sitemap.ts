@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/sistemas-criticos", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/inteligencia-operativa", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/automatizacion-gobierno", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/inversores", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/nosotros", priority: 0.7, changeFrequency: "monthly" as const },
   ]
 
   const enPages = [
@@ -30,6 +32,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/en/critical-systems", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/operational-intelligence", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/government-automation", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/investors", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/en/about", priority: 0.7, changeFrequency: "monthly" as const },
   ]
 
   return [...esPages, ...enPages].map((page) => ({

@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
       { source: "/en/critical-systems", destination: "/en/sistemas-criticos" },
       { source: "/en/operational-intelligence", destination: "/en/inteligencia-operativa" },
       { source: "/en/government-automation", destination: "/en/automatizacion-gobierno" },
+      { source: "/en/investors", destination: "/en/inversores" },
+      { source: "/en/about", destination: "/en/nosotros" },
     ];
   },
 };

@@ -7,12 +7,24 @@ const en = {
   },
   nav: {
     items: [
-      { name: "Capabilities", href: "#capacidades" },
-      { name: "AI Systems", href: "#sistemas-ia" },
-      { name: "NovaForge Standard", href: "#metodologia" },
-      { name: "Team", href: "#equipo" },
-      { name: "FAQ", href: "#faq" },
-      { name: "Investors", href: "#investors" },
+      {
+        name: "Platform",
+        children: [
+          { name: "Sovereign AI", href: "/soberania-ia", description: "AI infrastructure under your total control" },
+          { name: "Cybersecurity", href: "/ciberseguridad", description: "Autonomous defense with AI agents" },
+          { name: "Digital Workforce", href: "/fuerza-digital", description: "Executive assistants across all channels" },
+        ],
+      },
+      {
+        name: "Solutions",
+        children: [
+          { name: "Critical Systems", href: "/sistemas-criticos", description: "High-availability architecture" },
+          { name: "Operational Intelligence", href: "/inteligencia-operativa", description: "Command centers and unified data" },
+          { name: "Government Automation", href: "/automatizacion-gobierno", description: "Digitized government workflows" },
+        ],
+      },
+      { name: "Company", href: "/nosotros" },
+      { name: "Investors", href: "/inversores" },
     ],
     contact: "Contact",
     schedule: "Schedule",
@@ -276,8 +288,8 @@ const en = {
     ],
     company: "Company",
     companyLinks: [
-      { name: "Capabilities", href: "#capacidades" },
-      { name: "Methodology", href: "#metodologia" },
+      { name: "About Us", href: "/nosotros" },
+      { name: "Investors", href: "/inversores" },
       { name: "Diagnostic", href: "/diagnostico" },
       { name: "Schedule", href: "/agendar" },
     ],
@@ -673,6 +685,92 @@ const en = {
     cta: {
       label: "Contact for investment",
       href: "mailto:contacto@novaforge.io",
+    },
+  },
+  investorsPage: {
+    eyebrow: "INVESTORS",
+    title: "Infrastructure for the era of digital sovereignty.",
+    subtitle: "We are building the software, artificial intelligence, and cybersecurity layer that governments and enterprises need to operate with total technological independence.",
+    thesis: {
+      title: "Investment Thesis",
+      paragraphs: [
+        "The world is moving toward digital sovereignty. Governments and large corporations can no longer depend on third-party infrastructure for their most sensitive operations. Artificial intelligence, cybersecurity, and critical process automation must operate within each organization's perimeter.",
+        "NovaForge builds exactly that: the software infrastructure that enables high-demand organizations to operate with sovereign AI, defend themselves with autonomous cybersecurity agents, and automate regulated workflows with complete traceability.",
+        "Our approach combines high-level systems engineering with on-premise deployment, private language models, and Zero-Trust architecture — all designed for the most demanding standards of the enterprise and government market.",
+      ],
+    },
+    market: {
+      title: "Market Opportunity",
+      description: "Three exponentially growing verticals converge in our value proposition.",
+      segments: [
+        { title: "Enterprise Sovereign AI", description: "Organizations migrating from public AI APIs to private infrastructure due to regulation, security, and sensitive data control." },
+        { title: "Agentic Cybersecurity", description: "The next generation of cyber defense: autonomous agents that detect and respond in real time, without human intervention." },
+        { title: "Government Automation", description: "Governments digitizing critical workflows with strict requirements for traceability, compliance, and data sovereignty." },
+      ],
+    },
+    team: {
+      title: "Founding Team",
+      description: "Engineering and strategy behind NovaForge.",
+      members: [
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all NovaForge solutions." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines NovaForge's product vision and market strategy in the enterprise and government sector." },
+        { name: "Yeison Arley", initials: "YA", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions. Manages commercial relationships and NovaForge's expansion in regulated industries." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect NovaForge's technology with end users." },
+      ],
+    },
+    vision: {
+      quote: "Digital sovereignty is not a trend — it is the inevitable standard for every organization operating with sensitive data. We are building the infrastructure that makes it possible.",
+      author: "Johan Rocuts",
+      role: "CEO, NovaForge",
+    },
+    cta: {
+      title: "Let's Talk",
+      description: "If you share our vision for the future of digital sovereignty, we would love to have a conversation.",
+      email: "contacto@novaforge.io",
+      action: { label: "Contact Us", href: "mailto:contacto@novaforge.io" },
+    },
+  },
+  aboutPage: {
+    eyebrow: "ABOUT US",
+    title: "Precision engineering for the digital era.",
+    subtitle: "We are a team of engineers and strategists building the technological infrastructure that governments and enterprises need to operate with sovereignty, security, and autonomy.",
+    mission: {
+      title: "Our Mission",
+      description: "Build mission-critical software, sovereign artificial intelligence systems, and agentic cybersecurity platforms that enable high-demand organizations to operate with total technological independence. We don't sell smoke or generic solutions. We design, develop, and operate infrastructure that works under the highest standards in the world.",
+    },
+    methodology: {
+      title: "The NovaForge Standard",
+      description: "Our engineering process is designed to eliminate uncertainty and guarantee value delivery on every deployment.",
+      steps: [
+        { num: "01", title: "Diagnostics & Technical Audit", desc: "Exhaustive analysis of your current infrastructure and definition of business objectives." },
+        { num: "02", title: "Systems & Data Architecture", desc: "Technical solution modeling to ensure long-term scalability and maintainability." },
+        { num: "03", title: "Engineering & Development", desc: "Core system construction and integration of custom intelligent logic." },
+        { num: "04", title: "Validation & QA", desc: "Stress and security testing to guarantee zero-downtime deployments." },
+        { num: "05", title: "Operations & Evolution", desc: "Strategic monitoring, optimization, and specialized technical support." },
+      ],
+    },
+    team: {
+      title: "Our Team",
+      description: "Engineering and strategy behind NovaForge.",
+      members: [
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
+        { name: "Yeison Arley", initials: "YA", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions for regulated industries." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development and enterprise interface systems." },
+      ],
+    },
+    values: {
+      title: "Principles",
+      items: [
+        { title: "Precision over speed", description: "Every line of code, every architecture decision, and every deployment is designed to last." },
+        { title: "Sovereignty as standard", description: "Our clients' technological independence is non-negotiable." },
+        { title: "Engineering over promises", description: "We deliver functional infrastructure, not presentations with speculative roadmaps." },
+      ],
+    },
+    cta: {
+      title: "Let's build together.",
+      description: "If your organization needs high-level technological infrastructure, let's talk.",
+      action: { label: "Schedule Evaluation", href: "/agendar" },
     },
   },
   schedule: {
