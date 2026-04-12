@@ -1,17 +1,24 @@
 "use client"
 import Link from "next/link"
-import { IconSovereign, IconShield, IconAssistant, IconSystems, IconIntelligence, IconGovernance } from "@/components/ui/Icons"
+import {
+  IconShieldLock,
+  IconRadar2,
+  IconUserStar,
+  IconServer2,
+  IconChartDots3,
+  IconBuildingBank,
+} from "@tabler/icons-react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
 
 const SERVICE_ICONS = {
-  sovereign: IconSovereign,
-  shield: IconShield,
-  assistant: IconAssistant,
-  systems: IconSystems,
-  intelligence: IconIntelligence,
-  governance: IconGovernance,
+  sovereign: IconShieldLock,
+  shield: IconRadar2,
+  assistant: IconUserStar,
+  systems: IconServer2,
+  intelligence: IconChartDots3,
+  governance: IconBuildingBank,
 } as const
 
 interface ServicesContent {
@@ -59,7 +66,7 @@ export function Services({ content: servicesSection }: { content: ServicesConten
             const cardContent = (
               <>
                 <div className="mb-8 text-[#0a0a0a]">
-                  <Icon size={28} />
+                  <Icon size={28} stroke={1.5} />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 tracking-tight text-[#0a0a0a]">{svc.title}</h3>
                 <p className="text-[#525252] mb-8 text-base leading-relaxed">{svc.benefit}</p>

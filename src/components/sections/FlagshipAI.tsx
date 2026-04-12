@@ -1,13 +1,17 @@
 "use client"
-import { IconCyber, IconWorkforce, IconInfra } from "@/components/ui/Icons"
+import {
+  IconEyeSearch,
+  IconUsersGroup,
+  IconCloudLock,
+} from "@tabler/icons-react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
 
 const OFFER_ICONS = {
-  cyber: IconCyber,
-  workforce: IconWorkforce,
-  infra: IconInfra,
+  cyber: IconEyeSearch,
+  workforce: IconUsersGroup,
+  infra: IconCloudLock,
 } as const
 
 interface FlagshipAIContent {
@@ -63,7 +67,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
                 className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-12 hover:border-[#2a2a2a] transition-colors duration-300"
               >
                 <div className="mb-8 text-white">
-                  <Icon size={36} />
+                  <Icon size={36} stroke={1.5} />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4 text-white">{offer.title}</h3>
                 <p className="text-[#a3a3a3] text-base leading-relaxed">{offer.description}</p>
