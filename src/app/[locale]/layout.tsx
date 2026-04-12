@@ -43,9 +43,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       },
     },
     icons: {
-      icon: siteConfig.images.logo,
-      shortcut: siteConfig.images.logo,
-      apple: siteConfig.images.logo,
+      icon: "/icon.svg",
+      shortcut: "/icon.svg",
+      apple: "/icon.svg",
     },
     openGraph: {
       type: "website",
