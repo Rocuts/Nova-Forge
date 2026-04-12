@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import { IconSovereign, IconShield, IconAssistant, IconSystems, IconIntelligence, IconGovernance } from "@/components/ui/Icons"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
@@ -17,7 +18,7 @@ interface ServicesContent {
   sectionId: string
   title: string
   description: string
-  items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: keyof typeof SERVICE_ICONS }[]
+  items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: keyof typeof SERVICE_ICONS; href?: string }[]
 }
 
 export function Services({ content: servicesSection }: { content: ServicesContent }) {
@@ -77,6 +78,15 @@ export function Services({ content: servicesSection }: { content: ServicesConten
                     </li>
                   ))}
                 </ul>
+                {svc.href && (
+                  <Link
+                    href={svc.href}
+                    className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-[#0a0a0a] hover:text-[#525252] transition-colors"
+                  >
+                    Explorar
+                    <span aria-hidden="true">&rarr;</span>
+                  </Link>
+                )}
               </motion.div>
             )
           })}

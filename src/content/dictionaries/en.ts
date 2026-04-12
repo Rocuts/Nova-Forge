@@ -52,6 +52,7 @@ const en = {
           "Regulatory Compliance & Audit",
         ],
         icon: "sovereign",
+        href: "/soberania-ia",
       },
       {
         title: "Agentic Cybersecurity with AI",
@@ -63,6 +64,7 @@ const en = {
           "Autonomous Incident Response",
         ],
         icon: "shield",
+        href: "/ciberseguridad",
       },
       {
         title: "AI Executive Staff",
@@ -74,6 +76,7 @@ const en = {
           "Integration Across All Your Channels",
         ],
         icon: "assistant",
+        href: "/fuerza-digital",
       },
       {
         title: "Critical Systems Architecture",

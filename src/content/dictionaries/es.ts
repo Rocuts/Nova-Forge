@@ -52,6 +52,7 @@ const es = {
           "Cumplimiento Regulatorio y Auditoría",
         ],
         icon: "sovereign",
+        href: "/soberania-ia",
       },
       {
         title: "Ciberseguridad Agéntica con IA",
@@ -63,6 +64,7 @@ const es = {
           "Respuesta Autónoma a Incidentes",
         ],
         icon: "shield",
+        href: "/ciberseguridad",
       },
       {
         title: "Personal Ejecutivo con IA",
@@ -74,6 +76,7 @@ const es = {
           "Integración con Todos sus Canales",
         ],
         icon: "assistant",
+        href: "/fuerza-digital",
       },
       {
         title: "Arquitectura de Sistemas Críticos",
