@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.50",
+    "@iconify/react": "^6.0.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
-"@tabler/icons-react": "^3.41.1",
+    "@tabler/icons-react": "^3.41.1",
     "ai": "^6.0.146",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",

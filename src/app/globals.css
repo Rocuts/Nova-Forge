@@ -104,4 +104,13 @@
     background-image: radial-gradient(circle, #d4d4d4 0.5px, transparent 0.5px);
     background-size: 24px 24px;
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .marquee-container:hover .marquee-track {
+    animation-play-state: paused;
+  }
 }

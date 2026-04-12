@@ -1,7 +1,35 @@
 "use client"
 
+import { Icon } from "@iconify/react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
+
+const ICON_MAP: Record<string, string> = {
+  "Claude Opus 4": "simple-icons:anthropic",
+  "Gemini 2.5": "simple-icons:googlegemini",
+  "LLaMA 4": "simple-icons:meta",
+  "PyTorch": "simple-icons:pytorch",
+  "AWS": "simple-icons:amazonwebservices",
+  "Google Cloud": "simple-icons:googlecloud",
+  "Microsoft Azure": "simple-icons:microsoftazure",
+  "Kubernetes": "simple-icons:kubernetes",
+  "Terraform": "simple-icons:terraform",
+  "Pulumi": "simple-icons:pulumi",
+  "Next.js 16": "simple-icons:nextdotjs",
+  "React 19": "simple-icons:react",
+  "TypeScript 5": "simple-icons:typescript",
+  "Bun": "simple-icons:bun",
+  "Rust": "simple-icons:rust",
+  "Go": "simple-icons:go",
+  "PostgreSQL": "simple-icons:postgresql",
+  "ClickHouse": "simple-icons:clickhouse",
+  "Apache Kafka": "simple-icons:apachekafka",
+  "Apache Flink": "simple-icons:apacheflink",
+  "Grafana": "simple-icons:grafana",
+  "dbt": "simple-icons:dbt",
+}
+
+const SPEEDS = [25, 30, 35, 28, 32]
 
 interface TechStackContent {
   sectionId: string
@@ -10,6 +38,62 @@ interface TechStackContent {
     name: string
     items: readonly string[]
   }[]
+}
+
+function MarqueeRow({
+  category,
+  speed,
+  index,
+}: {
+  category: { name: string; items: readonly string[] }
+  speed: number
+  index: number
+}) {
+  const items = category.items
+  const doubled = [...items, ...items]
+  const direction = index % 2 === 0 ? "normal" : "reverse"
+
+  return (
+    <div className="flex items-center border-b border-[#e5e5e5] last:border-b-0">
+      <div className="w-40 md:w-52 shrink-0 py-6 pr-6 pl-6">
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#a3a3a3]">
+          {category.name}
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-hidden py-6">
+        <div
+          className="marquee-track flex items-center gap-10 w-max"
+          style={{
+            animation: `marquee ${speed}s linear infinite`,
+            animationDirection: direction,
+          }}
+        >
+          {doubled.map((item, i) => {
+            const iconName = ICON_MAP[item]
+            return (
+              <div
+                key={`${item}-${i}`}
+                className="flex items-center gap-2.5 shrink-0"
+              >
+                {iconName && (
+                  <Icon
+                    icon={iconName}
+                    width={20}
+                    height={20}
+                    className="text-[#525252]"
+                  />
+                )}
+                <span className="text-sm font-medium text-[#0a0a0a] whitespace-nowrap">
+                  {item}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function TechStack({ content }: { content: TechStackContent }) {
@@ -21,40 +105,26 @@ export function TechStack({ content }: { content: TechStackContent }) {
       <div className="mx-auto max-w-7xl px-6">
         <RevealText
           as="h2"
-          className="text-4xl md:text-5xl font-bold text-center text-[#0a0a0a] mb-16"
+          className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-[#0a0a0a] text-center mb-16"
         >
           {content.title}
         </RevealText>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="bg-white border border-[#e5e5e5] rounded-[6px] overflow-hidden"
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="marquee-container bg-white border border-[#e5e5e5] rounded-[6px] overflow-hidden"
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            {content.categories.map((cat, ci) => (
-              <div
-                key={cat.name}
-                className={`p-6 ${ci < content.categories.length - 1 ? "lg:border-r border-[#e5e5e5]" : ""}`}
-              >
-                <h3 className="text-xs font-bold tracking-[0.2em] uppercase text-[#a3a3a3] mb-6">
-                  {cat.name}
-                </h3>
-                <ul className="space-y-4">
-                  {cat.items.map((item) => (
-                    <li
-                      key={item}
-                      className="text-sm font-medium text-[#0a0a0a]"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          {content.categories.map((cat, i) => (
+            <MarqueeRow
+              key={cat.name}
+              category={cat}
+              speed={SPEEDS[i % SPEEDS.length]}
+              index={i}
+            />
+          ))}
         </motion.div>
       </div>
     </section>
