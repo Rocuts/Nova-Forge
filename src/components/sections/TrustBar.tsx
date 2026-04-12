@@ -7,7 +7,6 @@ const TRUST_ITEMS = [
   "Microsoft Azure",
   "OpenAI",
   "Vercel",
-  "ISO 27001",
 ]
 
 export function TrustBar() {
