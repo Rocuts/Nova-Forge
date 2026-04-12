@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
       { source: "/en/sovereign-ai", destination: "/en/soberania-ia" },
       { source: "/en/cybersecurity", destination: "/en/ciberseguridad" },
       { source: "/en/digital-workforce", destination: "/en/fuerza-digital" },
+      { source: "/en/critical-systems", destination: "/en/sistemas-criticos" },
+      { source: "/en/operational-intelligence", destination: "/en/inteligencia-operativa" },
+      { source: "/en/government-automation", destination: "/en/automatizacion-gobierno" },
     ];
   },
 };

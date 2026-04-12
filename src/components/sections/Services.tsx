@@ -56,15 +56,8 @@ export function Services({ content: servicesSection }: { content: ServicesConten
         >
           {servicesSection.items.map((svc) => {
             const Icon = SERVICE_ICONS[svc.icon]
-            return (
-              <motion.div
-                key={svc.title}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-                }}
-                className="group bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-10 flex flex-col hover:border-[#a3a3a3] transition-colors duration-300"
-              >
+            const cardContent = (
+              <>
                 <div className="mb-8 text-[#0a0a0a]">
                   <Icon size={28} />
                 </div>
@@ -79,13 +72,28 @@ export function Services({ content: servicesSection }: { content: ServicesConten
                   ))}
                 </ul>
                 {svc.href && (
-                  <Link
-                    href={svc.href}
-                    className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-[#0a0a0a] hover:text-[#525252] transition-colors"
-                  >
-                    Explorar
-                    <span aria-hidden="true">&rarr;</span>
+                  <span className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-[#0a0a0a] group-hover:text-[#525252] transition-colors">
+                    Explorar <span aria-hidden="true">&rarr;</span>
+                  </span>
+                )}
+              </>
+            )
+
+            return (
+              <motion.div
+                key={svc.title}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+                }}
+                className={`group bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-10 flex flex-col hover:border-[#a3a3a3] transition-colors duration-300${svc.href ? " cursor-pointer" : ""}`}
+              >
+                {svc.href ? (
+                  <Link href={svc.href} className="flex flex-col h-full">
+                    {cardContent}
                   </Link>
+                ) : (
+                  <div className="flex flex-col h-full">{cardContent}</div>
                 )}
               </motion.div>
             )

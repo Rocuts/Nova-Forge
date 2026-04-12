@@ -13,6 +13,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/soberania-ia", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/ciberseguridad", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/fuerza-digital", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/sistemas-criticos", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/inteligencia-operativa", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/automatizacion-gobierno", priority: 0.8, changeFrequency: "monthly" as const },
   ]
 
   const enPages = [
@@ -24,6 +27,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/en/sovereign-ai", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/cybersecurity", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/en/digital-workforce", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/critical-systems", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/operational-intelligence", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/en/government-automation", priority: 0.8, changeFrequency: "monthly" as const },
   ]
 
   return [...esPages, ...enPages].map((page) => ({

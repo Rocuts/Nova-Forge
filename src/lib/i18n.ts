@@ -16,6 +16,9 @@ export const pathMap: Record<string, Record<Locale, string>> = {
   "/soberania-ia": { es: "/soberania-ia", en: "/sovereign-ai" },
   "/ciberseguridad": { es: "/ciberseguridad", en: "/cybersecurity" },
   "/fuerza-digital": { es: "/fuerza-digital", en: "/digital-workforce" },
+  "/sistemas-criticos": { es: "/sistemas-criticos", en: "/critical-systems" },
+  "/inteligencia-operativa": { es: "/inteligencia-operativa", en: "/operational-intelligence" },
+  "/automatizacion-gobierno": { es: "/automatizacion-gobierno", en: "/government-automation" },
 }
 
 export function buildLocalePath(locale: Locale, internalPath: string): string {
