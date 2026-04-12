@@ -682,9 +682,10 @@ const en = {
     companyPlaceholder: "Acme Corp",
     topicLabel: "Topic of interest",
     topics: [
-      "Custom Software",
-      "AI Agents",
-      "SaaS Platform",
+      "Sovereign AI",
+      "Cybersecurity",
+      "Digital Workforce",
+      "Critical Systems",
       "Technical Consulting",
       "Other",
     ],
