@@ -239,8 +239,8 @@ const en = {
         tagline: "Strategist for high-scale digital products.",
       },
       {
-        name: "Yeison Arley",
-        initials: "YA",
+        name: "Yeison Grisales",
+        initials: "YG",
         role: "Director of Business Strategy",
         tagline: "Specialist in B2B technology solutions.",
       },
@@ -299,8 +299,9 @@ const en = {
       { name: "Artificial Intelligence", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "OpenClaw", "n8n", "LangChain", "PyTorch", "Ollama"] },
       { name: "Cloud & Infrastructure", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
       { name: "Development & Platforms", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
-      { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "SOC Automation", "WAF"] },
+      { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
       { name: "Data & Analytics", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
+      { name: "Compliance", items: ["SOC 2 Type II", "ISO 27001", "GDPR", "SSPA", "NIST CSF", "PCI DSS"] },
     ],
   },
   metrics: {
@@ -802,7 +803,7 @@ const en = {
       members: [
         { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all NovaForge solutions." },
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines NovaForge's product vision and market strategy in the enterprise and government sector." },
-        { name: "Yeison Arley", initials: "YA", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions. Manages commercial relationships and NovaForge's expansion in regulated industries." },
+        { name: "Yeison Grisales", initials: "YG", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions. Manages commercial relationships and NovaForge's expansion in regulated industries." },
         { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect NovaForge's technology with end users." },
       ],
     },
@@ -843,7 +844,7 @@ const en = {
       members: [
         { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
-        { name: "Yeison Arley", initials: "YA", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions for regulated industries." },
+        { name: "Yeison Grisales", initials: "YG", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions for regulated industries." },
         { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development and enterprise interface systems." },
       ],
     },

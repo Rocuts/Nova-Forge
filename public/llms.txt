@@ -17,7 +17,7 @@ Diseñamos, construimos y operamos software completo y agentes de IA para empres
 ## Equipo
 - Cristian Mancilla — Co-fundador
 - Johan Rocuts — Co-fundador
-- Yeison Arley — Co-fundador
+- Yeison Grisales — Co-fundador
 
 ## Diferenciadores
 - Fábrica de software con proceso de ingeniería estructurado
