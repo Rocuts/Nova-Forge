@@ -56,8 +56,8 @@ function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
 function getMegaMenuLabels(locale: string) {
   const isEN = locale === "en"
   return {
-    navigation: isEN ? "NAVIGATION" : "NAVEGACIÓN",
     platform: isEN ? "PLATFORM" : "PLATAFORMA",
+    solutions: isEN ? "SOLUTIONS" : "SOLUCIONES",
     about: isEN ? "ABOUT NOVAFORGE" : "SOBRE NOVAFORGE",
     contact: isEN ? "CONTACT" : "CONTACTO",
     learnMore: isEN ? "Learn more" : "Conocer más",
@@ -116,10 +116,9 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const columnItems = nav.items.filter((item) => item.children)
   const directItems = nav.items.filter((item) => !item.children)
 
-  // Collect all product links (children of column items) for the flat nav list
-  const allProductLinks = columnItems.flatMap(
-    (item) => item.children?.map((child) => ({ ...child })) ?? []
-  )
+  // Keep Platform and Solutions children separate
+  const platformLinks = columnItems[0]?.children ?? []
+  const solutionsLinks = columnItems[1]?.children ?? []
 
   return (
     <>
@@ -240,54 +239,19 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
 
             <div className="container px-6 mx-auto max-w-7xl py-12">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {/* Column 1: NAVIGATION — flat list of all links */}
-                <div>
-                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
-                    {labels.navigation}
-                  </h3>
-                  <div className="flex flex-col">
-                    {allProductLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={resolveHref(locale, link.href)}
-                        onClick={closeMegaMenu}
-                        className="block py-2 group/link"
-                      >
-                        <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-white hover:text-[#a3a3a3] transition-colors">
-                          <span className="text-[#525252] mr-2">&#8627;</span>
-                          {link.name}
-                        </span>
-                      </Link>
-                    ))}
-                    {/* Direct links (Empresa, Inversores) without arrows */}
-                    {directItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href ? resolveHref(locale, item.href) : "#"}
-                        onClick={closeMegaMenu}
-                        className="block py-2 mt-1"
-                      >
-                        <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-white hover:text-[#a3a3a3] transition-colors">
-                          {item.name}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Column 2: PLATFORM — products with descriptions */}
+                {/* Column 1: PLATFORM — core technology products */}
                 <div>
                   <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
                     {labels.platform}
                   </h3>
                   <div className="flex flex-col">
-                    {allProductLinks.map((link, i) => (
+                    {platformLinks.map((link, i) => (
                       <Link
                         key={link.href}
                         href={resolveHref(locale, link.href)}
                         onClick={closeMegaMenu}
                         className={`block py-4 group/desc ${
-                          i < allProductLinks.length - 1
+                          i < platformLinks.length - 1
                             ? "border-b border-white/5"
                             : ""
                         }`}
@@ -301,6 +265,52 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                             {link.description}
                           </span>
                         )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 2: SOLUTIONS — use-case / outcome-oriented */}
+                <div>
+                  <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#525252] mb-8">
+                    {labels.solutions}
+                  </h3>
+                  <div className="flex flex-col">
+                    {solutionsLinks.map((link, i) => (
+                      <Link
+                        key={link.href}
+                        href={resolveHref(locale, link.href)}
+                        onClick={closeMegaMenu}
+                        className={`block py-4 group/desc ${
+                          i < solutionsLinks.length - 1
+                            ? "border-b border-white/5"
+                            : ""
+                        }`}
+                      >
+                        <span className="text-base font-medium text-white group-hover/desc:text-[#a3a3a3] transition-colors">
+                          <span className="text-[#525252] mr-1.5">&#8627;</span>
+                          {link.name}
+                        </span>
+                        {link.description && (
+                          <span className="block text-sm text-[#525252] mt-1">
+                            {link.description}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Direct links below Solutions */}
+                  <div className="mt-8 pt-6 border-t border-white/5 flex flex-col gap-3">
+                    {directItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href ? resolveHref(locale, item.href) : "#"}
+                        onClick={closeMegaMenu}
+                        className="text-base font-medium text-white hover:text-[#a3a3a3] transition-colors"
+                      >
+                        <span className="text-[#525252] mr-1.5">&#8627;</span>
+                        {item.name}
                       </Link>
                     ))}
                   </div>

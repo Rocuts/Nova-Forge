@@ -73,9 +73,9 @@ export function Investors({ content }: { content: InvestorsContent }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
               transition={stagger(i)}
-              className="bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-8"
+              className="bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-6 md:p-8 overflow-hidden"
             >
-              <p className="text-6xl font-bold text-white tracking-tight mb-3">
+              <p className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-3 break-words">
                 {stat.value}
               </p>
               <p className="text-sm text-[#a3a3a3]">{stat.label}</p>

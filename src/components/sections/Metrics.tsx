@@ -90,9 +90,9 @@ export function Metrics({ content }: { content: MetricsContent }) {
                     hidden: { opacity: 0, y: 20 },
                     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
                   }}
-                  className="p-10 bg-[#141414] border border-[#1a1a1a] rounded-[6px]"
+                  className="p-6 md:p-8 bg-[#141414] border border-[#1a1a1a] rounded-[6px] overflow-hidden"
                 >
-                  <div className="text-5xl font-bold text-white mb-4 tracking-tighter">
+                  <div className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter break-words">
                     <AnimatedNumber value={value} suffix={suffix} />
                   </div>
                   <div className="text-[#a3a3a3] text-sm font-medium leading-snug">
