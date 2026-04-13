@@ -1,7 +1,6 @@
 "use client"
 import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
 
 interface TeamContent {
@@ -22,6 +21,7 @@ const ACCENT = [
 export function Team({ content: teamSection }: { content: TeamContent }) {
   const { ref: entranceRef, opacity, y } = useSectionEntrance()
   const [hovered, setHovered] = useState<number | null>(null)
+  const hoveredRole = hovered !== null ? teamSection.members[hovered]?.role : null
 
   return (
     <motion.section
@@ -31,11 +31,22 @@ export function Team({ content: teamSection }: { content: TeamContent }) {
       className="py-32 bg-[#0a0a0a] relative z-10"
     >
       <div className="mx-auto max-w-7xl px-6">
-        {/* Split header */}
+        {/* Split header — title swaps to hovered member's role */}
         <div className="mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-          <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-white">
-            {teamSection.title}
-          </RevealText>
+          <div className="relative md:max-w-lg lg:max-w-xl shrink-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={hoveredRole ?? "default"}
+                initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -20, filter: "blur(6px)" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+                className={`font-heading text-5xl md:text-7xl font-bold tracking-tight ${hoveredRole ? "text-white/70" : "text-white"}`}
+              >
+                {hoveredRole ?? teamSection.title}
+              </motion.h2>
+            </AnimatePresence>
+          </div>
           <p className="text-white/40 text-lg md:text-xl leading-relaxed max-w-md md:pb-2">
             {teamSection.description}
           </p>
