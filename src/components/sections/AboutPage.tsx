@@ -1,5 +1,6 @@
 "use client"
-import { motion } from "motion/react"
+import { useState } from "react"
+import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { Button } from "@/components/ui/Button"
 
@@ -39,6 +40,105 @@ const stagger = (i: number) => ({
 })
 
 const viewportConfig = { once: true, margin: "-100px" as const }
+
+const TEAM_ACCENT = [
+  { gradient: "from-blue-400 to-cyan-400", text: "text-blue-400" },
+  { gradient: "from-violet-400 to-purple-400", text: "text-violet-400" },
+  { gradient: "from-emerald-400 to-teal-400", text: "text-emerald-400" },
+  { gradient: "from-amber-400 to-orange-400", text: "text-amber-400" },
+] as const
+
+function TeamRows({ title, description, members, viewportConfig: vpc }: {
+  title: string
+  description: string
+  members: readonly { name: string; initials: string; role: string; bio: string }[]
+  viewportConfig: { once: boolean; margin: string }
+}) {
+  const [hovered, setHovered] = useState<number | null>(null)
+
+  return (
+    <section className="py-32 bg-[#0a0a0a]">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <RevealText as="h2" className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-white">
+            {title}
+          </RevealText>
+          <p className="text-white/40 text-lg leading-relaxed max-w-md md:pb-2">{description}</p>
+        </div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={vpc}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+        >
+          <div className="h-px w-full bg-white/[0.08]" />
+          {members.map((member, i) => {
+            const accent = TEAM_ACCENT[i % TEAM_ACCENT.length]
+            const active = hovered === i
+            const num = String(i + 1).padStart(2, "0")
+            return (
+              <motion.div
+                key={member.name}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.4, 0.25, 1] } },
+                }}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                className="group relative border-b border-white/[0.08]"
+              >
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-r ${accent.gradient} pointer-events-none`}
+                  initial={false}
+                  animate={{ opacity: active ? 0.05 : 0 }}
+                  transition={{ duration: 0.4 }}
+                />
+                <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none overflow-hidden">
+                  <motion.span
+                    className="font-heading text-[7rem] md:text-[10rem] lg:text-[13rem] font-bold leading-none text-white/[0.03] block"
+                    initial={false}
+                    animate={{ opacity: active ? 1 : 0, x: active ? 0 : 60 }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
+                  >
+                    {member.initials}
+                  </motion.span>
+                </div>
+                <div className="relative py-7 md:py-10">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
+                    <span className={`text-xs font-mono tracking-wider transition-colors duration-300 md:w-8 shrink-0 ${active ? accent.text : "text-white/20"}`}>{num}</span>
+                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-heading font-bold text-white tracking-tight flex-1 transition-transform duration-300 md:group-hover:translate-x-2">{member.name}</h3>
+                    <p className="text-[10px] md:text-xs font-medium tracking-[0.15em] uppercase text-white/30 md:text-right md:w-72 shrink-0">{member.role}</p>
+                  </div>
+                  <p className="mt-3 text-sm text-white/30 leading-relaxed max-w-2xl md:pl-16 md:hidden">{member.bio}</p>
+                  <AnimatePresence>
+                    {active && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+                        className="hidden md:block overflow-hidden"
+                      >
+                        <p className="pt-4 pl-16 text-base text-white/50 max-w-2xl leading-relaxed">{member.bio}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <motion.div
+                  className={`absolute bottom-0 left-0 h-px bg-gradient-to-r ${accent.gradient}`}
+                  initial={false}
+                  animate={{ width: active ? "100%" : "0%" }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
+                />
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      </div>
+    </section>
+  )
+}
 
 export function AboutPage({ content }: { content: AboutPageContent }) {
   return (
@@ -167,71 +267,7 @@ export function AboutPage({ content }: { content: AboutPageContent }) {
       </section>
 
       {/* ── Team ── */}
-      <section className="py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-20 max-w-3xl">
-            <RevealText
-              as="h2"
-              className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-[#0a0a0a] mb-8"
-            >
-              {content.team.title}
-            </RevealText>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={viewportConfig}
-              transition={stagger(0)}
-              className="text-lg text-[#525252] leading-relaxed"
-            >
-              {content.team.description}
-            </motion.p>
-          </div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportConfig}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 },
-              },
-            }}
-          >
-            {content.team.members.map((member) => (
-              <motion.div
-                key={member.name}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: "easeOut" },
-                  },
-                }}
-                className="text-center"
-              >
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-[#0a0a0a] text-white flex items-center justify-center mb-6">
-                    <span className="text-lg font-semibold">{member.initials}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#0a0a0a] mb-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-xs tracking-widest uppercase text-[#a3a3a3] mb-4">
-                    {member.role}
-                  </p>
-                  <p className="text-sm text-[#525252] leading-relaxed">
-                    {member.bio}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+      <TeamRows title={content.team.title} description={content.team.description} members={content.team.members} viewportConfig={viewportConfig} />
 
       {/* ── Values ── */}
       <section className="py-32 bg-[#f8f8f8]">
