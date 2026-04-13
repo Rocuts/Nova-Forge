@@ -1,7 +1,7 @@
 "use client"
 import { motion } from "motion/react"
 import { Button } from "@/components/ui/Button"
-import { RevealText } from "@/components/ui/RevealText"
+import { ScrambleText } from "@/components/ui/ScrambleText"
 import { trackEvent } from "@/lib/analytics"
 
 interface CTAContent {
@@ -22,11 +22,13 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
         className="mx-auto max-w-5xl px-6 text-center"
       >
         <div className="font-heading text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
-          <RevealText as="span" className="inline text-white">
+          <ScrambleText as="span" className="inline text-white" duration={1400} delay={0.15}>
             {ctaSection.lead}
-          </RevealText>
+          </ScrambleText>
           <br className="hidden md:block" />
-          <span className="text-[#a3a3a3]">{ctaSection.highlight}</span>
+          <ScrambleText as="span" className="text-[#a3a3a3]" duration={1600} delay={0.4}>
+            {ctaSection.highlight}
+          </ScrambleText>
         </div>
 
         <p className="text-lg md:text-xl text-[#a3a3a3] mb-14 max-w-2xl mx-auto leading-relaxed">
