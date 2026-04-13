@@ -17,10 +17,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Default: redirect root Spanish paths to /es/*
+  // Default: serve Spanish content at root paths without a visible redirect
   const url = request.nextUrl.clone()
   url.pathname = `/es${pathname}`
-  return NextResponse.redirect(url)
+  return NextResponse.rewrite(url)
 }
 
 export const config = {
