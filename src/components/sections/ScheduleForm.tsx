@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { CalendarCheck, ArrowLeft } from "lucide-react"
+import { ScrambleText } from "@/components/ui/ScrambleText"
 
 interface ScheduleFormProps {
   content: {
@@ -92,7 +93,9 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
           {content.badge}
         </p>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading tracking-tight mt-6 mb-8 leading-[1.1]">
-          {content.pageTitle}
+          <ScrambleText as="span" className="text-white" delay={0.15} duration={1400}>
+            {content.pageTitle}
+          </ScrambleText>
         </h1>
         <p className="text-[#a3a3a3] text-lg leading-relaxed max-w-md">
           {content.pageSubtitle}
