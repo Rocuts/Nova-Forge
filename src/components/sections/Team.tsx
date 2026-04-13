@@ -41,7 +41,7 @@ export function Team({ content: teamSection }: { content: TeamContent }) {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -20, filter: "blur(6px)" }}
                 transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
-                className={`font-heading text-5xl md:text-7xl font-bold tracking-tight ${hoveredRole ? "text-white/70" : "text-white"}`}
+                className={`font-heading text-5xl md:text-7xl font-bold tracking-tight text-white`}
               >
                 {hoveredRole ?? teamSection.title}
               </motion.h2>

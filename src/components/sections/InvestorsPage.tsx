@@ -71,7 +71,7 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -20, filter: "blur(6px)" }}
                 transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
-                className={`font-heading text-4xl md:text-5xl font-bold tracking-tight ${hoveredRole ? "text-white/70" : "text-white"}`}
+                className={`font-heading text-4xl md:text-5xl font-bold tracking-tight text-white`}
               >
                 {hoveredRole ?? title}
               </motion.h2>
