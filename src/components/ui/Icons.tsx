@@ -136,3 +136,4 @@ export function IconInfra({ size = 24, className }: IconProps) {
     </svg>
   )
 }
+

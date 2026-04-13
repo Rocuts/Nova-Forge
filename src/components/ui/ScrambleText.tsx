@@ -26,7 +26,9 @@ export function ScrambleText({
     let timeout: NodeJS.Timeout
     let frameId: number
     let startTime: number
-    
+    let lastUpdateTime = 0
+    const updateInterval = 40 // ~25 FPS
+
     // Safety check just in case children isn't a string
     const text = typeof children === 'string' ? children : String(children)
 
@@ -34,20 +36,22 @@ export function ScrambleText({
       if (!startTime) startTime = timestamp
       const progress = timestamp - startTime
 
-      let newText = ""
-      for (let i = 0; i < text.length; i++) {
-        // Distribute completion times across the duration
-        const charSettleTime = (duration / text.length) * i
-        
-        if (progress >= charSettleTime) {
-          newText += text[i]
-        } else {
-          // Keep spaces as spaces to maintain natural word wrapping breaks if any
-          newText += text[i] === " " ? " " : CHARS[Math.floor(Math.random() * CHARS.length)]
+      if (timestamp - lastUpdateTime >= updateInterval) {
+        let newText = ""
+        for (let i = 0; i < text.length; i++) {
+          const charSettleTime = (duration / text.length) * i
+          
+          if (progress >= charSettleTime) {
+            newText += text[i]
+          } else {
+            // Keep spaces as spaces to maintain natural word wrapping breaks if any
+            newText += text[i] === " " ? " " : CHARS[Math.floor(Math.random() * CHARS.length)]
+          }
         }
-      }
 
-      setDisplayText(newText)
+        setDisplayText(newText)
+        lastUpdateTime = timestamp
+      }
 
       if (progress < duration) {
         frameId = requestAnimationFrame(animate)
