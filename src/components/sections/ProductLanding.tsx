@@ -3,6 +3,8 @@ import { motion } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CharReveal } from "@/components/ui/RevealText"
 import { RevealText } from "@/components/ui/RevealText"
+import { buildLocalePath } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 
 interface ProductLandingContent {
   eyebrow: string
@@ -32,10 +34,17 @@ const stagger = (i: number) => ({
 
 const viewportConfig = { once: true, margin: "-100px" as const }
 
+function resolveHref(locale: string, href: string): string {
+  if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("http")) return href
+  return buildLocalePath(locale as Locale, href)
+}
+
 export function ProductLanding({
   content,
+  locale,
 }: {
   content: ProductLandingContent
+  locale: string
 }) {
   return (
     <div>
@@ -88,7 +97,7 @@ export function ProductLanding({
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(4)}
           >
-            <Button size="lg" variant="primary" href={content.cta.action.href}>
+            <Button size="lg" variant="primary" href={resolveHref(locale, content.cta.action.href)}>
               {content.cta.action.label}
             </Button>
           </motion.div>
@@ -171,7 +180,7 @@ export function ProductLanding({
             {content.cta.description}
           </p>
 
-          <Button size="lg" variant="primary" href={content.cta.action.href}>
+          <Button size="lg" variant="primary" href={resolveHref(locale, content.cta.action.href)}>
             {content.cta.action.label}
           </Button>
         </motion.div>

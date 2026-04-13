@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const enPages = [
     { path: "/en", priority: 1, changeFrequency: "weekly" as const },
     { path: "/en/schedule", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/en/diagnostics", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/en/diagnostic", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/en/privacy", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/en/terms", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/en/sovereign-ai", priority: 0.8, changeFrequency: "monthly" as const },

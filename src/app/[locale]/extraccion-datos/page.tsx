@@ -19,5 +19,5 @@ export default async function DataExtractionPage({ params }: { params: Promise<{
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.dataExtraction} />
+  return <ProductLanding content={dict.products.dataExtraction} locale={locale} />
 }

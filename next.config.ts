@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       // English slug aliases → internal [locale] routes
-      { source: "/en/diagnostics", destination: "/en/diagnostico" },
+      { source: "/en/diagnostic", destination: "/en/diagnostico" },
       { source: "/en/privacy", destination: "/en/privacidad" },
       { source: "/en/terms", destination: "/en/terminos" },
       { source: "/en/schedule", destination: "/en/agendar" },

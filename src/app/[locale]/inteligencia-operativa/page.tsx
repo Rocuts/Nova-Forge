@@ -19,5 +19,5 @@ export default async function OperationalIntelligencePage({ params }: { params: 
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.operationalIntelligence} />
+  return <ProductLanding content={dict.products.operationalIntelligence} locale={locale} />
 }

@@ -19,5 +19,5 @@ export default async function SystemsArchitecturePage({ params }: { params: Prom
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.systemsArchitecture} />
+  return <ProductLanding content={dict.products.systemsArchitecture} locale={locale} />
 }

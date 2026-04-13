@@ -19,5 +19,5 @@ export default async function GovernmentAutomationPage({ params }: { params: Pro
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.governmentAutomation} />
+  return <ProductLanding content={dict.products.governmentAutomation} locale={locale} />
 }

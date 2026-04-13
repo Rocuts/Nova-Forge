@@ -19,5 +19,5 @@ export default async function AboutLandingPage({ params }: { params: Promise<{ l
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <AboutPage content={dict.aboutPage} />
+  return <AboutPage content={dict.aboutPage} locale={locale} />
 }

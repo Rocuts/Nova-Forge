@@ -1,41 +1,44 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { pathMap } from "@/lib/i18n"
 
 interface LanguageSwitcherProps {
   locale: string
 }
 
-// Bidirectional path mapping — includes both visible URLs and internal [locale] paths
-const PATH_MAP: Record<string, string> = {
-  // ES visible -> EN visible
-  "/": "/en",
-  "/diagnostico": "/en/diagnostics",
-  "/privacidad": "/en/privacy",
-  "/terminos": "/en/terms",
-  "/agendar": "/en/schedule",
-  // ES internal (middleware-rewritten) -> EN visible
-  "/es": "/en",
-  "/es/diagnostico": "/en/diagnostics",
-  "/es/privacidad": "/en/privacy",
-  "/es/terminos": "/en/terms",
-  "/es/agendar": "/en/schedule",
-  // EN -> ES visible
-  "/en": "/",
-  "/en/diagnostics": "/diagnostico",
-  "/en/diagnostico": "/diagnostico",
-  "/en/privacy": "/privacidad",
-  "/en/privacidad": "/privacidad",
-  "/en/terms": "/terminos",
-  "/en/terminos": "/terminos",
-  "/en/schedule": "/agendar",
-  "/en/agendar": "/agendar",
+// Build a bidirectional lookup from pathMap so every page is covered automatically.
+function buildSwitchMap(): Record<string, string> {
+  const map: Record<string, string> = {
+    // Root pages
+    "/": "/en",
+    "/es": "/en",
+    "/en": "/",
+  }
+
+  for (const [, slugs] of Object.entries(pathMap)) {
+    const esSlug = slugs.es   // e.g. "/privacidad"
+    const enSlug = slugs.en   // e.g. "/privacy"
+
+    // ES visible -> EN visible
+    map[esSlug] = `/en${enSlug}`
+    // ES internal (middleware-rewritten with /es prefix) -> EN visible
+    map[`/es${esSlug}`] = `/en${enSlug}`
+    // EN visible -> ES visible
+    map[`/en${enSlug}`] = esSlug
+    // EN internal (Spanish slug still in URL) -> ES visible
+    map[`/en${esSlug}`] = esSlug
+  }
+
+  return map
 }
+
+const SWITCH_MAP = buildSwitchMap()
 
 export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   const pathname = usePathname()
 
-  const targetPath = PATH_MAP[pathname] ?? (
+  const targetPath = SWITCH_MAP[pathname] ?? (
     locale === "es"
       ? `/en${pathname.replace(/^\/es/, "")}`
       : pathname.replace(/^\/en/, "") || "/"

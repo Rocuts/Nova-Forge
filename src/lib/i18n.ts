@@ -9,7 +9,7 @@ export const localePrefix: Record<Locale, string> = {
 
 // Maps internal route paths to locale-specific slugs
 export const pathMap: Record<string, Record<Locale, string>> = {
-  "/diagnostico": { es: "/diagnostico", en: "/diagnostics" },
+  "/diagnostico": { es: "/diagnostico", en: "/diagnostic" },
   "/privacidad": { es: "/privacidad", en: "/privacy" },
   "/terminos": { es: "/terminos", en: "/terms" },
   "/agendar": { es: "/agendar", en: "/schedule" },

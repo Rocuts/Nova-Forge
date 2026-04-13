@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { ScheduleForm } from "@/components/sections/ScheduleForm"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, localePrefix } from "@/lib/i18n"
+import { isValidLocale, buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { siteConfig } from "@/config/site"
 import { notFound } from "next/navigation"
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: dict.schedule.pageTitle,
     description: dict.schedule.pageSubtitle,
     alternates: {
-      canonical: `${localePrefix[locale]}/agendar`,
+      canonical: buildLocalePath(locale, "/agendar"),
       languages: {
         es: "/agendar",
         en: "/en/schedule",

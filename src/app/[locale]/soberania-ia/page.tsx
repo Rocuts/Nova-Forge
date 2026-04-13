@@ -19,5 +19,5 @@ export default async function SovereignAIPage({ params }: { params: Promise<{ lo
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.sovereignAI} />
+  return <ProductLanding content={dict.products.sovereignAI} locale={locale} />
 }

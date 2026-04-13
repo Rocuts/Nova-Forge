@@ -3,6 +3,8 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { Button } from "@/components/ui/Button"
+import { buildLocalePath } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 
 interface AboutPageContent {
   eyebrow: string
@@ -152,7 +154,12 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
   )
 }
 
-export function AboutPage({ content }: { content: AboutPageContent }) {
+function resolveHref(locale: string, href: string): string {
+  if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("http")) return href
+  return buildLocalePath(locale as Locale, href)
+}
+
+export function AboutPage({ content, locale }: { content: AboutPageContent; locale: string }) {
   return (
     <div>
       {/* ── Hero ── */}
@@ -351,7 +358,7 @@ export function AboutPage({ content }: { content: AboutPageContent }) {
           <Button
             size="lg"
             variant="primary"
-            href={content.cta.action.href}
+            href={resolveHref(locale, content.cta.action.href)}
             className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
           >
             {content.cta.action.label}

@@ -19,5 +19,5 @@ export default async function DigitalWorkforcePage({ params }: { params: Promise
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.digitalWorkforce} />
+  return <ProductLanding content={dict.products.digitalWorkforce} locale={locale} />
 }

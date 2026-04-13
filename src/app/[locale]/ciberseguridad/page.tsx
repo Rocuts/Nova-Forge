@@ -19,5 +19,5 @@ export default async function CybersecurityPage({ params }: { params: Promise<{ 
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.cybersecurity} />
+  return <ProductLanding content={dict.products.cybersecurity} locale={locale} />
 }

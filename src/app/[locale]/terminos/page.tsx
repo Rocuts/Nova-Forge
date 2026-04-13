@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { LegalPage } from "@/components/sections/LegalPage"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, localePrefix } from "@/lib/i18n"
+import { isValidLocale, buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: dict.terms.title,
     description: dict.terms.description,
     alternates: {
-      canonical: `${localePrefix[locale]}/terminos`,
+      canonical: buildLocalePath(locale, "/terminos"),
       languages: {
         es: "/terminos",
         en: "/en/terms",

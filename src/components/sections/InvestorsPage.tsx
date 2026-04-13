@@ -3,6 +3,8 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { Button } from "@/components/ui/Button"
+import { buildLocalePath } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 
 interface InvestorsPageContent {
   eyebrow: string
@@ -154,7 +156,12 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
   )
 }
 
-export function InvestorsPage({ content }: { content: InvestorsPageContent }) {
+function resolveHref(locale: string, href: string): string {
+  if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("http")) return href
+  return buildLocalePath(locale as Locale, href)
+}
+
+export function InvestorsPage({ content, locale }: { content: InvestorsPageContent; locale: string }) {
   return (
     <div>
       {/* ── Hero ── */}
@@ -324,7 +331,7 @@ export function InvestorsPage({ content }: { content: InvestorsPageContent }) {
             <Button
               size="lg"
               variant="primary"
-              href={content.cta.action.href}
+              href={resolveHref(locale, content.cta.action.href)}
             >
               {content.cta.action.label}
             </Button>

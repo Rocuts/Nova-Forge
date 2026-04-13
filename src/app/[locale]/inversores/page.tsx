@@ -19,5 +19,5 @@ export default async function InvestorsLandingPage({ params }: { params: Promise
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <InvestorsPage content={dict.investorsPage} />
+  return <InvestorsPage content={dict.investorsPage} locale={locale} />
 }
