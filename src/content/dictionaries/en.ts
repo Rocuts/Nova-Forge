@@ -227,12 +227,6 @@ const en = {
     description: "Engineering and strategy behind NovaForge.",
     members: [
       {
-        name: "Cristian Mancilla",
-        initials: "CM",
-        role: "CTO - Chief Technology Officer",
-        tagline: "Specialist in distributed systems architecture.",
-      },
-      {
         name: "Johan Rocuts",
         initials: "JR",
         role: "CEO - Chief Executive Officer",
@@ -243,6 +237,12 @@ const en = {
         initials: "YG",
         role: "Director of Business Strategy",
         tagline: "Specialist in B2B technology solutions.",
+      },
+      {
+        name: "Cristian Mancilla",
+        initials: "CM",
+        role: "CTO - Chief Technology Officer",
+        tagline: "Specialist in distributed systems architecture.",
       },
       {
         name: "Andres Rodriguez",
@@ -801,9 +801,9 @@ const en = {
       title: "Founding Team",
       description: "Engineering and strategy behind NovaForge.",
       members: [
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all NovaForge solutions." },
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines NovaForge's product vision and market strategy in the enterprise and government sector." },
         { name: "Yeison Grisales", initials: "YG", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions. Manages commercial relationships and NovaForge's expansion in regulated industries." },
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all NovaForge solutions." },
         { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect NovaForge's technology with end users." },
       ],
     },
@@ -842,9 +842,9 @@ const en = {
       title: "Our Team",
       description: "Engineering and strategy behind NovaForge.",
       members: [
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
         { name: "Yeison Grisales", initials: "YG", role: "Director of Business Strategy", bio: "Specialist in B2B technology solutions for regulated industries." },
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
         { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development and enterprise interface systems." },
       ],
     },
