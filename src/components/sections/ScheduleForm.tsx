@@ -93,7 +93,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
           {content.badge}
         </p>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading tracking-tight mt-6 mb-8 leading-[1.1]">
-          <ScrambleText as="span" className="text-white" delay={0.15} duration={1400}>
+          <ScrambleText as="span" className="text-white" delay={0.1} duration={700}>
             {content.pageTitle}
           </ScrambleText>
         </h1>
