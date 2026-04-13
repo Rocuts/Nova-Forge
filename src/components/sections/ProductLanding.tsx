@@ -3,6 +3,7 @@ import { motion } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CharReveal } from "@/components/ui/RevealText"
 import { RevealText } from "@/components/ui/RevealText"
+import { ScrambleText } from "@/components/ui/ScrambleText"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
@@ -69,9 +70,9 @@ export function ProductLanding({
             transition={stagger(1)}
             className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-8"
           >
-            <CharReveal as="h1" className="text-[#0a0a0a]" delay={0.15}>
+            <ScrambleText as="h1" className="text-[#0a0a0a]" delay={0.15} duration={1400}>
               {content.title}
-            </CharReveal>
+            </ScrambleText>
           </motion.div>
 
           <motion.p
