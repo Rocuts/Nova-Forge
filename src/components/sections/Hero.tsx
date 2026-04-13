@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
+import { ScrambleText } from "@/components/ui/ScrambleText"
 import { trackEvent } from "@/lib/analytics"
 
 interface HeroContent {
@@ -56,7 +57,9 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           transition={stagger(1)}
           className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-10"
         >
-          <span className="block text-[#0a0a0a]">{heroContent.titleLead}</span>
+          <ScrambleText as="span" className="block text-[#0a0a0a]" delay={0.15} duration={1400}>
+            {heroContent.titleLead}
+          </ScrambleText>
           <span className="block overflow-hidden relative" style={{ height: "1.15em" }}>
             <AnimatePresence mode="wait">
               <motion.span
