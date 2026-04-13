@@ -57,14 +57,26 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
   viewportConfig: { once: boolean; margin: string }
 }) {
   const [hovered, setHovered] = useState<number | null>(null)
+  const hoveredRole = hovered !== null ? members[hovered]?.role : null
 
   return (
     <section className="py-32 bg-[#0a0a0a]">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-          <RevealText as="h2" className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-white">
-            {title}
-          </RevealText>
+          <div className="relative md:max-w-lg lg:max-w-xl shrink-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={hoveredRole ?? "default"}
+                initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -20, filter: "blur(6px)" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+                className={`font-heading text-4xl md:text-5xl font-bold tracking-tight ${hoveredRole ? "text-white/70" : "text-white"}`}
+              >
+                {hoveredRole ?? title}
+              </motion.h2>
+            </AnimatePresence>
+          </div>
           <p className="text-white/40 text-lg leading-relaxed max-w-md md:pb-2">{description}</p>
         </div>
 
