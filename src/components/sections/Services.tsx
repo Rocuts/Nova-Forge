@@ -1,37 +1,16 @@
 "use client"
 import Link from "next/link"
-import {
-  IconShieldLock,
-  IconRadar2,
-  IconUserStar,
-  IconServer2,
-  IconChartDots3,
-  IconBuildingBank,
-  IconDatabaseSearch,
-  IconSpider,
-} from "@tabler/icons-react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
-const SERVICE_ICONS = {
-  sovereign: IconShieldLock,
-  shield: IconRadar2,
-  assistant: IconUserStar,
-  systems: IconServer2,
-  intelligence: IconChartDots3,
-  governance: IconBuildingBank,
-  enrichment: IconDatabaseSearch,
-  scraper: IconSpider,
-} as const
-
 interface ServicesContent {
   sectionId: string
   title: string
   description: string
-  items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: keyof typeof SERVICE_ICONS; href?: string }[]
+  items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: string; href?: string }[]
 }
 
 export function Services({ content: servicesSection, locale }: { content: ServicesContent; locale: string }) {
@@ -68,12 +47,8 @@ export function Services({ content: servicesSection, locale }: { content: Servic
           }}
         >
           {servicesSection.items.map((svc) => {
-            const Icon = SERVICE_ICONS[svc.icon]
             const cardContent = (
               <>
-                <div className="mb-8 text-[#0a0a0a]">
-                  <Icon size={28} stroke={1.5} />
-                </div>
                 <h3 className="text-xl font-semibold mb-4 tracking-tight text-[#0a0a0a]">{svc.title}</h3>
                 <p className="text-[#525252] mb-8 text-base leading-relaxed">{svc.benefit}</p>
                 <ul className="space-y-3 mt-auto">

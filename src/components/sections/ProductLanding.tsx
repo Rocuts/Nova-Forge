@@ -1,7 +1,6 @@
 "use client"
 import { motion } from "motion/react"
 import { Button } from "@/components/ui/Button"
-import { CharReveal } from "@/components/ui/RevealText"
 import { RevealText } from "@/components/ui/RevealText"
 import { ScrambleText } from "@/components/ui/ScrambleText"
 import { buildLocalePath } from "@/lib/i18n"

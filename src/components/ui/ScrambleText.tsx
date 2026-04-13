@@ -69,18 +69,17 @@ export function ScrambleText({
     }
   }, [children, delay, duration])
 
+  const Tag = Component as "span"
   return (
-    <Component className={`relative ${className || ""}`}>
+    <Tag className={`relative ${className || ""}`}>
       {/* Invisible text for screen readers and layout constraints */}
       <span className="opacity-0 pointer-events-none" aria-hidden="true">{children}</span>
-      
       {/* Readable text for screen readers only */}
       <span className="sr-only">{children}</span>
-      
       {/* Visible animated text */}
       <span className="absolute inset-0" aria-hidden="true" style={{ letterSpacing: 'inherit', textAlign: 'inherit' }}>
         {hasAnimated || isAnimating ? displayText : ""}
       </span>
-    </Component>
+    </Tag>
   )
 }
