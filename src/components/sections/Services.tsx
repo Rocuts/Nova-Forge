@@ -13,6 +13,8 @@ import {
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { useSectionEntrance } from "@/hooks/useParallax"
+import { buildLocalePath } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 
 const SERVICE_ICONS = {
   sovereign: IconShieldLock,
@@ -32,7 +34,7 @@ interface ServicesContent {
   items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: keyof typeof SERVICE_ICONS; href?: string }[]
 }
 
-export function Services({ content: servicesSection }: { content: ServicesContent }) {
+export function Services({ content: servicesSection, locale }: { content: ServicesContent; locale: string }) {
   const { ref: entranceRef, opacity, y } = useSectionEntrance()
 
   return (
@@ -100,7 +102,7 @@ export function Services({ content: servicesSection }: { content: ServicesConten
                 className={`group bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-10 flex flex-col hover:border-[#a3a3a3] transition-colors duration-300${svc.href ? " cursor-pointer" : ""}`}
               >
                 {svc.href ? (
-                  <Link href={svc.href} className="flex flex-col h-full">
+                  <Link href={buildLocalePath(locale as Locale, svc.href)} className="flex flex-col h-full">
                     {cardContent}
                   </Link>
                 ) : (

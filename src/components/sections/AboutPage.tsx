@@ -42,7 +42,7 @@ const viewportConfig = { once: true, margin: "-100px" as const }
 
 export function AboutPage({ content }: { content: AboutPageContent }) {
   return (
-    <main>
+    <div>
       {/* ── Hero ── */}
       <section className="min-h-[60vh] flex items-center">
         <div className="mx-auto max-w-7xl px-6 py-32">
@@ -310,6 +310,6 @@ export function AboutPage({ content }: { content: AboutPageContent }) {
           </Button>
         </motion.div>
       </section>
-    </main>
+    </div>
   )
 }

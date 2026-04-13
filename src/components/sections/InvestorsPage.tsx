@@ -44,7 +44,7 @@ const viewportConfig = { once: true, margin: "-100px" as const }
 
 export function InvestorsPage({ content }: { content: InvestorsPageContent }) {
   return (
-    <main>
+    <div>
       {/* ── Hero ── */}
       <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]">
         <div className="mx-auto max-w-7xl px-6 py-32">
@@ -283,6 +283,6 @@ export function InvestorsPage({ content }: { content: InvestorsPageContent }) {
           </motion.div>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

@@ -38,7 +38,7 @@ export function ProductLanding({
   content: ProductLandingContent
 }) {
   return (
-    <main>
+    <div>
       {/* Hero */}
       <section className="relative min-h-[80vh] flex items-center bg-white">
         <div className="mx-auto w-full max-w-7xl px-6 py-32">
@@ -176,6 +176,6 @@ export function ProductLanding({
           </Button>
         </motion.div>
       </section>
-    </main>
+    </div>
   )
 }

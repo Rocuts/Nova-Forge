@@ -45,7 +45,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <Hero content={heroContent} />
       <TrustBar />
-      <Services content={dict.services} />
+      <Services content={dict.services} locale={locale} />
       <FlagshipAI content={dict.flagshipAI} />
       <Methodology content={dict.methodology} />
       <TechStack content={dict.techStack} />
