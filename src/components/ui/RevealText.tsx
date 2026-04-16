@@ -71,7 +71,7 @@ export function RevealText({
       {words.map((word, i) => (
         <span
           key={`${word}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
+          className="inline-block overflow-hidden align-bottom pb-[0.15em]"
         >
           <motion.span className="inline-block" variants={wordVariants}>
             {word}
@@ -149,13 +149,13 @@ export function CharReveal({
       aria-label={children}
     >
       {words.map((word, wi) => (
-        <span key={`word-${wi}`} className="inline-flex overflow-hidden align-bottom whitespace-nowrap">
+        <span key={`word-${wi}`} className="inline-flex overflow-hidden align-bottom whitespace-nowrap pb-[0.15em]">
           {word.split("").map((char) => {
             const ci = charIndex++
             return (
               <span
                 key={`${char}-${ci}`}
-                className="inline-block overflow-hidden align-bottom"
+                className="inline-block overflow-hidden align-bottom pb-[0.15em]"
               >
                 <motion.span
                   className="inline-block"
