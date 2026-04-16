@@ -122,18 +122,20 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.6, ease: "easeOut" }}
-          className="flex flex-wrap items-center gap-5"
+          className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 sm:gap-5"
         >
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55, duration: 0.5, ease: "easeOut" }}
+            className="w-full sm:w-auto"
           >
             <Button
               size="lg"
               variant="primary"
               href={heroContent.primaryAction.href}
               onClick={() => trackEvent(heroContent.primaryAction.analyticsEvent)}
+              className="w-full sm:w-auto"
             >
               {heroContent.primaryAction.label}
             </Button>
@@ -142,12 +144,14 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.5, ease: "easeOut" }}
+            className="w-full sm:w-auto"
           >
             <Button
               size="lg"
               variant="secondary"
               href={heroContent.secondaryAction.href}
               onClick={() => trackEvent(heroContent.secondaryAction.analyticsEvent)}
+              className="w-full sm:w-auto"
             >
               {heroContent.secondaryAction.label}
             </Button>
