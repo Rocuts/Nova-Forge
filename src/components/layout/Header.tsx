@@ -11,10 +11,18 @@ import { trackEvent } from "@/lib/analytics"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
+interface NavChild {
+  name: string
+  href: string
+  description?: string
+}
+
 interface NavItem {
   name: string
   href?: string
-  children?: readonly { name: string; href: string; description?: string }[]
+  children?: readonly NavChild[]
+  platformChildren?: readonly NavChild[]
+  solutionsChildren?: readonly NavChild[]
 }
 
 interface NavContent {
@@ -166,13 +174,13 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
     ? "text-white/60 hover:text-white"
     : "text-[#525252] hover:text-[#0a0a0a]"
 
-  // Separate items with children (mega menu columns) from direct links
-  const columnItems = nav.items.filter((item) => item.children)
+  // Separate items with children (mega menu trigger) from direct links
+  const megaMenuItem = nav.items.find((item) => item.children)
   const directItems = nav.items.filter((item) => !item.children)
 
-  // Keep Platform and Solutions children separate
-  const platformLinks = columnItems[0]?.children ?? []
-  const solutionsLinks = columnItems[1]?.children ?? []
+  // Source platform and solutions links from the single merged item
+  const platformLinks = megaMenuItem?.platformChildren ?? []
+  const solutionsLinks = megaMenuItem?.solutionsChildren ?? []
 
   return (
     <>

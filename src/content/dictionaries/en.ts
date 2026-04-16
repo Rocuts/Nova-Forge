@@ -8,18 +8,16 @@ const en = {
   nav: {
     items: [
       {
-        name: "Platform",
-        children: [
+        name: "Services",
+        children: [{ name: "", href: "" }],
+        platformChildren: [
           { name: "Sovereign AI", href: "/soberania-ia", description: "AI infrastructure under your total control" },
           { name: "Cybersecurity", href: "/ciberseguridad", description: "Autonomous defense with AI agents" },
           { name: "Digital Workforce", href: "/fuerza-digital", description: "Executive assistants across all channels" },
           { name: "Data Enrichment", href: "/enriquecimiento-datos", description: "Actionable intelligence from 75+ sources" },
           { name: "Data Extraction", href: "/extraccion-datos", description: "AI scrapers for OSINT and public records" },
         ],
-      },
-      {
-        name: "Solutions",
-        children: [
+        solutionsChildren: [
           { name: "Critical Systems", href: "/sistemas-criticos", description: "High-availability architecture" },
           { name: "Operational Intelligence", href: "/inteligencia-operativa", description: "Command centers and unified data" },
           { name: "Government Automation", href: "/automatizacion-gobierno", description: "Digitized government workflows" },

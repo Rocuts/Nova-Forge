@@ -8,18 +8,16 @@ const es = {
   nav: {
     items: [
       {
-        name: "Plataforma",
-        children: [
+        name: "Servicios",
+        children: [{ name: "", href: "" }],
+        platformChildren: [
           { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
           { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
           { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
           { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde 75+ fuentes" },
           { name: "Extracción de Datos", href: "/extraccion-datos", description: "Scrapers con IA para OSINT y registros públicos" },
         ],
-      },
-      {
-        name: "Soluciones",
-        children: [
+        solutionsChildren: [
           { name: "Sistemas Críticos", href: "/sistemas-criticos", description: "Arquitectura de alta disponibilidad" },
           { name: "Inteligencia Operativa", href: "/inteligencia-operativa", description: "Centros de comando y datos unificados" },
           { name: "Automatización de Gobierno", href: "/automatizacion-gobierno", description: "Workflows gubernamentales digitalizados" },
