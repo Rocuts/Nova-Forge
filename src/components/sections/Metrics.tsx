@@ -61,9 +61,9 @@ export function Metrics({ content }: { content: MetricsContent }) {
   const kpis = content.kpis.slice(0, 3)
 
   return (
-    <section className="py-32 bg-[#0a0a0a] relative z-10 border-t border-[#1a1a1a]" data-header-theme="dark">
+    <section className="py-16 sm:py-32 bg-[#0a0a0a] relative z-10 border-t border-[#1a1a1a]" data-header-theme="dark">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -72,7 +72,7 @@ export function Metrics({ content }: { content: MetricsContent }) {
           >
             <CoverReveal
               as="h2"
-              className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white"
+              className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white"
               variant="dark"
             >
               {content.title}

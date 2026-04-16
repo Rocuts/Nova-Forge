@@ -66,7 +66,7 @@ function MarqueeRow({
 
   return (
     <div className="flex items-center border-b border-[#e5e5e5] last:border-b-0">
-      <div className="w-40 md:w-52 shrink-0 py-6 pr-6 pl-6">
+      <div className="w-24 sm:w-40 md:w-52 shrink-0 py-6 pr-6 pl-6">
         <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#a3a3a3]">
           {category.name}
         </span>
@@ -74,7 +74,7 @@ function MarqueeRow({
 
       <div className="flex-1 overflow-hidden py-6">
         <div
-          className="marquee-track flex items-center gap-10 w-max"
+          className="marquee-track flex items-center gap-6 sm:gap-10 w-max"
           style={{
             animation: `marquee ${speed}s linear infinite`,
             animationDirection: direction,
@@ -111,7 +111,7 @@ export function TechStack({ content }: { content: TechStackContent }) {
   return (
     <section
       id={content.sectionId}
-      className="py-32 bg-[#f8f8f8] border-t border-[#e5e5e5]"
+      className="py-16 sm:py-32 bg-[#f8f8f8] border-t border-[#e5e5e5]"
     >
       <div className="mx-auto max-w-7xl px-6">
         <RevealText

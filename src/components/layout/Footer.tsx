@@ -24,8 +24,8 @@ export function Footer({ content, locale }: { content: FooterContent; nav?: unkn
   return (
     <footer className="bg-[#0a0a0a] text-white border-t border-[#1a1a1a] pt-16 pb-8">
       <div className="container px-4 mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+          <div className="sm:col-span-2 lg:col-span-2">
             <h3 className="font-heading text-xl font-semibold text-white mb-4">
               {siteConfig.name}
             </h3>
@@ -33,8 +33,8 @@ export function Footer({ content, locale }: { content: FooterContent; nav?: unkn
               {content.tagline}
             </p>
             <div className="flex items-center gap-4">
-              <a href={siteConfig.links.twitter} target="_blank" rel="noopener noreferrer" className="text-[#a3a3a3] hover:text-white transition-colors">Twitter X</a>
-              <a href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#a3a3a3] hover:text-white transition-colors">LinkedIn</a>
+              <a href={siteConfig.links.twitter} target="_blank" rel="noopener noreferrer" className="py-2 text-[#a3a3a3] hover:text-white transition-colors">Twitter X</a>
+              <a href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer" className="py-2 text-[#a3a3a3] hover:text-white transition-colors">LinkedIn</a>
             </div>
           </div>
 

@@ -45,12 +45,12 @@ export function Methodology({ content: methodologySection }: { content: Methodol
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-      className="py-32 bg-white border-t border-[#e5e5e5] relative z-10"
+      className="py-16 sm:py-32 bg-white border-t border-[#e5e5e5] relative z-10"
       id={methodologySection.sectionId}
     >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-20 max-w-3xl">
-          <CoverReveal as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
+        <div className="mb-10 sm:mb-20 max-w-3xl">
+          <CoverReveal as="h2" className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
             {methodologySection.title}
           </CoverReveal>
           <p className="text-[#525252] text-lg md:text-xl leading-relaxed">

@@ -29,14 +29,14 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       id={flagshipAISection.sectionId}
-      className="py-32 bg-[#0a0a0a] relative z-10"
+      className="py-16 sm:py-32 bg-[#0a0a0a] relative z-10"
       data-header-theme="dark"
     >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-20 max-w-3xl">
+        <div className="mb-10 sm:mb-20 max-w-3xl">
           <CoverReveal
             as="h2"
-            className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-white"
+            className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-tight text-white"
             variant="dark"
           >
             {flagshipAISection.title}
@@ -70,7 +70,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
                 }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-12 hover:border-[#2a2a2a] transition-colors duration-300"
+                className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-6 sm:p-12 hover:border-[#2a2a2a] transition-colors duration-300"
               >
                 <div className="mb-8 text-white">
                   <Icon size={36} stroke={1.5} />

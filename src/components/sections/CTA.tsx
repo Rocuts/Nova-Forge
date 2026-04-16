@@ -13,7 +13,7 @@ interface CTAContent {
 
 export function CTA({ content: ctaSection }: { content: CTAContent }) {
   return (
-    <section className="py-32 bg-[#0a0a0a] relative z-10 overflow-hidden" data-header-theme="dark">
+    <section className="py-16 sm:py-32 bg-[#0a0a0a] relative z-10 overflow-hidden" data-header-theme="dark">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -21,7 +21,7 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="mx-auto max-w-5xl px-6 text-center"
       >
-        <div className="font-heading text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
+        <div className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
           <ScrambleText as="span" className="inline text-white" duration={1400} delay={0.15}>
             {ctaSection.lead}
           </ScrambleText>
@@ -31,7 +31,7 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
           </ScrambleText>
         </div>
 
-        <p className="text-lg md:text-xl text-[#a3a3a3] mb-14 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-[#a3a3a3] mb-8 sm:mb-14 max-w-2xl mx-auto leading-relaxed">
           {ctaSection.description}
         </p>
 

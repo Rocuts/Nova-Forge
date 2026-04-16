@@ -269,7 +269,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
               onClick={toggleMegaMenu}
               aria-expanded={isMegaMenuOpen}
               aria-label={nav.menuLabel}
-              className={`w-10 h-10 rounded-[6px] flex items-center justify-center transition-all duration-200 ${
+              className={`w-11 h-11 rounded-[6px] flex items-center justify-center transition-all duration-200 ${
                 isOnDark
                   ? "bg-white/10 text-white border border-white/20"
                   : "bg-[#f5f5f5] text-[#525252] hover:bg-[#e5e5e5] hover:text-[#0a0a0a]"

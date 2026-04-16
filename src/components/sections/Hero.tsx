@@ -112,7 +112,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-          className="text-fluid-p text-[#525252] max-w-2xl mb-14 leading-relaxed"
+          className="text-fluid-p text-[#525252] max-w-2xl mb-8 sm:mb-14 leading-relaxed"
         >
           {heroContent.description}
         </motion.p>

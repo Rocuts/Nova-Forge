@@ -26,7 +26,7 @@
   --radius-lg: 6px;
   --radius-xl: 8px;
 
-  --text-fluid-hero: clamp(3.5rem, 8vw, 7rem);
+  --text-fluid-hero: clamp(2.5rem, 8vw, 7rem);
   --text-fluid-h1: clamp(2.5rem, 6vw, 5rem);
   --text-fluid-h2: clamp(1.5rem, 3vw, 2.25rem);
   --text-fluid-p: clamp(1.05rem, 1.5vw, 1.25rem);

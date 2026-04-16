@@ -52,14 +52,14 @@ export function FAQ({ content: faqSection }: { content: FAQContent }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-      className="py-32 bg-[#f8f8f8] border-t border-[#e5e5e5] relative z-10"
+      className="py-16 sm:py-32 bg-[#f8f8f8] border-t border-[#e5e5e5] relative z-10"
       id={faqSection.sectionId}
     >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-16">
           {/* Left — Title */}
           <div className="lg:col-span-2">
-            <RevealText as="h2" className="font-heading text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-6">
+            <RevealText as="h2" className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-6">
               {faqSection.title}
             </RevealText>
             <p className="text-lg text-[#525252] leading-relaxed">
