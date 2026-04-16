@@ -73,7 +73,6 @@ function getMegaMenuLabels(locale: string) {
       ? "We build software infrastructure, sovereign AI, and agentic cybersecurity for governments and organizations operating under the most demanding standards."
       : "Construimos infraestructura de software, IA soberana y ciberseguridad agéntica para gobiernos y organizaciones que operan bajo los estándares más exigentes.",
     company: isEN ? "Company" : "Empresa",
-    investors: isEN ? "Investors" : "Inversores",
   }
 }
 

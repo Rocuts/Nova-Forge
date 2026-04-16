@@ -24,7 +24,6 @@ const en = {
         ],
       },
       { name: "Company", href: "/nosotros" },
-      { name: "Investors", href: "/inversores" },
     ],
     contact: "Contact",
     schedule: "Schedule",
@@ -52,6 +51,11 @@ const en = {
       label: "View Engineering Capabilities",
       href: "#capacidades",
       analyticsEvent: "hero_cta_services",
+    },
+    nurtureCta: {
+      label: "View use cases for public sector",
+      href: "/automatizacion-gobierno",
+      analyticsEvent: "hero_nurture_cta",
     },
   },
   services: {
@@ -135,7 +139,7 @@ const en = {
       {
         title: "Data Enrichment",
         benefit:
-          "Transform fragmented records into actionable intelligence with automated enrichment from 75+ sources.",
+          "Transform fragmented records into actionable intelligence with automated enrichment from 75+ sources. With strict regulatory compliance and data residency configurable by jurisdiction.",
         bullets: [
           "Real-Time Multi-Source Enrichment",
           "Firmographic & Contact Profiling",
@@ -147,10 +151,10 @@ const en = {
       {
         title: "Data Extraction at Scale",
         benefit:
-          "Collect data from any public source with AI-powered extractors and full audit trails.",
+          "Collect data from any public source with AI-powered extractors and full audit trails. We operate exclusively on public and authorized sources, under compliance frameworks applicable to each jurisdiction.",
         bullets: [
           "AI-Adaptive Scrapers",
-          "OSINT & Open Source Intelligence",
+          "OSINT & Open Source Intelligence (public and open sources)",
           "Regulatory & Public Records Monitoring",
         ],
         icon: "scraper",
@@ -162,7 +166,7 @@ const en = {
     sectionId: "sistemas-ia",
     title: "Sovereign AI Deployment",
     description:
-      "Your organization needs artificial intelligence that operates under your rules, on your infrastructure, with your data. No external dependencies, no third-party risks.",
+      "Your organization needs artificial intelligence that operates under your rules, on your infrastructure, with your data. No external dependencies, no third-party risks. For solutions requiring third-party API integration, we implement data processing agreements and privacy architectures that keep operational control within your organization.",
     items: [
       {
         title: "Cyber Defense Agents",
@@ -271,9 +275,9 @@ const en = {
           "It's an autonomous operations team powered by artificial intelligence that works 24/7 integrated into your existing channels — WhatsApp, Slack, Teams, email. It manages calendars, triages communications, coordinates teams, and executes administrative tasks with the precision of a senior executive assistant.",
       },
       {
-        question: "Do you work with government and defense organizations?",
+        question: "How do you structure engagements with government and defense organizations?",
         answer:
-          "Yes. Our infrastructure and methodology are designed to meet the security and traceability standards required by government institutions, defense agencies, and regulated financial sector organizations.",
+          "Every engagement with the public sector and defense operates under confidentiality by default. We work under NDA-bound contracts, isolated infrastructure, and a specialized onboarding process that includes compliance requirements assessment, data perimeter definition, and assignment of appropriately cleared personnel. We do not publish government client names or implementation details — operational discretion is an integral part of our service standard.",
       },
     ],
   },
@@ -300,18 +304,6 @@ const en = {
       { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
       { name: "Data & Analytics", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
       { name: "Compliance", items: ["SOC 2 Type II", "ISO 27001", "GDPR", "SSPA", "NIST CSF", "PCI DSS"] },
-    ],
-  },
-  metrics: {
-    title: "Quantifiable Results",
-    description:
-      "We build to maximize operational efficiency and deploy high-availability systems that scale with your business.",
-    kpiLabel: "Audited metrics",
-    optimizationLabel: "Continuous Optimization",
-    kpis: [
-      { value: "40%", label: "Average reduction in Time-to-Market" },
-      { value: "99.9%", label: "Uptime on cloud-native architectures" },
-      { value: "10x", label: "Scalability in AI data pipelines" },
     ],
   },
   footer: {

@@ -24,7 +24,6 @@ const es = {
         ],
       },
       { name: "Empresa", href: "/nosotros" },
-      { name: "Inversores", href: "/inversores" },
     ],
     contact: "Contacto",
     schedule: "Agendar",
@@ -52,6 +51,11 @@ const es = {
       label: "Ver Capacidades de Ingeniería",
       href: "#capacidades",
       analyticsEvent: "hero_cta_services",
+    },
+    nurtureCta: {
+      label: "Ver casos de uso para sector público",
+      href: "/automatizacion-gobierno",
+      analyticsEvent: "hero_nurture_cta",
     },
   },
   services: {
@@ -135,7 +139,7 @@ const es = {
       {
         title: "Enriquecimiento de Datos",
         benefit:
-          "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado desde 75+ fuentes.",
+          "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado desde 75+ fuentes. Con estricto cumplimiento regulatorio y residencia de datos configurable por jurisdicción.",
         bullets: [
           "Enriquecimiento Multi-Fuente en Tiempo Real",
           "Perfilamiento Firmográfico y de Contactos",
@@ -147,10 +151,10 @@ const es = {
       {
         title: "Extracción de Datos a Escala",
         benefit:
-          "Recolecte datos de cualquier fuente pública con extractores potenciados por IA y trazabilidad completa.",
+          "Recolecte datos de cualquier fuente pública con extractores potenciados por IA y trazabilidad completa. Operamos exclusivamente sobre fuentes públicas y autorizadas, bajo marcos de cumplimiento aplicables a cada jurisdicción.",
         bullets: [
           "Scrapers Adaptativos con IA",
-          "OSINT e Inteligencia de Fuentes Abiertas",
+          "OSINT e Inteligencia de Fuentes Abiertas (fuentes públicas y abiertas)",
           "Monitoreo Regulatorio y de Registros Públicos",
         ],
         icon: "scraper",
@@ -162,7 +166,7 @@ const es = {
     sectionId: "sistemas-ia",
     title: "Despliegue de IA Soberana",
     description:
-      "Su organización necesita inteligencia artificial que opere bajo sus reglas, en su infraestructura, con sus datos. No dependencias externas, no riesgos de terceros.",
+      "Su organización necesita inteligencia artificial que opere bajo sus reglas, en su infraestructura, con sus datos. No dependencias externas, no riesgos de terceros. Para soluciones que requieren integración con APIs de terceros, implementamos contratos de procesamiento de datos y arquitecturas de privacidad que mantienen el control operativo en su organización.",
     items: [
       {
         title: "Agentes de Defensa Cibernética",
@@ -271,9 +275,9 @@ const es = {
           "Es un equipo de operaciones autónomo potenciado por inteligencia artificial que trabaja 24/7 integrado en sus canales existentes — WhatsApp, Slack, Teams, email. Gestiona agendas, clasifica comunicaciones, coordina equipos y ejecuta tareas administrativas con la precisión de un asistente ejecutivo de alto nivel.",
       },
       {
-        question: "¿Trabajan con organizaciones gubernamentales y de defensa?",
+        question: "¿Cómo estructuran los compromisos con organizaciones gubernamentales y de defensa?",
         answer:
-          "Sí. Nuestra infraestructura y metodología están diseñadas para cumplir con los estándares de seguridad y trazabilidad que exigen las instituciones gubernamentales, de defensa y del sector financiero regulado.",
+          "Cada compromiso con el sector público y defensa opera bajo confidencialidad por defecto. Trabajamos con contratos bajo NDA, infraestructura aislada y un proceso de onboarding especializado que incluye evaluación de requisitos de cumplimiento, definición de perímetro de datos y asignación de equipo con clearance apropiado. No publicamos nombres de clientes gubernamentales ni detalles de implementación — la discreción operativa es parte integral de nuestro estándar de servicio.",
       },
     ],
   },
@@ -300,18 +304,6 @@ const es = {
       { name: "Ciberseguridad", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
       { name: "Datos y Analítica", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
       { name: "Cumplimiento", items: ["SOC 2 Type II", "ISO 27001", "GDPR", "SSPA", "NIST CSF", "PCI DSS"] },
-    ],
-  },
-  metrics: {
-    title: "Resultados Cuantificables",
-    description:
-      "Construimos para maximizar eficiencia operativa y desplegar sistemas de alta disponibilidad que escalan con su negocio.",
-    kpiLabel: "Métricas auditadas",
-    optimizationLabel: "Optimización Continua",
-    kpis: [
-      { value: "40%", label: "Reducción promedio en Time-to-Market" },
-      { value: "99.9%", label: "Uptime en arquitecturas cloud-native" },
-      { value: "10x", label: "Escalabilidad en flujos de datos IA" },
     ],
   },
   footer: {

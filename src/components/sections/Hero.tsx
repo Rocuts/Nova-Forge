@@ -14,6 +14,7 @@ interface HeroContent {
   trustLine: string
   primaryAction: { label: string; href: string; analyticsEvent: string }
   secondaryAction: { label: string; href: string; analyticsEvent: string }
+  nurtureCta?: { label: string; href: string; analyticsEvent: string }
 }
 
 const ROTATE_INTERVAL = 3000
@@ -157,6 +158,25 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             </Button>
           </motion.div>
         </motion.div>
+
+        {/* Nurture CTA — low-commitment link for evaluation-phase visitors */}
+        {heroContent.nurtureCta && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.85, duration: 0.6, ease: "easeOut" }}
+            className="mt-6"
+          >
+            <a
+              href={heroContent.nurtureCta.href}
+              onClick={() => trackEvent(heroContent.nurtureCta!.analyticsEvent)}
+              className="inline-flex items-center gap-2 text-sm text-[#525252] hover:text-[#0a0a0a] transition-colors duration-200"
+            >
+              <span className="text-base">→</span>
+              {heroContent.nurtureCta.label}
+            </a>
+          </motion.div>
+        )}
       </div>
     </section>
   )
