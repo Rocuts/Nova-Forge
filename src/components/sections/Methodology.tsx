@@ -18,22 +18,24 @@ interface MethodologyContent {
 
 export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
   const lineRef = useRef<HTMLDivElement>(null)
+  const lineParentRef = useRef<HTMLDivElement>(null)
 
-  // Vanilla IntersectionObserver for the connector line scaleX animation
+  // Observe the PARENT container (has real height) to trigger the 1px line
   useEffect(() => {
-    const el = lineRef.current
-    if (!el) return
+    const parent = lineParentRef.current
+    const line = lineRef.current
+    if (!parent || !line) return
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          el.style.transition = "transform 1s cubic-bezier(0.22, 1, 0.36, 1)"
-          el.style.transform = "scaleX(1)"
+          line.style.transition = "transform 1s cubic-bezier(0.22, 1, 0.36, 1)"
+          line.style.transform = "scaleX(1)"
           observer.disconnect()
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     )
-    observer.observe(el)
+    observer.observe(parent)
     return () => observer.disconnect()
   }, [])
 
@@ -56,8 +58,8 @@ export function Methodology({ content: methodologySection }: { content: Methodol
           </p>
         </div>
 
-        <div className="relative">
-          {/* Horizontal connector line — animated via IntersectionObserver */}
+        <div ref={lineParentRef} className="relative">
+          {/* Horizontal connector line — animated when parent enters viewport */}
           <div
             ref={lineRef}
             className="hidden md:block absolute top-0 left-0 right-0 h-[1px] bg-[#e5e5e5] origin-left"
