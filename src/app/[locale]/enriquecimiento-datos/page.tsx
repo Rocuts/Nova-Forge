@@ -1,4 +1,4 @@
-import { ProductLanding } from "@/components/sections/ProductLanding"
+import { DataEnrichmentLanding } from "@/components/sections/DataEnrichmentLanding"
 import { getDictionary } from "@/content/dictionaries"
 import { isValidLocale } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
@@ -19,5 +19,5 @@ export default async function DataEnrichmentPage({ params }: { params: Promise<{
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.dataEnrichment} locale={locale} />
+  return <DataEnrichmentLanding content={dict.products.dataEnrichment} locale={locale} />
 }
