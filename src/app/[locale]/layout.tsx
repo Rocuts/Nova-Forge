@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Inter, JetBrains_Mono } from "next/font/google"
 import "../globals.css"
 import { siteConfig } from "@/config/site"
 import { isValidLocale, locales, localePrefix } from "@/lib/i18n"
@@ -8,10 +8,11 @@ import { getDictionary } from "@/content/dictionaries"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { SmoothScroll } from "@/components/providers/SmoothScroll"
+import { ScrollProgress } from "@/components/animations/ScrollProgress"
 import { notFound } from "next/navigation"
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" })
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", display: "swap" })
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -91,10 +92,11 @@ export default async function LocaleLayout({ params, children }: Props) {
   }
 
   return (
-    <html lang={locale} className={`${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+    <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable} antialiased`} suppressHydrationWarning>
       <body className="bg-white text-[#0a0a0a] min-h-screen flex flex-col" suppressHydrationWarning>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         <SmoothScroll>
+          <ScrollProgress />
           <Header nav={dict.nav} locale={locale} />
           <main className="flex-1 flex flex-col relative">{children}</main>
           <Footer content={dict.footer} locale={locale} />

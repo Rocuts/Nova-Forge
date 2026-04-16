@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { motion } from "motion/react"
-import { RevealText } from "@/components/ui/RevealText"
+import { CoverReveal } from "@/components/animations/CoverReveal"
 import { useSectionEntrance } from "@/hooks/useParallax"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
@@ -25,9 +25,9 @@ export function Services({ content: servicesSection, locale }: { content: Servic
     >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 max-w-3xl">
-          <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
+          <CoverReveal as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
             {servicesSection.title}
-          </RevealText>
+          </CoverReveal>
           <p className="text-[#525252] text-lg md:text-xl leading-relaxed">
             {servicesSection.description}
           </p>
@@ -42,7 +42,7 @@ export function Services({ content: servicesSection, locale }: { content: Servic
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.1 },
+              transition: { staggerChildren: 0.08 },
             },
           }}
         >
@@ -74,6 +74,8 @@ export function Services({ content: servicesSection, locale }: { content: Servic
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
                 }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className={`group bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-10 flex flex-col hover:border-[#a3a3a3] transition-colors duration-300${svc.href ? " cursor-pointer" : ""}`}
               >
                 {svc.href ? (

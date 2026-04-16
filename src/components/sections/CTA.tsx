@@ -13,7 +13,7 @@ interface CTAContent {
 
 export function CTA({ content: ctaSection }: { content: CTAContent }) {
   return (
-    <section className="py-32 bg-[#0a0a0a] relative z-10 overflow-hidden">
+    <section className="py-32 bg-[#0a0a0a] relative z-10 overflow-hidden" data-header-theme="dark">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -35,15 +35,20 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
           {ctaSection.description}
         </p>
 
-        <Button
-          size="lg"
-          variant="primary"
-          href={ctaSection.action.href}
-          onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
-          className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
+        <motion.div
+          animate={{ scale: [1, 1.02, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
-          {ctaSection.action.label}
-        </Button>
+          <Button
+            size="lg"
+            variant="primary"
+            href={ctaSection.action.href}
+            onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
+            className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
+          >
+            {ctaSection.action.label}
+          </Button>
+        </motion.div>
       </motion.div>
     </section>
   )

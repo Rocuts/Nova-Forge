@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "motion/react"
+import { CoverReveal } from "@/components/animations/CoverReveal"
 
 interface MetricsContent {
   title: string
@@ -47,7 +48,7 @@ export function Metrics({ content }: { content: MetricsContent }) {
   const kpis = content.kpis.slice(0, 3)
 
   return (
-    <section className="py-32 bg-[#0a0a0a] relative z-10 border-t border-[#1a1a1a]">
+    <section className="py-32 bg-[#0a0a0a] relative z-10 border-t border-[#1a1a1a]" data-header-theme="dark">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <motion.div
@@ -56,9 +57,13 @@ export function Metrics({ content }: { content: MetricsContent }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h2 className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white">
+            <CoverReveal
+              as="h2"
+              className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white"
+              variant="dark"
+            >
               {content.title}
-            </h2>
+            </CoverReveal>
             <p className="text-[#a3a3a3] text-lg md:text-xl leading-relaxed mb-10">
               {content.description}
             </p>
@@ -92,7 +97,7 @@ export function Metrics({ content }: { content: MetricsContent }) {
                   }}
                   className="p-6 md:p-8 bg-[#141414] border border-[#1a1a1a] rounded-[6px] overflow-hidden"
                 >
-                  <div className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter break-words">
+                  <div className="font-mono text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter tabular-nums break-words">
                     <AnimatedNumber value={value} suffix={suffix} />
                   </div>
                   <div className="text-[#a3a3a3] text-sm font-medium leading-snug">

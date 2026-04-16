@@ -17,9 +17,9 @@
   --color-accent: #0a0a0a;
   --color-accent-blue: #2563eb;
 
-  --font-sans: var(--font-geist);
-  --font-heading: var(--font-geist);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 
   --radius-sm: 2px;
   --radius-md: 4px;
@@ -51,6 +51,16 @@
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Crosshair cursor on desktop — communicates technical precision */
+  @media (pointer: fine) {
+    body {
+      cursor: crosshair;
+    }
+    a, button, [role="button"], input, textarea, select {
+      cursor: pointer;
+    }
   }
 
   *:focus-visible {
@@ -101,8 +111,10 @@
   }
 
   .bg-grid {
-    background-image: radial-gradient(circle, #d4d4d4 0.5px, transparent 0.5px);
-    background-size: 24px 24px;
+    background-image:
+      linear-gradient(to right, rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 
   @keyframes marquee {
@@ -112,5 +124,25 @@
 
   .marquee-container:hover .marquee-track {
     animation-play-state: paused;
+  }
+
+  /* Nav link hover: underline draws left→right */
+  .nav-link-hover {
+    position: relative;
+  }
+  .nav-link-hover::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .nav-link-hover:hover::after {
+    transform: scaleX(1);
   }
 }

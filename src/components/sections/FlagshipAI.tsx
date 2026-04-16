@@ -5,7 +5,7 @@ import {
   IconCloudLock,
 } from "@tabler/icons-react"
 import { motion } from "motion/react"
-import { RevealText } from "@/components/ui/RevealText"
+import { CoverReveal } from "@/components/animations/CoverReveal"
 import { useSectionEntrance } from "@/hooks/useParallax"
 
 const OFFER_ICONS = {
@@ -31,12 +31,17 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
       style={{ opacity, y }}
       id={flagshipAISection.sectionId}
       className="py-32 bg-[#0a0a0a] relative z-10"
+      data-header-theme="dark"
     >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 max-w-3xl">
-          <RevealText as="h2" className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-white">
+          <CoverReveal
+            as="h2"
+            className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight text-white"
+            variant="dark"
+          >
             {flagshipAISection.title}
-          </RevealText>
+          </CoverReveal>
           <p className="text-[#a3a3a3] text-lg md:text-xl leading-relaxed">
             {flagshipAISection.description}
           </p>
@@ -51,7 +56,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.12 },
+              transition: { staggerChildren: 0.1 },
             },
           }}
         >
@@ -64,6 +69,8 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
                 }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-12 hover:border-[#2a2a2a] transition-colors duration-300"
               >
                 <div className="mb-8 text-white">

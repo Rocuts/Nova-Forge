@@ -69,14 +69,59 @@ function getMegaMenuLabels(locale: string) {
   }
 }
 
+/** Detects which section the header overlaps and returns "light" or "dark" */
+function useDarkSectionDetection() {
+  const [isDarkSection, setIsDarkSection] = useState(false)
+
+  useEffect(() => {
+    const darkSections = document.querySelectorAll<HTMLElement>('[data-header-theme="dark"]')
+    if (darkSections.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Check if any dark section intersects the top of the viewport (header zone)
+        let anyDark = false
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const rect = entry.boundingClientRect
+            // Section is dark if it covers the header (top 64px)
+            if (rect.top < 64 && rect.bottom > 0) {
+              anyDark = true
+            }
+          }
+        }
+        setIsDarkSection(anyDark)
+      },
+      {
+        // Only observe the top 64px strip where the header lives
+        rootMargin: "0px 0px -95% 0px",
+        threshold: 0,
+      }
+    )
+
+    darkSections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
+
+  return isDarkSection
+}
+
 export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
+  const [logoGlitched, setLogoGlitched] = useState(false)
   const { scrollY } = useScroll()
+  const isDarkSection = useDarkSectionDetection()
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50)
   })
+
+  // Trigger logo glitch once on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setLogoGlitched(true), 500)
+    return () => clearTimeout(timer)
+  }, [])
 
   const closeMegaMenu = useCallback(() => setIsMegaMenuOpen(false), [])
 
@@ -112,6 +157,13 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const schedulingHref = buildLocalePath(locale as Locale, "/agendar")
   const labels = getMegaMenuLabels(locale)
 
+  // Determine header visual mode
+  const isOnDark = isMegaMenuOpen || isDarkSection
+  const textColor = isOnDark ? "text-white" : "text-[#0a0a0a]"
+  const navLinkColor = isOnDark
+    ? "text-white/60 hover:text-white"
+    : "text-[#525252] hover:text-[#0a0a0a]"
+
   // Separate items with children (mega menu columns) from direct links
   const columnItems = nav.items.filter((item) => item.children)
   const directItems = nav.items.filter((item) => !item.children)
@@ -126,32 +178,46 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           isMegaMenuOpen
             ? "bg-[#0a0a0a] border-b border-white/10"
-            : isScrolled
-              ? "bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5]"
-              : "bg-white"
+            : isDarkSection
+              ? isScrolled
+                ? "bg-[#0a0a0a]/90 backdrop-blur-sm border-b border-white/10"
+                : "bg-transparent"
+              : isScrolled
+                ? "bg-white/90 backdrop-blur-sm border-b border-[#e5e5e5]"
+                : "bg-white"
         }`}
       >
         <div className="container px-4 mx-auto max-w-7xl h-16 flex items-center justify-between">
           {/* Left: Logo */}
           <TransitionLink
             href={locale === "en" ? "/en" : "/"}
-            className={`flex items-center gap-2 font-heading text-lg font-semibold tracking-tight group transition-colors duration-300 ${
-              isMegaMenuOpen ? "text-white" : "text-[#0a0a0a]"
-            }`}
+            className={`flex items-center gap-2 font-heading text-lg font-semibold tracking-tight group transition-colors duration-300 ${textColor}`}
           >
-            <BrandLogo
-              size={24}
-              className={`transition-colors duration-300 ${
-                isMegaMenuOpen ? "text-white" : "text-[#0a0a0a]"
-              }`}
-            />
+            {/* Logo with micro-glitch on load */}
+            <motion.div
+              animate={
+                !logoGlitched
+                  ? { opacity: [1, 0.6, 1, 0.8, 1] }
+                  : { opacity: 1 }
+              }
+              transition={
+                !logoGlitched
+                  ? { duration: 0.4, times: [0, 0.2, 0.5, 0.7, 1] }
+                  : { duration: 0 }
+              }
+            >
+              <BrandLogo
+                size={24}
+                className={`transition-colors duration-300 ${textColor}`}
+              />
+            </motion.div>
             <span>{siteConfig.name}</span>
           </TransitionLink>
 
-          {/* Center: Desktop nav links */}
+          {/* Center: Desktop nav links with underline hover */}
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             {nav.items.map((item) =>
               item.children ? (
@@ -159,11 +225,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                   key={item.name}
                   type="button"
                   onClick={toggleMegaMenu}
-                  className={`px-4 py-2 transition-colors duration-200 ${
-                    isMegaMenuOpen
-                      ? "text-white/60 hover:text-white"
-                      : "text-[#525252] hover:text-[#0a0a0a]"
-                  }`}
+                  className={`nav-link-hover px-4 py-2 transition-colors duration-200 ${navLinkColor}`}
                 >
                   {item.name}
                 </button>
@@ -171,11 +233,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                 <Link
                   key={item.name}
                   href={item.href ? resolveHref(locale, item.href) : "#"}
-                  className={`px-4 py-2 transition-colors duration-200 ${
-                    isMegaMenuOpen
-                      ? "text-white/60 hover:text-white"
-                      : "text-[#525252] hover:text-[#0a0a0a]"
-                  }`}
+                  className={`nav-link-hover px-4 py-2 transition-colors duration-200 ${navLinkColor}`}
                 >
                   {item.name}
                 </Link>
@@ -187,7 +245,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
           <div className="flex items-center gap-3">
             <div
               className={`transition-colors duration-300 ${
-                isMegaMenuOpen
+                isOnDark
                   ? "[&_a]:text-white/70 [&_a]:border-white/20 [&_a:hover]:text-white [&_a:hover]:border-white/40"
                   : ""
               }`}
@@ -196,9 +254,9 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             </div>
             <Button
               size="sm"
-              variant={isMegaMenuOpen ? "secondary" : "primary"}
+              variant={isOnDark ? "secondary" : "primary"}
               className={
-                isMegaMenuOpen
+                isOnDark
                   ? "border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50"
                   : ""
               }
@@ -213,7 +271,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
               aria-expanded={isMegaMenuOpen}
               aria-label={nav.menuLabel}
               className={`w-10 h-10 rounded-[6px] flex items-center justify-center transition-all duration-200 ${
-                isMegaMenuOpen
+                isOnDark
                   ? "bg-white/10 text-white border border-white/20"
                   : "bg-[#f5f5f5] text-[#525252] hover:bg-[#e5e5e5] hover:text-[#0a0a0a]"
               }`}
