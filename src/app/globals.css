@@ -149,6 +149,10 @@
 .nav-link-hover:hover::after {
   transform: scaleX(1);
 }
+.nav-link-hover:active::after,
+.nav-link-hover[aria-expanded="true"]::after {
+  transform: scaleX(0);
+}
 
 /* Logo micro-glitch: runs once on mount */
 @keyframes logoGlitch {

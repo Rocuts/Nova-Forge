@@ -30,8 +30,15 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
 
   useEffect(() => {
     if (phrases.length <= 1) return
-    const timer = setInterval(next, ROTATE_INTERVAL)
-    return () => clearInterval(timer)
+    // Delay rotation start so it doesn't clash with CoverReveal animation
+    let intervalId: ReturnType<typeof setInterval>
+    const startDelay = setTimeout(() => {
+      intervalId = setInterval(next, ROTATE_INTERVAL)
+    }, 1500)
+    return () => {
+      clearTimeout(startDelay)
+      clearInterval(intervalId)
+    }
   }, [next, phrases.length])
 
   // Eyebrow line: animate scaleX 0→1 via vanilla JS

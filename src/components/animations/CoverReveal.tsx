@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "motion/react"
 import type { ReactNode } from "react"
 
@@ -18,7 +18,8 @@ interface CoverRevealProps {
  * Palantir-style cover reveal: an overlay sweeps in from the left (covering),
  * then slides off to the right (revealing the content underneath).
  *
- * Uses whileInView + variants for reliable triggering.
+ * Uses a vanilla IntersectionObserver that disconnects after first trigger
+ * to avoid re-triggering when overlays (e.g. mega menu) cover the page.
  * On mobile (<768px) falls back to a simple FadeInUp.
  * Respects prefers-reduced-motion.
  */
@@ -32,6 +33,8 @@ export function CoverReveal({
 }: CoverRevealProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [hasRevealed, setHasRevealed] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -42,6 +45,25 @@ export function CoverReveal({
     })
   }, [])
 
+  // Vanilla IntersectionObserver — disconnects after first trigger
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el || prefersReducedMotion) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasRevealed(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [prefersReducedMotion])
+
   const overlayColor = variant === "dark" ? "#ffffff" : "#0a0a0a"
   const halfDuration = duration / 2
 
@@ -50,14 +72,14 @@ export function CoverReveal({
     return <Tag className={className}>{children}</Tag>
   }
 
-  // Mobile: simple FadeInUp
+  // Mobile: simple FadeInUp (uses IntersectionObserver via hasRevealed)
   if (isMobile) {
     return (
       <motion.div
+        ref={wrapperRef}
         className={className}
         initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
+        animate={hasRevealed ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
       >
         <Tag>{children}</Tag>
@@ -68,10 +90,10 @@ export function CoverReveal({
   // Desktop: two-phase cover reveal using translateX
   return (
     <motion.div
+      ref={wrapperRef}
       className="relative overflow-hidden"
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      animate={hasRevealed ? "visible" : "hidden"}
     >
       {/* Content — fades in at the midpoint when overlay covers it */}
       <motion.div
