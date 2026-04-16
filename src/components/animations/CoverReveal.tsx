@@ -1,6 +1,6 @@
 "use client"
-import { useRef, useEffect, useState } from "react"
-import { motion, useInView } from "motion/react"
+import { useEffect, useState } from "react"
+import { motion } from "motion/react"
 import type { ReactNode } from "react"
 
 interface CoverRevealProps {
@@ -15,9 +15,10 @@ interface CoverRevealProps {
 }
 
 /**
- * Palantir-style cover reveal: an overlay sweeps in from the left,
- * then slides off to the right — revealing the content underneath.
+ * Palantir-style cover reveal: an overlay sweeps in from the left (covering),
+ * then slides off to the right (revealing the content underneath).
  *
+ * Uses whileInView + variants for reliable triggering.
  * On mobile (<768px) falls back to a simple FadeInUp.
  * Respects prefers-reduced-motion.
  */
@@ -29,8 +30,6 @@ export function CoverReveal({
   variant = "light",
   duration = 0.9,
 }: CoverRevealProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-60px" })
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -44,20 +43,21 @@ export function CoverReveal({
   }, [])
 
   const overlayColor = variant === "dark" ? "#ffffff" : "#0a0a0a"
+  const halfDuration = duration / 2
 
   // Reduced motion: render static
   if (prefersReducedMotion) {
     return <Tag className={className}>{children}</Tag>
   }
 
-  // Mobile: simple FadeInUp using motion.div wrapper
+  // Mobile: simple FadeInUp
   if (isMobile) {
     return (
       <motion.div
-        ref={ref}
         className={className}
         initial={{ opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
       >
         <Tag>{children}</Tag>
@@ -65,41 +65,45 @@ export function CoverReveal({
     )
   }
 
-  // Desktop: two-phase cover reveal
-  const halfDuration = duration / 2
-
+  // Desktop: two-phase cover reveal using translateX
   return (
-    <div ref={ref} className="relative overflow-hidden">
-      {/* Content — hidden until overlay midpoint, then visible */}
+    <motion.div
+      className="relative overflow-hidden"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+    >
+      {/* Content — fades in at the midpoint when overlay covers it */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isInView ? 1 : 0 }}
-        transition={{ duration: 0.01, delay: delay + halfDuration * 0.9 }}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: { duration: 0.01, delay: delay + halfDuration * 0.85 },
+          },
+        }}
       >
         <Tag className={`block ${className}`}>{children}</Tag>
       </motion.div>
 
-      {/* Sliding overlay: sweeps left→right to cover, then left→right to reveal */}
+      {/* Overlay: slides in from left, then exits to right */}
       <motion.div
         aria-hidden
         className="absolute inset-0 z-10"
         style={{ backgroundColor: overlayColor }}
-        initial={{ scaleX: 0, transformOrigin: "left" }}
-        animate={
-          isInView
-            ? {
-                scaleX: [0, 1, 1, 0],
-                transformOrigin: ["left", "left", "right", "right"],
-              }
-            : { scaleX: 0 }
-        }
-        transition={{
-          duration,
-          delay,
-          ease: [0.22, 1, 0.36, 1],
-          times: [0, 0.45, 0.55, 1],
+        variants={{
+          hidden: { x: "-101%" },
+          visible: {
+            x: ["-101%", "0%", "0%", "101%"],
+            transition: {
+              duration,
+              delay,
+              ease: [0.22, 1, 0.36, 1],
+              times: [0, 0.4, 0.55, 1],
+            },
+          },
         }}
       />
-    </div>
+    </motion.div>
   )
 }

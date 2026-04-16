@@ -2,7 +2,6 @@
 import Link from "next/link"
 import { motion } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
-import { useSectionEntrance } from "@/hooks/useParallax"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
@@ -14,12 +13,12 @@ interface ServicesContent {
 }
 
 export function Services({ content: servicesSection, locale }: { content: ServicesContent; locale: string }) {
-  const { ref: entranceRef, opacity, y } = useSectionEntrance()
-
   return (
     <motion.section
-      ref={entranceRef}
-      style={{ opacity, y }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       className="py-32 bg-white bg-grid relative z-10"
       id={servicesSection.sectionId}
     >

@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { TransitionLink } from "@/components/ui/TransitionLink"
@@ -109,7 +109,7 @@ function useDarkSectionDetection() {
 export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
-  const [logoGlitched, setLogoGlitched] = useState(false)
+  const logoRef = useRef<HTMLDivElement>(null)
   const { scrollY } = useScroll()
   const isDarkSection = useDarkSectionDetection()
 
@@ -117,9 +117,11 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
     setIsScrolled(latest > 50)
   })
 
-  // Trigger logo glitch once on mount
+  // Trigger logo CSS glitch once on mount
   useEffect(() => {
-    const timer = setTimeout(() => setLogoGlitched(true), 500)
+    const timer = setTimeout(() => {
+      logoRef.current?.classList.add("logo-glitch")
+    }, 500)
     return () => clearTimeout(timer)
   }, [])
 
@@ -196,24 +198,13 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             href={locale === "en" ? "/en" : "/"}
             className={`flex items-center gap-2 font-heading text-lg font-semibold tracking-tight group transition-colors duration-300 ${textColor}`}
           >
-            {/* Logo with micro-glitch on load */}
-            <motion.div
-              animate={
-                !logoGlitched
-                  ? { opacity: [1, 0.6, 1, 0.8, 1] }
-                  : { opacity: 1 }
-              }
-              transition={
-                !logoGlitched
-                  ? { duration: 0.4, times: [0, 0.2, 0.5, 0.7, 1] }
-                  : { duration: 0 }
-              }
-            >
+            {/* Logo with CSS micro-glitch on load (once) */}
+            <div ref={logoRef}>
               <BrandLogo
                 size={24}
                 className={`transition-colors duration-300 ${textColor}`}
               />
-            </motion.div>
+            </div>
             <span>{siteConfig.name}</span>
           </TransitionLink>
 

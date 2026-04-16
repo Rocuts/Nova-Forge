@@ -51,7 +51,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           className="flex items-center gap-4 mb-10"
         >
           <motion.span
-            className="w-12 h-[1px] bg-[#0a0a0a] opacity-30 origin-left"
+            className="block w-12 h-[1px] bg-[#0a0a0a] opacity-30 origin-left"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}

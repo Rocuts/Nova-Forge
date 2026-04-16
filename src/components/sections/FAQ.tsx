@@ -2,7 +2,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-import { useSectionEntrance } from "@/hooks/useParallax"
 
 function FAQItem({ question, answer, isFirst }: { question: string; answer: string; isFirst?: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -47,12 +46,12 @@ interface FAQContent {
 }
 
 export function FAQ({ content: faqSection }: { content: FAQContent }) {
-  const { ref: entranceRef, opacity, y } = useSectionEntrance()
-
   return (
     <motion.section
-      ref={entranceRef}
-      style={{ opacity, y }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       className="py-32 bg-[#f8f8f8] border-t border-[#e5e5e5] relative z-10"
       id={faqSection.sectionId}
     >

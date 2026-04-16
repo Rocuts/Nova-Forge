@@ -35,10 +35,7 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
           {ctaSection.description}
         </p>
 
-        <motion.div
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        >
+        <div className="cta-pulse inline-block">
           <Button
             size="lg"
             variant="primary"
@@ -48,7 +45,7 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
           >
             {ctaSection.action.label}
           </Button>
-        </motion.div>
+        </div>
       </motion.div>
     </section>
   )

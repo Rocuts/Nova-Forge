@@ -126,23 +126,55 @@
     animation-play-state: paused;
   }
 
-  /* Nav link hover: underline draws left→right */
-  .nav-link-hover {
-    position: relative;
-  }
-  .nav-link-hover::after {
-    content: "";
-    position: absolute;
-    bottom: 4px;
-    left: 16px;
-    right: 16px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.25s ease;
-  }
-  .nav-link-hover:hover::after {
-    transform: scaleX(1);
+}
+
+/* ── Standalone classes (outside @layer to avoid Tailwind purge) ── */
+
+/* Nav link hover: underline draws left→right */
+.nav-link-hover {
+  position: relative;
+}
+.nav-link-hover::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.25s ease;
+}
+.nav-link-hover:hover::after {
+  transform: scaleX(1);
+}
+
+/* Logo micro-glitch: runs once on mount */
+@keyframes logoGlitch {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.6; }
+  40% { opacity: 1; }
+  60% { opacity: 0.75; }
+  80% { opacity: 1; }
+}
+.logo-glitch {
+  animation: logoGlitch 0.4s ease forwards;
+}
+
+/* CTA button subtle pulse */
+@keyframes subtlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+.cta-pulse {
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  .logo-glitch,
+  .cta-pulse {
+    animation: none;
   }
 }

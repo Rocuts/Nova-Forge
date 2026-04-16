@@ -1,7 +1,6 @@
 "use client"
 import { motion } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
-import { useSectionEntrance } from "@/hooks/useParallax"
 
 interface MethodologyStep {
   num: string
@@ -17,12 +16,12 @@ interface MethodologyContent {
 }
 
 export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
-  const { ref: entranceRef, opacity, y } = useSectionEntrance()
-
   return (
     <motion.section
-      ref={entranceRef}
-      style={{ opacity, y }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       className="py-32 bg-white border-t border-[#e5e5e5] relative z-10"
       id={methodologySection.sectionId}
     >
