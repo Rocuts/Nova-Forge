@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Already has a locale prefix — let it through
-  if (pathname.startsWith("/en") || pathname.startsWith("/es")) {
+  if (pathname === "/en" || pathname.startsWith("/en/") || pathname === "/es" || pathname.startsWith("/es/")) {
     return NextResponse.next()
   }
 
