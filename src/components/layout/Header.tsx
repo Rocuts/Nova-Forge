@@ -121,7 +121,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       logoRef.current?.classList.add("logo-glitch")
-    }, 500)
+    }, 600)
     return () => clearTimeout(timer)
   }, [])
 

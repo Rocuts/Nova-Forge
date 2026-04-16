@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { useEffect, useRef } from "react"
 
 const TRUST_ITEMS = [
   "Amazon Web Services",
@@ -10,14 +10,31 @@ const TRUST_ITEMS = [
 ]
 
 export function TrustBar() {
+  const innerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = innerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.style.transition = "opacity 0.6s ease"
+          el.style.opacity = "1"
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.2 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section className="py-12 border-y border-[#e5e5e5] bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <div
+          ref={innerRef}
+          style={{ opacity: 0 }}
           className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4"
         >
           <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mr-4">
@@ -31,7 +48,7 @@ export function TrustBar() {
               {item}
             </span>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

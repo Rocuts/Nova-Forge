@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
-import { motion, useInView } from "motion/react"
+import { motion } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 
 interface MetricsContent {
@@ -19,26 +19,39 @@ function parseKpiValue(raw: string): { value: number; suffix: string } {
 
 function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [display, setDisplay] = useState("0")
 
+  // Vanilla IntersectionObserver instead of useInView
   useEffect(() => {
-    if (!isInView) return
-    const duration = 1500
-    const start = performance.now()
-    const hasDecimal = value % 1 !== 0
-    const decimals = hasDecimal ? 1 : 0
+    const el = ref.current
+    if (!el) return
 
-    function animate(now: number) {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
-      setDisplay((value * eased).toFixed(decimals))
-      if (progress < 1) requestAnimationFrame(animate)
-    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        observer.disconnect()
 
-    requestAnimationFrame(animate)
-  }, [isInView, value])
+        const duration = 1500
+        const start = performance.now()
+        const hasDecimal = value % 1 !== 0
+        const decimals = hasDecimal ? 1 : 0
+
+        function animate(now: number) {
+          const elapsed = now - start
+          const progress = Math.min(elapsed / duration, 1)
+          const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+          setDisplay((value * eased).toFixed(decimals))
+          if (progress < 1) requestAnimationFrame(animate)
+        }
+
+        requestAnimationFrame(animate)
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [value])
 
   return <span ref={ref}>{display}{suffix}</span>
 }

@@ -1,4 +1,5 @@
 "use client"
+import { useEffect, useRef } from "react"
 import { motion } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 
@@ -16,6 +17,26 @@ interface MethodologyContent {
 }
 
 export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
+  const lineRef = useRef<HTMLDivElement>(null)
+
+  // Vanilla IntersectionObserver for the connector line scaleX animation
+  useEffect(() => {
+    const el = lineRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.style.transition = "transform 1s cubic-bezier(0.22, 1, 0.36, 1)"
+          el.style.transform = "scaleX(1)"
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 30 }}
@@ -36,13 +57,11 @@ export function Methodology({ content: methodologySection }: { content: Methodol
         </div>
 
         <div className="relative">
-          {/* Animated horizontal connector line */}
-          <motion.div
+          {/* Horizontal connector line — animated via IntersectionObserver */}
+          <div
+            ref={lineRef}
             className="hidden md:block absolute top-0 left-0 right-0 h-[1px] bg-[#e5e5e5] origin-left"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transform: "scaleX(0)" }}
           />
 
           <motion.div

@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { motion, AnimatePresence, useScroll, useTransform } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 import { trackEvent } from "@/lib/analytics"
@@ -22,6 +22,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
   const phrases = heroContent.titleRotating ?? [heroContent.titleHighlight]
   const [index, setIndex] = useState(0)
   const sectionRef = useRef<HTMLElement>(null)
+  const eyebrowLineRef = useRef<HTMLSpanElement>(null)
 
   const next = useCallback(() => {
     setIndex((prev) => (prev + 1) % phrases.length)
@@ -33,16 +34,35 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
     return () => clearInterval(timer)
   }, [next, phrases.length])
 
-  // Scroll-linked fade: hero fades out as user scrolls down
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  })
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  // Eyebrow line: animate scaleX 0→1 via vanilla JS
+  useEffect(() => {
+    const el = eyebrowLineRef.current
+    if (!el) return
+    el.style.transform = "scaleX(0)"
+    el.style.transition = "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)"
+    const timer = setTimeout(() => {
+      el.style.transform = "scaleX(1)"
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Scroll-linked hero fade: vanilla scroll listener
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    function onScroll() {
+      const scrolled = window.scrollY
+      const heroHeight = section!.offsetHeight
+      const opacity = Math.max(0, 1 - (scrolled / heroHeight) * 1.5)
+      section!.style.opacity = String(opacity)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center bg-white overflow-hidden" data-header-theme="light">
-      <motion.div style={{ opacity: heroOpacity }} className="relative z-10 mx-auto w-full max-w-7xl px-6">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
         {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,11 +70,9 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           transition={{ delay: 0, duration: 0.6, ease: "easeOut" }}
           className="flex items-center gap-4 mb-10"
         >
-          <motion.span
+          <span
+            ref={eyebrowLineRef}
             className="block w-12 h-[1px] bg-[#0a0a0a] opacity-30 origin-left"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           />
           <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-[#0a0a0a] opacity-90">
             {heroContent.eyebrow}
@@ -128,7 +146,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             </Button>
           </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   )
 }
