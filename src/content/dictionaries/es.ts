@@ -192,7 +192,7 @@ const es = {
   },
   methodology: {
     sectionId: "metodologia",
-    title: "The NovaForge Standard",
+    title: "The Orbexs Standard",
     description:
       "Nuestro proceso de ingeniería está diseñado para eliminar la incertidumbre y garantizar la entrega de valor en cada despliegue.",
     steps: [
@@ -226,7 +226,7 @@ const es = {
   team: {
     sectionId: "equipo",
     title: "Nuestro Liderazgo Técnico",
-    description: "Ingeniería y estrategia detrás de NovaForge.",
+    description: "Ingeniería y estrategia detrás de Orbexs.",
     members: [
       {
         name: "Johan Rocuts",
@@ -336,7 +336,7 @@ const es = {
   privacy: {
     title: "Política de Privacidad",
     description:
-      "Cómo NovaForge recopila, utiliza y protege la información compartida a través de este sitio.",
+      "Cómo Orbexs recopila, utiliza y protege la información compartida a través de este sitio.",
     updatedAt: "16 de marzo de 2026",
     sections: [
       {
@@ -350,7 +350,7 @@ const es = {
         title: "Uso de la información",
         paragraphs: [
           "Utilizamos la información para responder consultas, preparar diagnósticos, coordinar reuniones, evaluar oportunidades comerciales y mejorar la experiencia del sitio.",
-          "No vendemos información personal a terceros ni la usamos para fines incompatibles con la relación comercial o precomercial que el visitante inicia con NovaForge.",
+          "No vendemos información personal a terceros ni la usamos para fines incompatibles con la relación comercial o precomercial que el visitante inicia con Orbexs.",
         ],
       },
       {
@@ -364,7 +364,7 @@ const es = {
         title: "Terceros y servicios externos",
         paragraphs: [
           "Este sitio puede apoyarse en servicios externos para agenda, correo, analítica o infraestructura. Cada proveedor procesa datos bajo sus propias políticas y obligaciones contractuales.",
-          "Si necesitas detalles sobre el tratamiento de tus datos o quieres ejercer tus derechos de acceso, actualización o eliminación, escríbenos a contacto@novaforge.io.",
+          "Si necesitas detalles sobre el tratamiento de tus datos o quieres ejercer tus derechos de acceso, actualización o eliminación, escríbenos a contact@orbexs.tech.",
         ],
       },
     ],
@@ -372,20 +372,20 @@ const es = {
   terms: {
     title: "Términos de Servicio",
     description:
-      "Condiciones generales para el uso del sitio web de NovaForge y el contacto comercial iniciado desde esta plataforma.",
+      "Condiciones generales para el uso del sitio web de Orbexs y el contacto comercial iniciado desde esta plataforma.",
     updatedAt: "16 de marzo de 2026",
     sections: [
       {
         title: "Uso permitido del sitio",
         paragraphs: [
-          "Este sitio tiene fines informativos y comerciales. Puedes navegarlo, compartirlo y utilizar sus canales de contacto para iniciar conversaciones legítimas con NovaForge.",
+          "Este sitio tiene fines informativos y comerciales. Puedes navegarlo, compartirlo y utilizar sus canales de contacto para iniciar conversaciones legítimas con Orbexs.",
           "No está permitido usar el sitio para actividades ilícitas, intentos de intrusión, scraping abusivo, envío de spam o cualquier acción que afecte la disponibilidad o integridad del servicio.",
         ],
       },
       {
         title: "Propiedad intelectual",
         paragraphs: [
-          "Los textos, marcas, layouts, gráficos, código y elementos visuales del sitio pertenecen a NovaForge o a sus respectivos licenciantes, salvo indicación expresa en contrario.",
+          "Los textos, marcas, layouts, gráficos, código y elementos visuales del sitio pertenecen a Orbexs o a sus respectivos licenciantes, salvo indicación expresa en contrario.",
           "No se autoriza la reproducción total o parcial con fines comerciales sin consentimiento previo por escrito.",
         ],
       },
@@ -399,8 +399,8 @@ const es = {
       {
         title: "Responsabilidad y contacto",
         paragraphs: [
-          "NovaForge procura mantener la información del sitio actualizada, pero no garantiza que todo el contenido permanezca completo, exacto o disponible en todo momento.",
-          "Si tienes preguntas legales o comerciales sobre estas condiciones, puedes escribir a contacto@novaforge.io.",
+          "Orbexs procura mantener la información del sitio actualizada, pero no garantiza que todo el contenido permanezca completo, exacto o disponible en todo momento.",
+          "Si tienes preguntas legales o comerciales sobre estas condiciones, puedes escribir a contact@orbexs.tech.",
         ],
       },
     ],
@@ -476,7 +476,7 @@ const es = {
     subtitle: "Análisis personalizado basado en sus respuestas.",
     loading: "Generando su diagnóstico...",
     whatsappMessage:
-      "Hola, acabo de completar el diagnóstico técnico en NovaForge ({name}). Me gustaría agendar una consulta estratégica.",
+      "Hola, acabo de completar el diagnóstico técnico en Orbexs ({name}). Me gustaría agendar una consulta estratégica.",
     whatsappButton: "Agendar por WhatsApp",
     backButton: "Volver al Inicio",
   },
@@ -799,11 +799,11 @@ const es = {
     quote: {
       text: "La soberanía digital no es una opción — es una necesidad estratégica para toda organización que opera con datos sensibles.",
       author: "Johan Rocuts",
-      role: "CEO, NovaForge",
+      role: "CEO, Orbexs",
     },
     cta: {
       label: "Contactar para inversión",
-      href: "mailto:contacto@novaforge.io",
+      href: "mailto:contact@orbexs.tech",
     },
   },
   investorsPage: {
@@ -814,7 +814,7 @@ const es = {
       title: "Tesis de Inversión",
       paragraphs: [
         "El mundo se mueve hacia la soberanía digital. Gobiernos y grandes corporaciones ya no pueden depender de infraestructura de terceros para sus operaciones más sensibles. La inteligencia artificial, la ciberseguridad y la automatización de procesos críticos deben operar dentro del perímetro de cada organización.",
-        "NovaForge construye exactamente eso: la infraestructura de software que permite a organizaciones de alta exigencia operar con IA soberana, defenderse con agentes autónomos de ciberseguridad y automatizar flujos de trabajo regulados con trazabilidad completa.",
+        "Orbexs construye exactamente eso: la infraestructura de software que permite a organizaciones de alta exigencia operar con IA soberana, defenderse con agentes autónomos de ciberseguridad y automatizar flujos de trabajo regulados con trazabilidad completa.",
         "Nuestro enfoque combina ingeniería de sistemas de alto nivel con despliegue on-premise, modelos de lenguaje privados y arquitectura Zero-Trust — todo diseñado para los estándares más exigentes del mercado enterprise y gubernamental.",
       ],
     },
@@ -829,24 +829,24 @@ const es = {
     },
     team: {
       title: "Equipo Fundador",
-      description: "Ingeniería y estrategia detrás de NovaForge.",
+      description: "Ingeniería y estrategia detrás de Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala. Define la visión de producto y la estrategia de mercado de NovaForge en el sector enterprise y gobierno." },
-        { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B. Gestiona las relaciones comerciales y la expansión de NovaForge en industrias reguladas." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad. Lidera el diseño técnico de todas las soluciones de NovaForge." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento. Construye las interfaces y sistemas que conectan la tecnología de NovaForge con los usuarios finales." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala. Define la visión de producto y la estrategia de mercado de Orbexs en el sector enterprise y gobierno." },
+        { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B. Gestiona las relaciones comerciales y la expansión de Orbexs en industrias reguladas." },
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad. Lidera el diseño técnico de todas las soluciones de Orbexs." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento. Construye las interfaces y sistemas que conectan la tecnología de Orbexs con los usuarios finales." },
       ],
     },
     vision: {
       quote: "La soberanía digital no es una tendencia — es el estándar inevitable para toda organización que opera con datos sensibles. Estamos construyendo la infraestructura que lo hace posible.",
       author: "Johan Rocuts",
-      role: "CEO, NovaForge",
+      role: "CEO, Orbexs",
     },
     cta: {
       title: "Hablemos",
       description: "Si comparte nuestra visión sobre el futuro de la soberanía digital, nos encantaría conversar.",
-      email: "contacto@novaforge.io",
-      action: { label: "Contactar", href: "mailto:contacto@novaforge.io" },
+      email: "contact@orbexs.tech",
+      action: { label: "Contactar", href: "mailto:contact@orbexs.tech" },
     },
   },
   aboutPage: {
@@ -858,7 +858,7 @@ const es = {
       description: "Construir software mission-critical, sistemas de inteligencia artificial soberana y plataformas de ciberseguridad agéntica que permitan a organizaciones de alta exigencia operar con independencia tecnológica total. No vendemos humo ni soluciones genéricas. Diseñamos, desarrollamos y operamos infraestructura que funciona bajo los estándares más altos del mundo.",
     },
     methodology: {
-      title: "Estándar NovaForge",
+      title: "Estándar Orbexs",
       description: "Nuestro proceso de ingeniería está diseñado para eliminar la incertidumbre y garantizar la entrega de valor en cada despliegue.",
       steps: [
         { num: "01", title: "Diagnóstico y Auditoría Técnica", desc: "Análisis exhaustivo de su infraestructura actual y definición de objetivos de negocio." },
@@ -870,7 +870,7 @@ const es = {
     },
     team: {
       title: "Nuestro Equipo",
-      description: "Ingeniería y estrategia detrás de NovaForge.",
+      description: "Ingeniería y estrategia detrás de Orbexs.",
       members: [
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala con enfoque en mercados enterprise y gobierno." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B para industrias reguladas." },

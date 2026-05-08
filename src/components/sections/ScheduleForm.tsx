@@ -104,7 +104,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
         {/* Contact info at bottom */}
         <div className="mt-auto pt-16 hidden md:block">
           <div className="border-t border-white/10 pt-6">
-            <p className="text-[#a3a3a3] text-sm">contacto@novaforge.io</p>
+            <p className="text-[#a3a3a3] text-sm">contact@orbexs.tech</p>
           </div>
         </div>
       </div>

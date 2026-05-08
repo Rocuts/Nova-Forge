@@ -6,7 +6,7 @@ const navItems = es.nav.items
 
 test('homepage loads and renders all sections', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/NovaForge/)
+  await expect(page).toHaveTitle(/Orbexs/)
   await expect(page.getByRole('heading', { level: 1 })).toContainText(heroContent.titleLead)
   await expect(page.locator('#servicios')).toBeAttached()
   await expect(page.locator('#metodologia')).toBeAttached()

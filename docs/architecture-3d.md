@@ -1,7 +1,7 @@
 # 3D & WebGL Architecture Architecture
 
 ## Component Boundary Strategy
-Three.js y ReactDOM manejan grafos diferentes. En Novaforge, orquestamos estos mundos a través de las carpetas `/src/components/3d` y `/src/components/canvas`.
+Three.js y ReactDOM manejan grafos diferentes. En Orbexs, orquestamos estos mundos a través de las carpetas `/src/components/3d` y `/src/components/canvas`.
 
 ### Reglas de Implementación 3D
 1. **Lazy Loading:** Nunca cargues componentes pesados de 3D sincrónicamente en el initial load del DOM de App Router. Usa `next/dynamic` con `ssr: false` para inyectar los Canvas en las secciones (ej. en `Hero.tsx`).

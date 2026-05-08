@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     })
   }
 
-  const prompt = `Eres un consultor senior de tecnología de la agencia NovaForge, especializada en IA y software empresarial.
+  const prompt = `Eres un consultor senior de tecnología de la agencia Orbexs, especializada en IA y software empresarial.
 
 Genera un diagnóstico técnico personalizado y profesional basado en las siguientes respuestas del cliente. El diagnóstico debe ser en español, conciso pero valioso, y demostrar expertise técnico real.
 

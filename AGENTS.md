@@ -1,6 +1,6 @@
-# Novaforge Project Context para Codex
+# Orbexs Project Context para Codex
 
-Bienvenido a Novaforge, el sitio web high-end de nuestra agencia de AI & Software.
+Bienvenido a Orbexs, el sitio web high-end de nuestra agencia de AI & Software.
 
 ## Estructura Rápida
 - `/src/app`: Routing principal (SSR).

@@ -1,4 +1,4 @@
-# Novaforge — Plan de Elevación Visual Top-Tier 2026
+# Orbexs — Plan de Elevación Visual Top-Tier 2026
 
 > Objetivo: Transformar la landing de "sitio dark bien construido" a "experiencia inmersiva nivel Awwwards".
 > Regla: Zero dependencias nuevas. Todo se implementa con el stack existente (Three.js, motion/react, Lenis, Tailwind v4).
@@ -166,7 +166,7 @@
 
 **Qué hacer:**
 - Overlay negro que cubre toda la pantalla al cargar
-- Logo de Novaforge aparece con character reveal (stagger)
+- Logo de Orbexs aparece con character reveal (stagger)
 - Línea de progreso sutil debajo del logo (conectada a `document.readyState` o next/font loading)
 - Al completar: el overlay hace clip-path circle expand (centro hacia fuera) revelando el sitio
 - Duración total: 1.5–2s máximo

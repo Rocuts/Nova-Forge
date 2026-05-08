@@ -66,7 +66,7 @@ function getMegaMenuLabels(locale: string) {
   return {
     platform: isEN ? "PLATFORM" : "PLATAFORMA",
     solutions: isEN ? "SOLUTIONS" : "SOLUCIONES",
-    about: isEN ? "ABOUT NOVAFORGE" : "SOBRE NOVAFORGE",
+    about: isEN ? "ABOUT ORBEXS" : "SOBRE ORBEXS",
     contact: isEN ? "CONTACT" : "CONTACTO",
     learnMore: isEN ? "Learn more" : "Conocer más",
     aboutText: isEN
@@ -202,7 +202,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
         <div className="container px-4 mx-auto max-w-7xl h-16 flex items-center justify-between">
           {/* Left: Logo */}
           <TransitionLink
-            href={locale === "en" ? "/en" : "/"}
+            href={buildLocalePath(locale as Locale, "/")}
             className={`flex items-center gap-2 font-heading text-lg font-semibold tracking-tight group transition-colors duration-300 ${textColor}`}
           >
             {/* Logo with CSS micro-glitch on load (once) */}

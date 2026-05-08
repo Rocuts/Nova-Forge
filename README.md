@@ -1,8 +1,8 @@
-# NovaForge
+# Orbexs
 
-Sitio web corporativo de NovaForge — ingenieria de software mission-critical, IA soberana y ciberseguridad agenticapara gobiernos y enterprise.
+Sitio web corporativo de Orbexs — ingenieria de software mission-critical, IA soberana y ciberseguridad agenticapara gobiernos y enterprise.
 
-**Produccion:** [nova-forge-alpha.vercel.app](https://nova-forge-alpha.vercel.app)
+**Produccion:** [orbexs-alpha.vercel.app](https://orbexs-alpha.vercel.app)
 
 ## Stack Tecnologico
 
@@ -106,4 +106,4 @@ El sitio se despliega automaticamente en Vercel al pushear a `main`.
 
 ## Licencia
 
-Codigo propietario. Todos los derechos reservados. NovaForge LLC.
+Codigo propietario. Todos los derechos reservados. Orbexs LLC.

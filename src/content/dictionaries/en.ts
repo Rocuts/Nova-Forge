@@ -192,7 +192,7 @@ const en = {
   },
   methodology: {
     sectionId: "metodologia",
-    title: "The NovaForge Standard",
+    title: "The Orbexs Standard",
     description:
       "Our engineering process is designed to eliminate uncertainty and guarantee value delivery on every deployment.",
     steps: [
@@ -226,7 +226,7 @@ const en = {
   team: {
     sectionId: "equipo",
     title: "Our Technical Leadership",
-    description: "Engineering and strategy behind NovaForge.",
+    description: "Engineering and strategy behind Orbexs.",
     members: [
       {
         name: "Johan Rocuts",
@@ -336,7 +336,7 @@ const en = {
   privacy: {
     title: "Privacy Policy",
     description:
-      "How NovaForge collects, uses, and protects information shared through this site.",
+      "How Orbexs collects, uses, and protects information shared through this site.",
     updatedAt: "March 16, 2026",
     sections: [
       {
@@ -350,7 +350,7 @@ const en = {
         title: "Use of Information",
         paragraphs: [
           "We use the information to respond to inquiries, prepare diagnostics, coordinate meetings, evaluate business opportunities, and improve the site experience.",
-          "We do not sell personal information to third parties or use it for purposes incompatible with the commercial or pre-commercial relationship initiated by the visitor with NovaForge.",
+          "We do not sell personal information to third parties or use it for purposes incompatible with the commercial or pre-commercial relationship initiated by the visitor with Orbexs.",
         ],
       },
       {
@@ -364,7 +364,7 @@ const en = {
         title: "Third Parties and External Services",
         paragraphs: [
           "This site may rely on external services for scheduling, email, analytics, or infrastructure. Each provider processes data under its own policies and contractual obligations.",
-          "If you need details about the processing of your data or wish to exercise your rights of access, rectification, or deletion, please contact us at contacto@novaforge.io.",
+          "If you need details about the processing of your data or wish to exercise your rights of access, rectification, or deletion, please contact us at contact@orbexs.tech.",
         ],
       },
     ],
@@ -372,20 +372,20 @@ const en = {
   terms: {
     title: "Terms of Service",
     description:
-      "General conditions for the use of the NovaForge website and commercial contact initiated from this platform.",
+      "General conditions for the use of the Orbexs website and commercial contact initiated from this platform.",
     updatedAt: "March 16, 2026",
     sections: [
       {
         title: "Permitted Use of the Site",
         paragraphs: [
-          "This site is intended for informational and commercial purposes. You may browse it, share it, and use its contact channels to initiate legitimate conversations with NovaForge.",
+          "This site is intended for informational and commercial purposes. You may browse it, share it, and use its contact channels to initiate legitimate conversations with Orbexs.",
           "Using the site for unlawful activities, intrusion attempts, abusive scraping, spam, or any action that affects the availability or integrity of the service is prohibited.",
         ],
       },
       {
         title: "Intellectual Property",
         paragraphs: [
-          "The text, trademarks, layouts, graphics, code, and visual elements of the site belong to NovaForge or their respective licensors, unless expressly stated otherwise.",
+          "The text, trademarks, layouts, graphics, code, and visual elements of the site belong to Orbexs or their respective licensors, unless expressly stated otherwise.",
           "Total or partial reproduction for commercial purposes without prior written consent is not authorized.",
         ],
       },
@@ -399,8 +399,8 @@ const en = {
       {
         title: "Liability and Contact",
         paragraphs: [
-          "NovaForge endeavors to keep the information on the site up to date but does not guarantee that all content will remain complete, accurate, or available at all times.",
-          "If you have legal or commercial questions about these terms, you may write to contacto@novaforge.io.",
+          "Orbexs endeavors to keep the information on the site up to date but does not guarantee that all content will remain complete, accurate, or available at all times.",
+          "If you have legal or commercial questions about these terms, you may write to contact@orbexs.tech.",
         ],
       },
     ],
@@ -476,7 +476,7 @@ const en = {
     subtitle: "Personalized analysis based on your responses.",
     loading: "Generating diagnostic...",
     whatsappMessage:
-      "Hi, I just completed the technical diagnostic on NovaForge ({name}). I'd like to schedule a strategic consultation.",
+      "Hi, I just completed the technical diagnostic on Orbexs ({name}). I'd like to schedule a strategic consultation.",
     whatsappButton: "Schedule via WhatsApp",
     backButton: "Back to Home",
   },
@@ -799,11 +799,11 @@ const en = {
     quote: {
       text: "Digital sovereignty is not an option — it's a strategic necessity for every organization operating with sensitive data.",
       author: "Johan Rocuts",
-      role: "CEO, NovaForge",
+      role: "CEO, Orbexs",
     },
     cta: {
       label: "Contact for investment",
-      href: "mailto:contacto@novaforge.io",
+      href: "mailto:contact@orbexs.tech",
     },
   },
   investorsPage: {
@@ -814,7 +814,7 @@ const en = {
       title: "Investment Thesis",
       paragraphs: [
         "The world is moving toward digital sovereignty. Governments and large corporations can no longer depend on third-party infrastructure for their most sensitive operations. Artificial intelligence, cybersecurity, and critical process automation must operate within each organization's perimeter.",
-        "NovaForge builds exactly that: the software infrastructure that enables high-demand organizations to operate with sovereign AI, defend themselves with autonomous cybersecurity agents, and automate regulated workflows with complete traceability.",
+        "Orbexs builds exactly that: the software infrastructure that enables high-demand organizations to operate with sovereign AI, defend themselves with autonomous cybersecurity agents, and automate regulated workflows with complete traceability.",
         "Our approach combines high-level systems engineering with on-premise deployment, private language models, and Zero-Trust architecture — all designed for the most demanding standards of the enterprise and government market.",
       ],
     },
@@ -829,24 +829,24 @@ const en = {
     },
     team: {
       title: "Founding Team",
-      description: "Engineering and strategy behind NovaForge.",
+      description: "Engineering and strategy behind Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines NovaForge's product vision and market strategy in the enterprise and government sector." },
-        { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions. Manages commercial relationships and NovaForge's expansion in regulated industries." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all NovaForge solutions." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect NovaForge's technology with end users." },
+        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines Orbexs's product vision and market strategy in the enterprise and government sector." },
+        { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions. Manages commercial relationships and Orbexs's expansion in regulated industries." },
+        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all Orbexs solutions." },
+        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect Orbexs's technology with end users." },
       ],
     },
     vision: {
       quote: "Digital sovereignty is not a trend — it is the inevitable standard for every organization operating with sensitive data. We are building the infrastructure that makes it possible.",
       author: "Johan Rocuts",
-      role: "CEO, NovaForge",
+      role: "CEO, Orbexs",
     },
     cta: {
       title: "Let's Talk",
       description: "If you share our vision for the future of digital sovereignty, we would love to have a conversation.",
-      email: "contacto@novaforge.io",
-      action: { label: "Contact Us", href: "mailto:contacto@novaforge.io" },
+      email: "contact@orbexs.tech",
+      action: { label: "Contact Us", href: "mailto:contact@orbexs.tech" },
     },
   },
   aboutPage: {
@@ -858,7 +858,7 @@ const en = {
       description: "Build mission-critical software, sovereign artificial intelligence systems, and agentic cybersecurity platforms that enable high-demand organizations to operate with total technological independence. We don't sell smoke or generic solutions. We design, develop, and operate infrastructure that works under the highest standards in the world.",
     },
     methodology: {
-      title: "The NovaForge Standard",
+      title: "The Orbexs Standard",
       description: "Our engineering process is designed to eliminate uncertainty and guarantee value delivery on every deployment.",
       steps: [
         { num: "01", title: "Diagnostics & Technical Audit", desc: "Exhaustive analysis of your current infrastructure and definition of business objectives." },
@@ -870,7 +870,7 @@ const en = {
     },
     team: {
       title: "Our Team",
-      description: "Engineering and strategy behind NovaForge.",
+      description: "Engineering and strategy behind Orbexs.",
       members: [
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions for regulated industries." },

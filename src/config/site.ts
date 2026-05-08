@@ -1,13 +1,13 @@
-const contactEmail = "contacto@novaforge.io"
+const contactEmail = "contact@orbexs.tech"
 const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : "https://novaforge.io"
+    : "https://orbexs.tech"
 
 export const siteConfig = {
-  name: "NovaForge",
-  legalName: "NovaForge LLC",
+  name: "Orbexs",
+  legalName: "Orbexs LLC",
   url: siteUrl,
   contactEmail,
   images: {
@@ -17,9 +17,9 @@ export const siteConfig = {
   },
   siteLastModified: "2026-04-05",
   links: {
-    twitter: "https://twitter.com/novaforge",
-    linkedin: "https://linkedin.com/company/novaforge",
-    booking: "https://cal.com/novaforge/diagnostico",
+    twitter: "https://twitter.com/orbexs",
+    linkedin: "https://linkedin.com/company/orbexs",
+    booking: "https://cal.com/orbexs/diagnostico",
     whatsapp: "https://wa.me/573015244404",
     contact: `mailto:${contactEmail}`,
   },

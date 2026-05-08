@@ -46,7 +46,7 @@ export function IntroSequence() {
 
   if (!show) return null
 
-  const letters = "NOVAFORGE".split("")
+  const letters = "ORBEXS".split("")
 
   return (
     <AnimatePresence>

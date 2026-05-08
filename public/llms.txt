@@ -1,4 +1,4 @@
-# NovaForge — Fábrica de Software & Inteligencia Artificial
+# Orbexs — Fábrica de Software & Inteligencia Artificial
 Diseñamos, construimos y operamos software completo y agentes de IA para empresas.
 
 ## Lo que construimos
@@ -24,5 +24,5 @@ Diseñamos, construimos y operamos software completo y agentes de IA para empres
 - Desde la idea hasta la operación: diseño, desarrollo, despliegue
 - Agentes de IA que trabajan como parte de tu equipo
 
-URL: https://novaforge.io
-Contacto: contacto@novaforge.io
+URL: https://orbexs.tech
+Contacto: contact@orbexs.tech
