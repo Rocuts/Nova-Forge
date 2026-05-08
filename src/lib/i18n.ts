@@ -3,7 +3,7 @@ export type Locale = (typeof locales)[number]
 export const defaultLocale: Locale = "es"
 
 export const localePrefix: Record<Locale, string> = {
-  es: "",
+  es: "/es",
   en: "/en",
 }
 
