@@ -1,46 +1,7 @@
 "use client"
 
-import { Icon } from "@iconify/react"
 import { motion } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
-
-const ICON_MAP: Record<string, string> = {
-  // AI
-  "Anthropic": "simple-icons:anthropic",
-  "OpenAI": "simple-icons:openai",
-  "Google Gemini": "simple-icons:googlegemini",
-  "Meta LLaMA": "simple-icons:meta",
-  "DeepSeek": "simple-icons:deepseek",
-  "Mistral": "simple-icons:mistral",
-  "Hugging Face": "simple-icons:huggingface",
-  "n8n": "simple-icons:n8n",
-  "LangChain": "simple-icons:langchain",
-  "PyTorch": "simple-icons:pytorch",
-  "Ollama": "simple-icons:ollama",
-  // Cloud
-  "AWS": "simple-icons:amazonwebservices",
-  "Google Cloud": "simple-icons:googlecloud",
-  "Microsoft Azure": "simple-icons:microsoftazure",
-  "Kubernetes": "simple-icons:kubernetes",
-  "Terraform": "simple-icons:terraform",
-  "Pulumi": "simple-icons:pulumi",
-  // Dev
-  "Next.js 16": "simple-icons:nextdotjs",
-  "React 19": "simple-icons:react",
-  "TypeScript 5": "simple-icons:typescript",
-  "Bun": "simple-icons:bun",
-  "Rust": "simple-icons:rust",
-  "Go": "simple-icons:go",
-  // Data
-  "PostgreSQL": "simple-icons:postgresql",
-  "ClickHouse": "simple-icons:clickhouse",
-  "Apache Kafka": "simple-icons:apachekafka",
-  "Apache Flink": "simple-icons:apacheflink",
-  "Grafana": "simple-icons:grafana",
-  "dbt": "simple-icons:dbt",
-}
-
-const SPEEDS = [25, 30, 35, 28, 32, 27]
 
 interface TechStackContent {
   sectionId: string
@@ -51,59 +12,41 @@ interface TechStackContent {
   }[]
 }
 
-function MarqueeRow({
+function CategoryRow({
   category,
-  speed,
   index,
 }: {
   category: { name: string; items: readonly string[] }
-  speed: number
   index: number
 }) {
-  const items = category.items
-  const doubled = [...items, ...items]
-  const direction = index % 2 === 0 ? "normal" : "reverse"
-
   return (
-    <div className="flex items-center border-b border-[#e5e5e5] last:border-b-0">
-      <div className="w-24 sm:w-40 md:w-52 shrink-0 py-6 pr-6 pl-6">
-        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#a3a3a3]">
-          {category.name}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8 py-8 border-b border-[#e5e5e5] last:border-b-0"
+    >
+      <div className="md:col-span-3 flex items-start gap-4">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[#a3a3a3] tabular-nums pt-[3px]" aria-hidden="true">
+          {String(index + 1).padStart(2, "0")}
         </span>
+        <h3 className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#525252] pt-[3px]">
+          {category.name}
+        </h3>
       </div>
 
-      <div className="flex-1 overflow-hidden py-6">
-        <div
-          className="marquee-track flex items-center gap-6 sm:gap-10 w-max"
-          style={{
-            animation: `marquee ${speed}s linear infinite`,
-            animationDirection: direction,
-          }}
-        >
-          {doubled.map((item, i) => {
-            const iconName = ICON_MAP[item]
-            return (
-              <div
-                key={`${item}-${i}`}
-                className="flex items-center gap-2.5 shrink-0"
-              >
-                {iconName ? (
-                  <Icon
-                    icon={iconName}
-                    width={20}
-                    height={20}
-                    className="text-[#525252]"
-                  />
-                ) : null}
-                <span className="text-sm font-medium text-[#0a0a0a] whitespace-nowrap">
-                  {item}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+      <ul className="md:col-span-9 flex flex-wrap gap-x-2 gap-y-3">
+        {category.items.map((item, i) => (
+          <li key={item} className="flex items-center text-sm font-medium text-[#0a0a0a] whitespace-nowrap">
+            {item}
+            {i < category.items.length - 1 && (
+              <span className="ml-2 text-[#d4d4d4] select-none" aria-hidden="true">/</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   )
 }
 
@@ -116,27 +59,16 @@ export function TechStack({ content }: { content: TechStackContent }) {
       <div className="mx-auto max-w-7xl px-6">
         <RevealText
           as="h2"
-          className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-[#0a0a0a] text-center mb-16"
+          className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-10 sm:mb-16"
         >
           {content.title}
         </RevealText>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="marquee-container bg-white border border-[#e5e5e5] rounded-[6px] overflow-hidden"
-        >
+        <div className="bg-white border border-[#e5e5e5] rounded-[6px] px-6 sm:px-10">
           {content.categories.map((cat, i) => (
-            <MarqueeRow
-              key={cat.name}
-              category={cat}
-              speed={SPEEDS[i % SPEEDS.length]}
-              index={i}
-            />
+            <CategoryRow key={cat.name} category={cat} index={i} />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

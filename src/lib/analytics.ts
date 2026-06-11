@@ -13,15 +13,19 @@ interface AnalyticsProvider {
   track: (event: string, properties?: Record<string, unknown>) => void
 }
 
-const consoleProvider: AnalyticsProvider = {
+import { track as vercelTrack } from '@vercel/analytics'
+
+const vercelProvider: AnalyticsProvider = {
   track: (event, properties) => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Analytics] ${event}`, properties)
+      return
     }
+    vercelTrack(event, properties as Record<string, string | number | boolean | null> | undefined)
   },
 }
 
-let provider: AnalyticsProvider = consoleProvider
+let provider: AnalyticsProvider = vercelProvider
 
 export function setAnalyticsProvider(p: AnalyticsProvider) {
   provider = p

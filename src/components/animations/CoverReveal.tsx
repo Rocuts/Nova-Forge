@@ -12,6 +12,12 @@ interface CoverRevealProps {
   variant?: "light" | "dark"
   /** Duration of the full reveal cycle in seconds */
   duration?: number
+  /**
+   * Above-the-fold / LCP content: the text is visible in the server-rendered
+   * HTML (no hidden phase), and the overlay sweeps across it after hydration.
+   * Keeps first paint fast — use for hero headlines.
+   */
+  priority?: boolean
 }
 
 /**
@@ -30,6 +36,7 @@ export function CoverReveal({
   delay = 0,
   variant = "light",
   duration = 0.9,
+  priority = false,
 }: CoverRevealProps) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -72,6 +79,11 @@ export function CoverReveal({
     return <Tag className={className}>{children}</Tag>
   }
 
+  // Priority content stays visible on mobile — never gate the LCP paint
+  if (priority && isMobile) {
+    return <Tag className={className}>{children}</Tag>
+  }
+
   // Mobile: simple FadeInUp (uses IntersectionObserver via hasRevealed)
   if (isMobile) {
     return (
@@ -95,15 +107,20 @@ export function CoverReveal({
       initial="hidden"
       animate={hasRevealed ? "visible" : "hidden"}
     >
-      {/* Content — fades in at the midpoint when overlay covers it */}
+      {/* Content — priority content is painted from SSR; otherwise it fades
+          in at the midpoint when the overlay covers it */}
       <motion.div
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { duration: 0.01, delay: delay + halfDuration * 0.85 },
-          },
-        }}
+        variants={
+          priority
+            ? undefined
+            : {
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { duration: 0.01, delay: delay + halfDuration * 0.85 },
+                },
+              }
+        }
       >
         <Tag className={`block ${className}`}>{children}</Tag>
       </motion.div>

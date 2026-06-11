@@ -27,8 +27,23 @@ export const pathMap: Record<string, Record<Locale, string>> = {
 
 export function buildLocalePath(locale: Locale, internalPath: string): string {
   const prefix = localePrefix[locale]
+  if (internalPath === "/") return prefix
   const mapped = pathMap[internalPath]?.[locale] ?? internalPath
   return `${prefix}${mapped}`
+}
+
+// Per-page canonical + hreflang. Spanish is the default market, so x-default → es.
+export function buildAlternates(internalPath: string, currentLocale: Locale) {
+  const es = buildLocalePath("es", internalPath)
+  const en = buildLocalePath("en", internalPath)
+  return {
+    canonical: currentLocale === "en" ? en : es,
+    languages: {
+      es,
+      en,
+      "x-default": es,
+    },
+  }
 }
 
 export function isValidLocale(value: string): value is Locale {

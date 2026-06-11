@@ -129,7 +129,7 @@ export function ProductLanding({
       </section>
 
       {/* Capabilities — Dark */}
-      <section className="py-32 bg-[#0a0a0a]">
+      <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {content.capabilities.map((group, i) => (

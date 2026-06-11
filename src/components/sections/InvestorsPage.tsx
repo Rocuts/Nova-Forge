@@ -45,13 +45,6 @@ const stagger = (i: number) => ({
 
 const viewportConfig = { once: true, margin: "-100px" as const }
 
-const TEAM_ACCENT = [
-  { gradient: "from-blue-400 to-cyan-400", text: "text-blue-400" },
-  { gradient: "from-violet-400 to-purple-400", text: "text-violet-400" },
-  { gradient: "from-emerald-400 to-teal-400", text: "text-emerald-400" },
-  { gradient: "from-amber-400 to-orange-400", text: "text-amber-400" },
-] as const
-
 function TeamRows({ title, description, members, viewportConfig: vpc }: {
   title: string
   description: string
@@ -62,7 +55,7 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
   const hoveredRole = hovered !== null ? members[hovered]?.role : null
 
   return (
-    <section className="py-32 bg-[#0a0a0a]">
+    <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
           <div className="relative md:max-w-lg lg:max-w-xl shrink-0 overflow-hidden">
@@ -90,7 +83,6 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
         >
           <div className="h-px w-full bg-white/[0.08]" />
           {members.map((member, i) => {
-            const accent = TEAM_ACCENT[i % TEAM_ACCENT.length]
             const active = hovered === i
             const num = String(i + 1).padStart(2, "0")
             return (
@@ -105,9 +97,9 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
                 className="group relative border-b border-white/[0.08]"
               >
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-r ${accent.gradient} pointer-events-none`}
+                  className="absolute inset-0 bg-white pointer-events-none"
                   initial={false}
-                  animate={{ opacity: active ? 0.05 : 0 }}
+                  animate={{ opacity: active ? 0.03 : 0 }}
                   transition={{ duration: 0.4 }}
                 />
                 <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none overflow-hidden">
@@ -122,7 +114,7 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
                 </div>
                 <div className="relative py-7 md:py-10">
                   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
-                    <span className={`text-xs font-mono tracking-wider transition-colors duration-300 md:w-8 shrink-0 ${active ? accent.text : "text-white/20"}`}>{num}</span>
+                    <span className={`text-xs font-mono tracking-wider transition-colors duration-300 md:w-8 shrink-0 ${active ? "text-white" : "text-white/20"}`}>{num}</span>
                     <h3 className="text-2xl md:text-4xl lg:text-5xl font-heading font-bold text-white tracking-tight flex-1 transition-transform duration-300 md:group-hover:translate-x-2">{member.name}</h3>
                     <p className="text-[10px] md:text-xs font-medium tracking-[0.15em] uppercase text-white/30 md:text-right md:w-72 shrink-0">{member.role}</p>
                   </div>
@@ -142,7 +134,7 @@ function TeamRows({ title, description, members, viewportConfig: vpc }: {
                   </AnimatePresence>
                 </div>
                 <motion.div
-                  className={`absolute bottom-0 left-0 h-px bg-gradient-to-r ${accent.gradient}`}
+                  className="absolute bottom-0 left-0 h-px bg-white/40"
                   initial={false}
                   animate={{ width: active ? "100%" : "0%" }}
                   transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
@@ -165,7 +157,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]">
+      <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-7xl px-6 py-32">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -283,7 +275,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
       <TeamRows title={content.team.title} description={content.team.description} members={content.team.members} viewportConfig={viewportConfig} />
 
       {/* ── Vision Quote ── */}
-      <section className="py-32 bg-[#0a0a0a]">
+      <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.blockquote
             initial={{ opacity: 0, y: 20 }}

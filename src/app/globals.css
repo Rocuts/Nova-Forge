@@ -17,9 +17,9 @@
   --color-accent: #0a0a0a;
   --color-accent-blue: #2563eb;
 
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-sans: var(--font-geist-sans);
+  --font-heading: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 
   --radius-sm: 2px;
   --radius-md: 4px;
@@ -117,15 +117,6 @@
     background-size: 40px 40px;
   }
 
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  .marquee-container:hover .marquee-track {
-    animation-play-state: paused;
-  }
-
 }
 
 /* ── Standalone classes (outside @layer to avoid Tailwind purge) ── */
@@ -166,19 +157,25 @@
   animation: logoGlitch 0.4s ease forwards;
 }
 
-/* CTA button subtle pulse */
-@keyframes subtlePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+/* Hero entrance — pure CSS so the first paint never waits for hydration (LCP) */
+@keyframes heroEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.cta-pulse {
-  animation: subtlePulse 3s ease-in-out infinite;
+.hero-enter {
+  animation: heroEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Respect reduced motion globally */
 @media (prefers-reduced-motion: reduce) {
   .logo-glitch,
-  .cta-pulse {
+  .hero-enter {
     animation: none;
   }
 }

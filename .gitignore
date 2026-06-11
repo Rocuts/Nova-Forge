@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# audit artifacts
+.unlighthouse/
+
+# playwright
+test-results/
+playwright-report/

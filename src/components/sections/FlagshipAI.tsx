@@ -68,7 +68,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
                 }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ y: -2 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className="group bg-[#141414] border border-[#1a1a1a] rounded-[6px] p-6 sm:p-12 hover:border-[#2a2a2a] transition-colors duration-300"
               >

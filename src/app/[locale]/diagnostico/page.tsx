@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { DiagnosticWizard } from "@/components/diagnostic/DiagnosticWizard"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, buildLocalePath } from "@/lib/i18n"
+import { isValidLocale, buildAlternates } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { siteConfig } from "@/config/site"
 import { notFound } from "next/navigation"
@@ -16,13 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: dict.diagnosticPage.pageTitle,
     description: dict.diagnosticPage.pageSubtitle,
-    alternates: {
-      canonical: buildLocalePath(locale, "/diagnostico"),
-      languages: {
-        es: "/diagnostico",
-        en: "/en/diagnostic",
-      },
-    },
+    alternates: buildAlternates("/diagnostico", locale),
     openGraph: {
       title: `${dict.diagnosticPage.pageTitle} | ${siteConfig.name}`,
       description: dict.diagnosticPage.pageSubtitle,

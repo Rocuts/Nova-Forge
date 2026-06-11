@@ -3,13 +3,16 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 
-function FAQItem({ question, answer, isFirst }: { question: string; answer: string; isFirst?: boolean }) {
+function FAQItem({ question, answer, index, isFirst }: { question: string; answer: string; index: number; isFirst?: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
+  const panelId = `faq-panel-${index}`
 
   return (
     <div className={`border-b border-[#d4d4d4]${isFirst ? " border-t" : ""}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
         className="py-6 w-full flex items-center justify-between text-left cursor-pointer"
       >
         <h3 className="text-base font-medium text-[#0a0a0a] pr-8">{question}</h3>
@@ -24,6 +27,7 @@ function FAQItem({ question, answer, isFirst }: { question: string; answer: stri
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            id={panelId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -70,7 +74,7 @@ export function FAQ({ content: faqSection }: { content: FAQContent }) {
           {/* Right — Accordion */}
           <div className="lg:col-span-3">
             {faqSection.items.map((faq, index) => (
-              <FAQItem key={faq.question} question={faq.question} answer={faq.answer} isFirst={index === 0} />
+              <FAQItem key={faq.question} question={faq.question} answer={faq.answer} index={index} isFirst={index === 0} />
             ))}
           </div>
         </div>

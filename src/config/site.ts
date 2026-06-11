@@ -15,7 +15,7 @@ export const siteConfig = {
     social: "/opengraph-image",
     twitter: "/twitter-image",
   },
-  siteLastModified: "2026-04-05",
+  siteLastModified: "2026-06-11",
   links: {
     twitter: "https://twitter.com/orbexs",
     linkedin: "https://linkedin.com/company/orbexs",

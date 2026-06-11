@@ -1,6 +1,8 @@
 import { ProductLanding } from "@/components/sections/ProductLanding"
+import { JsonLd } from "@/components/ui/JsonLd"
+import { serviceJsonLd, productBreadcrumbJsonLd } from "@/lib/seo"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale } from "@/lib/i18n"
+import { isValidLocale, buildAlternates } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
@@ -12,6 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: dict.products.sovereignAI.title,
     description: dict.products.sovereignAI.description,
+    alternates: buildAlternates("/soberania-ia", locale),
   }
 }
 
@@ -19,5 +22,22 @@ export default async function SovereignAIPage({ params }: { params: Promise<{ lo
   const { locale } = await params
   if (!isValidLocale(locale)) notFound()
   const dict = await getDictionary(locale as Locale)
-  return <ProductLanding content={dict.products.sovereignAI} locale={locale} />
+  const product = dict.products.sovereignAI
+  return (
+    <>
+      <JsonLd
+        data={[
+          serviceJsonLd({
+            dict,
+            internalPath: "/soberania-ia",
+            locale: locale as Locale,
+            fallbackName: product.subtitle,
+            description: product.description,
+          }),
+          productBreadcrumbJsonLd(dict, "/soberania-ia", locale as Locale, product.subtitle),
+        ]}
+      />
+      <ProductLanding content={product} locale={locale} />
+    </>
+  )
 }

@@ -11,13 +11,10 @@ interface DataEnrichmentContent {
   title: string
   subtitle: string
   description: string
-  stats: readonly { value: string; label: string }[]
   processTitle: string
   process: readonly {
     step: string
     title: string
-    stat: string
-    statLabel: string
     description: string
     details: readonly string[]
   }[]
@@ -108,30 +105,8 @@ export function DataEnrichmentLanding({
         </div>
       </section>
 
-      {/* ── Stats Bar ── */}
-      <section className="py-16 border-y border-[#e5e5e5] bg-white">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            {content.stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={viewportConfig}
-                transition={stagger(i)}
-              >
-                <p className="text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a]">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-[#a3a3a3] mt-2">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Process Pipeline ── */}
-      <section className="py-32 bg-white">
+      <section className="py-32 bg-white border-t border-[#e5e5e5]">
         <div className="mx-auto max-w-7xl px-6">
           <motion.p
             initial={{ opacity: 0 }}
@@ -166,12 +141,6 @@ export function DataEnrichmentLanding({
                 <h3 className="text-xl font-semibold text-[#0a0a0a] tracking-tight mt-4 mb-6">
                   {step.title}
                 </h3>
-                <p className="text-4xl font-bold text-[#0a0a0a] tracking-tight">
-                  {step.stat}
-                </p>
-                <p className="text-xs text-[#a3a3a3] tracking-wide uppercase mt-1 mb-6">
-                  {step.statLabel}
-                </p>
                 <p className="text-sm text-[#525252] leading-relaxed mb-6">
                   {step.description}
                 </p>
@@ -216,7 +185,7 @@ export function DataEnrichmentLanding({
       </section>
 
       {/* ── Capabilities — Dark ── */}
-      <section className="py-32 bg-[#0a0a0a]">
+      <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {content.capabilities.map((group, i) => (

@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n"
 interface ServicesContent {
   sectionId: string
   title: string
+  exploreLabel: string
   description: string
   items: readonly { title: string; benefit: string; bullets: readonly string[]; icon: string; href?: string }[]
 }
@@ -60,7 +61,7 @@ export function Services({ content: servicesSection, locale }: { content: Servic
                 </ul>
                 {svc.href && (
                   <span className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-[#0a0a0a] group-hover:text-[#525252] transition-colors">
-                    Explorar <span aria-hidden="true">&rarr;</span>
+                    {servicesSection.exploreLabel} <span aria-hidden="true">&rarr;</span>
                   </span>
                 )}
               </>
@@ -73,7 +74,7 @@ export function Services({ content: servicesSection, locale }: { content: Servic
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
                 }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ y: -2 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className={`group bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-6 sm:p-10 flex flex-col hover:border-[#a3a3a3] transition-colors duration-300${svc.href ? " cursor-pointer" : ""}`}
               >

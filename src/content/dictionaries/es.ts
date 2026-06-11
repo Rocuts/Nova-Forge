@@ -2,7 +2,7 @@ const es = {
   meta: {
     titleSuffix: "Ingeniería de Software, IA Soberana y Ciberseguridad",
     description:
-      "Ingeniería de software mission-critical, inteligencia artificial soberana, ciberseguridad agéntica y operaciones autónomas para enterprise y gobierno.",
+      "Ingeniería de software de misión crítica, inteligencia artificial soberana, ciberseguridad agéntica y operaciones autónomas para gobiernos y grandes organizaciones.",
     ogLocale: "es_ES",
   },
   nav: {
@@ -14,7 +14,7 @@ const es = {
           { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
           { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
           { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
-          { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde 75+ fuentes" },
+          { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde fuentes verificadas" },
           { name: "Extracción de Datos", href: "/extraccion-datos", description: "Scrapers con IA para OSINT y registros públicos" },
         ],
         solutionsChildren: [
@@ -30,7 +30,7 @@ const es = {
     menuLabel: "Menú de navegación",
   },
   hero: {
-    eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
+    eyebrow: "INFRAESTRUCTURA DE MISIÓN CRÍTICA",
     titleLead: "Construimos",
     titleHighlight: "soberanía digital.",
     titleRotating: [
@@ -58,9 +58,13 @@ const es = {
       analyticsEvent: "hero_nurture_cta",
     },
   },
+  trustBar: {
+    label: "Construido sobre",
+  },
   services: {
     sectionId: "capacidades",
     title: "Capacidades de Ingeniería",
+    exploreLabel: "Explorar",
     description:
       "Diseñamos, desplegamos y operamos sistemas de software, inteligencia artificial y ciberseguridad para organizaciones donde la falla no es una opción.",
     items: [
@@ -139,7 +143,7 @@ const es = {
       {
         title: "Enriquecimiento de Datos",
         benefit:
-          "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado desde 75+ fuentes. Con estricto cumplimiento regulatorio y residencia de datos configurable por jurisdicción.",
+          "Transforme registros fragmentados en inteligencia accionable con enriquecimiento automatizado multi-fuente. Con estricto cumplimiento regulatorio y residencia de datos configurable por jurisdicción.",
         bullets: [
           "Enriquecimiento Multi-Fuente en Tiempo Real",
           "Perfilamiento Firmográfico y de Contactos",
@@ -190,9 +194,35 @@ const es = {
     caption:
       "Control total. Soberanía completa. Impacto medible.",
   },
+  caseStudy: {
+    sectionId: "casos",
+    eyebrow: "CASO DE ESTUDIO",
+    industry: "Medios y Producción en Vivo",
+    title: "Mesa de ayuda autónoma para producción en vivo",
+    context:
+      "Un estudio de producción audiovisual que opera shows en vivo en TikTok no puede permitirse interrupciones durante una transmisión: cada minuto fuera del aire es audiencia e ingresos perdidos. Su mesa de ayuda dependía de tener un técnico disponible en el momento exacto del incidente.",
+    solution:
+      "Desplegamos un agente de IA que opera la mesa de ayuda de infraestructura de punta a punta. Durante la transmisión, el agente diagnostica y remedia incidentes de forma autónoma, y escala a un técnico humano únicamente cuando la remediación automática no resuelve el problema.",
+    outcome:
+      "La infraestructura del estudio se mantiene operativa durante las transmisiones sin intervención manual, y el equipo técnico se dedica a producir en lugar de hacer soporte reactivo.",
+    capabilitiesTitle: "Lo que el agente ejecuta de forma autónoma",
+    capabilities: [
+      "Diagnóstico de conectividad con ping a endpoints críticos",
+      "Verificación y actualización de drivers",
+      "Reinicio remoto del módem",
+      "Conmutación entre redes WiFi de respaldo",
+      "Triaje de tickets de la mesa de ayuda",
+      "Escalamiento a técnico humano con contexto completo",
+    ],
+    cta: {
+      label: "Conocer Fuerza Digital",
+      href: "/fuerza-digital",
+    },
+  },
   methodology: {
     sectionId: "metodologia",
-    title: "The Orbexs Standard",
+    title: "El Estándar Orbexs",
+    phaseLabel: "Fase",
     description:
       "Nuestro proceso de ingeniería está diseñado para eliminar la incertidumbre y garantizar la entrega de valor en cada despliegue.",
     steps: [
@@ -291,14 +321,11 @@ const es = {
       analyticsEvent: "cta_final_click",
     },
   },
-  credibility: {
-    title: "Stack Tecnológico de Grado Enterprise",
-  },
   techStack: {
     sectionId: "tecnologias",
     title: "Nuestro Stack Tecnológico",
     categories: [
-      { name: "Inteligencia Artificial", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "OpenClaw", "n8n", "LangChain", "PyTorch", "Ollama"] },
+      { name: "Inteligencia Artificial", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "n8n", "LangChain", "PyTorch", "Ollama"] },
       { name: "Nube e Infraestructura", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
       { name: "Desarrollo y Plataformas", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
       { name: "Ciberseguridad", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
@@ -645,7 +672,7 @@ const es = {
       capabilities: [
         { title: "Infraestructura", items: ["Kubernetes / Container Orchestration", "Multi-Region Deployment", "Disaster Recovery Automatizado"] },
         { title: "Seguridad", items: ["Zero-Trust Network Architecture", "Secrets Management", "Encrypted Data at Rest & Transit"] },
-        { title: "Operaciones", items: ["SRE & Incident Response", "SLA 99.99% Engineering", "Performance Profiling"] },
+        { title: "Operaciones", items: ["SRE & Incident Response", "Ingeniería de SLA y Disponibilidad", "Performance Profiling"] },
       ],
       cta: {
         title: "Construya sobre roca",
@@ -700,50 +727,37 @@ const es = {
     dataEnrichment: {
       eyebrow: "ENRIQUECIMIENTO DE DATOS",
       title: "Datos fragmentados convertidos en inteligencia decisiva.",
-      subtitle: "Enriquecimiento automatizado desde 75+ fuentes autorizadas.",
-      description: "Conectamos sus registros con más de 75 fuentes de datos autorizadas para transformar información incompleta en perfiles verificados y accionables — ya sea para calificar proveedores, consolidar registros ciudadanos o construir pipeline comercial. Hosting soberano, cumplimiento regulatorio y actualización en tiempo real incluidos.",
-      stats: [
-        { value: "75+", label: "Fuentes de datos autorizadas" },
-        { value: "99.2%", label: "Precisión en datos validados" },
-        { value: "95%", label: "Tasa de match en enriquecimiento" },
-      ],
+      subtitle: "Enriquecimiento automatizado desde fuentes autorizadas y verificadas.",
+      description: "Conectamos sus registros con un ecosistema de fuentes de datos autorizadas para transformar información incompleta en perfiles verificados y accionables — ya sea para calificar proveedores, consolidar registros ciudadanos o construir pipeline comercial. Hosting soberano, cumplimiento regulatorio y actualización en tiempo real incluidos.",
       processTitle: "PIPELINE DE ENRIQUECIMIENTO",
       process: [
         {
           step: "01",
           title: "Ingesta",
-          stat: "75+",
-          statLabel: "fuentes conectadas",
           description: "Conexión automatizada con registros comerciales, bases gubernamentales y proveedores de datos premium.",
           details: ["Registros comerciales", "Bases gubernamentales", "APIs de datos premium", "Registros públicos"],
         },
         {
           step: "02",
           title: "Validación",
-          stat: "99.2%",
-          statLabel: "datos validados",
           description: "Cross-referencing multi-fuente con deduplicación y normalización automática.",
           details: ["Deduplicación automática", "Normalización de formatos", "Cross-referencing multi-fuente", "Scoring de calidad"],
         },
         {
           step: "03",
           title: "Enriquecimiento",
-          stat: "95%",
-          statLabel: "tasa de match",
           description: "Perfilamiento completo con datos firmográficos, contacto e intención de compra.",
           details: ["Perfilamiento firmográfico", "Datos de contacto", "Señales de intención", "Análisis tecnográfico"],
         },
         {
           step: "04",
           title: "Entrega",
-          stat: "Real-time",
-          statLabel: "sincronización",
           description: "Sincronización bidireccional con sus sistemas CRM/ERP en tiempo real.",
           details: ["Sincronización CRM/ERP", "API REST & webhooks", "Reporting automatizado", "Alertas de cambios"],
         },
       ],
       features: [
-        { title: "Enriquecimiento Multi-Fuente en Cascada", description: "Cadena secuencial de 75+ proveedores de datos para maximizar cobertura y precisión en cada registro." },
+        { title: "Enriquecimiento Multi-Fuente en Cascada", description: "Cadena secuencial de proveedores de datos para maximizar cobertura y precisión en cada registro." },
         { title: "Perfilamiento Firmográfico Completo", description: "Datos de contacto, estructura organizacional, ingresos, tecnología utilizada y señales de compra para cada cuenta." },
         { title: "Detección de Intención de Compra", description: "Identificación de cuentas que están investigando activamente soluciones relevantes mediante señales de comportamiento." },
         { title: "Scoring con IA", description: "Clasificación automática de leads por ajuste, intención y probabilidad de conversión." },
@@ -767,16 +781,16 @@ const es = {
       subtitle: "Extractores con IA para OSINT, monitoreo regulatorio e inteligencia competitiva.",
       description: "Desplegamos colectores potenciados por IA que operan en la web abierta, portales gubernamentales y registros públicos — entregando inteligencia limpia y estructurada a sus sistemas en tiempo real. Diseñado para OSINT, monitoreo regulatorio y programas de registros públicos a escala nacional con trazabilidad completa y despliegue soberano.",
       features: [
-        { title: "Extracción Estructurada a Escala", description: "Conversión de páginas web, PDFs y documentos no estructurados en datos limpios con 95%+ de precisión." },
+        { title: "Extracción Estructurada a Escala", description: "Conversión de páginas web, PDFs y documentos no estructurados en datos limpios y validados." },
         { title: "Parseo Adaptativo con IA", description: "Modelos de lenguaje que se adaptan a cambios de layout sin mantenimiento manual de selectores." },
-        { title: "Infraestructura de Proxies Global", description: "Red de millones de IPs residenciales en 195+ países para recolección sin bloqueos." },
+        { title: "Infraestructura de Proxies Global", description: "Red global de proxies residenciales para recolección continua sin bloqueos." },
         { title: "OSINT e Inteligencia de Amenazas", description: "Recolección sistemática de foros, redes sociales y superficies de la dark web para agencias de inteligencia." },
         { title: "Monitoreo Regulatorio", description: "Seguimiento de cambios en legislación, listas de sanciones y bases de datos de licencias entre jurisdicciones." },
         { title: "Programación y Alertas", description: "Ejecuciones automatizadas con detección de fallos, monitoreo de cambios y notificaciones." },
       ],
       capabilities: [
         { title: "Infraestructura de Recolección", items: ["Red Global de Proxies", "Renderizado Headless Browser", "Resolución Automática de CAPTCHAs"] },
-        { title: "Extracción y Transformación", items: ["Parsers Adaptativos con IA", "Templates para 1,000+ Fuentes", "Pipelines de Extracción Personalizados"] },
+        { title: "Extracción y Transformación", items: ["Parsers Adaptativos con IA", "Biblioteca de Templates por Fuente", "Pipelines de Extracción Personalizados"] },
         { title: "Entrega y Gobierno", items: ["Entrega via API/Webhook/S3", "Logging de Proveniencia Completo", "Redacción de PII y Cumplimiento"] },
       ],
       cta: {
@@ -784,26 +798,6 @@ const es = {
         description: "Agende una evaluación de sus necesidades de extracción de datos.",
         action: { label: "Agendar Evaluación", href: "/agendar" },
       },
-    },
-  },
-  investors: {
-    sectionId: "inversores",
-    eyebrow: "RESPALDO INSTITUCIONAL",
-    title: "Construido para escalar.",
-    description: "Infraestructura de ingeniería respaldada por capital estratégico y una visión de largo plazo en IA soberana y ciberseguridad enterprise.",
-    stats: [
-      { value: "$2M+", label: "En contratos enterprise activos" },
-      { value: "99.9%", label: "Uptime en sistemas desplegados" },
-      { value: "4", label: "Industrias reguladas atendidas" },
-    ],
-    quote: {
-      text: "La soberanía digital no es una opción — es una necesidad estratégica para toda organización que opera con datos sensibles.",
-      author: "Johan Rocuts",
-      role: "CEO, Orbexs",
-    },
-    cta: {
-      label: "Contactar para inversión",
-      href: "mailto:contact@orbexs.tech",
     },
   },
   investorsPage: {
@@ -858,7 +852,8 @@ const es = {
       description: "Construir software mission-critical, sistemas de inteligencia artificial soberana y plataformas de ciberseguridad agéntica que permitan a organizaciones de alta exigencia operar con independencia tecnológica total. No vendemos humo ni soluciones genéricas. Diseñamos, desarrollamos y operamos infraestructura que funciona bajo los estándares más altos del mundo.",
     },
     methodology: {
-      title: "Estándar Orbexs",
+      title: "El Estándar Orbexs",
+      phaseLabel: "Fase",
       description: "Nuestro proceso de ingeniería está diseñado para eliminar la incertidumbre y garantizar la entrega de valor en cada despliegue.",
       steps: [
         { num: "01", title: "Diagnóstico y Auditoría Técnica", desc: "Análisis exhaustivo de su infraestructura actual y definición de objetivos de negocio." },

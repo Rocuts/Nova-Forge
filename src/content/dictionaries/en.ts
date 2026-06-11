@@ -14,7 +14,7 @@ const en = {
           { name: "Sovereign AI", href: "/soberania-ia", description: "AI infrastructure under your total control" },
           { name: "Cybersecurity", href: "/ciberseguridad", description: "Autonomous defense with AI agents" },
           { name: "Digital Workforce", href: "/fuerza-digital", description: "Executive assistants across all channels" },
-          { name: "Data Enrichment", href: "/enriquecimiento-datos", description: "Actionable intelligence from 75+ sources" },
+          { name: "Data Enrichment", href: "/enriquecimiento-datos", description: "Actionable intelligence from verified sources" },
           { name: "Data Extraction", href: "/extraccion-datos", description: "AI scrapers for OSINT and public records" },
         ],
         solutionsChildren: [
@@ -58,9 +58,13 @@ const en = {
       analyticsEvent: "hero_nurture_cta",
     },
   },
+  trustBar: {
+    label: "Built on",
+  },
   services: {
     sectionId: "capacidades",
     title: "Engineering Capabilities",
+    exploreLabel: "Explore",
     description:
       "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option.",
     items: [
@@ -139,7 +143,7 @@ const en = {
       {
         title: "Data Enrichment",
         benefit:
-          "Transform fragmented records into actionable intelligence with automated enrichment from 75+ sources. With strict regulatory compliance and data residency configurable by jurisdiction.",
+          "Transform fragmented records into actionable intelligence with automated multi-source enrichment. With strict regulatory compliance and data residency configurable by jurisdiction.",
         bullets: [
           "Real-Time Multi-Source Enrichment",
           "Firmographic & Contact Profiling",
@@ -190,9 +194,35 @@ const en = {
     caption:
       "Total control. Complete sovereignty. Measurable impact.",
   },
+  caseStudy: {
+    sectionId: "casos",
+    eyebrow: "CASE STUDY",
+    industry: "Media & Live Production",
+    title: "Autonomous help desk for live production",
+    context:
+      "An audiovisual production studio running live shows on TikTok cannot afford interruptions during a broadcast: every minute off the air is lost audience and revenue. Their help desk depended on having a technician available at the exact moment of the incident.",
+    solution:
+      "We deployed an AI agent that operates the infrastructure help desk end to end. During broadcasts, the agent diagnoses and remediates incidents autonomously, escalating to a human technician only when automated remediation does not resolve the problem.",
+    outcome:
+      "The studio's infrastructure stays operational throughout broadcasts without manual intervention, and the technical team focuses on production instead of reactive support.",
+    capabilitiesTitle: "What the agent executes autonomously",
+    capabilities: [
+      "Connectivity diagnostics with pings to critical endpoints",
+      "Driver verification and updates",
+      "Remote modem restarts",
+      "Failover between backup WiFi networks",
+      "Help desk ticket triage",
+      "Escalation to a human technician with full context",
+    ],
+    cta: {
+      label: "Explore Digital Workforce",
+      href: "/fuerza-digital",
+    },
+  },
   methodology: {
     sectionId: "metodologia",
     title: "The Orbexs Standard",
+    phaseLabel: "Phase",
     description:
       "Our engineering process is designed to eliminate uncertainty and guarantee value delivery on every deployment.",
     steps: [
@@ -291,14 +321,11 @@ const en = {
       analyticsEvent: "cta_final_click",
     },
   },
-  credibility: {
-    title: "Enterprise-Grade Technology Stack",
-  },
   techStack: {
     sectionId: "technologies",
     title: "Our Technology Stack",
     categories: [
-      { name: "Artificial Intelligence", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "OpenClaw", "n8n", "LangChain", "PyTorch", "Ollama"] },
+      { name: "Artificial Intelligence", items: ["Anthropic", "OpenAI", "Google Gemini", "Meta LLaMA", "DeepSeek", "Mistral", "Hugging Face", "n8n", "LangChain", "PyTorch", "Ollama"] },
       { name: "Cloud & Infrastructure", items: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Terraform", "Pulumi"] },
       { name: "Development & Platforms", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
       { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
@@ -645,7 +672,7 @@ const en = {
       capabilities: [
         { title: "Infrastructure", items: ["Kubernetes / Container Orchestration", "Multi-Region Deployment", "Automated Disaster Recovery"] },
         { title: "Security", items: ["Zero-Trust Network Architecture", "Secrets Management", "Encrypted Data at Rest & Transit"] },
-        { title: "Operations", items: ["SRE & Incident Response", "SLA 99.99% Engineering", "Performance Profiling"] },
+        { title: "Operations", items: ["SRE & Incident Response", "SLA & Availability Engineering", "Performance Profiling"] },
       ],
       cta: {
         title: "Build on solid ground",
@@ -700,50 +727,37 @@ const en = {
     dataEnrichment: {
       eyebrow: "DATA ENRICHMENT",
       title: "Fragmented data turned into decisive intelligence.",
-      subtitle: "Automated enrichment from 75+ authoritative sources.",
-      description: "We connect your records with 75+ authoritative data sources to transform incomplete information into verified, actionable profiles — whether qualifying vendors, consolidating citizen records, or building commercial pipeline. Sovereign hosting, regulatory compliance, and real-time refresh included.",
-      stats: [
-        { value: "75+", label: "Authorized data sources" },
-        { value: "99.2%", label: "Validated data accuracy" },
-        { value: "95%", label: "Enrichment match rate" },
-      ],
+      subtitle: "Automated enrichment from authoritative, verified sources.",
+      description: "We connect your records with an ecosystem of authoritative data sources to transform incomplete information into verified, actionable profiles — whether qualifying vendors, consolidating citizen records, or building commercial pipeline. Sovereign hosting, regulatory compliance, and real-time refresh included.",
       processTitle: "ENRICHMENT PIPELINE",
       process: [
         {
           step: "01",
           title: "Ingestion",
-          stat: "75+",
-          statLabel: "sources connected",
           description: "Automated connection to commercial registries, government databases and premium data providers.",
           details: ["Commercial registries", "Government databases", "Premium data APIs", "Public records"],
         },
         {
           step: "02",
           title: "Validation",
-          stat: "99.2%",
-          statLabel: "data validated",
           description: "Multi-source cross-referencing with automatic deduplication and normalization.",
           details: ["Automatic deduplication", "Format normalization", "Multi-source cross-referencing", "Quality scoring"],
         },
         {
           step: "03",
           title: "Enrichment",
-          stat: "95%",
-          statLabel: "match rate",
           description: "Complete profiling with firmographic, contact and buying intent data.",
           details: ["Firmographic profiling", "Contact data", "Intent signals", "Technographic analysis"],
         },
         {
           step: "04",
           title: "Delivery",
-          stat: "Real-time",
-          statLabel: "synchronization",
           description: "Bidirectional synchronization with your CRM/ERP systems in real time.",
           details: ["CRM/ERP sync", "REST API & webhooks", "Automated reporting", "Change alerts"],
         },
       ],
       features: [
-        { title: "Waterfall Multi-Source Enrichment", description: "Sequential chain of 75+ data providers to maximize coverage and accuracy on every record." },
+        { title: "Waterfall Multi-Source Enrichment", description: "Sequential chain of data providers to maximize coverage and accuracy on every record." },
         { title: "Full Firmographic Profiling", description: "Contact data, organizational structure, revenue, technology stack, and buying signals for each account." },
         { title: "Buying Intent Detection", description: "Identification of accounts actively researching relevant solutions through behavioral signals." },
         { title: "AI-Powered Scoring", description: "Automatic lead classification by fit, intent, and conversion probability." },
@@ -767,16 +781,16 @@ const en = {
       subtitle: "AI-powered extractors for OSINT, regulatory monitoring, and competitive intelligence.",
       description: "We deploy AI-powered collectors across the open web, government portals, and public registries — returning clean, structured intelligence to your systems in real time. Purpose-built for OSINT, regulatory monitoring, and large-scale public records programs with full audit trails and sovereign deployment options.",
       features: [
-        { title: "Structured Extraction at Scale", description: "Conversion of web pages, PDFs, and unstructured documents into clean data with 95%+ accuracy." },
+        { title: "Structured Extraction at Scale", description: "Conversion of web pages, PDFs, and unstructured documents into clean, validated data." },
         { title: "AI-Adaptive Parsing", description: "Language models that adapt to layout changes without manual selector maintenance." },
-        { title: "Global Proxy Infrastructure", description: "Network of millions of residential IPs across 195+ countries for unblocked collection." },
+        { title: "Global Proxy Infrastructure", description: "Global residential proxy network for continuous, unblocked collection." },
         { title: "OSINT & Threat Intelligence", description: "Systematic collection from forums, social media, and dark web surfaces for intelligence agencies." },
         { title: "Regulatory Monitoring", description: "Tracking changes in legislation, sanctions lists, and license databases across jurisdictions." },
         { title: "Scheduling & Alerts", description: "Automated runs with failure detection, change monitoring, and notifications." },
       ],
       capabilities: [
         { title: "Collection Infrastructure", items: ["Global Proxy Network", "Headless Browser Rendering", "Automatic CAPTCHA Resolution"] },
-        { title: "Extraction & Transformation", items: ["AI-Adaptive Parsers", "Templates for 1,000+ Sources", "Custom Extraction Pipelines"] },
+        { title: "Extraction & Transformation", items: ["AI-Adaptive Parsers", "Per-Source Template Library", "Custom Extraction Pipelines"] },
         { title: "Delivery & Governance", items: ["API/Webhook/S3 Delivery", "Full Provenance Logging", "PII Redaction & Compliance"] },
       ],
       cta: {
@@ -784,26 +798,6 @@ const en = {
         description: "Schedule an evaluation of your data extraction needs.",
         action: { label: "Schedule Evaluation", href: "/agendar" },
       },
-    },
-  },
-  investors: {
-    sectionId: "investors",
-    eyebrow: "INSTITUTIONAL BACKING",
-    title: "Built to scale.",
-    description: "Engineering infrastructure backed by strategic capital and a long-term vision in sovereign AI and enterprise cybersecurity.",
-    stats: [
-      { value: "$2M+", label: "In active enterprise contracts" },
-      { value: "99.9%", label: "Uptime on deployed systems" },
-      { value: "4", label: "Regulated industries served" },
-    ],
-    quote: {
-      text: "Digital sovereignty is not an option — it's a strategic necessity for every organization operating with sensitive data.",
-      author: "Johan Rocuts",
-      role: "CEO, Orbexs",
-    },
-    cta: {
-      label: "Contact for investment",
-      href: "mailto:contact@orbexs.tech",
     },
   },
   investorsPage: {
@@ -859,6 +853,7 @@ const en = {
     },
     methodology: {
       title: "The Orbexs Standard",
+      phaseLabel: "Phase",
       description: "Our engineering process is designed to eliminate uncertainty and guarantee value delivery on every deployment.",
       steps: [
         { num: "01", title: "Diagnostics & Technical Audit", desc: "Exhaustive analysis of your current infrastructure and definition of business objectives." },

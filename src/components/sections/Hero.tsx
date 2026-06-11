@@ -72,12 +72,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
     <section ref={sectionRef} className="relative min-h-screen flex items-center bg-white overflow-hidden" data-header-theme="light">
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
         {/* Eyebrow */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0, duration: 0.6, ease: "easeOut" }}
-          className="flex items-center gap-4 mb-10"
-        >
+        <div className="hero-enter flex items-center gap-4 mb-10">
           <span
             ref={eyebrowLineRef}
             className="block w-12 h-[1px] bg-[#0a0a0a] opacity-30 origin-left"
@@ -85,15 +80,16 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-[#0a0a0a] opacity-90">
             {heroContent.eyebrow}
           </p>
-        </motion.div>
+        </div>
 
         {/* Headline with CoverReveal */}
-        <div className="font-heading text-fluid-hero font-bold tracking-[-0.04em] leading-[1.05] mb-10">
-          <CoverReveal as="span" className="text-[#0a0a0a]" delay={0.1} duration={0.9}>
+        <h1 className="font-heading text-fluid-hero font-bold tracking-[-0.04em] leading-[1.05] mb-10">
+          <CoverReveal as="span" className="text-[#0a0a0a]" delay={0.1} duration={0.9} priority>
             {heroContent.titleLead}
           </CoverReveal>
-          <span className="block overflow-hidden relative" style={{ height: "1.15em" }}>
-            <AnimatePresence mode="wait">
+          <span className="sr-only">{heroContent.titleHighlight}</span>
+          <span aria-hidden="true" className="block overflow-hidden relative" style={{ height: "1.15em" }}>
+            <AnimatePresence mode="wait" initial={false}>
               <motion.span
                 key={phrases[index]}
                 initial={{ y: "100%", opacity: 0 }}
@@ -106,31 +102,19 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
               </motion.span>
             </AnimatePresence>
           </span>
-        </div>
+        </h1>
 
         {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-          className="text-fluid-p text-[#525252] max-w-2xl mb-8 sm:mb-14 leading-relaxed"
+        <p
+          className="hero-enter text-fluid-p text-[#525252] max-w-2xl mb-8 sm:mb-14 leading-relaxed"
+          style={{ animationDelay: "0.4s" }}
         >
           {heroContent.description}
-        </motion.p>
+        </p>
 
         {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.6, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 sm:gap-5"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.5, ease: "easeOut" }}
-            className="w-full sm:w-auto"
-          >
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 sm:gap-5">
+          <div className="hero-enter w-full sm:w-auto" style={{ animationDelay: "0.55s" }}>
             <Button
               size="lg"
               variant="primary"
@@ -140,13 +124,8 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             >
               {heroContent.primaryAction.label}
             </Button>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.5, ease: "easeOut" }}
-            className="w-full sm:w-auto"
-          >
+          </div>
+          <div className="hero-enter w-full sm:w-auto" style={{ animationDelay: "0.65s" }}>
             <Button
               size="lg"
               variant="secondary"
@@ -156,17 +135,12 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
             >
               {heroContent.secondaryAction.label}
             </Button>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Nurture CTA — low-commitment link for evaluation-phase visitors */}
         {heroContent.nurtureCta && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.85, duration: 0.6, ease: "easeOut" }}
-            className="mt-6"
-          >
+          <div className="hero-enter mt-6" style={{ animationDelay: "0.85s" }}>
             <a
               href={heroContent.nurtureCta.href}
               onClick={() => trackEvent(heroContent.nurtureCta!.analyticsEvent)}
@@ -175,7 +149,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
               <span className="text-base">→</span>
               {heroContent.nurtureCta.label}
             </a>
-          </motion.div>
+          </div>
         )}
       </div>
     </section>

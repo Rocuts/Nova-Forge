@@ -11,7 +11,7 @@ const TRUST_LOGOS = [
 const logoClass =
   "h-5 w-auto brightness-0 opacity-[0.35] hover:opacity-70 transition-opacity duration-200"
 
-export function TrustBar() {
+export function TrustBar({ label }: { label: string }) {
   const innerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function TrustBar() {
           className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-12 gap-y-4"
         >
           <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mr-4">
-            Infraestructura certificada
+            {label}
           </span>
 
           {TRUST_LOGOS.map((logo) => (

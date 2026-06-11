@@ -35,17 +35,15 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
           {ctaSection.description}
         </p>
 
-        <div className="cta-pulse inline-block">
-          <Button
-            size="lg"
-            variant="primary"
-            href={ctaSection.action.href}
-            onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
-            className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
-          >
-            {ctaSection.action.label}
-          </Button>
-        </div>
+        <Button
+          size="lg"
+          variant="primary"
+          href={ctaSection.action.href}
+          onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
+          className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
+        >
+          {ctaSection.action.label}
+        </Button>
       </motion.div>
     </section>
   )

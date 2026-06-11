@@ -1,6 +1,6 @@
 import { AboutPage } from "@/components/sections/AboutPage"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale } from "@/lib/i18n"
+import { isValidLocale, buildAlternates } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
@@ -12,6 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: dict.aboutPage.title,
     description: dict.aboutPage.subtitle,
+    alternates: buildAlternates("/nosotros", locale),
   }
 }
 

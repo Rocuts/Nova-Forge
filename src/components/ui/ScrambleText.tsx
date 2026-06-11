@@ -23,7 +23,6 @@ export function ScrambleText({
   const [hasAnimated, setHasAnimated] = useState(false)
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout
     let frameId: number
     let startTime: number
     let lastUpdateTime = 0
@@ -31,6 +30,8 @@ export function ScrambleText({
 
     // Safety check just in case children isn't a string
     const text = typeof children === 'string' ? children : String(children)
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp
@@ -62,10 +63,15 @@ export function ScrambleText({
       }
     }
 
-    timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
+      if (reduceMotion) {
+        setDisplayText(text)
+        setHasAnimated(true)
+        return
+      }
       setIsAnimating(true)
       frameId = requestAnimationFrame(animate)
-    }, delay * 1000)
+    }, reduceMotion ? 0 : delay * 1000)
 
     return () => {
       clearTimeout(timeout)
