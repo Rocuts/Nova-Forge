@@ -23,6 +23,7 @@ export const pathMap: Record<string, Record<Locale, string>> = {
   "/nosotros": { es: "/nosotros", en: "/about" },
   "/enriquecimiento-datos": { es: "/enriquecimiento-datos", en: "/data-enrichment" },
   "/extraccion-datos": { es: "/extraccion-datos", en: "/data-extraction" },
+  "/estudio-tiktok-live": { es: "/estudio-tiktok-live", en: "/tiktok-live-studio" },
 }
 
 export function buildLocalePath(locale: Locale, internalPath: string): string {

@@ -23,6 +23,7 @@ const en = {
           { name: "Government Automation", href: "/automatizacion-gobierno", description: "Digitized government workflows" },
         ],
       },
+      { name: "Live Studio", href: "/estudio-tiktok-live", accent: true },
       { name: "Company", href: "/nosotros" },
     ],
     contact: "Contact",
@@ -343,6 +344,12 @@ const en = {
       { name: "Digital Workforce", href: "/fuerza-digital" },
       { name: "Data Enrichment", href: "/enriquecimiento-datos" },
       { name: "Data Extraction", href: "/extraccion-datos" },
+    ],
+    studio: "Live Studio",
+    studioLinks: [
+      { name: "Orbexs Live Studio", href: "/estudio-tiktok-live" },
+      { name: "Creator program", href: "/estudio-tiktok-live" },
+      { name: "Brands and campaigns", href: "/agendar" },
     ],
     company: "Company",
     companyLinks: [
@@ -800,6 +807,229 @@ const en = {
       },
     },
   },
+  liveStudioTeaser: {
+    eyebrow: "NEW DIVISION",
+    kicker: "ORBEXS LIVE STUDIO",
+    title: "A TikTok LIVE studio operated by a software factory.",
+    description:
+      "We produce live broadcasts for LATAM creators from our own sets, running on the same infrastructure, redundancy, and automation we build for critical operations.",
+    points: [
+      "Sets calibrated for 9:16 vertical production",
+      "Redundant network with autonomous remediation mid-broadcast",
+      "Training, schedule, and in-house analytics for every creator",
+    ],
+    action: { label: "Explore the studio", href: "/estudio-tiktok-live" },
+  },
+  liveStudio: {
+    eyebrow: "ORBEXS LIVE STUDIO",
+    status: "TIKTOK LIVE AGENCY APPLICATION UNDER REVIEW",
+    onAir: "ON AIR",
+    titleLead: "The",
+    titleAccent: "TikTok LIVE",
+    titleTail: "studio for LATAM.",
+    subtitle: "We recruit creators, train them, and keep the live operation standing.",
+    description:
+      "Orbexs Live Studio is our live production division: recruitment and training for Latin American creators, with two working modes — on-site in our booths or remote from your own setup — running on the same critical-systems engineering we deploy for governments and large organizations.",
+    primaryAction: { label: "Apply as a creator" },
+    secondaryAction: { label: "Talk to the brand team", href: "/agendar" },
+    whatsappMessage:
+      "Hi, I'd like to apply as a creator to Orbexs Live Studio (TikTok LIVE). Here's my profile:",
+    marqueeLabel: "Phase one markets",
+    marquee: [
+      "Colombia",
+      "Mexico",
+      "Peru",
+      "Chile",
+      "Argentina",
+      "Ecuador",
+      "Vertical talent",
+      "Live groups",
+      "Gaming",
+      "Live music",
+      "Entertainment",
+    ],
+    stats: [
+      { value: "9:16", label: "Native format", description: "Studio booths are calibrated for vertical production; remote creators get the checklist to match it." },
+      { value: "24/7", label: "Continuous schedule", description: "Rotating creator shifts, on-site and remote, with permanent broadcast staff." },
+      { value: "<60 s", label: "Network recovery", description: "Autonomous detection and remediation of studio infrastructure incidents while on air." },
+      { value: "5", label: "Phase-one markets", description: "Initial operation focused on the highest-traction Spanish-speaking markets." },
+    ],
+    thesis: {
+      eyebrow: "THE THESIS",
+      title: "The bottleneck in live isn't talent. It's operations.",
+      paragraphs: [
+        "LATAM has no shortage of talent — it has a shortage of infrastructure. A creator can have an audience and a rhythm, then lose hours of air time to a dropped connection, an outdated driver, or a badly lit frame. Every minute off air is audience and revenue that doesn't come back.",
+        "We already solved that problem for live production clients: we deployed an AI agent that runs the infrastructure helpdesk end to end, diagnoses and remediates incidents autonomously, and escalates to a human technician only when it has to.",
+        "Orbexs Live Studio is that same stack, now operated by us and put to work for creators. We're not an agency that outsources its technology — we're the software factory that builds it.",
+      ],
+    },
+    program: {
+      eyebrow: "CREATOR PROGRAM",
+      title: "From casting to a stable schedule.",
+      description:
+        "A four-stage path designed to take a creator from application to a sustainable live operation, with support at every point.",
+      steps: [
+        {
+          step: "01",
+          title: "Casting",
+          description: "Profile assessment, identity verification, and definition of the content vertical.",
+          details: ["Profile and content review", "Identity and age verification", "Vertical definition", "Written terms upfront"],
+        },
+        {
+          step: "02",
+          title: "Training",
+          description: "LIVE Academy: session structure, pacing, retention, and real-time community handling.",
+          details: ["Session structure and script", "Retention in the first 30 s", "Moderation and community", "Platform best practices"],
+        },
+        {
+          step: "03",
+          title: "Production",
+          description: "A fixed block in the schedule, from a studio booth or your own setup.",
+          details: ["On-site or remote mode", "Assigned shift manager", "Fixed schedule block", "Technical support while on air"],
+        },
+        {
+          step: "04",
+          title: "Scaling",
+          description: "Data review, biweekly coaching, and expansion into collaborations and brand campaigns.",
+          details: ["Per-session metrics panel", "Biweekly coaching", "Creator collaborations", "Access to brand campaigns"],
+        },
+      ],
+    },
+    modalities: {
+      eyebrow: "TWO MODES",
+      title: "Choose how you go live.",
+      description:
+        "The studio recruits and trains; what separates one mode from the other is where you broadcast and who supplies the gear. We say it before you apply, not after.",
+      providesLabel: "Orbexs provides",
+      requiresLabel: "You provide",
+      items: [
+        {
+          tag: "ON-SITE",
+          title: "At the studio",
+          description:
+            "You broadcast from our booths, using studio equipment and taking part in live groups: themed group shows — battles, dance, challenges — where several creators carry the stream around a theme that drives the show.",
+          provides: [
+            "Equipped booth calibrated for 9:16",
+            "Themed live groups with other creators",
+            "Broadcast staff in the booth",
+            "Redundant connectivity with autonomous remediation",
+            "Full LIVE training",
+            "Assigned schedule block and per-session analytics",
+            "Shift manager",
+            "Access to brand campaigns",
+          ],
+          requires: ["Attendance at your assigned shift", "Consistency on the schedule"],
+        },
+        {
+          tag: "REMOTE",
+          title: "From your place",
+          description:
+            "You broadcast with your own equipment from wherever you are. You get the same training, schedule, and studio support, but the setup is on you: we don't supply devices or equipment for remote use.",
+          provides: [
+            "Full LIVE training",
+            "Assigned schedule block and per-session analytics",
+            "Shift manager and ongoing support",
+            "Technical setup checklist",
+            "Access to brand campaigns",
+          ],
+          requires: [
+            "Your broadcasting device",
+            "Your stable internet connection",
+            "Your space and lighting",
+            "Consistency on the schedule",
+          ],
+        },
+      ],
+    },
+    infrastructure: {
+      eyebrow: "THE ORBEXS EDGE",
+      title: "Booths built like a critical system.",
+      description:
+        "What follows describes the infrastructure of our booths — the advantage of the on-site mode. The difference isn't the cameras: it's what happens when something fails halfway through a broadcast.",
+      items: [
+        { title: "Sets calibrated for 9:16", description: "Lighting, audio, and framing configured specifically for the vertical feed — not adapted from a horizontal set." },
+        { title: "Redundant connectivity", description: "Dual internet providers with automatic failover to mobile network when the primary link degrades." },
+        { title: "Autonomous helpdesk", description: "An AI agent monitors studio infrastructure, diagnoses incidents, and executes remediation without waiting for a technician to be available." },
+        { title: "In-house creator analytics", description: "A panel with minute-by-minute retention, engagement curve, and peak-performance windows — data to decide with, not screenshots." },
+        { title: "Schedule continuity", description: "If a block goes down, the system reassigns set and shift so the studio never loses its signal on air." },
+        { title: "Operated to our own standard", description: "The same monitoring, incident response, and traceability processes we apply in enterprise deployments." },
+      ],
+    },
+    creators: {
+      eyebrow: "FOR CREATORS",
+      title: "What you get when you join the studio.",
+      items: [
+        { title: "Transparent terms", description: "Rules, targets, and revenue share in writing from day one. No fine print, no verbal agreements." },
+        { title: "No entry fee", description: "Joining the studio costs nothing. On-site you use our booth; remote you broadcast with your own equipment." },
+        { title: "LIVE Academy", description: "Hands-on training in session structure, retention, moderation, and sustained growth — the core of what the studio provides in both modes." },
+        { title: "Shift manager", description: "Someone from the studio on the broadcast in real time — not a chat that replies the next day." },
+        { title: "Actionable metrics", description: "Our own panel with a read on every session and concrete recommendations for the next one." },
+        { title: "Community and collaborations", description: "Cross-overs between studio creators to trade audience and sustain growth." },
+      ],
+    },
+    brands: {
+      eyebrow: "FOR BRANDS",
+      title: "Live presence, with real reporting.",
+      description:
+        "We work with brands that want to be inside the live conversation, not next to it. Every activation ships with measurement, not estimates.",
+      items: [
+        { title: "Live campaigns", description: "Product integrations inside the session, scripted with the creator and rehearsed before air." },
+        { title: "Sponsored sets", description: "Booth styling with brand identity across defined blocks of the schedule." },
+        { title: "Performance reporting", description: "Post-campaign delivery with audience, retention, engagement, and per-session results." },
+      ],
+      action: { label: "Book a commercial meeting", href: "/agendar" },
+    },
+    faq: {
+      title: "Frequently asked questions",
+      subtitle: "What every creator asks before applying.",
+      items: [
+        {
+          question: "Is Orbexs Live Studio an official TikTok agency?",
+          answer:
+            "Our application to operate as a LIVE agency is under review. In the meantime we operate as an independent production studio: the sets, training, staff, and infrastructure are ours. We'll publish any change of status as soon as it's confirmed — we don't claim an affiliation that doesn't exist yet.",
+        },
+        {
+          question: "Do I need a large audience to apply?",
+          answer:
+            "No. We assess consistency, willingness to broadcast regularly, and fit with one of our verticals. The program is designed to grow an audience inside the studio, not to require one as an entry condition.",
+        },
+        {
+          question: "Do I have to pay anything to join?",
+          answer:
+            "There's no entry fee in either mode. What changes is the equipment: on-site you use the studio's equipped booth, and remote you broadcast with your own device and your own connection. We don't supply equipment for remote use. Participation terms are put in writing before you start.",
+        },
+        {
+          question: "Can I broadcast from home, or does it have to be at the studio?",
+          answer:
+            "Both modes exist and you choose when you apply. On-site gives you an equipped booth, staff on the floor, redundant connectivity, and a place in the studio's live groups. Remote gives you the same training, schedule, analytics, and shift manager, but the setup is yours.",
+        },
+        {
+          question: "What do I need for the remote mode?",
+          answer:
+            "Your own broadcasting device, a stable internet connection, and a space with reasonable lighting. We hand you a technical checklist for vertical framing, audio, and network settings, but the equipment is yours: the studio does not lend or finance devices for remote use.",
+        },
+        {
+          question: "What are live groups?",
+          answer:
+            "They're group shows we produce at the studio: several creators broadcasting together around a theme that drives the show, with battles, dance, and challenges. They need the booths and staff coordination, so they're exclusive to the on-site mode.",
+        },
+        {
+          question: "What happens if the internet drops mid-broadcast?",
+          answer:
+            "That's exactly the problem this studio was designed around. Every booth runs on a dual link with automatic failover, and an autonomous agent diagnoses and remediates infrastructure incidents while on air, escalating to a human technician only when automatic remediation doesn't resolve it.",
+        },
+      ],
+    },
+    cta: {
+      title: "Apply to the studio.",
+      description:
+        "We're assembling the first cohort of Orbexs Live Studio creators. If you already go live — or want to start — write to us and let's talk.",
+      action: { label: "Apply as a creator" },
+      secondary: { label: "I'm a brand", href: "/agendar" },
+    },
+    disclaimer:
+      "TikTok is a trademark of its respective owners. Orbexs Live Studio is an independent production studio; our LIVE agency application is under review and this reference implies no affiliation, sponsorship, or official endorsement.",
+  },
   investorsPage: {
     eyebrow: "INVESTORS",
     title: "Infrastructure for the era of digital sovereignty.",
@@ -904,6 +1134,7 @@ const en = {
       "Cybersecurity",
       "Digital Workforce",
       "Critical Systems",
+      "Orbexs Live Studio (TikTok LIVE)",
       "Technical Consulting",
       "Other",
     ],

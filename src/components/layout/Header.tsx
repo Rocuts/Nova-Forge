@@ -20,6 +20,8 @@ interface NavChild {
 interface NavItem {
   name: string
   href?: string
+  /** Marks a live-broadcast destination — renders the pulsing ON AIR dot */
+  accent?: boolean
   children?: readonly NavChild[]
   platformChildren?: readonly NavChild[]
   solutionsChildren?: readonly NavChild[]
@@ -231,8 +233,9 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                 <Link
                   key={item.name}
                   href={item.href ? resolveHref(locale, item.href) : "#"}
-                  className={`nav-link-hover px-4 py-2 transition-colors duration-200 ${navLinkColor}`}
+                  className={`nav-link-hover px-4 py-2 transition-colors duration-200 inline-flex items-center gap-2 ${navLinkColor}`}
                 >
+                  {item.accent && <span className="live-dot" aria-hidden="true" />}
                   {item.name}
                 </Link>
               )
@@ -363,9 +366,13 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
                         key={item.name}
                         href={item.href ? resolveHref(locale, item.href) : "#"}
                         onClick={closeMegaMenu}
-                        className="text-base font-medium text-white hover:text-[#a3a3a3] transition-colors"
+                        className="text-base font-medium text-white hover:text-[#a3a3a3] transition-colors inline-flex items-center"
                       >
-                        <span className="text-[#525252] mr-1.5">&#8627;</span>
+                        {item.accent ? (
+                          <span className="live-dot mr-2.5" aria-hidden="true" />
+                        ) : (
+                          <span className="text-[#525252] mr-1.5">&#8627;</span>
+                        )}
                         {item.name}
                       </Link>
                     ))}

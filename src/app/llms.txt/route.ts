@@ -53,6 +53,12 @@ ${serviceLines(en, "en", enNav.platform)}
 ## Solutions (English)
 ${serviceLines(en, "en", enNav.solutions)}
 
+## Orbexs Live Studio (división de producción en vivo)
+- [Orbexs Live Studio — Español](${siteConfig.url}${buildLocalePath("es", "/estudio-tiktok-live")}): ${es.liveStudio.description}
+- [Orbexs Live Studio — English](${siteConfig.url}${buildLocalePath("en", "/estudio-tiktok-live")}): ${en.liveStudio.description}
+Estado: ${es.liveStudio.status.toLowerCase()}. ${es.liveStudio.disclaimer}
+Programa para creadores: ${es.liveStudio.program.steps.map((s) => `${s.step} ${s.title} — ${s.description}`).join(" ")}
+
 ## Casos de estudio
 ### ${es.caseStudy.title} — ${es.caseStudy.industry}
 ${es.caseStudy.context} ${es.caseStudy.solution} ${es.caseStudy.outcome}

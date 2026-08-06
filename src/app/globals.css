@@ -172,10 +172,115 @@
   animation: heroEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ── Orbexs Live Studio ──────────────────────────────────────────────
+   Broadcast-signal treatments. Scoped to the Live Studio surfaces; the
+   spectral cyan/magenta pair reads as a live feed without ever being
+   used as a fill. */
+
+:root {
+  --live-cyan: #25f4ee;
+  --live-magenta: #fe2c55;
+}
+
+/* Chromatic split on headlines — RGB fringing of a signal off-register */
+.chroma-text {
+  text-shadow:
+    0.028em 0 rgba(254, 44, 85, 0.55),
+    -0.028em 0 rgba(37, 244, 238, 0.55);
+}
+
+/* ON AIR indicator: the dot breathes, the halo expands and dies */
+@keyframes liveDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+@keyframes liveDotHalo {
+  0% { opacity: 0.5; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(2.6); }
+}
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--live-magenta);
+  animation: liveDotPulse 1.8s ease-in-out infinite;
+}
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--live-magenta);
+  animation: liveDotHalo 1.8s ease-out infinite;
+}
+
+/* Marquee — duplicated track translates exactly one copy width */
+@keyframes marqueeScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 46s linear infinite;
+  will-change: transform;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* 9:16 rhythm — vertical hairlines echoing stacked portrait frames */
+.live-frame-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 54px 96px;
+}
+
+/* Ambient signal glow behind the hero */
+.live-aurora {
+  background-image:
+    radial-gradient(60% 55% at 18% 12%, rgba(37, 244, 238, 0.16), transparent 62%),
+    radial-gradient(55% 50% at 84% 30%, rgba(254, 44, 85, 0.16), transparent 60%),
+    radial-gradient(70% 60% at 50% 100%, rgba(254, 44, 85, 0.07), transparent 70%);
+}
+
+/* Hairline separator that carries the spectral pair */
+.live-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(37, 244, 238, 0.55),
+    rgba(254, 44, 85, 0.55),
+    transparent
+  );
+}
+
+/* Scanline sweep across the hero frame */
+@keyframes liveScan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(1400%); opacity: 0; }
+}
+.live-scan {
+  animation: liveScan 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* Respect reduced motion globally */
 @media (prefers-reduced-motion: reduce) {
   .logo-glitch,
-  .hero-enter {
+  .hero-enter,
+  .marquee-track,
+  .live-scan,
+  .live-dot,
+  .live-dot::after {
     animation: none;
+  }
+  .live-dot::after {
+    opacity: 0;
   }
 }

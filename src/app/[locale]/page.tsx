@@ -10,6 +10,7 @@ import { notFound } from "next/navigation"
 const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
 const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
 const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
+const LiveStudioTeaser = dynamic(() => import("@/components/sections/LiveStudioTeaser").then(m => ({ default: m.LiveStudioTeaser })))
 const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
 const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
 const FAQ = dynamic(() => import("@/components/sections/FAQ").then(m => ({ default: m.FAQ })))
@@ -76,6 +77,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Services content={dict.services} locale={locale} />
       <FlagshipAI content={dict.flagshipAI} />
       <CaseStudy content={dict.caseStudy} locale={locale} />
+      <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
       <Methodology content={dict.methodology} />
       <TechStack content={dict.techStack} />
       <FAQ content={dict.faq} />

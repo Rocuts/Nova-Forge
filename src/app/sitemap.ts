@@ -16,6 +16,7 @@ const pages = [
   { path: "/automatizacion-gobierno", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/enriquecimiento-datos", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/extraccion-datos", priority: 0.8, changeFrequency: "monthly" as const },
+  { path: "/estudio-tiktok-live", priority: 0.9, changeFrequency: "weekly" as const },
   { path: "/inversores", priority: 0.7, changeFrequency: "monthly" as const },
   { path: "/nosotros", priority: 0.7, changeFrequency: "monthly" as const },
 ]

@@ -68,6 +68,39 @@ test('CTA buttons have real destinations', async ({ page }) => {
   await expect(page.getByRole('link', { name: hero.secondaryAction.label })).toHaveAttribute('href', hero.secondaryAction.href)
 })
 
+test('live studio page renders and routes in both locales', async ({ page }) => {
+  await page.goto('/es/estudio-tiktok-live')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(es.liveStudio.titleAccent)
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/es\/estudio-tiktok-live$/)
+
+  // Creator CTA opens the WhatsApp application flow with a prefilled message
+  const apply = page.getByRole('link', { name: es.liveStudio.primaryAction.label }).first()
+  await expect(apply).toHaveAttribute('href', /wa\.me\/.*\?text=/)
+
+  // FAQPage schema is generated from the studio dictionary
+  const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents()
+  const types = jsonLd.flatMap((s) => {
+    const parsed = JSON.parse(s)
+    return Array.isArray(parsed) ? parsed.map((e) => e['@type']) : [parsed['@type']]
+  })
+  expect(types).toContain('FAQPage')
+  expect(types).toContain('Service')
+
+  // English slug is served through the rewrite
+  await page.goto('/en/tiktok-live-studio')
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/tiktok-live-studio$/)
+})
+
+test('home page links to the live studio division', async ({ page }) => {
+  await page.goto('/es')
+  const navLink = page.getByRole('navigation').getByRole('link', { name: /Live Studio/ })
+  await expect(navLink).toHaveAttribute('href', '/es/estudio-tiktok-live')
+  await expect(page.getByRole('link', { name: es.liveStudioTeaser.action.label })).toHaveAttribute(
+    'href',
+    '/es/estudio-tiktok-live'
+  )
+})
+
 test('SEO essentials are present', async ({ page }) => {
   await page.goto('/es')
 

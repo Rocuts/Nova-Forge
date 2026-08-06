@@ -31,6 +31,8 @@ export function organizationJsonLd(description: string) {
       "Operational intelligence platforms",
       "Data enrichment",
       "Data extraction and OSINT",
+      "Live streaming production for LATAM creators",
+      "TikTok LIVE studio operations",
     ],
     sameAs: [siteConfig.links.twitter, siteConfig.links.linkedin],
   }

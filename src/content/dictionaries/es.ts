@@ -23,6 +23,7 @@ const es = {
           { name: "Automatización de Gobierno", href: "/automatizacion-gobierno", description: "Workflows gubernamentales digitalizados" },
         ],
       },
+      { name: "Live Studio", href: "/estudio-tiktok-live", accent: true },
       { name: "Empresa", href: "/nosotros" },
     ],
     contact: "Contacto",
@@ -343,6 +344,12 @@ const es = {
       { name: "Fuerza de Trabajo Digital", href: "/fuerza-digital" },
       { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos" },
       { name: "Extracción de Datos", href: "/extraccion-datos" },
+    ],
+    studio: "Live Studio",
+    studioLinks: [
+      { name: "Orbexs Live Studio", href: "/estudio-tiktok-live" },
+      { name: "Programa para creadores", href: "/estudio-tiktok-live" },
+      { name: "Marcas y campañas", href: "/agendar" },
     ],
     company: "Empresa",
     companyLinks: [
@@ -800,6 +807,229 @@ const es = {
       },
     },
   },
+  liveStudioTeaser: {
+    eyebrow: "NUEVA DIVISIÓN",
+    kicker: "ORBEXS LIVE STUDIO",
+    title: "Un estudio de TikTok LIVE operado por una fábrica de software.",
+    description:
+      "Producimos transmisiones en vivo para creadores de LATAM desde sets propios, con la misma infraestructura, redundancia y automatización que construimos para operaciones críticas.",
+    points: [
+      "Sets calibrados para producción vertical 9:16",
+      "Red redundante con remediación autónoma durante el aire",
+      "Formación, parrilla y analítica propia para cada creador",
+    ],
+    action: { label: "Conocer el estudio", href: "/estudio-tiktok-live" },
+  },
+  liveStudio: {
+    eyebrow: "ORBEXS LIVE STUDIO",
+    status: "SOLICITUD DE AGENCIA TIKTOK LIVE EN REVISIÓN",
+    onAir: "EN VIVO",
+    titleLead: "El estudio de",
+    titleAccent: "TikTok LIVE",
+    titleTail: "para LATAM.",
+    subtitle: "Reclutamos creadores, los capacitamos y sostenemos la operación en vivo.",
+    description:
+      "Orbexs Live Studio es nuestra división de producción en vivo: reclutamiento y formación de creadores de Latinoamérica, con dos modalidades de trabajo — presencial en nuestras cabinas o remoto desde tu propio setup — corriendo sobre la misma ingeniería de sistemas críticos que desplegamos para gobiernos y grandes organizaciones.",
+    primaryAction: { label: "Postular como creador" },
+    secondaryAction: { label: "Hablar con el equipo de marcas", href: "/agendar" },
+    whatsappMessage:
+      "Hola, quiero postular como creador a Orbexs Live Studio (TikTok LIVE). Les comparto mi perfil:",
+    marqueeLabel: "Mercados de la primera fase",
+    marquee: [
+      "Colombia",
+      "México",
+      "Perú",
+      "Chile",
+      "Argentina",
+      "Ecuador",
+      "Talento vertical",
+      "Live groups",
+      "Gaming",
+      "Música en vivo",
+      "Entretenimiento",
+    ],
+    stats: [
+      { value: "9:16", label: "Formato nativo", description: "Las cabinas del estudio están calibradas para producción vertical; en remoto entregamos el checklist para lograrlo." },
+      { value: "24/7", label: "Parrilla continua", description: "Turnos rotativos de creadores, presenciales y remotos, con staff de transmisión permanente." },
+      { value: "<60 s", label: "Recuperación de red", description: "Detección y remediación autónoma de incidentes en la infraestructura del estudio durante el aire." },
+      { value: "5", label: "Mercados en fase 1", description: "Operación inicial enfocada en los mercados hispanohablantes de mayor tracción." },
+    ],
+    thesis: {
+      eyebrow: "LA TESIS",
+      title: "El cuello de botella del live no es el talento. Es la operación.",
+      paragraphs: [
+        "En LATAM sobra talento y falta infraestructura. Un creador puede tener audiencia y ritmo, pero pierde horas de aire por una caída de internet, un driver desactualizado o un encuadre mal iluminado. Cada minuto fuera del aire es audiencia e ingreso que no vuelve.",
+        "Nosotros ya resolvimos ese problema para clientes de producción en vivo: desplegamos un agente de IA que opera la mesa de ayuda de infraestructura de punta a punta, diagnostica y remedia incidentes de forma autónoma y escala a un técnico humano solo cuando hace falta.",
+        "Orbexs Live Studio es ese mismo stack, ahora operado por nosotros y puesto al servicio de creadores. No somos una agencia que subcontrata tecnología: somos la fábrica de software que la construye.",
+      ],
+    },
+    program: {
+      eyebrow: "PROGRAMA PARA CREADORES",
+      title: "De casting a parrilla estable.",
+      description:
+        "Un recorrido de cuatro etapas diseñado para llevar a un creador desde la postulación hasta una operación de live sostenible, con acompañamiento en cada punto.",
+      steps: [
+        {
+          step: "01",
+          title: "Casting",
+          description: "Evaluación de perfil, verificación de identidad y definición del vertical de contenido.",
+          details: ["Revisión de perfil y contenido", "Verificación de identidad y edad", "Definición de vertical", "Condiciones por escrito"],
+        },
+        {
+          step: "02",
+          title: "Formación",
+          description: "Academia LIVE: estructura de sesión, ritmo, retención y manejo de comunidad en directo.",
+          details: ["Estructura y guion de sesión", "Retención en los primeros 30 s", "Moderación y comunidad", "Buenas prácticas de la plataforma"],
+        },
+        {
+          step: "03",
+          title: "Producción",
+          description: "Bloque fijo en la parrilla, en cabina del estudio o desde tu propio setup.",
+          details: ["Modalidad presencial o remota", "Manager de turno asignado", "Bloque fijo de parrilla", "Soporte técnico durante el aire"],
+        },
+        {
+          step: "04",
+          title: "Escalado",
+          description: "Lectura de datos, coaching quincenal y expansión a colaboraciones y campañas de marca.",
+          details: ["Panel de métricas por sesión", "Coaching quincenal", "Colaboraciones entre creadores", "Acceso a campañas de marca"],
+        },
+      ],
+    },
+    modalities: {
+      eyebrow: "DOS MODALIDADES",
+      title: "Elige cómo transmitir.",
+      description:
+        "El estudio recluta y capacita; la diferencia entre una modalidad y otra es dónde transmites y quién pone el equipo. Lo decimos antes de que postules, no después.",
+      providesLabel: "Orbexs pone",
+      requiresLabel: "Tú pones",
+      items: [
+        {
+          tag: "ONSITE",
+          title: "En el estudio",
+          description:
+            "Transmites desde nuestras cabinas, con el equipo del estudio y participando en los live groups: shows grupales temáticos — batallas, bailes, retos — donde varias creadoras sostienen el directo sobre una temática que guía el show.",
+          provides: [
+            "Cabina equipada y calibrada en 9:16",
+            "Live groups temáticos con otras creadoras",
+            "Staff de transmisión en cabina",
+            "Conectividad redundante con remediación autónoma",
+            "Capacitación LIVE completa",
+            "Parrilla asignada y analítica por sesión",
+            "Manager de turno",
+            "Acceso a campañas de marca",
+          ],
+          requires: ["Presencia en el turno asignado", "Constancia en la parrilla"],
+        },
+        {
+          tag: "REMOTO",
+          title: "Desde tu lugar",
+          description:
+            "Transmites con tu propio equipo desde donde estés. Recibes la misma formación, parrilla y acompañamiento del estudio, pero el setup corre por tu cuenta: no entregamos dispositivos ni equipamiento para uso remoto.",
+          provides: [
+            "Capacitación LIVE completa",
+            "Parrilla asignada y analítica por sesión",
+            "Manager de turno y acompañamiento",
+            "Checklist técnico de configuración",
+            "Acceso a campañas de marca",
+          ],
+          requires: [
+            "Tu dispositivo de transmisión",
+            "Tu conexión a internet estable",
+            "Tu espacio e iluminación",
+            "Constancia en la parrilla",
+          ],
+        },
+      ],
+    },
+    infrastructure: {
+      eyebrow: "LA VENTAJA ORBEXS",
+      title: "Cabinas construidas como un sistema crítico.",
+      description:
+        "Lo que sigue describe la infraestructura de nuestras cabinas — la ventaja de la modalidad presencial. La diferencia no está en las cámaras: está en lo que pasa cuando algo falla a mitad de una transmisión.",
+      items: [
+        { title: "Sets calibrados para 9:16", description: "Iluminación, audio y encuadre configurados específicamente para el feed vertical, no adaptados desde un set horizontal." },
+        { title: "Conectividad redundante", description: "Doble proveedor de internet con conmutación automática a red móvil ante degradación del enlace principal." },
+        { title: "Mesa de ayuda autónoma", description: "Un agente de IA monitorea la infraestructura del estudio, diagnostica incidentes y ejecuta la remediación sin esperar a que un técnico esté disponible." },
+        { title: "Analítica propia por creador", description: "Panel con retención por minuto, curva de interacción y horarios de mayor rendimiento — datos para decidir, no capturas de pantalla." },
+        { title: "Continuidad de la parrilla", description: "Si un bloque cae, el sistema reasigna set y turno para que el estudio no se quede sin señal al aire." },
+        { title: "Operación bajo estándar propio", description: "Los mismos procesos de monitoreo, respuesta a incidentes y trazabilidad que aplicamos en despliegues enterprise." },
+      ],
+    },
+    creators: {
+      eyebrow: "PARA CREADORES",
+      title: "Lo que recibe quien entra al estudio.",
+      items: [
+        { title: "Condiciones transparentes", description: "Reglas, metas y participación por escrito desde el primer día. Sin letra chica ni acuerdos verbales." },
+        { title: "Sin cuota de ingreso", description: "Entrar al estudio no cuesta. En modalidad presencial usas nuestra cabina; en remoto transmites con tu propio equipo." },
+        { title: "Academia LIVE", description: "Formación práctica en estructura de sesión, retención, moderación y crecimiento sostenido — el núcleo de lo que aporta el estudio en ambas modalidades." },
+        { title: "Manager de turno", description: "Una persona del estudio acompañando la transmisión en tiempo real, no un chat que responde al día siguiente." },
+        { title: "Métricas accionables", description: "Panel propio con lectura de cada sesión y recomendaciones concretas para la siguiente." },
+        { title: "Comunidad y colaboraciones", description: "Cruces entre creadores del estudio para intercambiar audiencia y sostener el crecimiento." },
+      ],
+    },
+    brands: {
+      eyebrow: "PARA MARCAS",
+      title: "Presencia en vivo, con reporte real.",
+      description:
+        "Trabajamos con marcas que quieren estar dentro de la conversación en directo, no al lado de ella. Cada activación se entrega con medición, no con estimaciones.",
+      items: [
+        { title: "Campañas en vivo", description: "Integraciones de producto dentro de la sesión, guionadas con el creador y ensayadas antes del aire." },
+        { title: "Sets patrocinados", description: "Ambientación de cabina con identidad de marca durante bloques definidos de la parrilla." },
+        { title: "Reporte de performance", description: "Entrega post-campaña con audiencia, retención, interacción y resultados por sesión." },
+      ],
+      action: { label: "Agendar reunión comercial", href: "/agendar" },
+    },
+    faq: {
+      title: "Preguntas frecuentes",
+      subtitle: "Lo que todo creador pregunta antes de postular.",
+      items: [
+        {
+          question: "¿Orbexs Live Studio es una agencia oficial de TikTok?",
+          answer:
+            "Nuestra solicitud para operar como agencia LIVE se encuentra en proceso de revisión. Mientras tanto operamos como estudio de producción independiente: sets, formación, staff e infraestructura son nuestros. Publicaremos cualquier cambio de estado apenas se confirme — no afirmamos una afiliación que todavía no existe.",
+        },
+        {
+          question: "¿Necesito tener una audiencia grande para postular?",
+          answer:
+            "No. Evaluamos consistencia, disposición a transmitir con frecuencia y ajuste con alguno de nuestros verticales. El programa está diseñado para hacer crecer la audiencia dentro del estudio, no para exigirla como requisito de entrada.",
+        },
+        {
+          question: "¿Tengo que pagar algo para entrar?",
+          answer:
+            "No cobramos cuota de ingreso en ninguna de las dos modalidades. Lo que cambia es el equipo: en la modalidad presencial usas la cabina equipada del estudio, y en la remota transmites con tu propio dispositivo y tu propia conexión. No entregamos equipamiento para uso remoto. Las condiciones de participación quedan por escrito antes de empezar.",
+        },
+        {
+          question: "¿Puedo transmitir desde mi casa o tiene que ser en el estudio?",
+          answer:
+            "Ambas modalidades existen y eliges al postular. La presencial te da cabina equipada, staff en sala, conectividad redundante y participación en los live groups del estudio. La remota te da la misma capacitación, parrilla, analítica y manager de turno, pero el setup lo pones tú.",
+        },
+        {
+          question: "¿Qué necesito para transmitir en la modalidad remota?",
+          answer:
+            "Tu propio dispositivo de transmisión, una conexión a internet estable y un espacio con iluminación razonable. Te entregamos un checklist técnico para configurar encuadre vertical, audio y red, pero el equipo es tuyo: el estudio no presta ni financia dispositivos para uso remoto.",
+        },
+        {
+          question: "¿Qué son los live groups?",
+          answer:
+            "Son shows grupales que producimos en el estudio: varias creadoras transmitiendo juntas alrededor de una temática que guía el show, con batallas, bailes y retos. Requieren las cabinas y la coordinación del staff, así que son exclusivos de la modalidad presencial.",
+        },
+        {
+          question: "¿Qué pasa si se cae el internet en medio de una transmisión?",
+          answer:
+            "Es exactamente el problema para el que fue diseñado el estudio. Cada cabina opera con doble enlace y conmutación automática, y un agente autónomo diagnostica y remedia incidentes de infraestructura durante el aire, escalando a un técnico humano solo cuando la remediación automática no resuelve.",
+        },
+      ],
+    },
+    cta: {
+      title: "Postula al estudio.",
+      description:
+        "Estamos armando la primera camada de creadores de Orbexs Live Studio. Si transmites en vivo o quieres empezar, escríbenos y conversamos.",
+      action: { label: "Postular como creador" },
+      secondary: { label: "Soy una marca", href: "/agendar" },
+    },
+    disclaimer:
+      "TikTok es una marca registrada de sus respectivos titulares. Orbexs Live Studio es un estudio de producción independiente; nuestra solicitud de agencia LIVE se encuentra en revisión y su mención no implica afiliación, patrocinio ni respaldo oficial.",
+  },
   investorsPage: {
     eyebrow: "INVERSORES",
     title: "Infraestructura para la era de la soberanía digital.",
@@ -904,6 +1134,7 @@ const es = {
       "Ciberseguridad",
       "Fuerza Digital",
       "Sistemas Críticos",
+      "Orbexs Live Studio (TikTok LIVE)",
       "Consultoría Técnica",
       "Otro",
     ],

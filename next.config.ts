@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
       { source: "/en/about", destination: "/en/nosotros" },
       { source: "/en/data-enrichment", destination: "/en/enriquecimiento-datos" },
       { source: "/en/data-extraction", destination: "/en/extraccion-datos" },
+      { source: "/en/tiktok-live-studio", destination: "/en/estudio-tiktok-live" },
     ];
   },
 };
