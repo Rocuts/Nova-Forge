@@ -10,6 +10,7 @@ interface TechStackContent {
     name: string
     items: readonly string[]
   }[]
+  note?: string
 }
 
 function CategoryRow({
@@ -69,6 +70,12 @@ export function TechStack({ content }: { content: TechStackContent }) {
             <CategoryRow key={cat.name} category={cat} index={i} />
           ))}
         </div>
+
+        {content.note && (
+          <p className="mt-6 max-w-3xl text-xs leading-relaxed text-[#737373]">
+            {content.note}
+          </p>
+        )}
       </div>
     </section>
   )

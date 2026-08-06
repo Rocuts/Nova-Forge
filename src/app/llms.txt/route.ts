@@ -30,7 +30,11 @@ export async function GET() {
   const esNav = navChildren(es)
   const enNav = navChildren(en)
 
-  const compliance = es.techStack.categories.find((c) => c.name === "Cumplimiento")?.items.join(" · ") ?? ""
+  const complianceCategories = ["Marcos de Cumplimiento", "Automatización de Cumplimiento"]
+  const compliance = es.techStack.categories
+    .filter((c) => complianceCategories.includes(c.name))
+    .map((c) => `- ${c.name}: ${c.items.join(" · ")}`)
+    .join("\n")
 
   const body = `# ${siteConfig.name}
 
@@ -73,6 +77,8 @@ ${es.faq.items.map((item) => `### ${item.question}\n${item.answer}`).join("\n\n"
 ${en.faq.items.map((item) => `### ${item.question}\n${item.answer}`).join("\n\n")}
 
 ## Cumplimiento y estándares
+${es.techStack.note}
+
 ${compliance}
 
 ## Empresa

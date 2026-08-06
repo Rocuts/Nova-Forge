@@ -331,8 +331,11 @@ const en = {
       { name: "Development & Platforms", items: ["Next.js 16", "React 19", "TypeScript 5", "Bun", "Rust", "Go"] },
       { name: "Cybersecurity", items: ["Zero Trust", "SIEM/SOAR", "Threat Intelligence", "Red Teaming", "Blue Teaming", "SOC Automation", "WAF", "Penetration Testing", "EDR/XDR", "Incident Response"] },
       { name: "Data & Analytics", items: ["PostgreSQL", "ClickHouse", "Apache Kafka", "Apache Flink", "Grafana", "dbt"] },
-      { name: "Compliance", items: ["SOC 2 Type II", "ISO 27001", "GDPR", "SSPA", "NIST CSF", "PCI DSS"] },
+      { name: "Compliance Frameworks", items: ["SOC 2 Type II", "ISO 27001", "GDPR", "SSPA", "NIST CSF", "PCI DSS"] },
+      { name: "Compliance Automation", items: ["Vanta", "Thoropass", "Drata", "Secureframe", "Sprinto"] },
     ],
+    note:
+      "Orbexs does not hold these certifications. We list them because we design the architecture, technical controls and audit evidence our clients rely on to obtain and maintain them — backed by compliance automation platforms such as Vanta and Thoropass, and accredited third-party auditors.",
   },
   footer: {
     tagline:
