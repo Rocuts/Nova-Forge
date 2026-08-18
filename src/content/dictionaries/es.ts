@@ -60,7 +60,8 @@ const es = {
     },
   },
   trustBar: {
-    label: "Construido sobre",
+    // Tecnologías que usamos, no partnerships ni certificaciones — ver CLAUDE.md
+    label: "Construimos con",
   },
   services: {
     sectionId: "capacidades",
