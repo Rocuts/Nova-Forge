@@ -266,6 +266,12 @@ const en = {
         tagline: "Strategist for high-scale digital products.",
       },
       {
+        name: "Mauricio Solano",
+        initials: "MS",
+        role: "Sales Director",
+        tagline: "Specialist in consultative B2B and enterprise sales.",
+      },
+      {
         name: "Yeison Grisales",
         initials: "YG",
         role: "CCO - Chief Commercial Officer",
@@ -276,12 +282,6 @@ const en = {
         initials: "CM",
         role: "CTO - Chief Technology Officer",
         tagline: "Specialist in distributed systems architecture.",
-      },
-      {
-        name: "Mauricio Solano",
-        initials: "MS",
-        role: "Sales Director",
-        tagline: "Specialist in consultative B2B and enterprise sales.",
       },
       {
         name: "Andres Rodriguez",
@@ -1107,9 +1107,9 @@ const en = {
       description: "Engineering and strategy behind Orbexs.",
       members: [
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
+        { name: "Mauricio Solano", initials: "MS", role: "Sales Director", bio: "Specialist in consultative B2B sales. Leads business development and relationships with enterprise and government clients." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions for regulated industries." },
         { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
-        { name: "Mauricio Solano", initials: "MS", role: "Sales Director", bio: "Specialist in consultative B2B sales. Leads business development and relationships with enterprise and government clients." },
         { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development and enterprise interface systems." },
       ],
     },
