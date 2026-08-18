@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { trackEvent } from "@/lib/analytics"
 import { applyHref, resolveHref } from "./shared"
@@ -48,7 +48,7 @@ function BroadcastFrame({ onAir }: { onAir: string }) {
         {/* Bottom strip: audio level meter */}
         <div className="absolute bottom-0 inset-x-0 h-14 border-t border-white/8 px-3 flex items-end gap-[3px] pb-3">
           {EQ_BARS.map((height, i) => (
-            <motion.span
+            <m.span
               key={i}
               className="flex-1 rounded-[1px] bg-gradient-to-t from-[#25f4ee]/50 to-[#fe2c55]/50"
               initial={{ height: 4 }}
@@ -115,7 +115,7 @@ export function LiveStudioHero({
       <div className="relative mx-auto w-full max-w-7xl px-6 py-32 md:py-40">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-7">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
@@ -130,9 +130,9 @@ export function LiveStudioHero({
               <span className="font-mono text-[10px] tracking-[0.22em] text-white/45 uppercase">
                 {status}
               </span>
-            </motion.div>
+            </m.div>
 
-            <motion.h1
+            <m.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
@@ -141,27 +141,27 @@ export function LiveStudioHero({
               {titleLead}{" "}
               <span className="chroma-text">{titleAccent}</span>{" "}
               {titleTail}
-            </motion.h1>
+            </m.h1>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.16, ease: "easeOut" }}
               className="font-heading text-2xl md:text-3xl text-white/55 font-medium tracking-tight mb-10 max-w-2xl"
             >
               {subtitle}
-            </motion.p>
+            </m.p>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.24, ease: "easeOut" }}
               className="text-fluid-p text-white/60 max-w-2xl leading-relaxed mb-14"
             >
               {description}
-            </motion.p>
+            </m.p>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.32, ease: "easeOut" }}
@@ -183,17 +183,17 @@ export function LiveStudioHero({
               >
                 {secondaryAction.label}
               </Button>
-            </motion.div>
+            </m.div>
           </div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             className="lg:col-span-5"
           >
             <BroadcastFrame onAir={onAir} />
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

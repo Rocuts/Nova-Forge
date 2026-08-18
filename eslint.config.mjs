@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".unlighthouse/**",
     "test-results/**",
     "playwright-report/**",
+    // Agent worktrees (contain full repo copies with build artifacts):
+    ".claude/**",
   ]),
 ]);
 

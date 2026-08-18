@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
 
@@ -11,7 +11,7 @@ export function LiveStudioStats({ stats }: Props) {
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 border border-white/8">
           {stats.map((stat, i) => (
-            <motion.div
+            <m.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -26,7 +26,7 @@ export function LiveStudioStats({ stats }: Props) {
                 {stat.label}
               </p>
               <p className="text-sm text-white/50 leading-relaxed">{stat.description}</p>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { RevealText } from "@/components/ui/RevealText"
 import { trackEvent } from "@/lib/analytics"
@@ -19,7 +19,7 @@ export function LiveStudioFinalCta({ onAir, cta, disclaimer, whatsappMessage, lo
       data-header-theme="dark"
     >
       <div aria-hidden="true" className="absolute inset-0 live-aurora opacity-80" />
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={viewportConfig}
@@ -67,7 +67,7 @@ export function LiveStudioFinalCta({ onAir, cta, disclaimer, whatsappMessage, lo
         <p className="text-xs text-white/30 leading-relaxed max-w-2xl mx-auto mt-16">
           {disclaimer}
         </p>
-      </motion.div>
+      </m.div>
     </section>
   )
 }

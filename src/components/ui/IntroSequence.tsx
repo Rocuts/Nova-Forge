@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 
 export function IntroSequence() {
   const [show, setShow] = useState(true)
@@ -51,7 +51,7 @@ export function IntroSequence() {
   return (
     <AnimatePresence>
       {animationPhase !== "done" && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[9998] bg-black flex items-center justify-center"
           animate={
             animationPhase === "reveal"
@@ -72,7 +72,7 @@ export function IntroSequence() {
           <div className="text-center">
             <div className="font-heading text-4xl md:text-6xl font-black tracking-widest text-white flex overflow-hidden justify-center">
               {letters.map((letter, i) => (
-                <motion.span
+                <m.span
                   key={i}
                   initial={{ y: "100%", opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -83,18 +83,18 @@ export function IntroSequence() {
                   }}
                 >
                   {letter}
-                </motion.span>
+                </m.span>
               ))}
             </div>
             {/* Progress line */}
-            <motion.div
+            <m.div
               className="h-[2px] bg-[#0a0a0a] mt-4 mx-auto"
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1.2, ease: "easeInOut" }}
             />
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

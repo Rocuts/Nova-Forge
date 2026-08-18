@@ -1,6 +1,6 @@
 "use client"
 import { forwardRef } from "react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { cn } from "@/lib/utils"
 import { MagneticButton } from "./MagneticButton"
 
@@ -40,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
     if (href) {
       const isExternal = /^https?:\/\//.test(href) || href.startsWith("mailto:")
       const anchor = (
-        <motion.a
+        <m.a
           ref={ref as React.Ref<HTMLAnchorElement>}
           href={href}
           target={isExternal ? (target || "_blank") : target}
@@ -51,23 +51,23 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
           aria-label={ariaLabel}
         >
           {children}
-        </motion.a>
+        </m.a>
       )
       return magnetic ? <MagneticButton>{anchor}</MagneticButton> : anchor
     }
 
     const button = (
-      <motion.button
+      <m.button
         ref={ref as React.Ref<HTMLButtonElement>}
         type={props.type || "button"}
         whileTap={{ scale: 0.98 }}
         className={combinedClassName}
         onClick={handleClick}
         aria-label={ariaLabel}
-        {...(props as React.ComponentProps<typeof motion.button>)}
+        {...(props as React.ComponentProps<typeof m.button>)}
       >
         {children}
-      </motion.button>
+      </m.button>
     )
     return magnetic ? <MagneticButton>{button}</MagneticButton> : button
   }

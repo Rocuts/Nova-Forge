@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 
 /**
  * The hover-expanding leadership roster. AboutPage and InvestorsPage carried a
@@ -35,7 +35,7 @@ export function TeamRows({
         <div className="mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
           <div className="relative md:max-w-lg lg:max-w-xl shrink-0 overflow-hidden">
             <AnimatePresence mode="wait">
-              <motion.h2
+              <m.h2
                 key={hoveredRole ?? "default"}
                 initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -44,13 +44,14 @@ export function TeamRows({
                 className={`font-heading text-4xl md:text-5xl font-bold tracking-tight text-white`}
               >
                 {hoveredRole ?? title}
-              </motion.h2>
+              </m.h2>
             </AnimatePresence>
           </div>
-          <p className="text-white/40 text-lg leading-relaxed max-w-md md:pb-2">{description}</p>
+          {/* a11y: white/40 sobre #0a0a0a da 3.77:1 (< AA 4.5); white/50 da 5.37:1 manteniendo el tono muted. */}
+          <p className="text-white/50 text-lg leading-relaxed max-w-md md:pb-2">{description}</p>
         </div>
 
-        <motion.div
+        <m.div
           initial="hidden"
           whileInView="visible"
           viewport={viewportConfig}
@@ -61,7 +62,7 @@ export function TeamRows({
             const active = hovered === i
             const num = String(i + 1).padStart(2, "0")
             return (
-              <motion.div
+              <m.div
                 key={member.name}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -71,21 +72,21 @@ export function TeamRows({
                 onMouseLeave={() => setHovered(null)}
                 className="group relative border-b border-white/[0.08]"
               >
-                <motion.div
+                <m.div
                   className="absolute inset-0 bg-white pointer-events-none"
                   initial={false}
                   animate={{ opacity: active ? 0.03 : 0 }}
                   transition={{ duration: 0.4 }}
                 />
                 <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none overflow-hidden">
-                  <motion.span
+                  <m.span
                     className="font-heading text-[7rem] md:text-[10rem] lg:text-[13rem] font-bold leading-none text-white/[0.03] block"
                     initial={false}
                     animate={{ opacity: active ? 1 : 0, x: active ? 0 : 60 }}
                     transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
                   >
                     {member.initials}
-                  </motion.span>
+                  </m.span>
                 </div>
                 <div className="relative py-7 md:py-10">
                   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
@@ -96,7 +97,7 @@ export function TeamRows({
                   <p className="mt-3 text-sm text-white/30 leading-relaxed max-w-2xl md:pl-16 md:hidden">{member.bio}</p>
                   <AnimatePresence>
                     {active && (
-                      <motion.div
+                      <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -104,20 +105,20 @@ export function TeamRows({
                         className="hidden md:block overflow-hidden"
                       >
                         <p className="pt-4 pl-16 text-base text-white/50 max-w-2xl leading-relaxed">{member.bio}</p>
-                      </motion.div>
+                      </m.div>
                     )}
                   </AnimatePresence>
                 </div>
-                <motion.div
+                <m.div
                   className="absolute bottom-0 left-0 h-px bg-white/40"
                   initial={false}
                   animate={{ width: active ? "100%" : "0%" }}
                   transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
                 />
-              </motion.div>
+              </m.div>
             )
           })}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   )

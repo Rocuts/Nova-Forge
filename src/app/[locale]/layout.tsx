@@ -11,6 +11,7 @@ import { JsonLd } from "@/components/ui/JsonLd"
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo"
 import { Analytics } from "@vercel/analytics/next"
 import { SmoothScroll } from "@/components/providers/SmoothScroll"
+import { MotionProvider } from "@/components/providers/MotionProvider"
 import { ScrollProgress } from "@/components/animations/ScrollProgress"
 import { notFound } from "next/navigation"
 
@@ -80,12 +81,14 @@ export default async function LocaleLayout({ params, children }: Props) {
     <html lang={locale} className={`${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
       <body className="bg-white text-[#0a0a0a] min-h-screen flex flex-col" suppressHydrationWarning>
         <JsonLd data={[organizationJsonLd(dict.meta.description), webSiteJsonLd()]} />
-        <SmoothScroll>
-          <ScrollProgress />
-          <Header nav={dict.nav} locale={locale} />
-          <main className="flex-1 flex flex-col relative">{children}</main>
-          <Footer content={dict.footer} locale={locale} />
-        </SmoothScroll>
+        <MotionProvider>
+          <SmoothScroll>
+            <ScrollProgress />
+            <Header nav={dict.nav} locale={locale} />
+            <main className="flex-1 flex flex-col relative">{children}</main>
+            <Footer content={dict.footer} locale={locale} />
+          </SmoothScroll>
+        </MotionProvider>
         <Analytics />
       </body>
     </html>

@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Eyebrow, stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
 
@@ -30,7 +30,7 @@ export function LiveStudioProgram({ program }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {program.steps.map((step, i) => (
-            <motion.div
+            <m.div
               key={step.step}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -58,7 +58,7 @@ export function LiveStudioProgram({ program }: Props) {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

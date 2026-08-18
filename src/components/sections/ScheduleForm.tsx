@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 import { CalendarCheck, ArrowLeft } from "lucide-react"
 import { ScrambleText } from "@/components/ui/ScrambleText"
 
@@ -113,7 +113,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
       <div className="w-full md:w-7/12 bg-white p-8 md:p-16 lg:p-20 flex items-center justify-center">
         <AnimatePresence mode="wait">
           {!submitted ? (
-            <motion.div
+            <m.div
               key="form"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -241,9 +241,9 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   {content.submitButton}
                 </button>
               </form>
-            </motion.div>
+            </m.div>
           ) : (
-            <motion.div
+            <m.div
               key="success"
               ref={successRef}
               tabIndex={-1}
@@ -252,7 +252,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="w-full max-w-xl outline-none"
             >
-              <motion.div
+              <m.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{
@@ -264,7 +264,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                 className="w-16 h-16 mb-8 rounded-full border border-[#e5e5e5] flex items-center justify-center"
               >
                 <CalendarCheck className="w-8 h-8 text-[#0a0a0a]" />
-              </motion.div>
+              </m.div>
 
               <h2 className="text-3xl md:text-4xl font-bold font-heading text-[#0a0a0a] mb-4 tracking-tight">
                 {content.successTitle}
@@ -290,7 +290,7 @@ export function ScheduleForm({ content, locale }: ScheduleFormProps) {
                   {content.backButton}
                 </a>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

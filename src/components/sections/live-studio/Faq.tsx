@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { trackEvent } from "@/lib/analytics"
 import { stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
@@ -11,7 +11,7 @@ function FaqItem({ item, index }: { item: { question: string; answer: string }; 
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={viewportConfig}
@@ -41,15 +41,15 @@ function FaqItem({ item, index }: { item: { question: string; answer: string }; 
           +
         </span>
       </button>
-      <motion.div
+      <m.div
         initial={false}
         animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         className="overflow-hidden"
       >
         <p className="text-[#525252] leading-relaxed max-w-3xl pb-8 pr-10">{item.answer}</p>
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   )
 }
 

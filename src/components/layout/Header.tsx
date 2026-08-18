@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "motion/react"
+import { m, useScroll, useMotionValueEvent, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { TransitionLink } from "@/components/ui/TransitionLink"
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher"
@@ -91,7 +91,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
 
   return (
     <>
-      <motion.header
+      <m.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
@@ -187,7 +187,7 @@ export function Header({ nav, locale }: { nav: NavContent; locale: string }) {
             </button>
           </div>
         </div>
-      </motion.header>
+      </m.header>
 
       {/* Mega menu overlay — DARK */}
       <AnimatePresence>

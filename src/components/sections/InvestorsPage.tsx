@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { TeamRows } from "./TeamRows"
 import { Button } from "@/components/ui/Button"
@@ -56,14 +56,14 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
       {/* ── Hero ── */}
       <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-7xl px-6 py-32">
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(0)}
             className="text-[10px] md:text-[11px] font-bold tracking-[0.35em] uppercase text-[#a3a3a3] mb-8"
           >
             {content.eyebrow}
-          </motion.p>
+          </m.p>
 
           <RevealText
             as="h1"
@@ -72,14 +72,14 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
             {content.title}
           </RevealText>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(2)}
             className="text-xl text-[#a3a3a3] max-w-3xl leading-relaxed"
           >
             {content.subtitle}
-          </motion.p>
+          </m.p>
         </div>
       </section>
 
@@ -95,7 +95,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
             </RevealText>
 
             {content.thesis.paragraphs.map((paragraph, i) => (
-              <motion.p
+              <m.p
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
                 className="text-lg text-[#525252] leading-[1.8] mb-8 last:mb-0"
               >
                 {paragraph}
-              </motion.p>
+              </m.p>
             ))}
           </div>
         </div>
@@ -120,7 +120,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
             >
               {content.market.title}
             </RevealText>
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -128,10 +128,10 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
               className="text-lg text-[#525252] leading-relaxed"
             >
               {content.market.description}
-            </motion.p>
+            </m.p>
           </div>
 
-          <motion.div
+          <m.div
             className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16"
             initial="hidden"
             whileInView="visible"
@@ -145,7 +145,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
             }}
           >
             {content.market.segments.map((segment) => (
-              <motion.div
+              <m.div
                 key={segment.title}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -162,9 +162,9 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
                 <p className="text-[#525252] leading-relaxed">
                   {segment.description}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
@@ -174,7 +174,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
       {/* ── Vision Quote ── */}
       <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <motion.blockquote
+          <m.blockquote
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportConfig}
@@ -192,14 +192,14 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
                 <p className="text-sm text-[#a3a3a3]">{content.vision.role}</p>
               </div>
             </footer>
-          </motion.blockquote>
+          </m.blockquote>
         </div>
       </section>
 
       {/* ── CTA ── */}
       <section className="py-32">
         <div className="mx-auto max-w-7xl px-6 text-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportConfig}
@@ -224,7 +224,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
             >
               {content.cta.action.label}
             </Button>
-          </motion.div>
+          </m.div>
         </div>
       </section>
     </div>

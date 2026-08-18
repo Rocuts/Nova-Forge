@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 
 function FAQItem({ question, answer, index, isFirst }: { question: string; answer: string; index: number; isFirst?: boolean }) {
@@ -16,17 +16,17 @@ function FAQItem({ question, answer, index, isFirst }: { question: string; answe
         className="py-6 w-full flex items-center justify-between text-left cursor-pointer"
       >
         <h3 className="text-base font-medium text-[#0a0a0a] pr-8">{question}</h3>
-        <motion.span
+        <m.span
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="text-[#a3a3a3] text-xl shrink-0"
         >
           +
-        </motion.span>
+        </m.span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
-          <motion.div
+          <m.div
             id={panelId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -35,7 +35,7 @@ function FAQItem({ question, answer, index, isFirst }: { question: string; answe
             className="overflow-hidden"
           >
             <p className="pb-6 text-[#525252] text-base leading-relaxed">{answer}</p>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -51,7 +51,7 @@ interface FAQContent {
 
 export function FAQ({ content: faqSection }: { content: FAQContent }) {
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -79,6 +79,6 @@ export function FAQ({ content: faqSection }: { content: FAQContent }) {
           </div>
         </div>
       </div>
-    </motion.section>
+    </m.section>
   )
 }

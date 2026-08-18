@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import type { ReactNode } from "react"
 
 interface CoverRevealProps {
@@ -87,7 +87,7 @@ export function CoverReveal({
   // Mobile: simple FadeInUp (uses IntersectionObserver via hasRevealed)
   if (isMobile) {
     return (
-      <motion.div
+      <m.div
         ref={wrapperRef}
         className={className}
         initial={{ opacity: 0, y: 20 }}
@@ -95,13 +95,13 @@ export function CoverReveal({
         transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
       >
         <Tag>{children}</Tag>
-      </motion.div>
+      </m.div>
     )
   }
 
   // Desktop: two-phase cover reveal using translateX
   return (
-    <motion.div
+    <m.div
       ref={wrapperRef}
       className="relative overflow-hidden"
       initial="hidden"
@@ -109,7 +109,7 @@ export function CoverReveal({
     >
       {/* Content — priority content is painted from SSR; otherwise it fades
           in at the midpoint when the overlay covers it */}
-      <motion.div
+      <m.div
         variants={
           priority
             ? undefined
@@ -123,10 +123,10 @@ export function CoverReveal({
         }
       >
         <Tag className={`block ${className}`}>{children}</Tag>
-      </motion.div>
+      </m.div>
 
       {/* Overlay: slides in from left, then exits to right */}
-      <motion.div
+      <m.div
         aria-hidden
         className="absolute inset-0 z-10"
         style={{ backgroundColor: overlayColor }}
@@ -143,6 +143,6 @@ export function CoverReveal({
           },
         }}
       />
-    </motion.div>
+    </m.div>
   )
 }

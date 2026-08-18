@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Eyebrow, stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
 
@@ -22,7 +22,7 @@ export function LiveStudioInfrastructure({ infrastructure }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/8 border border-white/8">
           {infrastructure.items.map((item, i) => (
-            <motion.div
+            <m.div
               key={item.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -38,7 +38,7 @@ export function LiveStudioInfrastructure({ infrastructure }: Props) {
                 {item.title}
               </h3>
               <p className="text-sm text-white/50 leading-relaxed">{item.description}</p>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

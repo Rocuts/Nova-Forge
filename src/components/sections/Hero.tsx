@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 import { trackEvent } from "@/lib/analytics"
@@ -90,7 +90,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
           <span className="sr-only">{heroContent.titleHighlight}</span>
           <span aria-hidden="true" className="block overflow-hidden relative" style={{ height: "1.15em" }}>
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
+              <m.span
                 key={phrases[index]}
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: "0%", opacity: 1 }}
@@ -99,7 +99,7 @@ export function Hero({ content: heroContent }: { content: HeroContent }) {
                 className="block text-[#525252]"
               >
                 {phrases[index]}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </span>
         </h1>

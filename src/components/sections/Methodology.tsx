@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef } from "react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 
 interface MethodologyStep {
@@ -41,7 +41,7 @@ export function Methodology({ content: methodologySection }: { content: Methodol
   }, [])
 
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -67,7 +67,7 @@ export function Methodology({ content: methodologySection }: { content: Methodol
             style={{ transform: "scaleX(0)" }}
           />
 
-          <motion.div
+          <m.div
             className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6"
             initial="hidden"
             whileInView="visible"
@@ -81,7 +81,7 @@ export function Methodology({ content: methodologySection }: { content: Methodol
             }}
           >
             {methodologySection.steps.map((step, i) => (
-              <motion.div
+              <m.div
                 key={step.num}
                 variants={{
                   hidden: { opacity: 0, y: 16 },
@@ -100,11 +100,11 @@ export function Methodology({ content: methodologySection }: { content: Methodol
                 </p>
                 <h3 className="text-lg font-semibold text-[#0a0a0a] mb-3 tracking-tight">{step.title}</h3>
                 <p className="text-sm text-[#525252] leading-relaxed">{step.desc}</p>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
       </div>
-    </motion.section>
+    </m.section>
   )
 }

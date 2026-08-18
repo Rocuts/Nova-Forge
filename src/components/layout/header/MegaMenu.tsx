@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { siteConfig } from "@/config/site"
 import { trackEvent } from "@/lib/analytics"
 import { getMegaMenuLabels, megaMenuEase, resolveHref } from "./types"
@@ -27,7 +27,7 @@ export function MegaMenu({
   const labels = getMegaMenuLabels(locale)
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
@@ -173,6 +173,6 @@ export function MegaMenu({
           </div>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   )
 }

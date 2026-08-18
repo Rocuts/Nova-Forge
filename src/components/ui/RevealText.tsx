@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import type { ElementType } from "react"
 
 /* -- shared types --------------------------------------------------------- */
@@ -33,7 +33,7 @@ export function RevealText({
   className = "",
   delay = 0,
 }: RevealTextProps) {
-  const MotionTag = motion.create(Tag as ElementType) as React.ComponentType<
+  const MotionTag = m.create(Tag as ElementType) as React.ComponentType<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   >
@@ -73,9 +73,9 @@ export function RevealText({
           key={`${word}-${i}`}
           className="inline-block overflow-hidden align-bottom pb-[0.15em]"
         >
-          <motion.span className="inline-block" variants={wordVariants}>
+          <m.span className="inline-block" variants={wordVariants}>
             {word}
-          </motion.span>
+          </m.span>
           {i < words.length - 1 && (
             <span className="inline-block w-[0.3em]" />
           )}
@@ -111,7 +111,7 @@ export function CharReveal({
   className = "",
   delay = 0,
 }: RevealTextProps) {
-  const MotionTag = motion.create(Tag as ElementType) as React.ComponentType<
+  const MotionTag = m.create(Tag as ElementType) as React.ComponentType<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   >
@@ -157,13 +157,13 @@ export function CharReveal({
                 key={`${char}-${ci}`}
                 className="inline-block overflow-hidden align-bottom pb-[0.15em]"
               >
-                <motion.span
+                <m.span
                   className="inline-block"
                   style={{ transformOrigin: "bottom center" }}
                   variants={charVariants}
                 >
                   {char}
-                </motion.span>
+                </m.span>
               </span>
             )
           })}

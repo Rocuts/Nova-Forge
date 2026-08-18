@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { Eyebrow, resolveHref, stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
@@ -32,7 +32,7 @@ export function LiveStudioBrands({ brands, locale }: Props) {
           <div className="lg:col-span-7">
             <div className="border-t border-white/10">
               {brands.items.map((item, i) => (
-                <motion.div
+                <m.div
                   key={item.title}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export function LiveStudioBrands({ brands, locale }: Props) {
                     </h3>
                     <p className="text-sm text-white/50 leading-relaxed">{item.description}</p>
                   </div>
-                </motion.div>
+                </m.div>
               ))}
             </div>
           </div>

@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 
 interface BrandLogoProps {
   className?: string
@@ -12,7 +12,7 @@ export function BrandLogo({ className = "", size = 24, loading = false }: BrandL
   const springConfig = { type: "spring" as const, stiffness: 400, damping: 25 }
 
   return (
-    <motion.div
+    <m.div
       className={`relative inline-flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
       animate={{ 
@@ -29,7 +29,7 @@ export function BrandLogo({ className = "", size = 24, loading = false }: BrandL
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g transform="rotate(45 12 12)">
           {/* Top Slab */}
-          <motion.rect
+          <m.rect
             x="4"
             width="16"
             height="7"
@@ -45,7 +45,7 @@ export function BrandLogo({ className = "", size = 24, loading = false }: BrandL
             transition={springConfig}
           />
           {/* Bottom Slab */}
-          <motion.rect
+          <m.rect
             x="4"
             width="16"
             height="7"
@@ -62,6 +62,6 @@ export function BrandLogo({ className = "", size = 24, loading = false }: BrandL
           />
         </g>
       </svg>
-    </motion.div>
+    </m.div>
   )
 }

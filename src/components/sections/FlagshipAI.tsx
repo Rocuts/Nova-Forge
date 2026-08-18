@@ -4,7 +4,7 @@ import {
   IconUsersGroup,
   IconCloudLock,
 } from "@tabler/icons-react"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 
 const OFFER_ICONS = {
@@ -23,7 +23,7 @@ interface FlagshipAIContent {
 
 export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAIContent }) {
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -46,7 +46,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
           </p>
         </div>
 
-        <motion.div
+        <m.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
           initial="hidden"
           whileInView="visible"
@@ -62,7 +62,7 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
           {flagshipAISection.items.map((offer) => {
             const Icon = OFFER_ICONS[offer.icon]
             return (
-              <motion.div
+              <m.div
                 key={offer.title}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -77,15 +77,15 @@ export function FlagshipAI({ content: flagshipAISection }: { content: FlagshipAI
                 </div>
                 <h3 className="text-2xl font-semibold mb-4 text-white">{offer.title}</h3>
                 <p className="text-[#a3a3a3] text-base leading-relaxed">{offer.description}</p>
-              </motion.div>
+              </m.div>
             )
           })}
-        </motion.div>
+        </m.div>
 
         <p className="text-[#a3a3a3] text-center text-base mt-14">
           {flagshipAISection.caption}
         </p>
       </div>
-    </motion.section>
+    </m.section>
   )
 }

@@ -17,10 +17,11 @@ export function LiveStudioMarquee({ marqueeLabel, marquee }: Props) {
         <div className="marquee-track">
           {[0, 1].map((copy) => (
             <div key={copy} className="flex shrink-0" aria-hidden={copy === 1}>
+              {/* a11y: white/45 sobre #0a0a0a da 4.48:1 (< AA 4.5); white/50 da 5.37:1 sin alterar el acento. */}
               {marquee.map((entry) => (
                 <span
                   key={`${copy}-${entry}`}
-                  className="flex items-center font-mono text-[11px] tracking-[0.24em] uppercase text-white/45 px-8"
+                  className="flex items-center font-mono text-[11px] tracking-[0.24em] uppercase text-white/50 px-8"
                 >
                   {entry}
                   <span className="ml-8 text-[#fe2c55]/50" aria-hidden="true">

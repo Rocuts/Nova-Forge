@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
-import { motion, useMotionValue, useSpring } from "motion/react"
+import { m, useMotionValue, useSpring } from "motion/react"
 
 const INTERACTIVE_SELECTOR = "a, button, [role='button'], input, textarea, select"
 
@@ -72,7 +72,7 @@ export function CustomCursor() {
   return (
     <>
       {/* Inner dot - follows mouse 1:1 */}
-      <motion.div
+      <m.div
         style={{
           x: cursorX,
           y: cursorY,
@@ -89,7 +89,7 @@ export function CustomCursor() {
         }}
       />
       {/* Outer circle - follows with spring */}
-      <motion.div
+      <m.div
         style={{
           x: springX,
           y: springY,

@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
@@ -20,7 +20,7 @@ interface CaseStudyContent {
 
 export function CaseStudy({ content, locale }: { content: CaseStudyContent; locale: string }) {
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -64,7 +64,7 @@ export function CaseStudy({ content, locale }: { content: CaseStudyContent; loca
           </div>
 
           {/* Capabilities panel */}
-          <motion.div
+          <m.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -79,7 +79,7 @@ export function CaseStudy({ content, locale }: { content: CaseStudyContent; loca
             </h3>
             <ul className="space-y-4">
               {content.capabilities.map((capability, i) => (
-                <motion.li
+                <m.li
                   key={capability}
                   variants={{
                     hidden: { opacity: 0, y: 10 },
@@ -91,12 +91,12 @@ export function CaseStudy({ content, locale }: { content: CaseStudyContent; loca
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {capability}
-                </motion.li>
+                </m.li>
               ))}
             </ul>
-          </motion.div>
+          </m.div>
         </div>
       </div>
-    </motion.section>
+    </m.section>
   )
 }

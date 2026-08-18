@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { trackEvent } from "@/lib/analytics"
 import { buildLocalePath } from "@/lib/i18n"
@@ -38,7 +38,7 @@ export function LiveStudioTeaser({
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-7">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -54,9 +54,9 @@ export function LiveStudioTeaser({
               <span className="font-mono text-[10px] tracking-[0.24em] uppercase text-white/45">
                 {content.kicker}
               </span>
-            </motion.div>
+            </m.div>
 
-            <motion.h2
+            <m.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -64,9 +64,9 @@ export function LiveStudioTeaser({
               className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-6"
             >
               {content.title}
-            </motion.h2>
+            </m.h2>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -74,9 +74,9 @@ export function LiveStudioTeaser({
               className="text-lg text-white/55 leading-relaxed max-w-2xl mb-10"
             >
               {content.description}
-            </motion.p>
+            </m.p>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -90,13 +90,13 @@ export function LiveStudioTeaser({
               >
                 {content.action.label}
               </Button>
-            </motion.div>
+            </m.div>
           </div>
 
           <div className="lg:col-span-5">
             <ul className="border-t border-white/10">
               {content.points.map((point, i) => (
-                <motion.li
+                <m.li
                   key={point}
                   initial={{ opacity: 0, x: 12 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -108,7 +108,7 @@ export function LiveStudioTeaser({
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="text-base text-white/70 leading-relaxed">{point}</span>
-                </motion.li>
+                </m.li>
               ))}
             </ul>
           </div>

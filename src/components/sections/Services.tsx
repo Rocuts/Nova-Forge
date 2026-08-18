@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
@@ -15,7 +15,7 @@ interface ServicesContent {
 
 export function Services({ content: servicesSection, locale }: { content: ServicesContent; locale: string }) {
   return (
-    <motion.section
+    <m.section
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -33,7 +33,7 @@ export function Services({ content: servicesSection, locale }: { content: Servic
           </p>
         </div>
 
-        <motion.div
+        <m.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           initial="hidden"
           whileInView="visible"
@@ -68,7 +68,7 @@ export function Services({ content: servicesSection, locale }: { content: Servic
             )
 
             return (
-              <motion.div
+              <m.div
                 key={svc.title}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -85,11 +85,11 @@ export function Services({ content: servicesSection, locale }: { content: Servic
                 ) : (
                   <div className="flex flex-col h-full">{cardContent}</div>
                 )}
-              </motion.div>
+              </m.div>
             )
           })}
-        </motion.div>
+        </m.div>
       </div>
-    </motion.section>
+    </m.section>
   )
 }

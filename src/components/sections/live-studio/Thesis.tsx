@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { CoverReveal } from "@/components/animations/CoverReveal"
 import { Eyebrow, stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
@@ -22,7 +22,7 @@ export function LiveStudioThesis({ thesis }: Props) {
           </div>
           <div className="lg:col-span-7 space-y-6">
             {thesis.paragraphs.map((paragraph, i) => (
-              <motion.p
+              <m.p
                 key={i}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -31,7 +31,7 @@ export function LiveStudioThesis({ thesis }: Props) {
                 className="text-lg text-[#525252] leading-relaxed"
               >
                 {paragraph}
-              </motion.p>
+              </m.p>
             ))}
           </div>
         </div>

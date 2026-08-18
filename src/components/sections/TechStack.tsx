@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 
 interface TechStackContent {
@@ -21,7 +21,7 @@ function CategoryRow({
   index: number
 }) {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -47,7 +47,7 @@ function CategoryRow({
           </li>
         ))}
       </ul>
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -71,8 +71,9 @@ export function TechStack({ content }: { content: TechStackContent }) {
           ))}
         </div>
 
+        {/* a11y: #737373 sobre #f8f8f8 daba 4.46:1 (< AA 4.5). #707070 da 4.66:1 sin cambio perceptible. */}
         {content.note && (
-          <p className="mt-6 max-w-3xl text-xs leading-relaxed text-[#737373]">
+          <p className="mt-6 max-w-3xl text-xs leading-relaxed text-[#707070]">
             {content.note}
           </p>
         )}

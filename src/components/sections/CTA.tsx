@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { ScrambleText } from "@/components/ui/ScrambleText"
 import { trackEvent } from "@/lib/analytics"
@@ -14,7 +14,7 @@ interface CTAContent {
 export function CTA({ content: ctaSection }: { content: CTAContent }) {
   return (
     <section className="py-16 sm:py-32 bg-[#0a0a0a] relative z-10 overflow-hidden" data-header-theme="dark">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -44,7 +44,7 @@ export function CTA({ content: ctaSection }: { content: CTAContent }) {
         >
           {ctaSection.action.label}
         </Button>
-      </motion.div>
+      </m.div>
     </section>
   )
 }

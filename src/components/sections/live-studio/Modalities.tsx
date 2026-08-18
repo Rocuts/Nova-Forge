@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Eyebrow, ModeList, stagger, viewportConfig } from "./shared"
 import type { LiveStudioContent } from "./shared"
 
@@ -19,7 +19,7 @@ export function LiveStudioModalities({ modalities }: Props) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {modalities.items.map((mode, i) => (
-            <motion.div
+            <m.div
               key={mode.tag}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ export function LiveStudioModalities({ modalities }: Props) {
                 <ModeList label={modalities.providesLabel} entries={mode.provides} />
                 <ModeList label={modalities.requiresLabel} entries={mode.requires} />
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

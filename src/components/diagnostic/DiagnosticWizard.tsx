@@ -1,6 +1,6 @@
 "use client"
 import { useState, useCallback } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { m, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { DiagnosticAnswers, INITIAL_ANSWERS } from "./types"
 import { StepCompany, StepTechStack, StepPainPoints, StepGoals, StepContact } from "./WizardSteps"
@@ -171,12 +171,13 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
                   ? "bg-[#f8f8f8] text-[#0a0a0a] border border-[#0a0a0a]"
                   : i === currentStep
                     ? "bg-[#0a0a0a] text-white"
-                    : "bg-[#f8f8f8] text-[#a3a3a3] border border-[#e5e5e5]"
+                    : "bg-[#f8f8f8] text-[#707070] border border-[#e5e5e5]" // a11y: #a3a3a3/#f8f8f8 = 2.4:1; #707070 = 4.66:1 (AA)
               }`}>
                 {i < currentStep ? "\u2713" : i + 1}
               </div>
+              {/* a11y: la etiqueta inactiva era #a3a3a3 sobre blanco (2.52:1); #737373 da 4.74:1 (AA). */}
               <span className={`text-xs font-medium hidden sm:block transition-colors ${
-                i <= currentStep ? "text-[#0a0a0a]" : "text-[#a3a3a3]"
+                i <= currentStep ? "text-[#0a0a0a]" : "text-[#737373]"
               }`}>
                 {step.label}
               </span>
@@ -184,7 +185,7 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
           ))}
         </div>
         <div className="h-1 bg-[#e5e5e5] rounded-full overflow-hidden">
-          <motion.div
+          <m.div
             className="h-full bg-[#0a0a0a] rounded-full"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -194,7 +195,7 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
 
       <div className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-8 md:p-10 min-h-[400px]">
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={currentStep}
             initial={{ opacity: 0, x: direction * 60 }}
             animate={{ opacity: 1, x: 0 }}
@@ -202,7 +203,7 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             {stepComponents[currentStep]}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
 
@@ -215,21 +216,16 @@ export function DiagnosticWizard({ content, reportContent, options, locale }: Pr
           {content.prev}
         </Button>
 
+        {/* a11y: `disabled` real en vez de opacity-50 + pointer-events-none — mismo look
+            (baseStyles ya trae disabled:opacity-50 disabled:pointer-events-none), axe excluye
+            controles deshabilitados del check de contraste y se cierra el hueco de teclado
+            (antes el botón seguía siendo enfocable y activable con Enter). */}
         {isLastStep ? (
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={submit}
-            className={!canProceed() ? "opacity-50 pointer-events-none" : ""}
-          >
+          <Button variant="primary" size="lg" onClick={submit} disabled={!canProceed()}>
             {content.submit}
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            onClick={next}
-            className={!canProceed() ? "opacity-50 pointer-events-none" : ""}
-          >
+          <Button variant="primary" onClick={next} disabled={!canProceed()}>
             {content.next}
           </Button>
         )}

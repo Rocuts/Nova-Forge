@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
 import { TeamRows } from "./TeamRows"
 import { Button } from "@/components/ui/Button"
@@ -55,14 +55,14 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
       {/* ── Hero ── */}
       <section className="min-h-[60vh] flex items-center">
         <div className="mx-auto max-w-7xl px-6 py-32">
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(0)}
-            className="text-[10px] md:text-[11px] font-bold tracking-[0.35em] uppercase text-[#a3a3a3] mb-8"
+            className="text-[10px] md:text-[11px] font-bold tracking-[0.35em] uppercase text-[#737373] mb-8"
           >
             {content.eyebrow}
-          </motion.p>
+          </m.p>
 
           <RevealText
             as="h1"
@@ -71,14 +71,14 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
             {content.title}
           </RevealText>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(2)}
             className="text-xl text-[#525252] max-w-3xl leading-relaxed"
           >
             {content.subtitle}
-          </motion.p>
+          </m.p>
         </div>
       </section>
 
@@ -93,7 +93,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
               {content.mission.title}
             </RevealText>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -101,7 +101,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
               className="text-lg text-[#525252] leading-[1.8]"
             >
               {content.mission.description}
-            </motion.p>
+            </m.p>
           </div>
         </div>
       </section>
@@ -116,7 +116,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
             >
               {content.methodology.title}
             </RevealText>
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportConfig}
@@ -124,14 +124,14 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
               className="text-lg text-[#a3a3a3] leading-relaxed"
             >
               {content.methodology.description}
-            </motion.p>
+            </m.p>
           </div>
 
           <div className="relative">
             {/* Horizontal connector line */}
             <div className="hidden md:block absolute top-0 left-0 right-0 h-[1px] bg-[#1a1a1a]" />
 
-            <motion.div
+            <m.div
               className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6"
               initial="hidden"
               whileInView="visible"
@@ -145,7 +145,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
               }}
             >
               {content.methodology.steps.map((step) => (
-                <motion.div
+                <m.div
                   key={step.num}
                   variants={{
                     hidden: { opacity: 0, y: 16 },
@@ -168,9 +168,9 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
                   <p className="text-sm text-[#a3a3a3] leading-relaxed">
                     {step.desc}
                   </p>
-                </motion.div>
+                </m.div>
               ))}
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -190,7 +190,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
             </RevealText>
           </div>
 
-          <motion.div
+          <m.div
             className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16"
             initial="hidden"
             whileInView="visible"
@@ -204,7 +204,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
             }}
           >
             {content.values.items.map((item) => (
-              <motion.div
+              <m.div
                 key={item.title}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -221,15 +221,15 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
                 <p className="text-[#525252] leading-relaxed">
                   {item.description}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* ── CTA ── */}
       <section className="py-32 bg-[#0a0a0a]" data-header-theme="dark">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportConfig}
@@ -253,7 +253,7 @@ export function AboutPage({ content, locale }: { content: AboutPageContent; loca
           >
             {content.cta.action.label}
           </Button>
-        </motion.div>
+        </m.div>
       </section>
     </div>
   )

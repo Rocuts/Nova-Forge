@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { RevealText } from "@/components/ui/RevealText"
 import { ScrambleText } from "@/components/ui/ScrambleText"
@@ -51,7 +51,7 @@ export function ProductLanding({
       {/* Hero */}
       <section className="relative min-h-[80vh] flex items-center bg-white">
         <div className="mx-auto w-full max-w-7xl px-6 py-32">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(0)}
@@ -61,9 +61,9 @@ export function ProductLanding({
             <p className="text-[10px] md:text-[11px] font-bold tracking-[0.35em] uppercase text-[#0a0a0a] opacity-90">
               {content.eyebrow}
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(1)}
@@ -72,27 +72,27 @@ export function ProductLanding({
             <ScrambleText as="h1" className="text-[#0a0a0a]" delay={0.15} duration={1400}>
               {content.title}
             </ScrambleText>
-          </motion.div>
+          </m.div>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(2)}
             className="font-heading text-2xl md:text-4xl text-[#a3a3a3] font-medium tracking-tight mb-10"
           >
             {content.subtitle}
-          </motion.p>
+          </m.p>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(3)}
             className="text-fluid-p text-[#525252] max-w-2xl leading-relaxed mb-14"
           >
             {content.description}
-          </motion.p>
+          </m.p>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={stagger(4)}
@@ -100,7 +100,7 @@ export function ProductLanding({
             <Button size="lg" variant="primary" href={resolveHref(locale, content.cta.action.href)}>
               {content.cta.action.label}
             </Button>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
@@ -109,7 +109,7 @@ export function ProductLanding({
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16">
             {content.features.map((feature, i) => (
-              <motion.div
+              <m.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export function ProductLanding({
                 <p className="text-[#525252] leading-relaxed">
                   {feature.description}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -133,7 +133,7 @@ export function ProductLanding({
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {content.capabilities.map((group, i) => (
-              <motion.div
+              <m.div
                 key={group.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -154,7 +154,7 @@ export function ProductLanding({
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -162,7 +162,7 @@ export function ProductLanding({
 
       {/* CTA */}
       <section className="py-32 bg-white">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportConfig}
@@ -183,7 +183,7 @@ export function ProductLanding({
           <Button size="lg" variant="primary" href={resolveHref(locale, content.cta.action.href)}>
             {content.cta.action.label}
           </Button>
-        </motion.div>
+        </m.div>
       </section>
     </div>
   )

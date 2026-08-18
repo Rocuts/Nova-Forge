@@ -1,5 +1,5 @@
 "use client"
-import { motion } from "motion/react"
+import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 
 interface ReportLabels {
@@ -33,7 +33,7 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
 
   return (
     <div className="space-y-10">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -49,9 +49,9 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
           {title}
         </h2>
         <p className="text-[#525252]">{content.subtitle}</p>
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.2 }}
@@ -78,9 +78,9 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
             <span className="inline-block w-2 h-5 bg-[#a3a3a3] animate-pulse ml-0.5" />
           )}
         </div>
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: isStreaming ? 0 : 1, y: isStreaming ? 20 : 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
@@ -101,7 +101,7 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
         >
           {content.backButton}
         </Button>
-      </motion.div>
+      </m.div>
     </div>
   )
 }
