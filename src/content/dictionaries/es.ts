@@ -278,6 +278,12 @@ const es = {
         tagline: "Especialista en arquitectura de sistemas distribuidos.",
       },
       {
+        name: "Mauricio Solano",
+        initials: "MS",
+        role: "Director de Ventas",
+        tagline: "Especialista en ventas consultivas B2B y enterprise.",
+      },
+      {
         name: "Andres Rodriguez",
         initials: "AR",
         role: "Ingeniero Full Stack Senior",
@@ -1103,6 +1109,7 @@ const es = {
         { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala con enfoque en mercados enterprise y gobierno." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B para industrias reguladas." },
         { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad." },
+        { name: "Mauricio Solano", initials: "MS", role: "Director de Ventas", bio: "Especialista en ventas consultivas B2B. Lidera el desarrollo de negocio y la relación con clientes enterprise y gobierno." },
         { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento y sistemas de interfaz enterprise." },
       ],
     },
