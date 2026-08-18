@@ -1,11 +1,13 @@
 "use client"
 import { useEffect, useRef } from "react"
 
+// width/height match each SVG's aspect ratio at the rendered 20px height (h-5),
+// so the row reserves its space before the images load (no CLS).
 const TRUST_LOGOS = [
-  { name: "Amazon Web Services", src: "/logos/aws.svg" },
-  { name: "Google Cloud", src: "/logos/google-cloud.svg" },
-  { name: "Microsoft Azure", src: "/logos/azure.svg" },
-  { name: "OpenAI", src: "/logos/openai.svg" },
+  { name: "Amazon Web Services", src: "/logos/aws.svg", width: 33, height: 20 },
+  { name: "Google Cloud", src: "/logos/google-cloud.svg", width: 40, height: 20 },
+  { name: "Microsoft Azure", src: "/logos/azure.svg", width: 20, height: 20 },
+  { name: "OpenAI", src: "/logos/openai.svg", width: 74, height: 20 },
 ]
 
 const logoClass =
@@ -44,10 +46,13 @@ export function TrustBar({ label }: { label: string }) {
           </span>
 
           {TRUST_LOGOS.map((logo) => (
+            // eslint-disable-next-line @next/next/no-img-element -- local SVGs; next/image would need dangerouslyAllowSVG for no optimization gain
             <img
               key={logo.name}
               src={logo.src}
               alt={logo.name}
+              width={logo.width}
+              height={logo.height}
               className={logoClass}
               draggable={false}
             />

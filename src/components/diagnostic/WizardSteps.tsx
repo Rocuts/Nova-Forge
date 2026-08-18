@@ -1,4 +1,5 @@
 "use client"
+import { useId } from "react"
 import type { DiagnosticAnswers } from "./types"
 
 interface StepProps {
@@ -82,12 +83,15 @@ interface StepContactProps extends StepProps {
 }
 
 function SelectChip({
-  label, selected, onClick,
-}: { label: string; selected: boolean; onClick: () => void }) {
+  label, selected, onClick, role,
+}: { label: string; selected: boolean; onClick: () => void; role?: "radio" }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      role={role}
+      aria-checked={role === "radio" ? selected : undefined}
+      aria-pressed={role === "radio" ? undefined : selected}
       className={`px-4 py-2.5 rounded-[6px] border text-sm font-medium transition-all duration-200 cursor-pointer ${
         selected
           ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
@@ -100,8 +104,8 @@ function SelectChip({
 }
 
 function MultiSelectChips({
-  options, selected, onChange,
-}: { options: readonly string[]; selected: string[]; onChange: (v: string[]) => void }) {
+  options, selected, onChange, ariaLabel,
+}: { options: readonly string[]; selected: string[]; onChange: (v: string[]) => void; ariaLabel: string }) {
   const toggle = (opt: string) => {
     onChange(
       selected.includes(opt)
@@ -110,7 +114,7 @@ function MultiSelectChips({
     )
   }
   return (
-    <div className="flex flex-wrap gap-3">
+    <div role="group" aria-label={ariaLabel} className="flex flex-wrap gap-3">
       {options.map((opt) => (
         <SelectChip key={opt} label={opt} selected={selected.includes(opt)} onClick={() => toggle(opt)} />
       ))}
@@ -119,12 +123,12 @@ function MultiSelectChips({
 }
 
 function SingleSelect({
-  options, value, onChange,
-}: { options: readonly string[]; value: string; onChange: (v: string) => void }) {
+  options, value, onChange, ariaLabel,
+}: { options: readonly string[]; value: string; onChange: (v: string) => void; ariaLabel: string }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div role="radiogroup" aria-label={ariaLabel} className="flex flex-wrap gap-3">
       {options.map((opt) => (
-        <SelectChip key={opt} label={opt} selected={value === opt} onClick={() => onChange(opt)} />
+        <SelectChip key={opt} role="radio" label={opt} selected={value === opt} onClick={() => onChange(opt)} />
       ))}
     </div>
   )
@@ -136,18 +140,39 @@ function InputField({
   label: string; value: string; onChange: (v: string) => void
   placeholder?: string; type?: string; required?: boolean
 }) {
+  const id = useId()
   return (
     <div>
-      <label className="block text-sm font-medium text-[#525252] mb-2">
+      <label htmlFor={id} className="block text-sm font-medium text-[#525252] mb-2">
         {label} {required && <span className="text-[#0a0a0a]">*</span>}
       </label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
         className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all"
+      />
+    </div>
+  )
+}
+
+function TextAreaField({
+  label, value, onChange, placeholder,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const id = useId()
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-[#525252] mb-2">{label}</label>
+      <textarea
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
       />
     </div>
   )
@@ -162,16 +187,16 @@ export function StepCompany({ answers, update, content, options }: StepCompanyPr
       </div>
       <InputField label={content.companyLabel} value={answers.companyName} onChange={(v) => update({ companyName: v })} placeholder={content.companyPlaceholder} />
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.industryLabel}</label>
-        <SingleSelect options={options.industries} value={answers.industry} onChange={(v) => update({ industry: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.industryLabel}</span>
+        <SingleSelect ariaLabel={content.industryLabel} options={options.industries} value={answers.industry} onChange={(v) => update({ industry: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.teamSizeLabel}</label>
-        <SingleSelect options={options.teamSizes} value={answers.teamSize} onChange={(v) => update({ teamSize: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.teamSizeLabel}</span>
+        <SingleSelect ariaLabel={content.teamSizeLabel} options={options.teamSizes} value={answers.teamSize} onChange={(v) => update({ teamSize: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.roleLabel}</label>
-        <SingleSelect options={options.roles} value={answers.role} onChange={(v) => update({ role: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.roleLabel}</span>
+        <SingleSelect ariaLabel={content.roleLabel} options={options.roles} value={answers.role} onChange={(v) => update({ role: v })} />
       </div>
     </div>
   )
@@ -185,16 +210,16 @@ export function StepTechStack({ answers, update, content, options }: StepTechSta
         <p className="text-[#525252]">{content.subtitle}</p>
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.stackLabel}</label>
-        <MultiSelectChips options={options.techStack} selected={answers.currentStack} onChange={(v) => update({ currentStack: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.stackLabel}</span>
+        <MultiSelectChips ariaLabel={content.stackLabel} options={options.techStack} selected={answers.currentStack} onChange={(v) => update({ currentStack: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.cloudLabel}</label>
-        <SingleSelect options={options.cloudProviders} value={answers.cloudProvider} onChange={(v) => update({ cloudProvider: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.cloudLabel}</span>
+        <SingleSelect ariaLabel={content.cloudLabel} options={options.cloudProviders} value={answers.cloudProvider} onChange={(v) => update({ cloudProvider: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.aiLabel}</label>
-        <SingleSelect options={options.aiMaturity} value={answers.aiMaturity} onChange={(v) => update({ aiMaturity: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.aiLabel}</span>
+        <SingleSelect ariaLabel={content.aiLabel} options={options.aiMaturity} value={answers.aiMaturity} onChange={(v) => update({ aiMaturity: v })} />
       </div>
     </div>
   )
@@ -207,17 +232,8 @@ export function StepPainPoints({ answers, update, content, options }: StepPainPo
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
         <p className="text-[#525252]">{content.subtitle}</p>
       </div>
-      <MultiSelectChips options={options.painPoints} selected={answers.painPoints} onChange={(v) => update({ painPoints: v })} />
-      <div>
-        <label className="block text-sm font-medium text-[#525252] mb-2">{content.detailLabel}</label>
-        <textarea
-          value={answers.painDetails}
-          onChange={(e) => update({ painDetails: e.target.value })}
-          placeholder={content.detailPlaceholder}
-          rows={3}
-          className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
-        />
-      </div>
+      <MultiSelectChips ariaLabel={content.title} options={options.painPoints} selected={answers.painPoints} onChange={(v) => update({ painPoints: v })} />
+      <TextAreaField label={content.detailLabel} value={answers.painDetails} onChange={(v) => update({ painDetails: v })} placeholder={content.detailPlaceholder} />
     </div>
   )
 }
@@ -229,18 +245,18 @@ export function StepGoals({ answers, update, content, options }: StepGoalsProps)
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#0a0a0a] mb-2">{content.title}</h2>
         <p className="text-[#525252]">{content.subtitle}</p>
       </div>
-      <MultiSelectChips options={options.goals} selected={answers.goals} onChange={(v) => update({ goals: v })} />
+      <MultiSelectChips ariaLabel={content.title} options={options.goals} selected={answers.goals} onChange={(v) => update({ goals: v })} />
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.budgetLabel}</label>
-        <SingleSelect options={options.budgetRanges} value={answers.budgetRange} onChange={(v) => update({ budgetRange: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.budgetLabel}</span>
+        <SingleSelect ariaLabel={content.budgetLabel} options={options.budgetRanges} value={answers.budgetRange} onChange={(v) => update({ budgetRange: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.timelineLabel}</label>
-        <SingleSelect options={options.timelines} value={answers.timeline} onChange={(v) => update({ timeline: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.timelineLabel}</span>
+        <SingleSelect ariaLabel={content.timelineLabel} options={options.timelines} value={answers.timeline} onChange={(v) => update({ timeline: v })} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-[#525252] mb-3">{content.decisionLabel}</label>
-        <SingleSelect options={options.decisionStages} value={answers.decisionStage} onChange={(v) => update({ decisionStage: v })} />
+        <span className="block text-sm font-medium text-[#525252] mb-3">{content.decisionLabel}</span>
+        <SingleSelect ariaLabel={content.decisionLabel} options={options.decisionStages} value={answers.decisionStage} onChange={(v) => update({ decisionStage: v })} />
       </div>
     </div>
   )
@@ -256,16 +272,7 @@ export function StepContact({ answers, update, content }: StepContactProps) {
       <InputField label={content.nameLabel} value={answers.contactName} onChange={(v) => update({ contactName: v })} placeholder={content.namePlaceholder} required />
       <InputField label={content.emailLabel} value={answers.contactEmail} onChange={(v) => update({ contactEmail: v })} placeholder={content.emailPlaceholder} type="email" required />
       <InputField label={content.websiteLabel} value={answers.contactWebsite} onChange={(v) => update({ contactWebsite: v })} placeholder={content.websitePlaceholder} />
-      <div>
-        <label className="block text-sm font-medium text-[#525252] mb-2">{content.notesLabel}</label>
-        <textarea
-          value={answers.additionalNotes}
-          onChange={(e) => update({ additionalNotes: e.target.value })}
-          placeholder={content.notesPlaceholder}
-          rows={3}
-          className="w-full px-4 py-3 rounded-[6px] border border-[#e5e5e5] bg-white text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0a0a0a] focus:ring-1 focus:ring-[#0a0a0a] transition-all resize-none"
-        />
-      </div>
+      <TextAreaField label={content.notesLabel} value={answers.additionalNotes} onChange={(v) => update({ additionalNotes: v })} placeholder={content.notesPlaceholder} />
     </div>
   )
 }

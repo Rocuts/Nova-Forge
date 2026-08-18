@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
+import { pathMap } from "./src/lib/i18n";
 
 const securityHeaders = [
   // Force HTTPS for 2 years, including subdomains, and allow preload list inclusion
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   // Never render this site inside a frame (clickjacking)
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  // No plugins, no <base> hijacking, forms only submit to this origin.
+  // script-src is intentionally absent: the inline JSON-LD blocks would need nonces.
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'" },
   // Disable MIME sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
   // Don't leak full URLs to third parties
@@ -15,6 +18,12 @@ const securityHeaders = [
   // Isolate the browsing context from cross-origin windows
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
+
+// English slugs live only in pathMap; rewrites/redirects derive from it so a new
+// page only needs the folder + pathMap + sitemap entries.
+const englishSlugPairs = Object.entries(pathMap)
+  .filter(([internalPath, slugs]) => slugs.en !== internalPath)
+  .map(([internalPath, slugs]) => ({ internal: `/en${internalPath}`, english: `/en${slugs.en}` }));
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -31,25 +40,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    // The Spanish-named folders are still routable under /en; without this they
+    // serve duplicate content of the canonical English slugs.
+    return englishSlugPairs.map(({ internal, english }) => ({
+      source: internal,
+      destination: english,
+      permanent: true,
+    }));
+  },
   async rewrites() {
-    return [
-      // English slug aliases → internal [locale] routes
-      { source: "/en/diagnostic", destination: "/en/diagnostico" },
-      { source: "/en/privacy", destination: "/en/privacidad" },
-      { source: "/en/terms", destination: "/en/terminos" },
-      { source: "/en/schedule", destination: "/en/agendar" },
-      { source: "/en/sovereign-ai", destination: "/en/soberania-ia" },
-      { source: "/en/cybersecurity", destination: "/en/ciberseguridad" },
-      { source: "/en/digital-workforce", destination: "/en/fuerza-digital" },
-      { source: "/en/critical-systems", destination: "/en/sistemas-criticos" },
-      { source: "/en/operational-intelligence", destination: "/en/inteligencia-operativa" },
-      { source: "/en/government-automation", destination: "/en/automatizacion-gobierno" },
-      { source: "/en/investors", destination: "/en/inversores" },
-      { source: "/en/about", destination: "/en/nosotros" },
-      { source: "/en/data-enrichment", destination: "/en/enriquecimiento-datos" },
-      { source: "/en/data-extraction", destination: "/en/extraccion-datos" },
-      { source: "/en/tiktok-live-studio", destination: "/en/estudio-tiktok-live" },
-    ];
+    // English slug aliases → internal [locale] routes
+    return englishSlugPairs.map(({ internal, english }) => ({
+      source: english,
+      destination: internal,
+    }));
   },
 };
 

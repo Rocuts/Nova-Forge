@@ -107,7 +107,13 @@ export function DiagnosticReport({ reportContent, isStreaming, contactName, cont
 }
 
 function formatMarkdown(text: string): string {
+  // The report can echo user-provided answers (and LLM output can be steered),
+  // so every HTML character is escaped before the markdown regexes add markup.
   return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
