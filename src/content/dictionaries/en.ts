@@ -269,7 +269,7 @@ const en = {
         name: "Mauricio Solano",
         initials: "MS",
         role: "Sales Director",
-        tagline: "Specialist in consultative B2B and enterprise sales.",
+        tagline: "Specialist in consultative B2B, enterprise, and government sales.",
       },
       {
         name: "Yeison Grisales",

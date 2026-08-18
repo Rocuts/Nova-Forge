@@ -269,7 +269,7 @@ const es = {
         name: "Mauricio Solano",
         initials: "MS",
         role: "Director de Ventas",
-        tagline: "Especialista en ventas consultivas B2B y enterprise.",
+        tagline: "Especialista en ventas consultivas B2B, enterprise y gobierno.",
       },
       {
         name: "Yeison Grisales",
