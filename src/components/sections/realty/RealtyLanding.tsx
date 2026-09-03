@@ -38,7 +38,21 @@ import type { RealtyContent } from "./shared"
 
 export type { RealtyContent }
 
-export function RealtyLanding({ content, locale }: { content: RealtyContent; locale: string }) {
+/**
+ * `voiceDemoEnabled` is read from the environment in page.tsx at build time and
+ * flows to exactly two sections: Voice (the demo card and its status card) and
+ * Status (the voice row of the reality table). They must agree — a live demo
+ * with a "validated" row would contradict itself on the same page.
+ */
+export function RealtyLanding({
+  content,
+  locale,
+  voiceDemoEnabled,
+}: {
+  content: RealtyContent
+  locale: string
+  voiceDemoEnabled: boolean
+}) {
   const statusLabels = content.statusLabels
   const { demoLabel, demoSrText } = content
 
@@ -53,7 +67,12 @@ export function RealtyLanding({ content, locale }: { content: RealtyContent; loc
       />
       <RealtyOutcomes content={content.outcomes} />
       <RealtyJourney content={content.journey} statusLabels={statusLabels} />
-      <RealtyVoice content={content.voice} statusLabels={statusLabels} />
+      <RealtyVoice
+        content={content.voice}
+        statusLabels={statusLabels}
+        locale={locale}
+        voiceDemoEnabled={voiceDemoEnabled}
+      />
       <RealtyConsole
         content={content.console}
         statusLabels={statusLabels}
@@ -61,7 +80,7 @@ export function RealtyLanding({ content, locale }: { content: RealtyContent; loc
         demoSrText={demoSrText}
       />
       <RealtyChannels content={content.channels} statusLabels={statusLabels} />
-      <RealtyStatus content={content.status} statusLabels={statusLabels} />
+      <RealtyStatus content={content.status} statusLabels={statusLabels} voiceDemoEnabled={voiceDemoEnabled} />
       <RealtyFaq content={content.faq} />
       <RealtyFinalCta content={content.cta} locale={locale} />
     </div>

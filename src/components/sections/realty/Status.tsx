@@ -6,6 +6,12 @@ import type { RealtyContent } from "./shared"
 type Props = {
   content: RealtyContent["status"]
   statusLabels: RealtyContent["statusLabels"]
+  /**
+   * `REALTY_VOICE_DEMO_ENABLED === "true"` at build time (see page.tsx). When
+   * true the `key: "voice"` row states the reality the visitor can verify two
+   * sections above — a live demo in the browser — instead of "validated".
+   */
+  voiceDemoEnabled: boolean
 }
 
 /**
@@ -19,8 +25,16 @@ type Props = {
  * The activation card holds the ONLY performance figure the page is allowed —
  * "48–72 h" — and its qualifier sits directly under it, never a scroll away.
  */
-export function RealtyStatus({ content, statusLabels }: Props) {
+export function RealtyStatus({ content, statusLabels, voiceDemoEnabled }: Props) {
   const reduced = useReducedMotion()
+
+  // The table is the page's single source of reality, so the voice row cannot
+  // keep saying "validated" while a working demo sits on the same page.
+  const rows = content.rows.map((row) =>
+    voiceDemoEnabled && row.key === "voice"
+      ? { ...row, status: content.liveVoiceRow.status, note: content.liveVoiceRow.note }
+      : row
+  )
 
   return (
     <section id={content.id} className="bg-white py-24 md:py-32">
@@ -51,7 +65,7 @@ export function RealtyStatus({ content, statusLabels }: Props) {
               </tr>
             </thead>
             <tbody>
-              {content.rows.map((row) => (
+              {rows.map((row) => (
                 <tr key={row.component} className="border-b border-[#e5e5e5] last:border-b-0">
                   <th scope="row" className="px-6 py-5 align-top text-sm font-medium text-[#0a0a0a]">
                     {row.component}

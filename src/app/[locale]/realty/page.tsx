@@ -14,6 +14,18 @@ const PRODUCT_NAME = "RealTy"
 const DESCRIPTION_MAX = 160
 
 /**
+ * Live voice demo switch, read from the environment while this page is
+ * prerendered. It is intentionally NOT a NEXT_PUBLIC variable and not read in
+ * the browser: the route stays static, and the flag is baked into the HTML.
+ *
+ * Consequence to remember: flipping REALTY_VOICE_DEMO_ENABLED requires a
+ * redeploy (or a dev-server restart). Changing it in the dashboard alone does
+ * nothing to the already-built page — although `/api/realty/voice-session`
+ * reads it per request, so the route follows the environment immediately.
+ */
+const VOICE_DEMO_ENABLED = process.env.REALTY_VOICE_DEMO_ENABLED === "true"
+
+/**
  * Meta description: the scope phrase from the status line ("Demonstration
  * build" / "Versión de demostración") followed by the hero description. The
  * scope phrase leads so the honesty contract survives a search result, where
@@ -106,7 +118,7 @@ export default async function RealtyPage({ params }: { params: Promise<{ locale:
           ]),
         ]}
       />
-      <RealtyLanding content={realty} locale={locale} />
+      <RealtyLanding content={realty} locale={locale} voiceDemoEnabled={VOICE_DEMO_ENABLED} />
     </>
   )
 }

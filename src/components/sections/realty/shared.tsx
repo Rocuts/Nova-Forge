@@ -106,8 +106,38 @@ export interface RealtyContent {
       speakerLabels: { buyer: string; advisor: string; check: string }
       turns: readonly TranscriptTurn[]
     }
-    /** Status card: always `validated` today, with the honest sentence. */
+    /** Status card when the live demo is OFF: `validated`, with the honest sentence. */
     state: { status: RealtyStatus; title: string; text: string }
+    /**
+     * Status card when the live demo is ON (`REALTY_VOICE_DEMO_ENABLED=true`).
+     * Replaces `state`: the browser demo IS built, so it carries `built` — and
+     * its text must still say that the development's phone calls go live in the
+     * pilot (CLAUDE.md, RealTy block).
+     */
+    live: { status: RealtyStatus; title: string; text: string }
+    /**
+     * Copy of the in-page voice demo (`VoiceDemo.tsx`). Every string the state
+     * machine can show lives here: no message is authored in the component.
+     */
+    demo: {
+      title: string
+      description: string
+      /** Microphone + processed by ElevenLabs + maximum duration + fictitious data. */
+      consent: string
+      start: string
+      hangUp: string
+      retry: string
+      schedule: Action
+      speakerLabels: { user: string; agent: string }
+      status: { requesting: string; connecting: string; listening: string; speaking: string; ended: string }
+      countdownLabel: string
+      micDenied: string
+      /** `resetsAt` takes a `{time}` placeholder for the local reset time. */
+      quota: { browser: string; ip: string; daily: string; resetsAt: string }
+      unavailable: string
+      /** Frame label, e.g. "Conversación de demostración · datos ficticios". */
+      demoLabel: string
+    }
     qualifier: string
   }
 
@@ -154,7 +184,14 @@ export interface RealtyContent {
   /** Product status table + activation target. */
   status: SectionHead & {
     columns: readonly string[]
-    rows: readonly { component: string; status: RealtyStatus; note: string }[]
+    /**
+     * `key` is a stable identifier for rows the page has to address from code.
+     * Only the voice advisor uses one today (`key: "voice"`), so the live-demo
+     * flag can swap its status and note for `liveVoiceRow`.
+     */
+    rows: readonly { key?: string; component: string; status: RealtyStatus; note: string }[]
+    /** Replacement for the `key: "voice"` row when the live demo is ON. */
+    liveVoiceRow: { status: RealtyStatus; note: string }
     activation: { title: string; value: string; description: string; qualifier: string }
     builtWith: { title: string; text: string }
     qualifier: string

@@ -46,6 +46,10 @@ const securityHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
+// Same global policy with `microphone` opened to this origin only.
+const microphonePermissionsPolicy = "camera=(), microphone=(self), geolocation=(), payment=(), usb=()";
+const realtyPaths = ["/es/realty", "/en/realty"];
+
 // English slugs live only in pathMap; rewrites/redirects derive from it so a new
 // page only needs the folder + pathMap + sitemap entries.
 const englishSlugPairs = Object.entries(pathMap)
@@ -65,6 +69,14 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      // The RealTy landing hosts the voice demo, the only page on the site that
+      // opens a microphone. Later entries win for the same key, so these two
+      // relax exactly one directive of the global Permissions-Policy and leave
+      // every other header (and every other route) untouched.
+      ...realtyPaths.map((source) => ({
+        source,
+        headers: [{ key: "Permissions-Policy", value: microphonePermissionsPolicy }],
+      })),
     ];
   },
   async redirects() {

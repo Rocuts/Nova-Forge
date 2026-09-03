@@ -8,9 +8,10 @@ import en from '../src/content/dictionaries/en'
  * La página se dirige a un promotor inmobiliario / director comercial, no a un
  * revisor técnico: este test bloquea (a) el vocabulario de ingeniería y los
  * nombres prohibidos por CLAUDE.md, (b) la estructura de secciones, (c) el
- * etiquetado de los datos de demostración, y (d)(e) las dos afirmaciones que la
- * regla de honestidad obliga a calificar — la ventana de activación y el estado
- * del asesor de voz.
+ * etiquetado de los datos de demostración, y (d)(e)(f) las afirmaciones que la
+ * regla de honestidad obliga a calificar — la ventana de activación, lo que el
+ * asesor de voz NO hace, y la coherencia entre el estado del asesor y la demo
+ * de voz en vivo (que depende de `REALTY_VOICE_DEMO_ENABLED`, leído en build).
  *
  * Se compara siempre en minúsculas: los chips de estado se pintan con
  * `text-transform: uppercase` y `innerText` devuelve el texto YA transformado.
@@ -69,7 +70,11 @@ const ACTIVATION_QUALIFIER: Record<LocaleKey, string> = {
   en: 'design target',
 }
 
-/** El asesor de voz está validado, nunca "operando" ni "en llamadas". */
+/**
+ * El asesor de voz nunca "opera" ni está "en llamadas": con la demo apagada no
+ * está desplegado, y con la demo encendida solo conversa desde el navegador —
+ * las llamadas telefónicas del proyecto se activan en el piloto.
+ */
 const VOICE_FORBIDDEN = ['operando', 'operating', 'en llamadas', 'on calls'] as const
 
 const countOccurrences = (haystack: string, needle: string) =>
@@ -117,12 +122,40 @@ for (const locale of ['es', 'en'] as LocaleKey[]) {
       expect(status).toContain(ACTIVATION_QUALIFIER[locale])
     })
 
-    test('the voice advisor is validated, never operating', async ({ page }) => {
+    test('the voice advisor never claims to take the development calls', async ({ page }) => {
       const voice = (await page.locator('#voice').innerText()).toLowerCase()
 
       const claims = VOICE_FORBIDDEN.filter((term) => voice.includes(term))
-      expect(claims, 'el asesor de voz no está desplegado').toEqual([])
-      expect(voice).toContain(realty.statusLabels.validated.toLowerCase())
+      expect(claims, 'el asesor de voz no atiende las llamadas del proyecto').toEqual([])
+    })
+
+    /**
+     * La demo de voz en vivo depende de `REALTY_VOICE_DEMO_ENABLED`, que se lee
+     * en build: el mismo código produce dos páginas honestas distintas y el test
+     * tiene que aceptar las dos. La presencia del botón de la demo es lo que
+     * decide cuál, y todo lo demás debe ser coherente con esa señal — nunca una
+     * demo funcionando junto a una fila que la llama "validada".
+     */
+    test('the voice advisor state matches the live demo flag', async ({ page }) => {
+      const startButton = page.getByRole('button', { name: realty.voice.demo.start })
+      const demoEnabled = (await startButton.count()) > 0
+
+      const voice = (await page.locator('#voice').innerText()).toLowerCase()
+      const status = (await page.locator('#status').innerText()).toLowerCase()
+
+      if (demoEnabled) {
+        await expect(startButton.first()).toBeVisible()
+        expect(voice).toContain(realty.statusLabels.built.toLowerCase())
+        expect(voice).not.toContain(realty.statusLabels.validated.toLowerCase())
+        // El consentimiento se lee ANTES de pulsar: micrófono, quién procesa la
+        // conversación, cuánto dura y que los datos son ficticios.
+        expect(voice).toContain(realty.voice.demo.consent.toLowerCase())
+        expect(status).toContain(realty.status.liveVoiceRow.note.toLowerCase())
+      } else {
+        expect(voice).toContain(realty.statusLabels.validated.toLowerCase())
+        expect(voice).not.toContain(realty.voice.demo.title.toLowerCase())
+        expect(status).not.toContain(realty.status.liveVoiceRow.note.toLowerCase())
+      }
     })
   })
 }

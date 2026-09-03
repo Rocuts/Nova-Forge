@@ -1366,6 +1366,41 @@ const es = {
         title: "Estado del asesor de voz",
         text: "Guion, herramientas y pruebas están completos y validados. Se activa con las credenciales del piloto; hoy no atiende llamadas.",
       },
+      live: {
+        status: "built",
+        title: "Demo de voz en vivo",
+        text: "Puede hablar con el asesor de demostración desde esta página; conversa sobre un proyecto ficticio. Las llamadas telefónicas del proyecto se activan en el piloto.",
+      },
+      demo: {
+        title: "Hable con el asesor ahora",
+        description:
+          "Una conversación de voz real, desde su navegador, con el asesor de demostración. Responde sobre un proyecto ficticio: ni el inventario ni los precios pertenecen a un cliente.",
+        consent:
+          "Al empezar, su navegador le pedirá permiso para usar el micrófono. La conversación la procesa ElevenLabs, la tecnología de voz con la que construimos, y dura hasta dos minutos. Es una demostración con datos ficticios: aquí no se reserva ni se compra nada.",
+        start: "Hablar con el asesor",
+        hangUp: "Colgar",
+        retry: "Volver a intentar",
+        schedule: { label: "Agendar una demo sobre su inventario", href: "/agendar" },
+        speakerLabels: { user: "Usted", agent: "Asesor RealTy" },
+        status: {
+          requesting: "Pidiendo permiso para usar el micrófono…",
+          connecting: "Conectando con el asesor…",
+          listening: "El asesor le escucha",
+          speaking: "El asesor está hablando",
+          ended: "La demostración terminó.",
+        },
+        countdownLabel: "Tiempo restante",
+        micDenied:
+          "Su navegador no dio acceso al micrófono. Actívelo para este sitio y vuelva a intentarlo.",
+        quota: {
+          browser: "Ya usó todas las demostraciones disponibles desde este navegador por hoy.",
+          ip: "Se alcanzaron las demostraciones disponibles desde su conexión por hoy.",
+          daily: "Se agotó el tiempo de demostración disponible para hoy.",
+          resetsAt: "Vuelve a estar disponible a las {time}.",
+        },
+        unavailable: "La demostración no está disponible ahora mismo.",
+        demoLabel: "Conversación de demostración · datos ficticios",
+      },
       qualifier:
         "La conversación de arriba es una demostración con datos de ejemplo, no la grabación de una llamada: el asesor de voz todavía no atiende compradores.",
     },
@@ -1502,6 +1537,7 @@ const es = {
         },
         { component: "Consola comercial", status: "built", note: "Seis pantallas sobre datos de demostración." },
         {
+          key: "voice",
           component: "Asesor de voz",
           status: "validated",
           note: "Guion y pruebas completos; se activa con las credenciales del piloto.",
@@ -1528,6 +1564,10 @@ const es = {
           note: "Fuera del alcance de RealTy por diseño.",
         },
       ],
+      liveVoiceRow: {
+        status: "built",
+        note: "Demo en vivo en esta página; las llamadas telefónicas del proyecto se activan en el piloto.",
+      },
       activation: {
         title: "Activar un proyecto",
         value: "48–72 h",
