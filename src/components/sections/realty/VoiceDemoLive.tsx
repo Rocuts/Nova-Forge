@@ -15,15 +15,20 @@ import { useReducedMotion } from "motion/react"
 import { ConversationProvider, useConversation } from "@elevenlabs/react"
 import { Button } from "@/components/ui/Button"
 import type { RealtyContent } from "./shared"
+// Type-only, so it is erased at compile time: no runtime edge back to the
+// module that dynamically imports this one.
+import type { VoiceSession } from "./VoiceDemo"
 
 type DemoContent = RealtyContent["voice"]["demo"]
 
 export type VoiceDemoLiveProps = {
   content: DemoContent
-  /** Per-session URL issued by /api/realty/voice-session. Never an agent id. */
-  signedUrl: string
-  /** Hard ceiling for this session, in seconds, as granted by the server. */
-  maxSeconds: number
+  /**
+   * The session granted by /api/realty/voice-session, already validated there.
+   * It carries either a signed URL (private agent) or an agent id (public
+   * agent), plus the hard ceiling in seconds the server allowed.
+   */
+  session: VoiceSession
   /** The socket is up and the advisor is on the line. */
   onConnected: () => void
   /** Terminal: hang-up, countdown exhaustion, or the advisor closing the call. */
@@ -106,14 +111,8 @@ function LevelMeter({
   )
 }
 
-function LiveSession({
-  content,
-  signedUrl,
-  maxSeconds,
-  onConnected,
-  onEnded,
-  onFailed,
-}: VoiceDemoLiveProps) {
+function LiveSession({ content, session, onConnected, onEnded, onFailed }: VoiceDemoLiveProps) {
+  const { maxSeconds } = session
   const [turns, setTurns] = useState<{ id: number; who: "user" | "agent"; text: string }[]>([])
   const [remaining, setRemaining] = useState(maxSeconds)
   const [connected, setConnected] = useState(false)
@@ -164,13 +163,18 @@ function LiveSession({
   useEffect(() => {
     let cancelled = false
     const id = window.setTimeout(() => {
-      if (!cancelled) startSession({ signedUrl, connectionType: "websocket" })
+      if (cancelled) return
+      startSession(
+        session.mode === "signed"
+          ? { signedUrl: session.signedUrl, connectionType: "websocket" }
+          : { agentId: session.agentId, connectionType: "websocket" }
+      )
     }, 0)
     return () => {
       cancelled = true
       window.clearTimeout(id)
     }
-  }, [startSession, signedUrl])
+  }, [startSession, session])
 
   const hangUp = useCallback(() => {
     endSession()

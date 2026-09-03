@@ -1,14 +1,24 @@
-// Server-only configuration for the RealTy voice demo. Never expose any of
-// this to the client: the browser only ever receives a per-session signed URL.
-// Nothing here is logged — `readVoiceDemoConfig()` returns secrets, callers
-// must only test them for presence.
+// Server-only configuration for the RealTy voice demo. Nothing here is logged —
+// `readVoiceDemoConfig()` returns a secret, callers must only test it for
+// presence.
+//
+// Two modes, picked by what the environment holds:
+//  * "signed"  — an API key is set, the agent is private, and the browser gets
+//    a per-session signed URL. The key and the agent id never leave the server.
+//  * "public"  — no API key. The agent is public in ElevenLabs and protected by
+//    its domain allowlist there, so the browser gets the agent id and connects
+//    on its own. The route still gates every request (origin + quotas).
+
+export type VoiceDemoMode = "signed" | "public"
 
 export type VoiceDemoConfig = {
   /** `REALTY_VOICE_DEMO_ENABLED === "true"`. Anything else keeps the demo off. */
   enabled: boolean
-  /** ElevenLabs API key. Empty string when unset → route answers 503. */
+  /** "signed" when an API key is present, "public" otherwise. */
+  mode: VoiceDemoMode
+  /** ElevenLabs API key. Empty string in public mode. */
   apiKey: string
-  /** ElevenLabs agent id (`agent_…`). Empty string when unset → route answers 503. */
+  /** ElevenLabs agent id (`agent_…`). Required in both modes; empty → 503. */
   agentId: string
   /** Seconds granted per session, also the amount reserved from the daily budget. */
   maxSeconds: number
@@ -52,9 +62,11 @@ function readInt(raw: string | undefined, fallback: number, range: { min: number
 /** Reads the voice-demo configuration from the environment on every request. */
 export function readVoiceDemoConfig(): VoiceDemoConfig {
   const env = process.env
+  const apiKey = env.ELEVENLABS_API_KEY?.trim() ?? ""
   return {
     enabled: env.REALTY_VOICE_DEMO_ENABLED === "true",
-    apiKey: env.ELEVENLABS_API_KEY?.trim() ?? "",
+    mode: apiKey.length > 0 ? "signed" : "public",
+    apiKey,
     agentId: env.ELEVENLABS_AGENT_ID?.trim() ?? "",
     maxSeconds: readInt(env.REALTY_VOICE_DEMO_MAX_SECONDS, DEFAULTS.maxSeconds, RANGES.maxSeconds),
     dailyMinutes: readInt(env.REALTY_VOICE_DEMO_DAILY_MINUTES, DEFAULTS.dailyMinutes, RANGES.dailyMinutes),
@@ -63,7 +75,12 @@ export function readVoiceDemoConfig(): VoiceDemoConfig {
   }
 }
 
-/** True when the demo is fully wired (flag on plus both ElevenLabs secrets). */
+/**
+ * True when the demo can actually run. Both modes need the agent id; "signed"
+ * additionally needs the API key, which is what selected that mode to begin
+ * with — so the agent id is the real gate.
+ */
 export function isVoiceDemoConfigured(config: VoiceDemoConfig): boolean {
-  return config.apiKey.length > 0 && config.agentId.length > 0
+  if (config.agentId.length === 0) return false
+  return config.mode === "public" || config.apiKey.length > 0
 }

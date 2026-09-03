@@ -39,23 +39,56 @@ type Phase =
   | "error"
   | "micDenied"
 
-type Session = { signedUrl: string; maxSeconds: number }
+/**
+ * A granted session, discriminated by how the server chose to authenticate it.
+ *
+ * - `signed`: the agent is private and the browser gets a per-session signed
+ *   URL. Nothing identifying the agent ever reaches the client.
+ * - `public`: the agent is public and the browser connects with its id. The
+ *   id is not a secret in that configuration, but the quota still lives on the
+ *   server, which is why the client asks for a session either way.
+ */
+export type VoiceSession =
+  | { mode: "signed"; signedUrl: string; maxSeconds: number }
+  | { mode: "public"; agentId: string; maxSeconds: number }
 
 const SESSION_PATH = "/api/realty/voice-session"
 const FALLBACK_MAX_SECONDS = 120
 const MIN_MAX_SECONDS = 30
 const CEILING_MAX_SECONDS = 600
 
-/** Server payload of a granted session. Narrowed before it is trusted. */
-function readSession(body: unknown): Session | null {
-  if (typeof body !== "object" || body === null) return null
-  const record = body as Record<string, unknown>
-  if (typeof record.signedUrl !== "string" || record.signedUrl.length === 0) return null
-  const granted = typeof record.maxSeconds === "number" ? record.maxSeconds : FALLBACK_MAX_SECONDS
-  const maxSeconds = Number.isFinite(granted)
+function readMaxSeconds(value: unknown): number {
+  const granted = typeof value === "number" ? value : FALLBACK_MAX_SECONDS
+  return Number.isFinite(granted)
     ? Math.min(CEILING_MAX_SECONDS, Math.max(MIN_MAX_SECONDS, Math.round(granted)))
     : FALLBACK_MAX_SECONDS
-  return { signedUrl: record.signedUrl, maxSeconds }
+}
+
+/**
+ * Server payload of a granted session, narrowed before it is trusted.
+ *
+ * The credential is shape-checked, not just type-checked: a `wss://` URL for a
+ * signed session, an `agent_` id for a public one. Handing the SDK a payload
+ * that only looks plausible turns a server misconfiguration into an opaque
+ * connection failure a minute later; refusing it here surfaces as the honest
+ * "not available right now" straight away.
+ */
+function readSession(body: unknown): VoiceSession | null {
+  if (typeof body !== "object" || body === null) return null
+  const record = body as Record<string, unknown>
+  const maxSeconds = readMaxSeconds(record.maxSeconds)
+
+  if (record.mode === "signed") {
+    return typeof record.signedUrl === "string" && record.signedUrl.startsWith("wss://")
+      ? { mode: "signed", signedUrl: record.signedUrl, maxSeconds }
+      : null
+  }
+  if (record.mode === "public") {
+    return typeof record.agentId === "string" && record.agentId.startsWith("agent_")
+      ? { mode: "public", agentId: record.agentId, maxSeconds }
+      : null
+  }
+  return null
 }
 
 function readError(body: unknown): { code: string; retryAfterSeconds: number } {
@@ -69,7 +102,7 @@ function readError(body: unknown): { code: string; retryAfterSeconds: number } {
 
 export function VoiceDemo({ content, locale }: { content: DemoContent; locale: string }) {
   const [phase, setPhase] = useState<Phase>("idle")
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<VoiceSession | null>(null)
   /** Composed on the client because it can carry a local reset time. */
   const [quotaMessage, setQuotaMessage] = useState("")
 
@@ -131,7 +164,7 @@ export function VoiceDemo({ content, locale }: { content: DemoContent; locale: s
         }
         setSession(granted)
         setPhase("connecting")
-        trackEvent("realty_voice_start", { locale, maxSeconds: granted.maxSeconds })
+        trackEvent("realty_voice_start", { locale, mode: granted.mode, maxSeconds: granted.maxSeconds })
         return
       }
 
@@ -239,8 +272,7 @@ export function VoiceDemo({ content, locale }: { content: DemoContent; locale: s
       {session && (phase === "connecting" || phase === "live") && (
         <VoiceDemoLive
           content={content}
-          signedUrl={session.signedUrl}
-          maxSeconds={session.maxSeconds}
+          session={session}
           onConnected={handleConnected}
           onEnded={handleEnded}
           onFailed={handleFailed}

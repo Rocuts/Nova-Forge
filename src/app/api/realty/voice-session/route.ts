@@ -140,7 +140,20 @@ export async function POST(request: Request): Promise<Response> {
   const dailyDecision = await store.reserveDaily(day, config.maxSeconds, config.dailyMinutes * 60)
   if (!dailyDecision.allowed) return quotaExceeded("quota_daily", retryAfterSeconds)
 
-  // 8. ElevenLabs.
+  const session = {
+    maxSeconds: config.maxSeconds,
+    expiresAt: new Date(now.getTime() + SESSION_TTL_MS).toISOString(),
+  }
+  const grant = { "Set-Cookie": browserCookie(browserCount + 1) }
+
+  // 8a. Public mode: the agent is public in ElevenLabs and fenced by its domain
+  // allowlist there, so there is no upstream call and no 502 branch. The quota
+  // is still spent — this route is what rations the account's minutes.
+  if (config.mode === "public") {
+    return json({ mode: "public", agentId: config.agentId, ...session }, 200, grant)
+  }
+
+  // 8b. Signed mode: private agent, per-session signed URL.
   let signedUrl: string
   try {
     signedUrl = await getSignedUrl(config.apiKey, config.agentId)
@@ -151,15 +164,7 @@ export async function POST(request: Request): Promise<Response> {
     return fail("upstream", 502)
   }
 
-  return json(
-    {
-      signedUrl,
-      maxSeconds: config.maxSeconds,
-      expiresAt: new Date(now.getTime() + SESSION_TTL_MS).toISOString(),
-    },
-    200,
-    { "Set-Cookie": browserCookie(browserCount + 1) },
-  )
+  return json({ mode: "signed", signedUrl, ...session }, 200, grant)
 }
 
 /** Method check runs before everything else, so this answers even with the flag off. */

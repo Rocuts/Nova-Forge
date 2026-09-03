@@ -25,18 +25,38 @@ test('(b) POST without Origin is 403 when enabled, 404 when the flag is off', as
   expect(res.headers()['cache-control']).toContain('no-store')
 })
 
-test('(c) POST with same-origin and no API key is 503 not_configured (404 while the flag is off; the enabled branch is covered in production)', async ({
+test('(c) POST with same-origin returns a public-mode grant, or 503 without an agent id (404 while the flag is off)', async ({
   request,
 }) => {
   const res = await request.post(ENDPOINT, {
     headers: { 'content-type': 'application/json', origin: ORIGIN },
     data: { locale: 'es', consent: true },
   })
-  // 200/429 would mean this environment has real ElevenLabs credentials; the
-  // contract under test is the unconfigured one.
-  expect([404, 503]).toContain(res.status())
+  expect([200, 404, 503]).toContain(res.status())
   const body = await res.json()
-  expect(body.error).toBe(res.status() === 404 ? 'disabled' : 'not_configured')
+
+  if (res.status() === 404) {
+    // Flag off — the default locally. The enabled branch runs in production.
+    expect(body.error).toBe('disabled')
+    return
+  }
+  if (res.status() === 503) {
+    // Flag on but no agent id configured.
+    expect(body.error).toBe('not_configured')
+    return
+  }
+
+  expect(body.maxSeconds).toBeGreaterThan(0)
+  expect(typeof body.expiresAt).toBe('string')
+  if (body.mode === 'public') {
+    // No API key: the browser gets the public agent id, never a signed URL.
+    expect(body.agentId).toMatch(/^agent_/)
+    expect(body.signedUrl).toBeUndefined()
+  } else {
+    expect(body.mode).toBe('signed')
+    expect(typeof body.signedUrl).toBe('string')
+    expect(body.agentId).toBeUndefined()
+  }
 })
 
 test('(e) Permissions-Policy opens the microphone only on the RealTy landing', async ({ request }) => {
