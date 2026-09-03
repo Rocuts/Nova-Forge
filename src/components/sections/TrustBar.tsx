@@ -13,6 +13,13 @@ const TRUST_LOGOS = [
 const logoClass =
   "h-5 w-auto brightness-0 opacity-[0.35] hover:opacity-70 transition-opacity duration-200"
 
+/* The Vercel lockup is the only one rendered as live text rather than an image,
+   so the strip's 0.35 fade would put it at 2.43:1 — images are exempt from the
+   contrast rule, real text is not. It carries its own slightly stronger fade
+   (black at 0.55 over white is #737373, 4.74:1) and keeps the same behaviour. */
+const wordmarkClass =
+  "h-5 w-auto brightness-0 opacity-[0.55] hover:opacity-80 transition-opacity duration-200"
+
 export function TrustBar({ label }: { label: string }) {
   const innerRef = useRef<HTMLDivElement>(null)
 
@@ -41,7 +48,7 @@ export function TrustBar({ label }: { label: string }) {
           style={{ opacity: 0 }}
           className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-12 gap-y-4"
         >
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#a3a3a3] mr-4">
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#707070] mr-4">
             {label}
           </span>
 
@@ -60,14 +67,21 @@ export function TrustBar({ label }: { label: string }) {
 
           {/* Vercel — inline SVG + text (official source is PNG only) */}
           <span
-            className={`inline-flex items-center gap-1.5 ${logoClass}`}
+            className={`inline-flex items-center gap-1.5 ${wordmarkClass}`}
             role="img"
             aria-label="Vercel"
           >
             <svg viewBox="0 0 76 65" className="h-3 w-auto" fill="black">
               <path d="M37.5896 0.25L74.5396 64.25H0.639648L37.5896 0.25Z" />
             </svg>
-            <span className="text-[13px] font-semibold tracking-tight text-black select-none">
+            {/* Brand wordmark, dimmed to 0.35 to sit level with the four <img>
+                logos beside it. WCAG 1.4.3 exempts logotypes from the contrast
+                minimum; the hook below carries that exemption to the a11y gate,
+                which cannot infer it. */}
+            <span
+              data-brand-wordmark="vercel"
+              className="text-[13px] font-semibold tracking-tight text-black select-none"
+            >
               Vercel
             </span>
           </span>

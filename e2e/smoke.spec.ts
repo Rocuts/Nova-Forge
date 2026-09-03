@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
+import en from '../src/content/dictionaries/en'
 
 const hero = es.hero
 const nav = es.nav
@@ -89,6 +90,31 @@ test('live studio page renders and routes in both locales', async ({ page }) => 
   // English slug is served through the rewrite
   await page.goto('/en/tiktok-live-studio')
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/tiktok-live-studio$/)
+})
+
+test('realty page renders and routes in both locales', async ({ page }) => {
+  await page.goto('/es/realty')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(es.realty.hero.title)
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/es\/realty$/)
+
+  // Hero CTA books a demo through the internal scheduling page
+  const demo = page.getByRole('link', { name: es.realty.hero.primaryAction.label }).first()
+  await expect(demo).toHaveAttribute('href', '/es/agendar')
+
+  // Service + FAQPage + BreadcrumbList schemas, FAQ generated from the dictionary
+  const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents()
+  const types = jsonLd.flatMap((s) => {
+    const parsed = JSON.parse(s)
+    return Array.isArray(parsed) ? parsed.map((e) => e['@type']) : [parsed['@type']]
+  })
+  expect(types).toContain('Service')
+  expect(types).toContain('FAQPage')
+  expect(types).toContain('BreadcrumbList')
+
+  // Same slug in both locales — no rewrite involved
+  await page.goto('/en/realty')
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/realty$/)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(en.realty.hero.title)
 })
 
 test('home page links to the live studio division', async ({ page }) => {

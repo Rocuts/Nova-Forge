@@ -24,6 +24,8 @@ export const pathMap: Record<string, Record<Locale, string>> = {
   "/enriquecimiento-datos": { es: "/enriquecimiento-datos", en: "/data-enrichment" },
   "/extraccion-datos": { es: "/extraccion-datos", en: "/data-extraction" },
   "/estudio-tiktok-live": { es: "/estudio-tiktok-live", en: "/tiktok-live-studio" },
+  // Same slug in both locales: next.config derives no rewrite/redirect for it.
+  "/realty": { es: "/realty", en: "/realty" },
 }
 
 export function buildLocalePath(locale: Locale, internalPath: string): string {

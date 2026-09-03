@@ -39,7 +39,7 @@ export function LiveStudioProgram({ program }: Props) {
               className={`py-8 md:px-8 first:md:pl-0 last:lg:pr-0 border-[#e5e5e5] ${PROGRAM_BORDERS[i] ?? ""}`}
             >
               <div className="flex items-center gap-3 mb-5">
-                <span className="font-mono text-[10px] font-bold tracking-[0.3em] text-[#a3a3a3]">
+                <span className="font-mono text-[10px] font-bold tracking-[0.3em] text-[#707070]">
                   {step.step}
                 </span>
                 <span className="flex-1 live-rule opacity-60" />

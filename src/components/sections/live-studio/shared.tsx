@@ -103,7 +103,7 @@ export function Eyebrow({ children, tone = "dark" }: { children: string; tone?: 
 export function ModeList({ label, entries }: { label: string; entries: readonly string[] }) {
   return (
     <div>
-      <p className="font-mono text-[10px] font-bold tracking-[0.26em] uppercase text-[#a3a3a3] pb-3 mb-4 border-b border-[#e5e5e5]">
+      <p className="font-mono text-[10px] font-bold tracking-[0.26em] uppercase text-[#707070] pb-3 mb-4 border-b border-[#e5e5e5]">
         {label}
       </p>
       <ul className="space-y-2.5">

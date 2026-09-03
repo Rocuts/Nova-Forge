@@ -29,7 +29,7 @@ function CategoryRow({
       className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8 py-8 border-b border-[#e5e5e5] last:border-b-0"
     >
       <div className="md:col-span-3 flex items-start gap-4">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[#a3a3a3] tabular-nums pt-[3px]" aria-hidden="true">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[#707070] tabular-nums pt-[3px]" aria-hidden="true">
           {String(index + 1).padStart(2, "0")}
         </span>
         <h3 className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#525252] pt-[3px]">

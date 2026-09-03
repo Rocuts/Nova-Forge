@@ -90,11 +90,11 @@ export function TeamRows({
                 </div>
                 <div className="relative py-7 md:py-10">
                   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
-                    <span className={`text-xs font-mono tracking-wider transition-colors duration-300 md:w-8 shrink-0 ${active ? "text-white" : "text-white/20"}`}>{num}</span>
+                    <span className={`text-xs font-mono tracking-wider transition-colors duration-300 md:w-8 shrink-0 ${active ? "text-white" : "text-white/55"}`}>{num}</span>
                     <h3 className="text-2xl md:text-4xl lg:text-5xl font-heading font-bold text-white tracking-tight flex-1 transition-transform duration-300 md:group-hover:translate-x-2">{member.name}</h3>
-                    <p className="text-[10px] md:text-xs font-medium tracking-[0.15em] uppercase text-white/30 md:text-right md:w-72 shrink-0">{member.role}</p>
+                    <p className="text-[10px] md:text-xs font-medium tracking-[0.15em] uppercase text-white/55 md:text-right md:w-72 shrink-0">{member.role}</p>
                   </div>
-                  <p className="mt-3 text-sm text-white/30 leading-relaxed max-w-2xl md:pl-16 md:hidden">{member.bio}</p>
+                  <p className="mt-3 text-sm text-white/55 leading-relaxed max-w-2xl md:pl-16 md:hidden">{member.bio}</p>
                   <AnimatePresence>
                     {active && (
                       <m.div

@@ -95,7 +95,7 @@ export function Methodology({ content: methodologySection }: { content: Methodol
               >
                 {/* Node dot on the line */}
                 <div className="hidden md:block w-2 h-2 rounded-full bg-[#0a0a0a] -mt-1 mb-8" />
-                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#b0b0b0] mb-3 tabular-nums">
+                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#707070] mb-3 tabular-nums">
                   {methodologySection.phaseLabel} {step.num}
                 </p>
                 <h3 className="text-lg font-semibold text-[#0a0a0a] mb-3 tracking-tight">{step.title}</h3>

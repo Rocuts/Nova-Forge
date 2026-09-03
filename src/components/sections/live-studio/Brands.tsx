@@ -40,7 +40,7 @@ export function LiveStudioBrands({ brands, locale }: Props) {
                   transition={stagger(i)}
                   className="py-7 border-b border-white/10 flex gap-6"
                 >
-                  <span className="font-mono text-[10px] tracking-[0.26em] text-white/25 pt-1.5 shrink-0">
+                  <span className="font-mono text-[10px] tracking-[0.26em] text-white/55 pt-1.5 shrink-0">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div>

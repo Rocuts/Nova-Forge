@@ -63,6 +63,13 @@ ${serviceLines(en, "en", enNav.solutions)}
 Estado: ${es.liveStudio.status.toLowerCase()}. ${es.liveStudio.disclaimer}
 Programa para creadores: ${es.liveStudio.program.steps.map((s) => `${s.step} ${s.title} — ${s.description}`).join(" ")}
 
+## RealTy (infraestructura de ventas con IA para inmobiliarias)
+- [RealTy — Español](${siteConfig.url}${buildLocalePath("es", "/realty")}): ${es.realty.hero.description}
+- [RealTy — English](${siteConfig.url}${buildLocalePath("en", "/realty")}): ${en.realty.hero.description}
+Estado: ${es.realty.statusLine} / ${en.realty.statusLine}
+${es.realty.disclaimer}
+${en.realty.disclaimer}
+
 ## Casos de estudio
 ### ${es.caseStudy.title} — ${es.caseStudy.industry}
 ${es.caseStudy.context} ${es.caseStudy.solution} ${es.caseStudy.outcome}

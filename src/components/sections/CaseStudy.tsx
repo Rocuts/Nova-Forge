@@ -37,7 +37,7 @@ export function CaseStudy({ content, locale }: { content: CaseStudyContent; loca
               {content.eyebrow}
             </p>
           </div>
-          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#a3a3a3]">
+          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#707070]">
             {content.industry}
           </p>
         </div>
@@ -87,7 +87,7 @@ export function CaseStudy({ content, locale }: { content: CaseStudyContent; loca
                   }}
                   className="flex items-start gap-4 text-sm text-[#525252] leading-relaxed"
                 >
-                  <span className="font-mono text-[10px] text-[#a3a3a3] tabular-nums pt-[3px] select-none" aria-hidden="true">
+                  <span className="font-mono text-[10px] text-[#707070] tabular-nums pt-[3px] select-none" aria-hidden="true">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {capability}

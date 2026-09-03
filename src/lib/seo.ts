@@ -33,6 +33,7 @@ export function organizationJsonLd(description: string) {
       "Data extraction and OSINT",
       "Live streaming production for LATAM creators",
       "TikTok LIVE studio operations",
+      "AI sales infrastructure for real-estate developers",
     ],
     sameAs: [siteConfig.links.twitter, siteConfig.links.linkedin],
   }
