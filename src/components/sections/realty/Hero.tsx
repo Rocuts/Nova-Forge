@@ -1,124 +1,121 @@
 "use client"
+import { useState } from "react"
 import { m, useReducedMotion } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { trackEvent } from "@/lib/analytics"
-import { SimValue, resolveHref } from "./shared"
+import { DemoTag, resolveHref } from "./shared"
 import type { RealtyContent } from "./shared"
+import { Funnel, StatTile } from "./viz"
 
 /** Deterministic ambient rulers — no Math.random, so SSR and hydration agree. */
 const RULERS = ["18%", "38%", "62%", "84%"]
 
 /**
- * The console dossier schematic: label strip → readiness row → rows ledger →
- * close ledger → live column. Decorative (aria-hidden); every string comes from
- * the dictionary, every rule is a 1px hairline.
+ * Props of `RealtyHero`.
+ *
+ * `eyebrow`, `demoLabel` and `demoSrText` are the top-level dictionary strings
+ * (`realty.eyebrow`, `realty.demoLabel`, `realty.demoSrText`); everything else
+ * comes from `realty.hero`. `statusLine` is deliberately NOT rendered here —
+ * v2 drops the disclaimer strip above the headline and lets the console frame's
+ * single demo tag carry that job (page.tsx still uses it for the meta
+ * description).
  */
-function CommandFrame({
-  frame,
-  simToken,
-  simSrText,
+export interface RealtyHeroProps {
+  content: RealtyContent["hero"]
+  /** Product eyebrow, e.g. "RealTy". */
+  eyebrow: string
+  /** One demo-data tag for the whole console frame. */
+  demoLabel: string
+  demoSrText: string
+  locale: string
+}
+
+/**
+ * The console "Overview" screen, rendered as the hero visual: hero figure,
+ * a 2×2 grid of stat tiles with sparklines, and the pipeline funnel underneath.
+ * Same three-part structure as the product's own overview, in Orbexs ink.
+ */
+function ConsoleFrame({
+  console: overview,
+  demoLabel,
+  demoSrText,
+  drawn,
 }: {
-  frame: RealtyContent["hero"]["frame"]
-  simToken: string
-  simSrText: string
+  console: RealtyContent["hero"]["console"]
+  demoLabel: string
+  demoSrText: string
+  drawn: boolean
 }) {
+  const funnelLabel = `${overview.funnel.label}: ${overview.funnel.stages
+    .map((stage) => `${stage.name} ${stage.count}`)
+    .join(", ")}`
+
   return (
-    <div aria-hidden="true" className="relative isolate w-full max-w-[460px] mx-auto lg:mx-0 select-none">
+    <div className="relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0">
       <div className="relative rounded-[6px] border border-[#1a1a1a] bg-[#141414]">
-        {/* Label strip */}
-        <div className="flex items-center justify-between gap-4 px-5 h-11 border-b border-white/[0.08]">
-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/75">{frame.label}</span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-1.5 h-1.5 bg-white/40" />
-            <span className="inline-block w-1.5 h-1.5 border border-white/40" />
-            <span className="inline-block w-1.5 h-1.5 border border-dotted border-white/40" />
-          </span>
+        {/* Frame header: the screen's name, and the one demo-data tag. */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1a1a1a] px-5 py-4">
+          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#a3a3a3]">{overview.label}</span>
+          <DemoTag label={demoLabel} srText={demoSrText} tone="dark" />
         </div>
 
-        {/* Readiness row */}
-        <div className="flex items-baseline justify-between gap-4 px-5 py-5 border-b border-white/[0.08]">
-          <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/55">
-            {frame.readinessLabel}
-          </span>
-          <span className="font-mono text-lg leading-none">
-            <SimValue token={simToken} srText={simSrText}>
-              {frame.readinessValue}
-            </SimValue>
-          </span>
+        {/* Hero figure — exactly one per screen. */}
+        <div className="border-b border-[#1a1a1a] px-5 py-6">
+          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#a3a3a3]">
+            {overview.headline.label}
+          </p>
+          <p className="mt-3 font-heading text-[clamp(1.85rem,4.5vw,2.6rem)] font-bold leading-none tracking-tight text-white">
+            {overview.headline.value}
+          </p>
+          <p className="mt-3 text-xs leading-relaxed text-[#a3a3a3]">{overview.headline.caption}</p>
         </div>
 
-        {/* Rows ledger */}
-        <div>
-          {frame.rows.map((row, i) => (
-            <div
-              key={row.key}
-              className="flex items-baseline justify-between gap-4 px-5 py-3 border-b border-white/[0.06]"
-            >
-              <span className="flex items-baseline gap-3 min-w-0">
-                <span className="font-mono text-[10px] tracking-[0.2em] text-white/55">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="text-[13px] text-white/50 truncate">{row.key}</span>
-              </span>
-              <span className="font-mono text-[12px] text-white whitespace-nowrap">
-                {row.simulated ? (
-                  <SimValue token={simToken} srText={simSrText}>
-                    {row.value}
-                  </SimValue>
-                ) : (
-                  row.value
-                )}
-              </span>
-            </div>
+        {/* Stat tiles: hairline-separated, two up. */}
+        <div className="grid grid-cols-2 border-b border-[#1a1a1a]">
+          {overview.tiles.map((tile, i) => (
+            <StatTile
+              key={tile.label}
+              label={tile.label}
+              value={tile.value}
+              series={tile.series}
+              tone="dark"
+              drawn={drawn}
+              delayMs={140 * i}
+              className={`${i % 2 === 0 ? "border-r border-[#1a1a1a]" : ""} ${
+                i < overview.tiles.length - 2 ? "border-b border-[#1a1a1a]" : ""
+              }`}
+            />
           ))}
         </div>
 
-        {/* Close ledger line */}
-        <div className="flex items-baseline justify-between gap-4 px-5 py-4 border-b border-white/[0.08]">
-          <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/55">{frame.closeLabel}</span>
-          <span className="font-mono text-[11px] tracking-[0.12em] text-white/80">{frame.closeValue}</span>
-        </div>
-
-        {/* Live column */}
-        <div className="flex items-center justify-between gap-4 px-5 py-4">
-          <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/55">{frame.liveLabel}</span>
-          <span className="inline-flex items-center gap-2 rounded-[2px] border border-white/15 px-2.5 py-1">
-            <span className="inline-block w-1.5 h-1.5 bg-white/60" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/75">
-              {frame.liveIndicator}
-            </span>
-          </span>
+        {/* Pipeline funnel — the same nine stages the product uses. */}
+        <div className="px-5 py-5">
+          <Funnel
+            stages={overview.funnel.stages}
+            label={overview.funnel.label}
+            ariaLabel={funnelLabel}
+            tone="dark"
+            drawn={drawn}
+          />
         </div>
       </div>
 
-      {/* Offset ghost frame — the stack of open dossiers */}
-      <div className="absolute -right-3 top-5 bottom-5 w-full rounded-[6px] border border-white/[0.06] -z-10" />
+      {/* Offset ghost frame — the stack of open screens behind this one. */}
+      <div aria-hidden="true" className="absolute -right-3 top-5 bottom-5 -z-10 w-full rounded-[6px] border border-white/[0.06]" />
     </div>
   )
 }
 
-export function RealtyHero({
-  content,
-  eyebrow,
-  statusLine,
-  simToken,
-  simSrText,
-  locale,
-}: {
-  content: RealtyContent["hero"]
-  eyebrow: string
-  statusLine: string
-  simToken: string
-  simSrText: string
-  locale: string
-}) {
+export function RealtyHero({ content, eyebrow, demoLabel, demoSrText, locale }: RealtyHeroProps) {
   const reduced = useReducedMotion()
+  // The charts draw once the frame is observed in the viewport (immediately, in
+  // practice — it is above the fold). `drawn` starts false for everyone and only
+  // changes from an event callback, never from a render-time branch or an
+  // effect, so the server markup and the first client render agree.
+  const [drawn, setDrawn] = useState(false)
 
   return (
-    <section
-      className="relative min-h-[92vh] flex items-center overflow-hidden bg-[#0a0a0a]"
-      data-header-theme="dark"
-    >
+    <section className="relative flex min-h-[92vh] items-center overflow-hidden bg-[#0a0a0a]" data-header-theme="dark">
       {/* Ambient hairline rulers */}
       <div aria-hidden="true" className="absolute inset-0">
         {RULERS.map((left) => (
@@ -127,43 +124,37 @@ export function RealtyHero({
       </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-6 py-32 md:py-40">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          <div className="lg:col-span-7">
-            {/* Eyebrow + status line */}
-            <div className="hero-enter flex flex-wrap items-center gap-x-4 gap-y-3 mb-10">
-              <span aria-hidden="true" className="w-12 h-[1px] bg-white opacity-30" />
-              <p className="text-[10px] md:text-[11px] font-bold tracking-[0.35em] uppercase text-white/70">
+        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12">
+          <div className="lg:col-span-6">
+            <div className="hero-enter mb-10 flex items-center gap-4">
+              <span aria-hidden="true" className="h-[1px] w-12 bg-white opacity-30" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/70 md:text-[11px]">
                 {eyebrow}
               </p>
-              <span aria-hidden="true" className="hidden sm:block w-px h-3 bg-white/15" />
-              <p className="font-mono text-[10px] md:text-[11px] tracking-[0.1em] text-white/55">{statusLine}</p>
             </div>
 
             <h1
-              className="hero-enter font-heading text-fluid-hero font-bold tracking-tight leading-[1.02] text-white mb-8 text-balance"
+              className="hero-enter mb-8 text-balance font-heading text-[clamp(2.25rem,4.6vw,4rem)] font-bold leading-[1.04] tracking-tight text-white"
               style={{ animationDelay: "0.1s" }}
             >
               {content.title}
             </h1>
 
             <p
-              className="hero-enter font-heading text-2xl md:text-3xl text-white/55 font-medium tracking-tight mb-10 max-w-2xl"
+              className="hero-enter mb-8 max-w-2xl font-heading text-xl font-medium tracking-tight text-[#a3a3a3] md:text-2xl"
               style={{ animationDelay: "0.2s" }}
             >
               {content.subtitle}
             </p>
 
             <p
-              className="hero-enter text-fluid-p text-white/60 max-w-2xl leading-relaxed mb-14"
+              className="hero-enter mb-12 max-w-2xl text-base leading-relaxed text-[#a3a3a3] md:text-lg"
               style={{ animationDelay: "0.3s" }}
             >
               {content.description}
             </p>
 
-            <div
-              className="hero-enter flex flex-col sm:flex-row gap-4"
-              style={{ animationDelay: "0.4s" }}
-            >
+            <div className="hero-enter flex flex-col gap-4 sm:flex-row" style={{ animationDelay: "0.4s" }}>
               <Button
                 size="lg"
                 href={resolveHref(locale, content.primaryAction.href)}
@@ -176,7 +167,7 @@ export function RealtyHero({
                 size="lg"
                 variant="secondary"
                 href={resolveHref(locale, content.secondaryAction.href)}
-                className="border-white/25 text-white hover:bg-white/10 hover:border-white/45"
+                className="border-white/25 text-white hover:border-white/45 hover:bg-white/10"
               >
                 {content.secondaryAction.label}
               </Button>
@@ -191,9 +182,16 @@ export function RealtyHero({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduced ? 0 : 0.8, delay: reduced ? 0 : 0.35, ease: "easeOut" }}
-            className="lg:col-span-5"
+            viewport={{ once: true }}
+            onViewportEnter={() => setDrawn(true)}
+            className="lg:col-span-6"
           >
-            <CommandFrame frame={content.frame} simToken={simToken} simSrText={simSrText} />
+            <ConsoleFrame
+              console={content.console}
+              demoLabel={demoLabel}
+              demoSrText={demoSrText}
+              drawn={drawn}
+            />
           </m.div>
         </div>
       </div>

@@ -7,8 +7,6 @@ import type { RealtyContent } from "./shared"
 
 type Props = {
   content: RealtyContent["faq"]
-  labels?: RealtyContent["statusLabels"]
-  locale?: string
 }
 
 function FaqItem({
@@ -74,7 +72,7 @@ export function RealtyFaq({ content }: Props) {
   const reduced = useReducedMotion() ?? false
 
   return (
-    <section id={content.id} className="bg-white py-24 md:py-32">
+    <section id={content.id} className="bg-white border-t border-[#e5e5e5] py-24 md:py-32">
       <div className="mx-auto max-w-4xl px-6">
         <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#0a0a0a] mb-4">
           {content.title}

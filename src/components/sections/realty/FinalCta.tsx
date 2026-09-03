@@ -8,12 +8,18 @@ import type { RealtyContent } from "./shared"
 
 type Props = {
   content: RealtyContent["cta"]
-  disclaimer: RealtyContent["disclaimer"]
-  labels?: RealtyContent["statusLabels"]
   locale: string
 }
 
-export function RealtyFinalCta({ content, disclaimer, locale }: Props) {
+/**
+ * Closing section. Dark, centred, two actions.
+ *
+ * `content.note` is the page's last honesty line — one sentence, authored in
+ * the dictionary, naming what is still simulated and that the voice advisor is
+ * validated but not switched on. It replaces the long disclaimer of v1: the
+ * detail now lives in the status section, which the secondary action links to.
+ */
+export function RealtyFinalCta({ content, locale }: Props) {
   const reduced = useReducedMotion()
   const reveal = revealProps(reduced, 0)
 
@@ -50,10 +56,7 @@ export function RealtyFinalCta({ content, disclaimer, locale }: Props) {
           </Button>
         </div>
 
-        {/* Demonstration build: simulated transactions, voice runtime not deployed (DECISIONS §2) */}
-        <p className="text-xs text-[#a3a3a3] leading-relaxed max-w-2xl mx-auto mt-16">
-          {disclaimer}
-        </p>
+        <p className="text-xs text-[#a3a3a3] leading-relaxed max-w-2xl mx-auto mt-16">{content.note}</p>
       </m.div>
     </section>
   )

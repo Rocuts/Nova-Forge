@@ -67,8 +67,8 @@ Programa para creadores: ${es.liveStudio.program.steps.map((s) => `${s.step} ${s
 - [RealTy — Español](${siteConfig.url}${buildLocalePath("es", "/realty")}): ${es.realty.hero.description}
 - [RealTy — English](${siteConfig.url}${buildLocalePath("en", "/realty")}): ${en.realty.hero.description}
 Estado: ${es.realty.statusLine} / ${en.realty.statusLine}
-${es.realty.disclaimer}
-${en.realty.disclaimer}
+${es.realty.cta.note}
+${en.realty.cta.note}
 
 ## Casos de estudio
 ### ${es.caseStudy.title} — ${es.caseStudy.industry}

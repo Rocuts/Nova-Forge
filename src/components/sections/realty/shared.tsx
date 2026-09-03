@@ -3,160 +3,177 @@
 // import from here. The RealtyContent type is the contract between the
 // dictionaries (src/content/dictionaries/{es,en}.ts → `realty`) and the
 // sections under ./ — change it only together with both dictionaries.
+//
+// v2 (2026-09-03): the page speaks to a developer's commercial director, not to
+// a reviewer. Every capability still carries its status (CLAUDE.md, RealTy
+// block) but the vocabulary is business language and the demo data is
+// labelled once per visual frame instead of once per number.
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
-/** Reality status of a capability. Mirrors the product README "What is real". */
-export type RealtyStatus = "real" | "simulated" | "mock" | "not_implemented" | "planned"
+/**
+ * Reality status of a capability, in business words.
+ * - built: works today on the product's own data.
+ * - validated: configuration complete and tested, switched on in the pilot
+ *   (used ONLY for the voice advisor — never "operating", never "on calls").
+ * - simulated: real records, zero external effect (holds, reservations, deposits).
+ * - adapter: a test adapter that is swapped for the real provider in the pilot.
+ * - planned: on the roadmap, not started.
+ * - notImplemented: deliberately out of scope for now.
+ */
+export type RealtyStatus = "built" | "validated" | "simulated" | "adapter" | "planned" | "notImplemented"
 
-interface Action {
+export interface Action {
   label: string
   href: string
 }
 
-interface SectionHead {
+export interface SectionHead {
   id: string
   eyebrow: string
   title: string
   description: string
 }
 
+/**
+ * One turn of the demo conversation. `check` is the advisor verifying a fact
+ * against the inventory before answering — shown as a quiet inset line, never
+ * as a function name or code.
+ */
 export type TranscriptTurn =
   | { kind: "buyer" | "advisor"; text: string }
-  | { kind: "tool"; name: string; args: string; result: string; status: RealtyStatus }
+  | { kind: "check"; text: string; result: string }
 
 export interface RealtyContent {
+  /** Product eyebrow, e.g. "RealTy". */
   eyebrow: string
+  /**
+   * Scope line used by page.tsx for the meta description: the text before the
+   * first "·" is the scope phrase ("Infraestructura de ventas con IA para
+   * promotores inmobiliarios"), the rest qualifies the demo state.
+   */
   statusLine: string
   statusLabels: Record<RealtyStatus, string>
+  /** One label per visual frame with demo data, e.g. "Datos de demostración". */
+  demoLabel: string
+  /** Screen-reader text for the demo label, e.g. "Cifras de un entorno de demostración, no de clientes reales". */
+  demoSrText: string
+
   hero: {
     title: string
     subtitle: string
+    /** Two short sentences; feeds the meta description. */
     description: string
     primaryAction: Action
     secondaryAction: Action
-    frame: {
+    /** The "Overview" screen of the console, rendered as the hero visual. */
+    console: {
       label: string
-      readinessLabel: string
-      readinessValue: string
-      rows: readonly { key: string; value: string; simulated: boolean }[]
-      closeLabel: string
-      closeValue: string
-      liveLabel: string
-      liveIndicator: string
+      headline: { label: string; value: string; caption: string }
+      tiles: readonly { label: string; value: string; series: readonly number[] }[]
+      funnel: { label: string; stages: readonly { name: string; count: number }[] }
     }
   }
-  architecture: SectionHead & {
-    legendTitle: string
-    layers: readonly {
-      key: "channels" | "orchestration" | "sources" | "outcomes"
-      title: string
-      caption: string
-      nodes: readonly { label: string; detail: string; status: RealtyStatus }[]
-    }[]
-    /** Mono strapline inside the orchestration container. */
-    centerLabel: string
-    /** Caption under the diagram explaining what the arrows mean. */
-    flowLabel: string
-    qualifier: string
+
+  /** Four outcomes for the developer's team, no numbers. */
+  outcomes: SectionHead & {
+    items: readonly { title: string; description: string }[]
   }
-  machine: SectionHead & {
-    stages: readonly { step: string; title: string; description: string; status: RealtyStatus; detail: string }[]
-    qualifier: string
-  }
-  experience: SectionHead & {
-    scenarioLabel: string
-    transcriptLabel: string
-    controls: { play: string; pause: string; next: string; restart: string }
-    /** Visible captions above each conversational turn, so a reader can tell who speaks. */
-    speakerLabels: { buyer: string; advisor: string }
-    toolLabel: string
-    turns: readonly TranscriptTurn[]
-    action: Action
-    qualifier: string
-  }
-  commandCenter: SectionHead & {
-    band: string
-    simToken: string
-    simSrText: string
-    opportunities: {
-      title: string
-      columns: readonly string[]
-      rows: readonly { lead: string; country: string; stage: string; readiness: string; band: string; close: string; unit: string }[]
-    }
-    readiness: {
-      title: string
-      score: string
-      scoreLabel: string
-      components: readonly { name: string; weight: string; note: string }[]
-      blockersTitle: string
-      blockers: readonly string[]
-    }
-    closeLedger: {
-      title: string
-      summary: string
-      states: readonly { name: string; met: boolean }[]
-    }
-    live: {
-      title: string
-      indicator: string
-      events: readonly { lane: string; text: string }[]
-    }
-    qualifier: string
-  }
+
+  /** Buyer journey: the real pipeline stages plus five narrated steps. */
   journey: SectionHead & {
+    pipeline: {
+      label: string
+      /** Nine ordered stages, literal to the product. */
+      stages: readonly string[]
+      /** Terminal outcomes, e.g. ["Ganado", "Perdido"]. */
+      terminal: readonly string[]
+      /** Index of the stage highlighted as "current" in the demo. */
+      current: number
+    }
     systemLabel: string
     buyerLabel: string
     steps: readonly { step: string; title: string; system: string; buyer: string; status: RealtyStatus }[]
     qualifier: string
   }
-  omnichannel: SectionHead & {
-    principle: string
-    channels: readonly { name: string; description: string; status: RealtyStatus }[]
-    qualifier: string
-  }
-  inventory: SectionHead & {
-    claimTypesTitle: string
-    claimTypes: readonly { name: string; description: string }[]
-    example: {
-      title: string
-      inputsTitle: string
-      inputs: readonly { label: string; value: string }[]
-      outputTitle: string
-      output: readonly { label: string; value: string; note: string }[]
-      chainTitle: string
-      chain: readonly { kind: string; text: string }[]
-      unknownsTitle: string
-      unknowns: readonly string[]
+
+  /** The voice advisor. */
+  voice: SectionHead & {
+    points: readonly { title: string; description: string }[]
+    transcript: {
+      label: string
+      scenario: string
+      speakerLabels: { buyer: string; advisor: string; check: string }
+      turns: readonly TranscriptTurn[]
     }
-    hierarchy: { title: string; description: string; levels: readonly string[]; status: RealtyStatus }
+    /** Status card: always `validated` today, with the honest sentence. */
+    state: { status: RealtyStatus; title: string; text: string }
     qualifier: string
   }
-  followUp: SectionHead & {
-    items: readonly { title: string; description: string; status: RealtyStatus }[]
+
+  /** The commercial console (CRM). */
+  console: SectionHead & {
+    band: string
+    opportunities: {
+      title: string
+      columns: readonly string[]
+      rows: readonly {
+        lead: string
+        country: string
+        stage: string
+        /** 0–1, rendered as a small meter + number. */
+        readiness: number
+        band: string
+        unit: string
+        next: string
+      }[]
+    }
+    readiness: {
+      title: string
+      lead: string
+      score: number
+      band: string
+      components: readonly { name: string; value: number; max: number; note: string }[]
+    }
+    closeLedger: {
+      title: string
+      summary: string
+      states: readonly { name: string; met: boolean; simulated: boolean }[]
+    }
+    /** Three guarantees in plain words (never invents a price, says "I don't know", leaves a trail). */
+    principles: readonly { title: string; description: string }[]
     qualifier: string
   }
-  visual: SectionHead & {
-    loopTitle: string
-    loop: readonly { step: string; title: string; description: string }[]
-    prototype: { title: string; paragraphs: readonly string[] }
-    roadmapTitle: string
-    roadmap: readonly string[]
+
+  /** Channels and human handover. */
+  channels: SectionHead & {
+    items: readonly { name: string; description: string; status: RealtyStatus }[]
     qualifier: string
   }
-  impact: SectionHead & {
-    outcomes: readonly { title: string; description: string }[]
-    target: { title: string; value: string; description: string; qualifier: string }
-  }
-  proof: SectionHead & {
+
+  /** Product status table + activation target. */
+  status: SectionHead & {
     columns: readonly string[]
     rows: readonly { component: string; status: RealtyStatus; note: string }[]
-    builtWith: { title: string; items: readonly string[]; note: string }
+    activation: { title: string; value: string; description: string; qualifier: string }
+    builtWith: { title: string; text: string }
     qualifier: string
   }
-  faq: { id: string; title: string; subtitle: string; items: readonly { question: string; answer: string }[] }
-  cta: { title: string; description: string; action: Action; secondary: Action }
-  disclaimer: string
+
+  faq: {
+    id: string
+    title: string
+    subtitle: string
+    items: readonly { question: string; answer: string }[]
+  }
+
+  cta: {
+    title: string
+    description: string
+    action: Action
+    secondary: Action
+    note: string
+  }
 }
 
 export const viewportConfig = { once: true, margin: "-100px" as const }
@@ -261,12 +278,15 @@ export function StatusChip({
   labels: Record<RealtyStatus, string>
   tone?: "light" | "dark"
 }) {
+  // Literal class strings only: Tailwind's scanner cannot see interpolated names.
   const glyph: Record<RealtyStatus, string> = {
-    real: tone === "dark" ? "bg-white" : "bg-[#0a0a0a]",
+    built: tone === "dark" ? "bg-white" : "bg-[#0a0a0a]",
+    validated: "bg-[#2563eb]",
     simulated: tone === "dark" ? "bg-white/40" : "bg-[#0a0a0a]/40",
-    mock: tone === "dark" ? "border border-white/60" : "border border-[#0a0a0a]/60",
-    not_implemented: tone === "dark" ? "border border-dashed border-white/40" : "border border-dashed border-[#0a0a0a]/40",
+    adapter: tone === "dark" ? "border border-white/60" : "border border-[#0a0a0a]/60",
     planned: tone === "dark" ? "border border-dotted border-white/40" : "border border-dotted border-[#0a0a0a]/40",
+    notImplemented:
+      tone === "dark" ? "border border-dashed border-white/40" : "border border-dashed border-[#0a0a0a]/40",
   }
   return (
     <span
@@ -281,33 +301,18 @@ export function StatusChip({
 }
 
 /**
- * A simulated figure: 45° hatch ground that survives a screenshot, a mono SIM
- * token, and sr-only text so screen readers hear the label too.
+ * The single demo-data label of a visual frame. Replaces the per-number SIM
+ * badges of v1: one quiet tag in the frame header plus sr-only text.
  */
-export function SimValue({
-  children,
-  token,
-  srText,
-  tone = "dark",
-}: {
-  children: React.ReactNode
-  token: string
-  srText: string
-  tone?: "light" | "dark"
-}) {
+export function DemoTag({ label, srText, tone = "dark" }: { label: string; srText: string; tone?: "light" | "dark" }) {
   return (
-    <span className="inline-flex items-baseline gap-1.5">
-      <span className={`relative inline-block px-1 rounded-[2px] ${tone === "dark" ? "text-white" : "text-[#0a0a0a]"}`}>
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 rounded-[2px] opacity-[0.18]"
-          style={{ backgroundImage: "repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 5px)" }}
-        />
-        <span className="relative">{children}</span>
-      </span>
-      <span aria-hidden="true" className={`font-mono text-[9px] tracking-[0.2em] ${tone === "dark" ? "text-white/55" : "text-[#737373]"}`}>
-        {token}
-      </span>
+    <span
+      className={`inline-flex items-center gap-2 rounded-[2px] border px-2 py-1 font-mono text-[9px] tracking-[0.22em] uppercase whitespace-nowrap ${
+        tone === "dark" ? "border-white/15 text-white/60" : "border-[#e5e5e5] text-[#737373]"
+      }`}
+    >
+      <span aria-hidden="true" className={`inline-block w-1.5 h-1.5 ${tone === "dark" ? "bg-white/40" : "bg-[#0a0a0a]/40"}`} />
+      <span aria-hidden="true">{label}</span>
       <span className="sr-only">{srText}</span>
     </span>
   )
