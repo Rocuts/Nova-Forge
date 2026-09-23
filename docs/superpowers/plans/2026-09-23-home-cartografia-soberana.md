@@ -39,11 +39,13 @@
   ```bash
   git -C /home/user/Nova-Forge worktree add /home/user/wt/taskN -b wt/taskN redesign/home
   cp -al /home/user/Nova-Forge/node_modules /home/user/wt/taskN/node_modules   # enlaces duros: instantáneo y sin coste de disco
+  (cd /home/user/wt/taskN && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
   ```
   (No usar un symlink de `node_modules`: Turbopack rechaza symlinks que salen de la raíz del proyecto.)
 - Puerto del servidor de desarrollo de la tarea N: **`PORT=30N0`** (tarea 1 → 3010, tarea 10 → 3100, tarea 11 → 3110). Todas las órdenes de Playwright del worktree llevan ese `PORT`.
 - El implementador hace commits en `wt/taskN` (los que quiera). **No hace push ni toca `/home/user/Nova-Forge`.**
 - `next dev` puede reescribir el bloque `nextjs-agent-rules` de `AGENTS.md`; si aparece como cambio sin querer, se descarta con `git checkout AGENTS.md` (salvo en la tarea 11, que edita ese archivo a propósito).
+- **Tailwind lee `docs/`.** Tailwind v4 escanea todos los archivos del repositorio que no estén en `.gitignore`, también este plan. Una clase citada en un `.md` con un valor inválido (por ejemplo, puntos suspensivos en lugar del nombre de la variable) genera CSS que Turbopack no parsea, y `next dev` responde 500 en todas las páginas. T1 (paso 2.8) excluye `docs/` con `@source not`. Hasta que T1 esté integrada, las correcciones de este plan tienen que estar commiteadas en `redesign/home` antes de crear cada worktree, y en ningún `.md` se citan clases con valores elididos.
 
 ### 1.2 Revisión
 Un subagente revisor, distinto del implementador, lee `git diff redesign/home...wt/taskN` y comprueba:
@@ -102,11 +104,12 @@ T4 títulos+motion ──┴─────┴─► T5 nav+header ───┘
 | Archivo compartido (obliga a ir en serie) | Tareas que lo tocan |
 |---|---|
 | `src/content/dictionaries/es.ts` / `en.ts` | T3, T5, T6, T7, T8, T9, T10, T11 |
-| `src/app/globals.css` | T5, T6, T10 |
+| `src/app/globals.css` | T1 (`@source not`), T5, T6, T10 |
 | `e2e/smoke.spec.ts` | T5, T6, T7, T9, T10 |
 | `src/app/[locale]/page.tsx` | T2 (metadatos), T6, T7, T8, T9, T10 |
 | `src/components/sections/live-studio/Hero.tsx` | T4, T5 |
 | `src/config/site.ts` | T1, T2 |
+| `package.json` | T1 (scripts de imágenes), T11 (scripts de medición) |
 | `e2e/seo.spec.ts` | T1 (crea), T2 |
 | `e2e/home.spec.ts` | T6 (crea), T7, T8, T9, T10 |
 | `e2e/helpers.ts` | T4 (crea), T5–T10 |
@@ -204,7 +207,7 @@ hero: {
 ```ts
 thesis: {
   text: "Diseñamos, desplegamos y operamos sistemas de software, inteligencia artificial y ciberseguridad para organizaciones donde la falla no es una opción.",
-  // en: "We design, deploy and operate software, artificial intelligence and cybersecurity systems for organizations where failure is not an option."
+  // en: "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option."
 },
 services: { /* sin cambios */ ..., imageLabel: "Imagen ilustrativa" /* en: "Illustrative image" */ },
 ```
@@ -396,6 +399,7 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
 - `inView` (< 768 px de ancho, o < 600 px de alto como un celular apaisado): sin sticky; la animación se dispara una vez al entrar en pantalla.
 - `scrub` (≥ 768 px de ancho **y** ≥ 600 px de alto, sin reducir movimiento): el avance del contenedor (0→1) controla la animación.
 - **Variante CSS `stage:`** (la crea T6 en `globals.css`): `@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference));`. Toda altura larga, `sticky` o ajuste propio del modo `scrub` usa `stage:` (nunca `md:motion-safe:`), para que CSS y `useStageMode()` coincidan siempre. *Decisión:* sin el requisito de alto, un celular apaisado de ≥ 768 px de ancho (844×390) entraba en `scrub` y el marco `h-svh` con `overflow-hidden` recortaba el contenido.
+- El marco `sticky` (`h-svh` + `overflow-hidden`) nunca recorta contenido ni lo deja bajo el encabezado fijo de 64 px: `scrub` empieza en 600 px de alto, así que una sección cuyo contenido pueda no caber compacta su ritmo con `short:` (≤ 720 px de alto) y lleva además `stage:h-auto stage:min-h-svh` en `frameClassName` para crecer en lugar de recortar (portada en T6, expediente en T8).
 - `h1`/`h2` visibles desde el servidor: nunca `opacity: 0` ni `visibility: hidden` en ellos ni en sus ancestros.
 - Superposiciones SVG: `viewBox="0 0 1536 1024"`, `preserveAspectRatio="xMidYMid slice"`, `aria-hidden="true"`, dentro de `FocalCover`.
 - Trazos: **nunca** combinar `vectorEffect="non-scaling-stroke"` con un trazo animado por `pathLength` (en Chromium el guion se calcula en unidades de la imagen y se pinta en píxeles de pantalla: una línea al 50 % a media escala sale entera, y la ruta de la portada se quedaría en ~60–80 % en pantallas grandes). Los trazos animados con `pathLength` fijan su grosor en unidades de la imagen (≈ 1,1 unidades ≈ 1 px a 1440 px de ancho). `non-scaling-stroke` solo en trazos que no usan `pathLength` (p. ej. los recuadros del expediente, que aparecen con un fundido).
@@ -406,6 +410,7 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
   - `effectiveOpacity(locator)` → producto de la opacidad calculada del elemento y todos sus ancestros (`toBeVisible()` considera visible un elemento con `opacity: 0`).
   - `scrollToY(page, y)` → `window.scrollTo({ top: y, behavior: "instant" })` + espera de dos frames (`globals.css` tiene `scroll-behavior: smooth`).
   - `waitForFrames(page, count)` → espera `count` frames de animación (T5).
+  - `waitForHydration(page)` → espera `.site-header[data-tone]` (hasta 15 s), señal de que la página hidrató y de que el efecto de montaje de `SmoothScroll` (que devuelve la ventana al tope) ya corrió. Obligatorio tras `goto` antes de cualquier `scrollToY` o clic cuyo resultado dependa de la posición, cuando lo que se afirma antes ya es cierto en el HTML del servidor (T5).
   - `countVisibleBlue(page): Promise<number>` → cuenta los elementos **visibles dentro del viewport** cuyo `color`, `fill`, `stroke`, `background-color` o `border-color` calculado es `rgb(37, 99, 235)` (T6).
   - `settledTopOffset(locator)` → distancia del elemento al borde superior del viewport, medida cuando el scroll lleva dos frames quieto; para usar con `expect.poll` (T8).
   - `FORBIDDEN_STEMS`, `FORBIDDEN_WORDS`, `findForbiddenTerms(text)` → lista negra de RealTy compartida con `e2e/realty.spec.ts` (T9).
@@ -437,19 +442,20 @@ Revisiones del traspaso (§5 "Review Focus") y dónde se prueban:
 2. Enlace `#gobierno` desde la portada deja la sección arriba del viewport → **T8**.
 3. Escritorio → celular: Capacidades pasa a `inView` sin errores y completa la red → **T7**.
 4. Sin JavaScript: título visible y encabezado claro sobre la portada negra → **T6** (y T5 en `/es/inversores`).
-5. La home en inglés muestra las claves nuevas traducidas → **T6–T9** (cada una añade las suyas).
+5. La home en inglés muestra las claves nuevas traducidas → **T5–T9** (cada una añade las suyas; T5, la nav, el mega menú y el footer).
 
 ---
 
 ## Tarea 1 — Proceso de imágenes y logo
 
 **Depende de:** nada. Va en la oleada A, en paralelo con T3 y T4, sin archivos en común.
-**Archivos compartidos:** `src/config/site.ts` (T2 lo vuelve a tocar) y `e2e/seo.spec.ts` (T1 lo crea y T2 lo amplía). En este plan, `package.json` y `package-lock.json` solo los toca T1.
+**Archivos compartidos:** `src/config/site.ts` (T2 lo vuelve a tocar), `e2e/seo.spec.ts` (T1 lo crea y T2 lo amplía), `src/app/globals.css` (T1 añade una línea arriba; T5, T6 y T10 lo tocan después) y `package.json` (T11 le añade dos scripts). `package-lock.json` solo lo toca T1.
 **Worktree y puerto:** `/home/user/wt/task1` (rama `wt/task1`), `PORT=3010`.
 
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task1 -b wt/task1 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task1/node_modules
+(cd /home/user/wt/task1 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task1
 ```
 
@@ -467,7 +473,7 @@ Además, se corrige el JSON-LD `Organization`, que hoy apunta a un `/logo.svg` q
 | Crear | `scripts/process-images.mjs`, `scripts/verify-images.mjs` |
 | Crear (binarios, generados) | `design/source/{relieve,lamina,expediente,arquitectura}.png`, `src/assets/images/{relieve,lamina,expediente}.jpg`, `public/images/og/relieve-og.jpg`, `public/logo.png` |
 | Crear | `public/logo.svg`, `e2e/seo.spec.ts` |
-| Modificar | `package.json`, `package-lock.json`, `src/config/site.ts`, `next.config.ts` |
+| Modificar | `package.json`, `package-lock.json`, `src/config/site.ts`, `next.config.ts`, `src/app/globals.css` (1 línea) |
 | Borrar (se mueven) | `design/moodboard/A1-v2.png`, `A2-v2.png`, `B1.png`, `C1-v2.png` |
 
 | Fuente actual | Destino | Uso |
@@ -875,6 +881,18 @@ const nextConfig: NextConfig = {
   experimental: {
 ```
 
+**2.8** En `src/app/globals.css`, saca `docs/` de la detección automática de fuentes de Tailwind v4. Tailwind escanea todos los archivos del proyecto que no estén en `.gitignore`, incluidos los `.md` de `docs/` (este plan, el diseño, el traspaso y los informes que escribe T11). Cualquier texto de esos documentos con forma de clase (por ejemplo, una clase arbitraria citada con `…` en lugar del valor) se convierte en una regla CSS inválida. Turbopack no puede parsear el `globals.css` resultante y `next dev` responde 500 en todas las páginas, lo que tumba todas las pruebas e2e. Comprobado en una copia de `HEAD`: con una clase así en el plan, `GET /es` da 500; con esta línea, 200.
+
+Antes:
+```css
+@import "tailwindcss";
+```
+Después:
+```css
+@import "tailwindcss";
+@source not "../../docs";
+```
+
 ### Paso 3 — Verificación
 
 ```bash
@@ -905,7 +923,7 @@ Resultados esperados:
 ### Paso 4 — Commit
 
 ```bash
-git add -A package.json package-lock.json design scripts src/assets src/config/site.ts next.config.ts public/logo.svg public/logo.png public/images e2e/seo.spec.ts
+git add -A package.json package-lock.json design scripts src/assets src/config/site.ts next.config.ts src/app/globals.css public/logo.svg public/logo.png public/images e2e/seo.spec.ts
 git status --short   # solo esos archivos; nada de AGENTS.md ni node_modules
 git commit -F - <<'EOF'
 feat(home): pipeline de imágenes en gris y logo de Orbexs
@@ -922,6 +940,8 @@ Decisiones:
 - El papel #ffffff se verifica por proporción de blancos puros frente al percentil 95 de la fuente: el percentil 95 de la salida ya vale 255 sin estirar (rebote de lanczos3 y JPEG), así que no discrimina.
 - relieve-og.jpg recorta el centro del relieve: horizonte y crestas, con cielo oscuro arriba para el logo.
 - logo.png queda en RGB opaco sobre blanco, por compatibilidad como logo del JSON-LD.
+- globals.css excluye docs/ de la detección de Tailwind (@source not): una clase con
+  valor inválido citada en un .md generaba CSS que Turbopack no parsea (next dev daba 500).
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
@@ -958,6 +978,7 @@ EOF
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task2 -b wt/task2 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task2/node_modules
+(cd /home/user/wt/task2 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task2
 test -f public/images/og/relieve-og.jpg && grep -q '"/logo.png"' src/config/site.ts && echo "T1 presente"
 ```
@@ -2043,6 +2064,7 @@ EOF
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task3 -b wt/task3 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task3/node_modules
+(cd /home/user/wt/task3 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task3
 ```
 
@@ -2365,6 +2387,7 @@ EOF
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task4 -b wt/task4 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task4/node_modules
+(cd /home/user/wt/task4 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task4
 ```
 
@@ -2378,7 +2401,7 @@ cd /home/user/wt/task4
 
 ### Archivos
 - **Crear:** `e2e/helpers.ts`, `e2e/motion.spec.ts`
-- **Modificar:** `src/components/providers/MotionProvider.tsx`, `src/components/sections/ProductLanding.tsx`, `src/components/sections/DataEnrichmentLanding.tsx`, `src/components/sections/live-studio/Hero.tsx`
+- **Modificar:** `src/components/providers/MotionProvider.tsx`, `src/components/sections/ProductLanding.tsx`, `src/components/sections/DataEnrichmentLanding.tsx`, `src/components/sections/live-studio/Hero.tsx`, `src/components/animations/ScrollProgress.tsx`
 - **Borrar:** — (`src/components/ui/ScrambleText.tsx` se queda: lo siguen usando `CTA.tsx`, hasta T10, y `ScheduleForm.tsx`, fuera de alcance)
 
 ### Auditoría de valores ligados al scroll (§9.3, hecha al preparar la tarea)
@@ -2390,10 +2413,10 @@ cd /home/user/wt/task4
 | `src/components/layout/Header.tsx` | `useScroll()` + `useMotionValueEvent` → solo `setIsScrolled(latest > 50)`, un booleano | No: no anima ningún valor con el scroll |
 | `src/hooks/useParallax.ts` (`useParallax`, `useScrollScale`, `useScrollOpacity`, `useSectionEntrance`) | `useScroll` + `useTransform` + `useSpring` | No: **no tiene consumidores** (código muerto; candidato a borrarse en T11) |
 | `src/hooks/useScrollVelocity.ts` (`useScrollVelocitySkew`) | ídem, y ya devuelve 0 con reducir movimiento | No: **no tiene consumidores** (candidato a T11) |
-| `src/components/animations/ScrollProgress.tsx` | listener nativo de `scroll` que escribe `style.height` | No en esta tarea: ya devuelve `null` con reducir movimiento o en móvil. Anima `height`, contra §11, pero queda fuera de la home rediseñada (se reporta) |
+| `src/components/animations/ScrollProgress.tsx` | listener nativo de `scroll` que escribe `style.height` | **Sí (paso 2.5):** ya devuelve `null` con reducir movimiento o en móvil, pero el layout (`src/app/[locale]/layout.tsx`) lo pinta en todas las rutas, también en `/es` en escritorio, y anima `height` en cada evento de scroll, contra el diseño §11. Pasa a `scaleY` |
 | `MagneticButton.tsx`, `CustomCursor.tsx` | `useSpring` sobre el puntero, no sobre el scroll | No |
 
-Conclusión: hoy **ningún componente en uso** anima valores ligados al scroll. Los nuevos (T6–T10) los obtienen de `useStageProgress`, que ya incluye reducir movimiento (§3.3).
+Conclusión: el único componente en uso que anima un valor ligado al scroll es `ScrollProgress` (paso 2.5). Los nuevos (T6–T10) los obtienen de `useStageProgress`, que ya incluye reducir movimiento (§3.3).
 
 ### Paso 1 — Prueba primero
 
@@ -2876,6 +2899,37 @@ Reemplazar por:
 
 El resto del Hero (estado, subtítulo, descripción, CTA y marco) conserva su entrada `m.*`. Con reducir movimiento, `MotionConfig` anula su `y` y deja un fundido de opacidad. Las animaciones CSS de Live Studio (`.live-scan`, `.live-dot`, `.marquee-track`) ya se apagan con `@media (prefers-reduced-motion: reduce)` en `globals.css`.
 
+#### 2.5 `src/components/animations/ScrollProgress.tsx`: `scaleY` en lugar de `height`
+
+El indicador lateral lo monta el layout en todas las rutas, home incluida (escritorio y sin reducir movimiento). Escribía `style.height` en cada evento de scroll; el diseño §11 prohíbe animar `height`. El relleno pasa a ocupar toda la pista y escala desde arriba.
+
+Antes:
+```tsx
+      innerRef.current.style.height = `${progress}%`
+```
+Después:
+```tsx
+      innerRef.current.style.transform = `scaleY(${progress / 100})`
+```
+
+Antes:
+```tsx
+        <div
+          ref={innerRef}
+          className="absolute top-0 left-0 w-full bg-[#0a0a0a] opacity-60"
+          style={{ height: "0%" }}
+        />
+```
+Después:
+```tsx
+        <div
+          ref={innerRef}
+          className="absolute inset-0 origin-top bg-[#0a0a0a] opacity-60"
+          style={{ transform: "scaleY(0)" }}
+        />
+```
+El componente devuelve `null` hasta montar, así que no cambia nada del HTML del servidor.
+
 ### Paso 3 — Verificación
 
 ```bash
@@ -2889,9 +2943,11 @@ grep -nE "(initial|animate)=\{\{ ?height" src/components/sections/live-studio/He
 #   esperado: sin salida (ya no se anima height)
 grep -rn "m\.h1" src/components/sections/live-studio src/components/sections/ProductLanding.tsx src/components/sections/DataEnrichmentLanding.tsx
 #   esperado: sin salida
+grep -n "style.height\|height: \"0%\"" src/components/animations/ScrollProgress.tsx
+#   esperado: sin salida (el indicador anima scaleY)
 PORT=3040 npx playwright test --reporter=line                         # suite completa en verde (39 previas + 12 nuevas)
 git status --short
-#   esperado: M en MotionProvider.tsx, ProductLanding.tsx, DataEnrichmentLanding.tsx, live-studio/Hero.tsx;
+#   esperado: M en MotionProvider.tsx, ProductLanding.tsx, DataEnrichmentLanding.tsx, live-studio/Hero.tsx, ScrollProgress.tsx;
 #             ?? e2e/helpers.ts, e2e/motion.spec.ts  (si aparece AGENTS.md: git checkout AGENTS.md)
 ```
 
@@ -2906,7 +2962,7 @@ Comprobaciones específicas del resultado:
 cd /home/user/wt/task4
 git add src/components/providers/MotionProvider.tsx src/components/sections/ProductLanding.tsx \
   src/components/sections/DataEnrichmentLanding.tsx src/components/sections/live-studio/Hero.tsx \
-  e2e/helpers.ts e2e/motion.spec.ts
+  src/components/animations/ScrollProgress.tsx e2e/helpers.ts e2e/motion.spec.ts
 git commit -F - <<'EOF'
 fix(home): títulos visibles desde el servidor y respeto a reducir movimiento
 
@@ -2924,7 +2980,8 @@ Decisiones:
 - Atributos nuevos data-eq-bar y data-eq-level (amplían §3.4 del plan) para medir las barras.
 - Playwright 1.58 no acepta reducedMotion en test.use: se usa contextOptions: { reducedMotion } (ajuste a §3.7).
 - Prueba extra de MotionConfig (registro por frame del desplazamiento del subtítulo): sin ella, el proveedor quedaba sin cubrir.
-- Auditoría: ningún componente en uso anima valores ligados al scroll; useParallax.ts y useScrollVelocity.ts no tienen consumidores (T11).
+- Auditoría: el indicador ScrollProgress (en todas las rutas, home incluida) animaba height con el scroll; pasa a scaleY.
+  useParallax.ts y useScrollVelocity.ts no tienen consumidores (T11).
 - Fuera de alcance: h1 de /agendar (ScrambleText) y de /nosotros e /inversores (RevealText), y h2 de los CTA de producto.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -2942,7 +2999,7 @@ EOF
 - **`reducedMotion` en Playwright:** §3.7 del plan dice `test.use({ reducedMotion: "reduce" })`, pero en Playwright 1.58 esa opción no existe en `test.use` (solo en `contextOptions` o en `page.emulateMedia`). Se usa `test.use({ contextOptions: { reducedMotion: 'reduce' } })`. T5–T10 deben hacer lo mismo, o usar `page.emulateMedia` antes de `goto`.
 - **Prueba (c) de `MotionConfig`:** no la pedía el enunciado, pero sin ella el cambio en `MotionProvider` quedaba sin prueba. Un `addInitScript` registra por frame el `translateY` del subtítulo de `/es/soberania-ia` desde antes de hidratar. Con el proveedor, solo aparecen 20 y 0; sin él, valores intermedios durante 0,6 s. Es determinista: no depende de cuándo hidrata la página.
 - **`waitForTimeout` en (b):** solo para medir la ausencia de movimiento durante unos 600 ms, que no tiene un atributo observable. La espera de estados se hace con `expect.poll`.
-- **Auditoría de scroll (§9.3):** hoy no hay componentes en uso con valores ligados al scroll: `Header` solo deriva un booleano, y `useParallax.ts` y `useScrollVelocity.ts` no tienen consumidores. No se cambia nada. Se proponen para la limpieza de T11. `ScrollProgress` anima `height` por estilo, pero ya se desactiva con reducir movimiento; queda anotado.
+- **Auditoría de scroll (§9.3):** `Header` solo deriva un booleano, y `useParallax.ts` y `useScrollVelocity.ts` no tienen consumidores (se borran en T11). `ScrollProgress` sí está en uso: el layout lo pinta en todas las rutas, `/es` incluida, y animaba `height` con el scroll, contra el diseño §11. Pasa a `scaleY` desde arriba (paso 2.5); con reducir movimiento o en móvil sigue sin montarse.
 - **Fuera de alcance (se reporta, no se toca):** mismo tipo de fallo en otros sitios. El h1 de `/agendar` (`ScheduleForm`, ScrambleText). Los h1 de `/nosotros` e `/inversores` (`RevealText as="h1"`: palabras en `y: 100%` dentro de `overflow-hidden`, recortadas sin JavaScript). Los h2 de los CTA de las páginas de producto (`RevealText` dentro de un `m.div` con `opacity: 0` hasta `whileInView`). §9.3 limita la tarea a ProductLanding y DataEnrichmentLanding; el diseño deja Nosotros e Inversores para la fase 2.
 
 ---
@@ -2953,12 +3010,13 @@ EOF
 
 **Depende de:** T3 y T4, ya integradas en `redesign/home` (T3 toca `es.ts`/`en.ts`; T4 toca `live-studio/Hero.tsx` y crea `e2e/helpers.ts` con `effectiveOpacity` y `scrollToY`). Va en paralelo con T2: no comparten archivos.
 
-**Archivos compartidos** (plan §2): `es.ts`/`en.ts` (T3 antes; T6–T11 después), `src/app/globals.css` (T6 y T10 después), `e2e/smoke.spec.ts` (T6, T7, T9 y T10 después), `live-studio/Hero.tsx` (T4 antes), `e2e/helpers.ts` (T4 lo crea; esta tarea le añade `waitForFrames`), `realty/Hero.tsx` (T9 después exporta `ConsoleFrame`), `e2e/a11y.spec.ts` (solo esta tarea). Los bloques "Antes" de esta sección se tomaron de `b65e497`; T3 y T4 no tocan esas líneas. Si alguno no casa exacto, aplicar el mismo cambio sobre el código vigente sin tocar lo demás.
+**Archivos compartidos** (plan §2): `es.ts`/`en.ts` (T3 antes; T6–T11 después), `src/app/globals.css` (T6 y T10 después), `e2e/smoke.spec.ts` (T6, T7, T9 y T10 después), `live-studio/Hero.tsx` (T4 antes), `e2e/helpers.ts` (T4 lo crea; esta tarea le añade `waitForFrames` y `waitForHydration`), `realty/Hero.tsx` (T9 después exporta `ConsoleFrame`), `e2e/a11y.spec.ts` (solo esta tarea). Los bloques "Antes" de esta sección se tomaron de `b65e497`; T3 y T4 no tocan esas líneas. Si alguno no casa exacto, aplicar el mismo cambio sobre el código vigente sin tocar lo demás.
 
 **Worktree y puerto:**
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task5 -b wt/task5 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task5/node_modules
+(cd /home/user/wt/task5 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task5            # todas las órdenes de esta tarea, desde aquí
 # Servidor de desarrollo de esta tarea: PORT=3050 (Playwright lo arranca solo).
 ```
@@ -2967,14 +3025,14 @@ cd /home/user/wt/task5            # todas las órdenes de esta tarea, desde aqu�
 - `usePathname` se importa de `next/navigation` y es un hook de cliente (`node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-pathname.md`). Con rewrites (los slugs ingleses), el valor del cliente puede diferir del del servidor. Por eso aquí solo sirve como dependencia del efecto y para comparar, y nunca se pinta en el HTML. No hay `cacheComponents`, así que no requiere `Suspense` (`SmoothScroll` y `LanguageSwitcher` ya lo usan en el layout).
 - `AnimatePresence`, `useScroll` y `useMotionValueEvent` salen de `motion/react`, y `m.div` acepta `ref` (React 19).
 - `tailwind-merge` 3.5: `cn("bg-[#0a0a0a] text-white hover:bg-[#1a1a1a] focus-visible:ring-[#0a0a0a] …", "bg-[color:var(--hdr-cta-bg)] text-[color:var(--hdr-cta-fg)] hover:bg-[color:var(--hdr-cta-bg-hover)] focus-visible:ring-[color:var(--hdr-focus)]")` elimina los cuatro colores del `Button` (comprobado con node).
-- Tailwind 4.2 compila `aria-expanded:text-[color:var(…)]` → `&[aria-expanded="true"]`, `data-[scrolled=true]:backdrop-blur-sm` → `&[data-scrolled="true"]` y `[&_a]:border-[color:var(…)]` → `& a`, con especificidad (0,1,1). Esta última gana a `text-[#525252]` y `border-[#e5e5e5]` del `LanguageSwitcher`, que son (0,1,0), sin tocar ese componente.
+- Tailwind 4.2 compila `aria-expanded:text-[color:var(--hdr-link-hover)]` → `&[aria-expanded="true"]`, `data-[scrolled=true]:backdrop-blur-sm` → `&[data-scrolled="true"]` y `[&_a]:border-[color:var(--hdr-control-border)]` → `& a`, con especificidad (0,1,1). Esta última gana a `text-[#525252]` y `border-[#e5e5e5]` del `LanguageSwitcher`, que son (0,1,0), sin tocar ese componente.
 - Playwright 1.58: `expect(locator).toHaveAttribute(name)` sin valor comprueba presencia (`not.` para ausencia). `javaScriptEnabled` es opción de primer nivel de `test.use`.
 - Reglas activas de `react-hooks` 7 (`set-state-in-effect`, `refs`, `immutability`, `purity`…): el código de esta sección pasa `eslint` y `tsc --noEmit` en una copia del árbol con estos cambios y el `e2e/helpers.ts` de T4.
 
 ### Archivos
 - **Crear:** `e2e/header.spec.ts`
 - **Reescribir (código completo abajo):** `src/components/layout/Header.tsx`, `src/components/layout/header/MegaMenu.tsx`, `src/components/layout/header/types.ts`, `src/components/layout/header/useDarkSectionDetection.ts`, `src/components/layout/Footer.tsx`, `e2e/a11y.spec.ts`
-- **Modificar (bloques Antes → Después):** `src/content/dictionaries/es.ts`, `src/content/dictionaries/en.ts`, `src/app/globals.css`, `src/lib/seo.ts`, `src/app/llms.txt/route.ts`, `src/components/sections/realty/Hero.tsx`, `src/components/sections/InvestorsPage.tsx`, `src/components/sections/live-studio/Hero.tsx`, `e2e/smoke.spec.ts`, `e2e/helpers.ts`
+- **Modificar (bloques Antes → Después):** `src/content/dictionaries/es.ts`, `src/content/dictionaries/en.ts`, `src/app/globals.css`, `src/lib/seo.ts`, `src/app/llms.txt/route.ts`, `src/components/sections/realty/Hero.tsx`, `src/components/sections/InvestorsPage.tsx`, `src/components/sections/live-studio/Hero.tsx`, `src/components/providers/SmoothScroll.tsx`, `e2e/smoke.spec.ts`, `e2e/helpers.ts`
 - **Sin cambios:** `src/components/layout/header/HamburgerIcon.tsx`, `src/components/ui/LanguageSwitcher.tsx`, `src/components/ui/Button.tsx` y `src/app/[locale]/layout.tsx` (sigue pasando `dict.nav` y `dict.footer`)
 - **Borrar:** —
 
@@ -2982,11 +3040,32 @@ cd /home/user/wt/task5            # todas las órdenes de esta tarea, desde aqu�
 
 ### Paso 1 — Prueba primero
 
-#### 1.1 `e2e/helpers.ts`: añadir `waitForFrames`
+#### 1.1 `e2e/helpers.ts`: añadir `waitForFrames` y `waitForHydration`
 
-Añadir al final del archivo que creó T4, que ya importa `type { Locator, Page }` de `@playwright/test`. No hace falta ningún import nuevo.
+El archivo que creó T4 importa `type { Locator, Page }` de `@playwright/test`. `waitForHydration` necesita además `expect`, así que la primera línea cambia:
+```ts
+// antes
+import type { Locator, Page } from '@playwright/test'
+// después
+import { expect, type Locator, type Page } from '@playwright/test'
+```
+
+Añadir al final del archivo:
 
 ```ts
+/**
+ * Espera a que la página haya hidratado. `SmoothScroll` (layout) lleva la
+ * ventana al tope en su efecto de montaje: un `scrollToY` o un clic hechos
+ * antes de hidratar se pierden. `.site-header[data-tone]` falta en el HTML del
+ * servidor y aparece después de ese efecto (el Header es hijo de SmoothScroll
+ * y el tono llega en un callback posterior), así que sirve de señal. Hace
+ * falta cuando lo primero que se afirma (p. ej. `data-stage-mode="scrub"`)
+ * ya es cierto en el HTML del servidor.
+ */
+export async function waitForHydration(page: Page): Promise<void> {
+  await expect(page.locator('.site-header')).toHaveAttribute('data-tone', /^(light|dark|menu)$/, { timeout: 15_000 })
+}
+
 /**
  * Espera `count` frames del navegador. Sirve para afirmar que un estado NO
  * cambia: deja llegar un callback pendiente (p. ej., de IntersectionObserver)
@@ -3015,7 +3094,9 @@ export async function waitForFrames(page: Page, count = 2): Promise<void> {
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
-import { scrollToY, waitForFrames } from './helpers'
+import en from '../src/content/dictionaries/en'
+import { buildLocalePath } from '../src/lib/i18n'
+import { scrollToY, waitForFrames, waitForHydration } from './helpers'
 
 /**
  * Encabezado y mega menú (diseño §6 y §12 prueba 3; traspaso "Encabezado").
@@ -3039,8 +3120,10 @@ test.describe('tono del encabezado', () => {
   test('al navegar de /es a /es/inversores por el footer, el encabezado queda oscuro', async ({ page }) => {
     await page.goto('/es')
     const header = page.locator('.site-header')
+    // Antes de hidratar, el efecto de montaje de SmoothScroll desharía el scroll.
+    await waitForHydration(page)
 
-    // Sobre la primera sección clara de la home el tono es claro (y el encabezado ya hidrató).
+    // Sobre la primera sección clara de la home el tono es claro.
     await scrollToY(page, (await documentTop(page, LIGHT_SECTION)) + 1)
     await expect(header).toHaveAttribute('data-tone', 'light')
 
@@ -3050,6 +3133,8 @@ test.describe('tono del encabezado', () => {
     })
     await page.getByRole('contentinfo').getByRole('link', { name: investors.name, exact: true }).click()
     await expect(page).toHaveURL(/\/es\/inversores$/)
+    // La página nueva empieza arriba (SmoothScroll, paso 2.11): el tono oscuro es el de su portada.
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
     await expect(header).toHaveAttribute('data-tone', 'dark')
     expect(await page.evaluate(() => '__clientNavigation' in window)).toBe(true)
 
@@ -3169,6 +3254,38 @@ test.describe('mega menú', () => {
     await expect(page.locator(`.site-header .live-dot, ${MEGA_MENU} .live-dot, footer .live-dot`)).toHaveCount(0)
   })
 })
+
+test.describe('navegación en inglés (revisión 5 del traspaso)', () => {
+  test.use({ viewport: { width: 1280, height: 720 } })
+
+  test('la nav, el mega menú y el footer de /en muestran las claves nuevas traducidas', async ({ page }) => {
+    await page.goto('/en')
+    await waitForHydration(page)
+    const nav = page.getByRole('navigation')
+    const [services, products, company] = en.nav.items
+    await expect(nav.getByRole('button', { name: services.name, exact: true })).toBeVisible()
+    await expect(nav.getByRole('button', { name: products.name, exact: true })).toBeVisible()
+    await expect(nav.getByRole('link', { name: company.name, exact: true })).toHaveAttribute('href', buildLocalePath('en', '/nosotros'))
+
+    await nav.getByRole('button', { name: products.name, exact: true }).click()
+    const menu = page.locator(MEGA_MENU)
+    await expect(menu).toBeVisible()
+    for (const link of en.nav.productLinks) {
+      const item = menu.getByRole('link', { name: link.name })
+      await expect(item).toHaveAttribute('href', buildLocalePath('en', link.href))
+      await expect(item).toContainText(link.description)
+    }
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+
+    const footer = page.getByRole('contentinfo')
+    await expect(footer).toContainText(en.footer.solutions)
+    await expect(footer).toContainText(en.footer.products)
+    for (const link of en.footer.productLinks) {
+      await expect(footer.getByRole('link', { name: link.name, exact: true }).first()).toHaveAttribute('href', buildLocalePath('en', link.href))
+    }
+  })
+})
 ```
 
 Qué cubre cada prueba:
@@ -3176,6 +3293,7 @@ Qué cubre cada prueba:
 - **Secciones oscuras contiguas** (segundo bug del traspaso): en `/es/estudio-tiktok-live` la portada y el marquee son oscuros y se tocan. En el paso 2 el callback trae solo la portada saliendo; el código actual pintaría el encabezado claro. `waitForFrames` deja llegar ese callback y el render de React antes de afirmar que sigue oscuro.
 - **Hidratación:** el hook devuelve `null` hasta saber; el primer render del cliente no lleva `data-tone`, igual que el HTML del servidor.
 - **Sin JavaScript** (revisión 4 del traspaso, parte de páginas no-home; la home la cubre T6): regla `body:has([data-header-start="dark"]) .site-header:not([data-tone])` en `/es/inversores`, y el caso claro en `/es/nosotros` para verificar que la regla no se aplica de más.
+- **Inglés** (revisión 5 del traspaso): en `/en`, los disparadores "Services" y "Products", el enlace "Company", los productos del mega menú con su descripción y las columnas Solutions / Products del footer salen de `en.ts`, con los `href` localizados.
 - **Mega menú:** `aria-expanded`, `aria-controls` solo con el panel abierto, foco al primer enlace, Escape cierra y devuelve el foco al botón que lo abrió (los tres disparadores), bloque Productos y ausencia del punto magenta.
 
 #### 1.3 `e2e/smoke.spec.ts`
@@ -3408,7 +3526,7 @@ PORT=3050 npx playwright test e2e/header.spec.ts e2e/smoke.spec.ts e2e/a11y.spec
 ```
 
 Fallos esperados (y por estas razones, no por errores de sintaxis de la prueba):
-- `header.spec.ts`: **7 de 7**. Las de tono esperan `.site-header` con `data-tone` y el elemento no existe (hoy el `<header>` no tiene esa clase); las de sin JavaScript fallan en `toHaveCSS` por lo mismo; `Servicios y Productos…` falla en `expect(menuTriggers).toEqual(…)` (hoy ningún ítem tiene `opensMenu`: `[]` frente a `["Servicios", "Live Studio"]`); `el bloque Productos…` agota el tiempo buscando un botón "Live Studio" (hoy es un enlace).
+- `header.spec.ts`: **8 de 8**. La de inglés falla porque `en.nav.productLinks` todavía no existe (`TypeError` al recorrerlo). Las de tono esperan `.site-header` con `data-tone` y el elemento no existe (hoy el `<header>` no tiene esa clase); las de sin JavaScript fallan en `toHaveCSS` por lo mismo; `Servicios y Productos…` falla en `expect(menuTriggers).toEqual(…)` (hoy ningún ítem tiene `opensMenu`: `[]` frente a `["Servicios", "Live Studio"]`); `el bloque Productos…` agota el tiempo buscando un botón "Live Studio" (hoy es un enlace).
 - `smoke.spec.ts`: **4** — `navigation works on desktop` (no hay botón "Live Studio"), `mobile menu works` (`TypeError`: `nav.platformLinks` es `undefined`), `home page links to the live studio division` (no hay botón "Live Studio") y `llms.txt lists…` (falta `## Productos (Español)`). El resto pasa.
 - `a11y.spec.ts`: **1** — el escaneo con el mega menú abierto (`#site-mega-menu` no existe). Los 8 escaneos de rutas pasan.
 
@@ -4405,6 +4523,26 @@ Después:
 
 La portada de la home recibe el atributo en T6 (`ScrollStage startsDark`). `AboutPage.tsx` empieza en claro y no lo lleva.
 
+#### 2.11 `src/components/providers/SmoothScroll.tsx`: volver al tope sin animación
+
+`html { scroll-behavior: smooth }` hace que `window.scrollTo(0, 0)` **anime**. Next 16 ya no desactiva el scroll suave durante la navegación si `<html>` no lleva `data-scroll-behavior="smooth"` (`node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md`, "Scroll Behavior Override"). El scroll de Next y este scroll suave compiten, y tras una navegación de cliente desde una página desplazada la página nueva a menudo se queda a media altura (medido: `scrollY` final de 1914 a 1934 px en lugar de 0). La prueba 1 de `header.spec.ts` falla por eso de forma intermitente. Ninguna otra tarea toca este archivo.
+
+Antes:
+```tsx
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+```
+Después:
+```tsx
+  useEffect(() => {
+    // Instant on purpose: with `scroll-behavior: smooth` on <html> a plain
+    // scrollTo animates and races Next's own scroll after a navigation, and the
+    // new page can stop halfway down. Anchor links keep the native smooth scroll.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+  }, [pathname])
+```
+
 ---
 
 ### Paso 3 — Verificación
@@ -4412,7 +4550,7 @@ La portada de la home recibe el atributo en T6 (`ScrollStage startsDark`). `Abou
 ```bash
 npm run lint                                   # 0 errores
 npx tsc --noEmit                               # 0 errores
-PORT=3050 npx playwright test e2e/header.spec.ts --reporter=line    # 7 passed
+PORT=3050 npx playwright test e2e/header.spec.ts --reporter=line    # 8 passed
 PORT=3050 npx playwright test e2e/smoke.spec.ts e2e/a11y.spec.ts --reporter=line   # todo verde (a11y: 9 passed)
 PORT=3050 npx playwright test --reporter=line  # suite completa en verde antes de entregar
 ```
@@ -4424,7 +4562,7 @@ grep -rn "live-dot" src/components/layout
 grep -n "#525252" src/components/layout/header/MegaMenu.tsx
 grep -rn "y: -100" src/components/layout
 grep -rn "directItems\|NavChild\b" src
-grep -rln 'data-header-start="dark"' src        # exactamente: realty/Hero.tsx, InvestorsPage.tsx, live-studio/Hero.tsx
+grep -rln --include=*.tsx 'data-header-start="dark"' src   # exactamente: realty/Hero.tsx, InvestorsPage.tsx, live-studio/Hero.tsx
 ```
 
 Revisión manual rápida (no bloqueante, con `PORT=3050 npm run dev`):
@@ -4459,7 +4597,9 @@ Decisiones:
 - CTA y hamburguesa con borde de 1 px en todos los tonos: mismo tamaño al cambiar de tono.
 - El hook devuelve null también justo tras navegar: decide el CSS con la página nueva, sin arrastrar el tono anterior.
 - llms.txt: secciones nuevas Productos / Products; la línea de RealTy sale de Plataforma. serviceNameForPath busca también en productLinks.
-- Pruebas: "sección clara" = toda section sin data-header-theme="dark" (hoy solo la portada vieja lleva "light"); helper nuevo waitForFrames.
+- Pruebas: "sección clara" = toda section sin data-header-theme="dark" (hoy solo la portada vieja lleva "light"); helpers nuevos waitForFrames y waitForHydration; prueba de la nav, el mega menú y el footer en inglés.
+- SmoothScroll vuelve al tope con behavior "instant": con scroll-behavior: smooth en <html>, Next 16 ya no lo
+  desactiva al navegar y el scroll suave competía con el de Next (la página nueva quedaba a media altura).
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
@@ -4471,7 +4611,7 @@ EOF
 ### Decisiones
 
 1. **El mega menú deja de listar enlaces directos** (`directItems`). El traspaso fija la columna 2 como "Soluciones y debajo Productos". El único ítem directo que queda en la nav es "Empresa" (`/nosotros`), y ya lo cubre la columna 3 ("Sobre Orbexs → Conocer más"). Así, en móvil, la hamburguesa sigue llegando a las tres entradas de la nav. (El `layout.md` del design system describe "Solutions + direct links": el traspaso manda.)
-2. **Tipos:** `NavItem` pasa a ser una unión discriminada (`{ opensMenu: true }` | `{ href }`), `NavChild` pasa a llamarse `NavLink`, y `types.ts` exporta `MEGA_MENU_ID` y `HeaderTone`. Las pruebas escriben `'site-mega-menu'` literal (contrato §3.4) para que `e2e/` siga importando solo diccionarios y `helpers.ts`.
+2. **Tipos:** `NavItem` pasa a ser una unión discriminada (`{ opensMenu: true }` | `{ href }`), `NavChild` pasa a llamarse `NavLink`, y `types.ts` exporta `MEGA_MENU_ID` y `HeaderTone`. Las pruebas escriben `'site-mega-menu'` literal (contrato §3.4) para que `e2e/` no importe módulos de componentes: solo diccionarios, `helpers.ts` y `src/lib/i18n` (`buildLocalePath`).
 3. **`<header>` simple en lugar de `m.header`:** quitar `initial={{ y: -100 }}` deja a motion sin nada que animar. El `trackEvent` del toggle sale del *updater* de `setState` (antes se ejecutaba dos veces en StrictMode). Escape sigue sin registrar evento, como antes.
 4. **Nombres concretos de variables** (el traspaso solo da las familias `--hdr-control-*` y `--hdr-cta-*`): `--hdr-control-{bg,bg-hover,fg,fg-hover,border,border-hover}` y `--hdr-cta-{bg,bg-hover,fg,border,border-hover}`. **Se añaden** `--hdr-focus` y `--hdr-focus-offset`, más la regla `.site-header :focus-visible { outline-color }`: el anillo global es `#0a0a0a` y no se veía en los tonos oscuros ni en `menu`. Esto importa porque Escape devuelve el foco al disparador.
 5. **Colores del tono oscuro:** los enlaces y el selector de idioma pasan a `#a3a3a3` (antes `white/60` y `white/70`), el token `text-on-dark-secondary`, igual que el mega menú. Contraste de texto (AA ≥ 4,5:1): claro `#0a0a0a` 19,8, `#525252` 7,8 sobre blanco y 7,2 sobre `#f5f5f5`; oscuro/menú: blanco 19,8, `#a3a3a3` 7,85 sobre `#0a0a0a`; barras al 90 % con scroll: 6,3 en el peor caso; aurora de Live Studio: ≥ 5,7.
@@ -4480,7 +4620,7 @@ EOF
 8. **El logo y el CTA "Agendar" cierran el menú al pulsarse.** Antes, navegar desde el logo con el menú abierto lo dejaba abierto sobre la página nueva.
 9. **`llms.txt`** gana "## Productos (Español)" y "## Products (English)" desde `nav.productLinks`. RealTy sale de Plataforma/Platform y el resto de la salida no cambia. **`serviceNameForPath`** busca también en `productLinks`, así que el `Service` de `/realty` sigue llamándose "RealTy". Una prueba de humo nueva vigila `llms.txt`.
 10. **Footer:** "Legal" usa la misma `FooterColumn` (mismos `href`) y se quita la prop `nav?: unknown`, que no se usaba. La clase `.live-dot` se queda en `globals.css` porque la usa la página de Live Studio.
-11. **Pruebas:** (a) "sección clara" es toda `main section:not([data-header-theme="dark"])`: aunque §3.4 pide `data-header-theme` en todas las secciones, hoy solo la portada vieja lleva `"light"`, y entre T6 y T7 la home podría no tener ninguna marcada. (b) El bug del conjunto se prueba en `/es/estudio-tiktok-live`, donde portada y marquee son oscuros y contiguos. (c) El escaneo axe con el menú abierto se limita a `#site-mega-menu` y `.site-header`: lo de debajo del panel no se ve. Espera a que el fondo del encabezado sea `rgb(10, 10, 10)` para no medir colores a mitad de transición. (d) Helper nuevo `waitForFrames(page, count)` en `e2e/helpers.ts`.
+11. **Pruebas:** (a) "sección clara" es toda `main section:not([data-header-theme="dark"])`: aunque §3.4 pide `data-header-theme` en todas las secciones, hoy solo la portada vieja lleva `"light"`, y entre T6 y T7 la home podría no tener ninguna marcada. (b) El bug del conjunto se prueba en `/es/estudio-tiktok-live`, donde portada y marquee son oscuros y contiguos. (c) El escaneo axe con el menú abierto se limita a `#site-mega-menu` y `.site-header`: lo de debajo del panel no se ve. Espera a que el fondo del encabezado sea `rgb(10, 10, 10)` para no medir colores a mitad de transición. (d) Helpers nuevos en `e2e/helpers.ts`: `waitForFrames(page, count)` y `waitForHydration(page)`. El segundo espera `.site-header[data-tone]`: el efecto de montaje de `SmoothScroll` devuelve la ventana al tope, así que todo `scrollToY` o clic que siga a un `goto` y dependa de la posición espera antes a la hidratación (T6–T8 lo usan). (e) La nav, el mega menú y el footer también se prueban en `/en` (revisión 5 del traspaso). (f) `SmoothScroll` usa `behavior: "instant"` (paso 2.11).
 12. **Para T6:** en tono oscuro el encabezado es transparente sobre el relieve. Los 64 px superiores de la portada deben mantener `#a3a3a3` y el blanco con ≥ 4,5:1 (degradado superior si hace falta). La portada debe llevar `data-header-start="dark"` (vía `ScrollStage startsDark`) para que `:has()` actúe en `/es` sin JavaScript.
 
 ---
@@ -4493,7 +4633,7 @@ EOF
 - **T1:** `src/assets/images/relieve.jpg` (2560 px, gris). Con import estático, `next/image` recibe ancho, alto y `blurDataURL`.
 - **T2:** `src/lib/page-meta.ts` y `src/lib/metadata.ts`. `generateMetadata` de la home ya llama a `pageMetadata(locale, "/")`.
 - **T4:** `e2e/helpers.ts` con `effectiveOpacity(locator)` y `scrollToY(page, y)`. `MotionProvider` con `<MotionConfig reducedMotion="user">`.
-- **T5:** encabezado pintado con variables CSS (`--hdr-*`), la regla `body:has([data-header-start="dark"]) .site-header:not([data-tone])`, `data-tone` / `data-scrolled`, `waitForFrames` en helpers, y `smoke.spec.ts` / `a11y.spec.ts` ya ajustados a la nav nueva.
+- **T5:** encabezado pintado con variables CSS (`--hdr-*`), la regla `body:has([data-header-start="dark"]) .site-header:not([data-tone])`, `data-tone` / `data-scrolled`, `waitForFrames` y `waitForHydration` en helpers, `SmoothScroll` con scroll instantáneo, y `smoke.spec.ts` / `a11y.spec.ts` ya ajustados a la nav nueva.
 
 **Archivos compartidos (van en serie, plan §2):** `es.ts` / `en.ts`, `globals.css`, `e2e/smoke.spec.ts`, `src/app/[locale]/page.tsx`, `e2e/home.spec.ts` (lo crea esta tarea), `e2e/helpers.ts`, `src/lib/page-meta.ts`, `TechStack.tsx` y `e2e/a11y.spec.ts` (solo un comentario).
 
@@ -4501,6 +4641,7 @@ EOF
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task6 -b wt/task6 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task6/node_modules
+(cd /home/user/wt/task6 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task6
 export PORT=3060          # todas las órdenes de Playwright de esta tarea
 ```
@@ -4523,7 +4664,7 @@ grep -n 'data-header-start="dark"' src/app/globals.css
 | Crear | `src/components/sections/home/geometry.ts`, `src/components/sections/home/HomeHero.tsx`, `src/components/sections/home/HeroRoute.tsx` |
 | Crear | `e2e/home.spec.ts` |
 | Modificar | `src/app/[locale]/page.tsx` (completo), `src/components/sections/TechStack.tsx` (completo) |
-| Modificar | `src/content/dictionaries/es.ts`, `en.ts` (bloque `hero`), `src/app/globals.css` (2 bloques), `src/lib/page-meta.ts` (1 expresión) |
+| Modificar | `src/content/dictionaries/es.ts`, `en.ts` (bloque `hero`), `src/app/globals.css` (2 bloques), `src/lib/page-meta.ts` (1 expresión y su comentario) |
 | Modificar | `e2e/helpers.ts` (se agrega `countVisibleBlue`), `e2e/smoke.spec.ts` (1 línea), `e2e/a11y.spec.ts` (1 comentario) |
 | Borrar | `src/components/sections/Hero.tsx`, `src/components/sections/TrustBar.tsx` |
 
@@ -4596,7 +4737,7 @@ export async function countVisibleBlue(page: Page): Promise<number> {
 import { test, expect, type Locator, type Page } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
 import en from '../src/content/dictionaries/en'
-import { countVisibleBlue, effectiveOpacity, scrollToY } from './helpers'
+import { countVisibleBlue, effectiveOpacity, scrollToY, waitForHydration } from './helpers'
 
 /**
  * Home "Cartografía soberana". Un `describe` por sección; T6 crea la portada y
@@ -4652,6 +4793,22 @@ test.describe('portada · HTML del servidor', () => {
     expect(heroImage, 'la imagen de la portada se pide con prioridad alta').toBeDefined()
     expect(heroImage).toContain('loading="eager"')
   })
+
+  test('la portada pesa ≤ 250 KB en AVIF a 1920 px (diseño §7)', async ({ request }) => {
+    const html = await (await request.get('/es')).text()
+    const tag = html.match(/<img[^>]*fetchpriority="high"[^>]*>/i)![0]
+    const srcset = tag.match(/srcset="([^"]+)"/i)![1].replace(/&amp;/g, '&')
+    const candidate = srcset
+      .split(',')
+      .map((entry) => entry.trim().split(' '))
+      .find(([, width]) => width === '1920w')
+    expect(candidate, 'el srcset de la portada ofrece 1920w').toBeDefined()
+    // El optimizador de next dev también codifica AVIF (next.config.ts, T1).
+    const response = await request.get(candidate![0], { headers: { accept: 'image/avif,image/webp,*/*' } })
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toBe('image/avif')
+    expect((await response.body()).length).toBeLessThanOrEqual(250 * 1024)
+  })
 })
 
 test.describe('portada · sin JavaScript (revisión 4)', () => {
@@ -4681,8 +4838,9 @@ test.describe('portada · reducir movimiento', () => {
     await page.goto('/es')
 
     const stage = page.locator(HERO)
+    // Margen amplio: con la suite completa en paralelo, la hidratación puede pasar de 5 s.
+    await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true', { timeout: 15_000 })
     await expect(stage).toHaveAttribute('data-stage-mode', 'static')
-    await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true')
     await expect(stage.locator('[data-stage-frame]')).not.toHaveCSS('position', 'sticky')
     await expect.poll(() => effectiveOpacity(stage.locator('[data-hero-summit]'))).toBe(1)
     expect(await countVisibleBlue(page)).toBe(1)
@@ -4705,7 +4863,8 @@ test.describe('portada · pantallas extremas (revisión 1)', () => {
       await page.goto('/es')
 
       const stage = page.locator(HERO)
-      await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true')
+      // Margen amplio: con la suite completa en paralelo, la hidratación puede pasar de 5 s.
+      await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true', { timeout: 15_000 })
 
       const h1 = stage.getByRole('heading', { level: 1 })
       expect(await lineCount(h1), 'el h1 debe quedar en dos líneas').toBe(2)
@@ -4728,6 +4887,9 @@ test.describe('portada · scrub en escritorio', () => {
 
   test('la ruta se dibuja con el scroll y deja un solo elemento azul', async ({ page }) => {
     await page.goto('/es')
+    // Lo que se afirma primero ya es cierto en el HTML del servidor: sin esta
+    // espera, el scroll de abajo llegaría antes de hidratar y SmoothScroll lo desharía.
+    await waitForHydration(page)
 
     const stage = page.locator(HERO)
     const route = stage.locator('[data-hero-route]')
@@ -4759,11 +4921,27 @@ test.describe('portada · celular', () => {
     await page.goto('/es')
 
     const stage = page.locator(HERO)
-    await expect(stage).toHaveAttribute('data-stage-mode', 'inView')
+    // El HTML del servidor dice "scrub": esta espera cubre también la hidratación.
+    await expect(stage).toHaveAttribute('data-stage-mode', 'inView', { timeout: 15_000 })
     await expect(stage.locator('[data-stage-frame]')).not.toHaveCSS('position', 'sticky')
     // 0,3 s de espera + 1,8 s de dibujo
-    await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true', { timeout: 6000 })
+    await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true', { timeout: 15_000 })
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.hero.title)
+  })
+})
+
+test.describe('portada · celular apaisado (poco alto)', () => {
+  // ≥ 768 px de ancho pero < 600 px de alto: inView, no scrub (contrato §3.6).
+  test.use({ viewport: { width: 844, height: 390 } })
+
+  test('≥ 768 px de ancho y < 600 px de alto → inView, sin sticky', async ({ page }) => {
+    await page.goto('/es')
+
+    const stage = page.locator(HERO)
+    // El HTML del servidor dice "scrub": esta espera cubre también la hidratación.
+    await expect(stage).toHaveAttribute('data-stage-mode', 'inView', { timeout: 15_000 })
+    await expect(stage.locator('[data-stage-frame]')).not.toHaveCSS('position', 'sticky')
+    await expect(stage.locator('[data-hero-route]')).toHaveAttribute('data-complete', 'true', { timeout: 15_000 })
   })
 })
 
@@ -4799,10 +4977,10 @@ test.describe('portada · inglés (revisión 5)', () => {
 PORT=3060 npx playwright test e2e/home.spec.ts e2e/smoke.spec.ts --reporter=line
 ```
 
-**Resultado esperado: ROJO.** Fallan las 9 pruebas de `home.spec.ts` y la primera de `smoke.spec.ts` ("homepage loads and renders all sections"), por estas razones:
+**Resultado esperado: ROJO.** Fallan las 11 pruebas de `home.spec.ts` y la primera de `smoke.spec.ts` ("homepage loads and renders all sections"), por estas razones:
 - `es.hero.title` todavía no existe (`undefined`). `escapeRegExp(undefined)` lanza `TypeError`, y los `toHaveText(undefined)` / `toContainText(undefined)` fallan con *expected string*.
 - No hay `#inicio`, `[data-hero-route]`, `[data-stage-mode]` ni `[data-hero-summit]`, así que los `toHaveAttribute` agotan su espera.
-- La portada vieja es clara (`data-header-theme="light"`), así que el HTML del servidor no trae `data-header-start="dark"` ni una `<img>` con `fetchPriority="high"` (prueba del HTML del servidor).
+- La portada vieja es clara (`data-header-theme="light"`), así que el HTML del servidor no trae `data-header-start="dark"` ni una `<img>` con `fetchPriority="high"` (pruebas del HTML del servidor; la del peso AVIF lanza `TypeError` al no encontrar esa `<img>`).
 
 Las demás pruebas de `smoke.spec.ts` siguen en verde.
 
@@ -4935,27 +5113,31 @@ Las demás pruebas de `smoke.spec.ts` siguen en verde.
 `trustBar` no cambia: su `label` lo usa ahora TechStack. Comprobación de que las claves borradas no se usan en ningún otro sitio:
 ```bash
 grep -rnE "titleRotating|titleHighlight|trustLine" src e2e       # sin resultados
-grep -rn "titleLead" src e2e                                     # solo liveStudio: LiveStudioLanding.tsx, live-studio/{shared,Hero}.tsx y el bloque liveStudio de es.ts/en.ts
+grep -rn "titleLead" src e2e                                     # solo liveStudio: LiveStudioLanding.tsx, live-studio/{shared,Hero}.tsx, el bloque liveStudio de es.ts/en.ts, src/lib/page-meta.ts (caso /estudio-tiktok-live: studio.titleLead) y e2e/motion.spec.ts (studio.titleLead); ninguna coincidencia de hero.titleLead
 ```
 Si `grep` encuentra `hero.titleLead` en otra prueba (por ejemplo en `e2e/motion.spec.ts` de T4), se cambia por `hero.title`. El H1 nuevo contiene ese texto.
 
 #### 2.2 `src/lib/page-meta.ts`: título de la imagen para redes de la home
+El comentario que dejó T2 sobre el `cardTitle` de `"/"` se borra junto con la expresión.
 ```ts
-// antes (expresión del cardTitle de "/")
-`${dict.hero.titleLead} ${dict.hero.titleHighlight}`
+// antes
+        // Task 6 switches this to dict.hero.title when the fixed H1 lands.
+        cardTitle: `${dict.hero.titleLead} ${dict.hero.titleHighlight}`,
 // después
-dict.hero.title
+        cardTitle: dict.hero.title,
 ```
 
 #### 2.3 `src/app/globals.css`
 
-Bloque 1. Variante de altura justo después del import (antes → después):
+Bloque 1. Variantes justo después del import y del `@source not` que añadió T1 (antes → después):
 ```css
 /* antes */
 @import "tailwindcss";
+@source not "../../docs";
 
 /* después */
 @import "tailwindcss";
+@source not "../../docs";
 
 /* Viewport de poca altura (≤ 720 px): portátiles de 1366×768 con la barra del
    navegador (~657 px de alto). La portada compacta su ritmo vertical con `short:`. */
@@ -5101,10 +5283,11 @@ import type { MotionValue } from "motion/react"
 
 /**
  * Cómo se anima una sección de la home (plan §3.6):
- * - `scrub`: ≥ 768 px y sin reducir movimiento. El avance del escenario (0→1)
- *   controla la animación; el `sticky` y la altura larga los pone CSS
- *   (`stage:`), no este hook.
- * - `inView`: < 768 px. Sin sticky; la animación se dispara una vez al entrar.
+ * - `scrub`: ≥ 768 px de ancho y ≥ 600 px de alto, sin reducir movimiento. El
+ *   avance del escenario (0→1) controla la animación; el `sticky` y la altura
+ *   larga los pone CSS (`stage:`), no este hook.
+ * - `inView`: < 768 px de ancho o < 600 px de alto (celular apaisado). Sin
+ *   sticky; la animación se dispara una vez al entrar.
  * - `static`: reducir movimiento. Estado final, sin animar.
  */
 export type StageMode = "scrub" | "inView" | "static"
@@ -5851,11 +6034,11 @@ cd /home/user/wt/task6
 npm run lint                                   # 0 errores, 0 avisos nuevos
 npx tsc --noEmit                               # sin salida (e2e/ incluido)
 PORT=3060 npx playwright test e2e/home.spec.ts --reporter=line
-#   → 9 passed
+#   → 11 passed
 PORT=3060 npx playwright test e2e/smoke.spec.ts e2e/a11y.spec.ts --reporter=line
 #   → todo passed; el escaneo "on /es" sin violaciones serious/critical
 PORT=3060 npx playwright test --reporter=line
-#   → suite completa en verde (las de T1–T5 + las 9 nuevas)
+#   → suite completa en verde (las de T1–T5 + las 11 nuevas)
 npm run build                                  # compila sin errores ni avisos de tipos
 ```
 
@@ -5867,7 +6050,7 @@ grep -rn "priority" src/components/sections/home/HomeHero.tsx | grep -v fetchPri
 grep -rnE "#2563eb" src/components/sections/home | grep -v HeroRoute.tsx    # el único azul es la cumbre
 ```
 
-**Coordinación con T5:** si `e2e/header.spec.ts` afirma que el encabezado de `/es` es claro al cargar (`data-tone="light"`), esa aserción describe la portada anterior. Se cambia a `dark`: la portada nueva es oscura y lleva `data-header-start="dark"` (contrato §3.4 y §3.5). La prueba de `/es/inversores` no cambia.
+**Coordinación con T5:** `e2e/header.spec.ts` no cambia. Su única aserción `light` en `/es` se hace tras esperar la hidratación (`waitForHydration`) y desplazarse a la primera `section` no oscura, y sigue siendo correcta con la portada oscura. No la cambies a `dark`.
 
 **Revisión visual (opcional, 2 min).** Levanta `PORT=3060 npm run dev` y abre `/es` y `/en`:
 - **1440×900:** texto a la izquierda y cumbre a la derecha. Al bajar, la ruta se dibuja, aparece el punto azul, el texto sube y se desvanece, y el borde inferior funde a `#0a0a0a`.
@@ -5903,6 +6086,8 @@ Decisiones:
   portada cabe a 1366×657 y nada se recorta en teléfonos apaisados.
 - La ruta fija su grosor en unidades de la imagen, sin non-scaling-stroke
   (plan §3.6).
+- Pruebas: 844×390 queda en inView (requisito de alto de §3.6) y la
+  portada en AVIF a 1920 px pesa ≤ 250 KB (diseño §7).
 - TechStack sigue siendo componente cliente (m.div whileInView + RevealText).
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
@@ -5959,7 +6144,9 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
     - Reducir movimiento con `contextOptions` (§3.7).
     - El encabezado sin JavaScript se comprueba con el fondo de `.site-header` transparente y el color del enlace del logo (`a[href="/es"]`, que pinta `--hdr-fg`) en `rgb(255, 255, 255)`. Así no importa si `.site-header` declara `color` o no.
     - `countVisibleBlue` cuenta una propiedad solo en el elemento que la declara, no en los que la heredan: un `<g fill>` con tres círculos cuenta como un elemento azul. También cuenta azul con alfa > 0.
-    - La prueba de celular espera hasta 6 s a `data-complete="true"`: 0,3 s de espera más 1,8 s de dibujo.
+    - Las esperas a `data-complete="true"` justo después de `goto` llevan 15 s de margen: incluyen la hidratación, que con la suite completa en paralelo y la caché de imágenes fría pasa de 5 s (en celular, además, 0,3 s de espera y 1,8 s de dibujo). La prueba de scrub espera antes `waitForHydration` (T5): su primera aserción ya es cierta en el HTML del servidor y el efecto de montaje de `SmoothScroll` desharía un scroll anterior a la hidratación.
+    - 844×390 (celular apaisado) comprueba el requisito de alto del modo `scrub` (§3.6) en `useStageMode` y en la variante `stage:` a la vez: `inView` y marco sin `sticky`.
+    - Presupuesto del diseño §7: la variante de 1920 px del `srcset` de la portada se sirve como `image/avif` y pesa ≤ 250 KB (estimado con la fuente actual: ≈ 115 KB).
 11. **Detalles de copy y accesibilidad:**
     - La fila de índice no lleva "·": los números `/0N` (blancos, `aria-hidden`) hacen de separador, y con `flex-wrap` un punto al principio de línea se veía roto en celular.
     - Foco visible sobre oscuro: anillo blanco con offset `#0a0a0a` en los botones y `outline` blanco en el enlace de sector público. El foco del `Button` y el global son `#0a0a0a` e invisibles sobre la portada.
@@ -5969,7 +6156,7 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
 
 ## Tarea 7 — Tesis y Capacidades
 
-**Depende de:** T6 integrada en `redesign/home` (existen `src/assets/images/{lamina,expediente}.jpg`, `src/hooks/useStageProgress.ts`, `src/components/ui/{InstrumentLabel,FocalCover,ScrollStage}.tsx`, `src/components/sections/home/geometry.ts`, las clases `.focal-frame` / `.focal-cover` en `globals.css`, `e2e/home.spec.ts` y `e2e/helpers.ts` con `effectiveOpacity`, `scrollToY` y `countVisibleBlue`). La home renderiza `HomeHero` y después los antiguos `Services`, `FlagshipAI`, `CaseStudy`, `LiveStudioTeaser`, `Methodology`, `TechStack`, `FAQ` y `CTA`.
+**Depende de:** T6 integrada en `redesign/home` (existen `src/assets/images/{lamina,expediente}.jpg`, `src/hooks/useStageProgress.ts`, `src/components/ui/{InstrumentLabel,FocalCover,ScrollStage}.tsx`, `src/components/sections/home/geometry.ts`, las clases `.focal-frame` / `.focal-cover` en `globals.css`, `e2e/home.spec.ts` y `e2e/helpers.ts` con `effectiveOpacity`, `scrollToY`, `countVisibleBlue` y `waitForHydration` de T5). La home renderiza `HomeHero` y después los antiguos `Services`, `FlagshipAI`, `CaseStudy`, `LiveStudioTeaser`, `Methodology`, `TechStack`, `FAQ` y `CTA`.
 
 **Archivos compartidos (obligan a ir en serie):** `src/content/dictionaries/es.ts`, `src/content/dictionaries/en.ts`, `src/app/[locale]/page.tsx`, `e2e/home.spec.ts` (se añaden bloques al final). `e2e/smoke.spec.ts` no cambia (ver 2.6).
 
@@ -5977,6 +6164,7 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task7 -b wt/task7 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task7/node_modules
+(cd /home/user/wt/task7 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task7
 ```
 
@@ -5987,13 +6175,13 @@ cd /home/user/wt/task7
 
 ### Paso 1 — Prueba primero
 
-**1.1 Importaciones.** En la cabecera de `e2e/home.spec.ts` deben quedar estas importaciones. Añade solo las que falten (no dupliques ninguna ya creada por T6; si T6 importa los helpers en otra línea, amplía esa línea):
+**1.1 Importaciones.** Al terminar esta tarea, la cabecera de `e2e/home.spec.ts` es exactamente esta. Se **fusiona** con la de T6 (solo se añade la línea de `buildLocalePath`): no la pegues encima, porque `lineCount` y `stageScrollY` de T6 usan `Locator` y `Page`.
 ```ts
-import { test, expect } from '@playwright/test'
+import { test, expect, type Locator, type Page } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
 import en from '../src/content/dictionaries/en'
 import { buildLocalePath } from '../src/lib/i18n'
-import { countVisibleBlue, effectiveOpacity, scrollToY } from './helpers'
+import { countVisibleBlue, effectiveOpacity, scrollToY, waitForHydration } from './helpers'
 ```
 > `countVisibleBlue(page)` es el helper de T6. Este plan lo usa como `(page: Page) => Promise<number>` y asume que cuenta solo los elementos azules **visibles y dentro del viewport** (ver Decisiones). Si T6 lo creó con otra firma, adapta la llamada; no lo dupliques.
 
@@ -6055,6 +6243,9 @@ test.describe('Tesis y Capacidades · scrub (1440×900)', () => {
 
   test('la tesis pasa de #737373 a #0a0a0a palabra a palabra', async ({ page }) => {
     await page.goto('/es')
+    // data-stage-mode="scrub" ya está en el HTML del servidor: sin esta espera, el
+    // scroll llegaría antes de hidratar y SmoothScroll lo desharía (§3.7).
+    await waitForHydration(page)
     const thesis = page.locator('p:has([data-thesis-word])')
     await expect(page.locator('section:has([data-thesis-word])')).toHaveAttribute('data-stage-mode', 'scrub')
     await expect(page.locator('[data-thesis-word][data-active="true"]')).toHaveCount(0)
@@ -6069,6 +6260,7 @@ test.describe('Tesis y Capacidades · scrub (1440×900)', () => {
 
   test('con la fila 3 en el centro se encienden los nodos 0–2 y hay un solo azul', async ({ page }) => {
     await page.goto('/es')
+    await waitForHydration(page)
     const section = page.locator(`#${es.services.sectionId}`)
     await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
     await expect(section.locator('figure')).toHaveCSS('position', 'sticky')
@@ -6217,7 +6409,7 @@ Antes (`src/content/dictionaries/en.ts`):
 Después:
 ```ts
   thesis: {
-    text: "We design, deploy and operate software, artificial intelligence and cybersecurity systems for organizations where failure is not an option.",
+    text: "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option.",
   },
   services: {
     sectionId: "capacidades",
@@ -6678,6 +6870,7 @@ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task8 -b wt/task8 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task8/node_modules
+(cd /home/user/wt/task8 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task8
 ```
 
@@ -6714,10 +6907,14 @@ export async function settledTopOffset(locator: Locator): Promise<number> {
 }
 ```
 
-**1.2 Importaciones.** Amplía la cabecera de `e2e/home.spec.ts` (sin duplicar):
+**1.2 Importaciones.** Amplía la cabecera de `e2e/home.spec.ts` (sin duplicar ni pegar encima). Al terminar, queda exactamente así:
 ```ts
+import { test, expect, type Locator, type Page } from '@playwright/test'
+import es from '../src/content/dictionaries/es'
+import en from '../src/content/dictionaries/en'
+import { buildLocalePath } from '../src/lib/i18n'
 import { extractionAt, fieldState } from '../src/components/sections/home/dossier-progress'
-import { countVisibleBlue, effectiveOpacity, scrollToY, settledTopOffset } from './helpers'
+import { countVisibleBlue, effectiveOpacity, scrollToY, settledTopOffset, waitForHydration } from './helpers'
 ```
 
 **1.3 Pega al final de `e2e/home.spec.ts`:**
@@ -6797,6 +6994,8 @@ test.describe('Del papel al dato · enlace de la portada (revisión 2)', () => {
   test('el enlace de sector público deja #gobierno arriba del viewport', async ({ page }) => {
     expect(es.hero.nurtureCta.href).toBe(`#${es.dossier.sectionId}`)
     await page.goto('/es')
+    // Un clic antes de hidratar puede quedar deshecho por el scroll al tope de SmoothScroll.
+    await waitForHydration(page)
     await page.getByRole('link', { name: es.hero.nurtureCta.label }).click()
     const section = page.locator(`#${es.dossier.sectionId}`)
     // El scroll al ancla es suave: se mide solo cuando lleva dos frames quieto
@@ -6810,6 +7009,8 @@ test.describe('Del papel al dato · scrub (1440×900)', () => {
 
   test('con 2 campos extraídos y 1 en proceso, el único azul es el recuadro activo', async ({ page }) => {
     await page.goto('/es')
+    // data-stage-mode="scrub" ya está en el HTML del servidor (§3.7, waitForHydration).
+    await waitForHydration(page)
     const section = page.locator(`#${es.dossier.sectionId}`)
     await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
     await expect(section.locator('[data-stage-frame]')).toHaveCSS('position', 'sticky')
@@ -6834,6 +7035,37 @@ test.describe('Del papel al dato · scrub (1440×900)', () => {
     // Un solo azul visible, y es el recuadro activo (que sí es azul): el panel no tiene azul
     await expect.poll(() => countVisibleBlue(page)).toBe(1)
   })
+})
+
+test.describe('Del papel al dato · scrub en pantallas bajas (§3.6: scrub desde 600 px de alto)', () => {
+  for (const { viewport, panelInView } of [
+    { viewport: { width: 1280, height: 600 }, panelInView: true }, // el alto mínimo del modo scrub
+    { viewport: { width: 1366, height: 657 }, panelInView: true }, // 1366×768 con la barra del navegador
+    { viewport: { width: 1024, height: 600 }, panelInView: false }, // tableta apaisada: el marco crece
+  ]) {
+    test(`a ${viewport.width}×${viewport.height} nada queda bajo el encabezado ni recortado`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await page.goto('/es')
+      await waitForHydration(page)
+      const section = page.locator(`#${es.dossier.sectionId}`)
+      await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
+      const y = await section.evaluate((el) => {
+        const rect = el.getBoundingClientRect()
+        return window.scrollY + rect.top + 0.5 * (rect.height - window.innerHeight)
+      })
+      await scrollToY(page, y)
+
+      // El marco sticky no recorta: si el contenido no cabe, crece (stage:h-auto)
+      const frame = section.locator('[data-stage-frame]')
+      expect(await frame.evaluate((el) => el.scrollHeight <= el.clientHeight)).toBe(true)
+      const eyebrow = await section.getByText(es.dossier.eyebrow, { exact: true }).boundingBox()
+      expect(eyebrow!.y, 'el eyebrow queda bajo el encabezado fijo de 64 px').toBeGreaterThanOrEqual(64)
+      if (panelInView) {
+        const lastRow = await section.locator('[data-dossier-row]').last().boundingBox()
+        expect(lastRow!.y + lastRow!.height, 'la última fila del panel se sale del viewport').toBeLessThanOrEqual(viewport.height)
+      }
+    })
+  }
 })
 
 test.describe('Del papel al dato · celular', () => {
@@ -6889,7 +7121,7 @@ PORT=3080 npx playwright test e2e/home.spec.ts --reporter=line
 ```bash
 PORT=3080 npx playwright test e2e/home.spec.ts --reporter=line -g "Del papel al dato"
 ```
-Ahora pasa `extractionAt (módulo puro)` y fallan las otras 6: `TypeError: Cannot read properties of undefined (reading 'sectionId')` porque `es.dossier` / `en.dossier` no existen, o *timeout* porque `#gobierno` no existe. T6 y T7 siguen en verde.
+Ahora pasa `extractionAt (módulo puro)` y fallan las otras 9: `TypeError: Cannot read properties of undefined (reading 'sectionId')` porque `es.dossier` / `en.dossier` no existen, o *timeout* porque `#gobierno` no existe. T6 y T7 siguen en verde.
 
 ### Paso 2 — Implementación
 
@@ -7122,17 +7354,19 @@ export function Dossier({ content, locale }: { content: DossierContent; locale: 
       mode={mode}
       theme="dark"
       className="bg-[#0a0a0a] text-white"
-      frameClassName="stage:flex stage:items-center"
+      // stage:h-auto + stage:min-h-svh (twMerge sustituye el h-svh de ScrollStage):
+      // si el contenido no cabe en el viewport, el marco crece en lugar de recortarlo.
+      frameClassName="stage:flex stage:items-center stage:h-auto stage:min-h-svh"
     >
-      <div className="mx-auto w-full max-w-7xl px-6 py-24 md:py-32 stage:pb-10 stage:pt-24">
-        <div className="grid gap-10 md:grid-cols-12 md:gap-x-12 md:gap-y-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-24 md:py-32 stage:pb-10 stage:pt-24 short:stage:pb-6 short:stage:pt-20">
+        <div className="grid gap-10 md:grid-cols-12 md:gap-x-12 md:gap-y-8 short:stage:gap-y-5">
           <div className="md:col-span-5 md:col-start-1 md:row-start-1 md:self-end">
             <InstrumentLabel as="p">{content.eyebrow}</InstrumentLabel>
-            <h2 className="mt-5 text-balance font-heading text-4xl font-bold tracking-tight text-white lg:text-5xl">
+            <h2 className="mt-5 text-balance font-heading text-4xl font-bold tracking-tight text-white lg:text-5xl short:stage:mt-3 short:stage:text-4xl">
               {content.title}
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-[#a3a3a3]">{content.description}</p>
-            <ul className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+            <p className="mt-5 text-base leading-relaxed text-[#a3a3a3] short:stage:mt-3 short:stage:text-sm">{content.description}</p>
+            <ul className="mt-6 flex flex-wrap gap-x-8 gap-y-3 short:stage:mt-4">
               {content.links.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -7204,7 +7438,7 @@ export function Dossier({ content, locale }: { content: DossierContent; locale: 
             </InstrumentLabel>
           </div>
 
-          <div className="rounded-[6px] border border-[#1a1a1a] bg-[#141414] p-5 md:col-span-5 md:col-start-1 md:row-start-2 md:self-start md:p-6">
+          <div className="rounded-[6px] border border-[#1a1a1a] bg-[#141414] p-5 md:col-span-5 md:col-start-1 md:row-start-2 md:self-start md:p-6 short:stage:p-4">
             <div className="flex items-baseline justify-between gap-4 border-b border-[#1a1a1a] pb-3">
               <InstrumentLabel>{content.counterLabel}</InstrumentLabel>
               <span
@@ -7223,7 +7457,7 @@ export function Dossier({ content, locale }: { content: DossierContent; locale: 
                     key={name}
                     data-dossier-row=""
                     data-state={state}
-                    className={`-mx-2 flex items-center justify-between gap-4 border-b border-[#1a1a1a] px-2 py-2 font-mono text-[11px] uppercase tracking-[0.15em] last:border-b-0 ${state === "active" ? "bg-[#1a1a1a]" : ""}`}
+                    className={`-mx-2 flex items-center justify-between gap-4 border-b border-[#1a1a1a] px-2 py-2 short:stage:py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] last:border-b-0 ${state === "active" ? "bg-[#1a1a1a]" : ""}`}
                   >
                     <span className={tone}>{name}</span>
                     <span className={tone}>{content.status[state]}</span>
@@ -7241,7 +7475,10 @@ export function Dossier({ content, locale }: { content: DossierContent; locale: 
 
 Presupuesto de altura del marco fijo (con `overflow-hidden`), medido con las clases de arriba:
 - **1440×900:** la imagen mide 702 px; texto + panel ≈ 580 px; hay 764 px útiles (900 − `pt-24` − `pb-10`). Cabe.
-- **1280×720** (viewport por defecto de Playwright y de axe): la imagen mide 562 px; texto + panel ≈ 583 px; hay 584 px útiles. Cabe justo. El `pt-24` deja libre la cabecera fija de 64 px cuando `#gobierno` queda en `top = 0`.
+- **1280×720** (viewport por defecto de Playwright y de axe): ya aplica `short:` (≤ 720 px de alto), que compacta título, descripción, huecos y filas. Sin esa compactación el contenido medía 730 px con los rellenos y no cabía.
+- **Entre 600 y 720 px de alto** (sigue siendo `scrub`, §3.6), sin `short:` el marco `h-svh` con `overflow-hidden` recortaba el contenido centrado: medido a 1280×600, el eyebrow quedaba en y = 31 (debajo del encabezado fijo de 64 px); a 1024×600, en y = −11 y la última fila en 642 (recortada). Con `short:` a 1280×600: eyebrow en 93, última fila en 546; a 1366×657: 122 y 574.
+- **Red de seguridad:** el marco lleva `stage:h-auto stage:min-h-svh`, como la portada. Si aun así el contenido no cabe (tabletas de 768–1100 px de ancho y poco alto, donde el texto se parte en más líneas), el marco crece en lugar de recortar: el `sticky` fija su parte superior y el final del panel aparece al terminar el recorrido. Medido: a 1024×600 el marco mide 632 px y el eyebrow queda en 80.
+- `pt-24` (96 px) y `short:stage:pt-20` (80 px) dejan libre la cabecera fija de 64 px cuando `#gobierno` queda en `top = 0`.
 
 #### 2.4 `src/app/[locale]/page.tsx`
 
@@ -7270,7 +7507,7 @@ Después:
 cd /home/user/wt/task8
 npm run lint                     # 0 errores
 npx tsc --noEmit                 # 0 errores
-PORT=3080 npx playwright test e2e/home.spec.ts --reporter=line -g "Del papel al dato"   # 7 en verde
+PORT=3080 npx playwright test e2e/home.spec.ts --reporter=line -g "Del papel al dato"   # 10 en verde
 PORT=3080 npx playwright test e2e/home.spec.ts e2e/smoke.spec.ts e2e/a11y.spec.ts --reporter=line
 PORT=3080 npx playwright test --reporter=line                                           # suite completa en verde
 grep -rn "2563eb" src/components/sections/home/Dossier.tsx   # una sola línea: la constante BLUE (solo la usa el recuadro)
@@ -7297,6 +7534,9 @@ Decisiones:
   campo se activa 700 ms después.
 - Helper settledTopOffset en e2e/helpers.ts para medir el ancla tras el
   scroll suave.
+- Entre 600 y 720 px de alto (scrub) el marco h-svh recortaba el contenido
+  centrado: short: compacta la sección y stage:h-auto stage:min-h-svh deja
+  crecer el marco si aun así no cabe. Prueba a 1280×600, 1366×657 y 1024×600.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
@@ -7310,7 +7550,8 @@ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
 5. **Revisión 2 (ancla):** el enlace de la portada hace un scroll suave (`scroll-behavior: smooth`). `settledTopOffset` solo mide cuando `scrollY` lleva dos frames quieto; `expect.poll` exige `|top| ≤ 2`. `#gobierno` no lleva `scroll-margin`: su marco fijo empieza en `top = 0` y el `pt-24` deja libre la cabecera.
 6. **Posición de `dossier` en el diccionario:** antes de `caseStudy`, en el mismo orden que la home. El anclaje `  caseStudy: {\n    sectionId: "casos",` es único en ambos diccionarios; T9 añade claves dentro de `caseStudy` y no choca.
 7. **Degradados de borde** (`#0a0a0a` → transparente, 12 % vertical y 8 % horizontal) sobre el marco, para fundir la mesa oscura con el fondo sin cortes (§4 del diseño). No tapan ningún campo: los campos están entre el 26 % y el 58 % del alto.
-8. **Dependencia de `countVisibleBlue`:** la prueba de scrub afirma que hay un solo azul y que el recuadro activo es azul. Juntas implican que el panel no tiene azul. Esto exige que el helper de T6 cuente solo lo visible dentro del viewport (la cumbre de la portada, azul en modo `static`, está fuera de pantalla en ese momento).
+8. **Pantallas bajas en `scrub` (600–720 px de alto) y tabletas.** El marco fijo es `h-svh` con `overflow-hidden` y centra el contenido: si no cabe, lo recorta por arriba y por abajo, y el eyebrow queda debajo del encabezado fijo (medido: a 1280×600, eyebrow en y = 31; a 1024×600, en −11 y última fila en 642). `short:` (≤ 720 px de alto, la variante de T6) compacta la sección en `scrub`: rellenos `pt-20`/`pb-6`, título `text-4xl`, descripción `text-sm`, huecos menores, panel `p-4` y filas `py-1.5`. Como red de seguridad, el marco lleva `stage:h-auto stage:min-h-svh` (igual que la portada): en tabletas de 768–1100 px de ancho con poco alto el marco crece, el `sticky` fija su parte superior y el final del panel aparece al terminar el recorrido. Nada se oculta y nada queda bajo el encabezado. La prueba "scrub en pantallas bajas" lo comprueba a 1280×600, 1366×657 y 1024×600.
+9. **Dependencia de `countVisibleBlue`:** la prueba de scrub afirma que hay un solo azul y que el recuadro activo es azul. Juntas implican que el panel no tiene azul. Esto exige que el helper de T6 cuente solo lo visible dentro del viewport (la cumbre de la portada, azul en modo `static`, está fuera de pantalla en ese momento).
 
 ---
 
@@ -7326,6 +7567,7 @@ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task9 -b wt/task9 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task9/node_modules
+(cd /home/user/wt/task9 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task9
 ```
 
@@ -7349,7 +7591,7 @@ cd /home/user/wt/task9
 
 ### Paso 1 — Prueba primero
 
-**1.1 `e2e/helpers.ts`: añadir al final del archivo** (la lista negra se mueve tal cual desde `e2e/realty.spec.ts`; `findForbiddenTerms` aplica exactamente sus reglas):
+**1.1 `e2e/helpers.ts`: añadir al final del archivo** (la lista negra se mueve desde `e2e/realty.spec.ts` con un solo añadido, `'API'`, que CLAUDE.md nombra en la regla de lenguaje de RealTy y faltaba; ni el bloque `realty` de los diccionarios ni sus componentes lo contienen, así que `/realty` sigue en verde. `findForbiddenTerms` aplica exactamente sus reglas):
 
 ```ts
 // ── Lista negra de RealTy (CLAUDE.md, bloque RealTy) ─────────────────────────
@@ -7387,6 +7629,7 @@ export const FORBIDDEN_WORDS = [
   'JSON',
   'SSE',
   'LLM',
+  'API',
   'TypeScript',
   'PostgreSQL',
   'Fastify',
@@ -7500,14 +7743,22 @@ Después:
   )
 ```
 
-**1.4 `e2e/home.spec.ts`: importaciones y pruebas.** La cabecera debe importar estos nombres. Añade a las líneas existentes los que falten, sin duplicar ningún `import`:
+**1.4 `e2e/home.spec.ts`: importaciones y pruebas.** Solo se añade `findForbiddenTerms` a la línea de `./helpers`; no pegues esta cabecera encima de la existente, porque las pruebas de T6–T8 usan todos estos nombres. Al terminar, la cabecera queda exactamente así:
 ```ts
-import { test, expect } from '@playwright/test'
+import { test, expect, type Locator, type Page } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
 import en from '../src/content/dictionaries/en'
-import { countVisibleBlue, effectiveOpacity, findForbiddenTerms, scrollToY } from './helpers'
+import { buildLocalePath } from '../src/lib/i18n'
+import { extractionAt, fieldState } from '../src/components/sections/home/dossier-progress'
+import {
+  countVisibleBlue,
+  effectiveOpacity,
+  findForbiddenTerms,
+  scrollToY,
+  settledTopOffset,
+  waitForHydration,
+} from './helpers'
 ```
-(`effectiveOpacity` la usa T10; si al terminar T9 nadie la usa todavía, ESLint da un *warning*, no un error.)
 
 Añade al final del archivo:
 ```ts
@@ -7515,8 +7766,6 @@ Añade al final del archivo:
 test.describe('T9 · Lo que ya construimos', () => {
   /** `transform` calculado de un elemento sin transformación, o con escala 1. */
   const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
-  /** Raíz de "simulado/simulated" que la consola muestra junto a retenciones y reservas. */
-  const SIMULATED_STEM = { es: 'simulad', en: 'simulated' } as const
 
   for (const locale of ['es', 'en'] as const) {
     const dict = locale === 'es' ? es : en
@@ -7533,7 +7782,9 @@ test.describe('T9 · Lo que ya construimos', () => {
       expect(findForbiddenTerms(text), `términos prohibidos en la tarjeta de RealTy (/${locale})`).toEqual([])
       const demoLabel = dict.realty.demoLabel.toLowerCase()
       expect(text.split(demoLabel).length - 1, 'demoLabel una sola vez en el marco').toBe(1)
-      expect(text, '"simulado" junto a retenciones y reservas').toContain(SIMULATED_STEM[locale])
+      // Raíz de "Simulado"/"Simulated" (statusLabels): casa con "simuladas" y con "simulated holds".
+      const simulatedStem = dict.realty.statusLabels.simulated.toLowerCase().slice(0, 7)
+      expect(text, '"simulado" junto a retenciones y reservas').toContain(simulatedStem)
 
       await expect(card.getByRole('link', { name: dict.built.realtyCta })).toHaveAttribute('href', `/${locale}/realty`)
     })
@@ -7640,7 +7891,7 @@ PORT=3090 npx playwright test e2e/smoke.spec.ts e2e/realty.spec.ts --reporter=li
 **Fallo esperado:**
 - `tsc`: `TS2339: Property 'built' does not exist…` en `e2e/home.spec.ts` y `e2e/smoke.spec.ts`, y `Property 'ownership'` / `'summary'` en `e2e/home.spec.ts`.
 - `home.spec.ts -g "T9 ·"`: **7 failed**, todas con `TypeError: Cannot read properties of undefined (reading 'sectionId')`: `es.built` y `en.built` todavía no existen.
-- `smoke.spec.ts`: fallan `homepage loads and renders all sections` y `home page links to the live studio division` por el mismo `TypeError`. **`realty.spec.ts`: 12 passed**: mover la lista no cambia su comportamiento. Si alguna falla, el traslado está mal hecho.
+- `smoke.spec.ts`: fallan `homepage loads and renders all sections` y `home page links to the live studio division` por el mismo `TypeError`. **`realty.spec.ts`: 12 passed**: mover la lista (con `'API'` añadido) no cambia su resultado. Si alguna falla, el traslado está mal hecho.
 
 ### Paso 2 — Implementación
 
@@ -8009,14 +8260,14 @@ export function StudioSequence({
               />
               <span
                 aria-hidden="true"
-                className={`pt-[3px] font-mono text-[11px] tabular-nums tracking-[0.2em] transition-colors duration-500 motion-reduce:transition-none ${
+                className={`pt-[3px] font-mono text-[11px] tabular-nums tracking-[0.2em] ${
                   on ? "text-white" : "text-[#a3a3a3]"
                 }`}
               >
                 {num}
               </span>
               <span
-                className={`text-sm leading-relaxed transition-colors duration-500 motion-reduce:transition-none ${
+                className={`text-sm leading-relaxed ${
                   on ? "text-white" : "text-[#a3a3a3]"
                 }`}
               >
@@ -8204,7 +8455,7 @@ git rm src/components/sections/CaseStudy.tsx src/components/sections/LiveStudioT
 
 ```bash
 cd /home/user/wt/task9
-npm run lint                     # 0 errores (a lo sumo el warning de effectiveOpacity sin usar)
+npm run lint                     # 0 errores
 npx tsc --noEmit                 # sin salida
 PORT=3090 npx playwright test e2e/home.spec.ts -g "T9 ·" --reporter=line                 # 7 passed
 PORT=3090 npx playwright test e2e/smoke.spec.ts e2e/realty.spec.ts --reporter=line        # todo verde (realty: 12 passed)
@@ -8241,6 +8492,7 @@ Decisiones:
 - ConsoleFrame gana `compact` (sin embudo, por defecto false): RealtyHero no cambia.
 - En la home la consola va con drawn=true: su trazo anima stroke-dashoffset, fuera de transform/opacity/pathLength.
 - La escala empieza en 1 (servidor y sin JavaScript) y baja a 0,92 tras montar, con la tarjeta fuera de pantalla.
+- La lista negra compartida gana 'API': CLAUDE.md la nombra en la regla de lenguaje de RealTy y faltaba.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
@@ -8255,8 +8507,8 @@ El borrado de 2.8 ya quedó en el índice con `git rm`.
 3. **`drawn` fijo en `true` en la home.** El trazo de las *sparklines* anima `stroke-dashoffset`, que no está entre las propiedades permitidas (§3.6). En la home la consola sale terminada y el único movimiento de la tarjeta es la escala.
 4. **`ConsoleFrame` sigue en `realty/Hero.tsx` (`"use client"`)**, como pide el traspaso. Desde `BuiltProof` es una referencia de cliente: sus props (los datos de la consola) viajan en el RSC y el trozo de `realty/Hero` y `viz` entra en la home (pocos KB gzip). Para la fase 2 queda la opción de moverlo a un módulo sin hooks ni `"use client"`, que lo volvería puramente de servidor.
 5. **Escala de la tarjeta.** En `scrub` sigue al scroll (`["start 0.95", "start 0.45"]`) en lugar de dispararse una sola vez, igual que el resto de secciones en `scrub`. En `inView` se anima una vez (0,7 s) y en `static` vale 1. El valor inicial es 1 para todos, así que en el servidor, sin JavaScript y con reducir movimiento la tarjeta nunca queda encogida. El modo `scrub` inicial la lleva a 0,92 solo después de montar.
-6. **Secuencia 01–06.** Apagado: `#a3a3a3` sobre `#0a0a0a` (7,9:1). Encendido: blanco más una línea de 1 px con `scaleX`. El número es `aria-hidden` porque el `<ol>` ya da el orden, y `capabilitiesTitle` es un `h4`. No lleva horas, estados ni "OK": no es un registro de eventos. El caso de Live Studio no pasa por la lista negra de RealTy, porque dice "endpoints" legítimamente (traspaso, "Pruebas").
-7. **Pruebas.** La tarjeta de RealTy se verifica en **es y en**, con la raíz de "simulado" de cada idioma (`simulad` / `simulated`). Se añade `findForbiddenTerms` a `helpers.ts`. `realty.spec.ts` solo importa las constantes y su filtro inline no cambia. Reducir movimiento se activa con `page.emulateMedia` (§3.7). En las pruebas de `scrub`, `.site-header[data-tone]` (T5) sirve de señal de hidratación, porque `data-stage-mode="scrub"` coincide con el HTML del servidor.
+6. **Secuencia 01–06.** Apagado: `#a3a3a3` sobre `#0a0a0a` (7,9:1). Encendido: blanco más una línea de 1 px con `scaleX`. El color cambia de forma discreta, sin `transition-colors` (diseño §5 y contrato §3.6: solo se interpolan `transform`, `opacity` y `pathLength`); lo único que se anima es la línea. El número es `aria-hidden` porque el `<ol>` ya da el orden, y `capabilitiesTitle` es un `h4`. No lleva horas, estados ni "OK": no es un registro de eventos. El caso de Live Studio no pasa por la lista negra de RealTy, porque dice "endpoints" legítimamente (traspaso, "Pruebas").
+7. **Pruebas.** La tarjeta de RealTy se verifica en **es y en**, con la raíz de "simulado" de cada idioma, tomada de `realty.statusLabels.simulated` (`simulad` / `simulat`), sin literales (§3.7). Se añade `findForbiddenTerms` a `helpers.ts`. `realty.spec.ts` solo importa las constantes y su filtro inline no cambia. Reducir movimiento se activa con `page.emulateMedia` (§3.7). En las pruebas de `scrub`, `.site-header[data-tone]` (T5) sirve de señal de hidratación, porque `data-stage-mode="scrub"` coincide con el HTML del servidor.
 8. **Claves que quedan sin componente.** `caseStudy.sectionId` (`"casos"`) y `caseStudy.eyebrow` ya no las usa ningún componente; `llms.txt` usa `title`, `industry`, `context`, `solution` y `outcome`. Se dejan para que T11 decida. Con `LiveStudioTeaser` desaparece también el evento `live_studio_teaser_click`, y no se añade analítica nueva porque no se pidió.
 
 ---
@@ -8267,12 +8519,13 @@ El borrado de 2.8 ya quedó en el índice con `git rm`.
 
 **Depende de:** T9 integrada en `redesign/home`. También T6, por `FocalCover`, `InstrumentLabel`, `useStageProgress`, `src/assets/images/relieve.jpg`, `hero.imageLabel` y `countVisibleBlue`.
 
-**Archivos compartidos:** `src/app/[locale]/page.tsx`, `e2e/home.spec.ts`, `src/components/sections/TechStack.tsx` (solo si hace falta, ver 2.5). `src/app/globals.css` figura en la tabla §2 para T10, pero **esta tarea no lo necesita** y no lo toca.
+**Archivos compartidos:** `src/app/[locale]/page.tsx`, `e2e/home.spec.ts`, `src/components/sections/TechStack.tsx` (ver 2.5). `src/app/globals.css` figura en la tabla §2 para T10, pero **esta tarea no lo necesita** y no lo toca.
 
 **Worktree y puerto:** `/home/user/wt/task10`, rama `wt/task10`, **`PORT=3100`**.
 ```bash
 git -C /home/user/Nova-Forge worktree add /home/user/wt/task10 -b wt/task10 redesign/home
 cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task10/node_modules
+(cd /home/user/wt/task10 && npx next typegen >/dev/null)   # crea next-env.d.ts (está en .gitignore): sin él, tsc no conoce los imports de imágenes
 cd /home/user/wt/task10
 ```
 
@@ -8286,7 +8539,7 @@ cd /home/user/wt/task10
 | Reescribir | `src/components/sections/CTA.tsx`: relieve inferior con paralaje, `h2` real, sin ScrambleText |
 | Reescribir | `src/components/sections/FAQ.tsx`: `bg-white`, `h3 > button`, sin animación de altura |
 | Modificar | `src/app/[locale]/page.tsx`: `MethodologyLine` y la prop `imageLabel` del cierre |
-| Modificar (condicional) | `src/components/sections/TechStack.tsx`: solo los bloques de 2.5 que T6 no haya aplicado |
+| Modificar | `src/components/sections/TechStack.tsx`: los dos bloques de 2.5 (`h2` sin `RevealText` y `data-header-theme`) |
 | Modificar | `e2e/home.spec.ts` |
 | Borrar | `src/components/sections/Methodology.tsx` |
 
@@ -8397,6 +8650,24 @@ test.describe('T10 · Cierre sin JavaScript', () => {
     await expect(closing).toContainText(es.hero.imageLabel)
     await expect(closing.getByRole('link', { name: es.cta.action.label })).toHaveAttribute('href', '/es/agendar')
   })
+
+  test('todos los h2 de la home se ven sin JavaScript (§3.6)', async ({ page }) => {
+    await page.goto('/es')
+    // Capacidades, Del papel al dato, Lo que ya construimos, Metodología, Tecnologías, FAQ y cierre
+    const headings = page.locator('main h2')
+    const count = await headings.count()
+    expect(count).toBeGreaterThanOrEqual(7)
+    for (let i = 0; i < count; i++) {
+      const heading = headings.nth(i)
+      expect(await effectiveOpacity(heading), `h2 n.º ${i + 1} con opacidad < 1`).toBe(1)
+      // RevealText baja cada palabra con translateY(100%) dentro de overflow-hidden:
+      // la opacidad sigue en 1 pero el texto no se ve hasta hidratar.
+      await expect(heading.locator('[style*="translateY(100%)"]')).toHaveCount(0)
+    }
+    for (const title of [es.methodology.title, es.techStack.title, es.faq.title]) {
+      await expect(page.getByRole('heading', { level: 2, name: title })).toHaveCount(1)
+    }
+  })
 })
 
 test.describe('T10 · Orden de la home', () => {
@@ -8465,10 +8736,10 @@ cd /home/user/wt/task10
 npx tsc --noEmit                                                            # sin errores: no hay claves nuevas
 PORT=3100 npx playwright test e2e/home.spec.ts -g "T10 ·" --reporter=line
 ```
-**Fallo esperado: 10 failed.**
+**Fallo esperado: 11 failed.**
 - `T10 · Preguntas frecuentes`: `expect(buttons).toHaveCount(4)` recibe **0**, porque hoy el marcado es `button > h3`.
 - `T10 · Metodología` (3): `toHaveAttribute('data-stage-mode', …)` falla porque la sección antigua no tiene el atributo.
-- `T10 · Cierre sin JavaScript`: `toHaveCount(1)` recibe **0**. El título actual es un `<div>` con ScrambleText, no un `h2`.
+- `T10 · Cierre sin JavaScript` (2): el título del cierre, `toHaveCount(1)` recibe **0** (el título actual es un `<div>` con ScrambleText, no un `h2`); todos los `h2`, falla en el `h2` de Tecnologías (`RevealText`: palabras con `translateY(100%)`) o en el de la FAQ (`m.section` con `opacity: 0` en el HTML del servidor).
 - `T10 · Orden de la home`: el orden de los `id` ya es correcto tras T9. Falla `toHaveCSS('background-color', 'rgb(255, 255, 255)')` en `#faq`, que hoy es `rgb(248, 248, 248)`.
 - `T10 · Regla del azul` (4): falla la espera `#metodologia[data-stage-mode]`, que todavía no existe.
 
@@ -8602,7 +8873,7 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
                 >
                   <span
                     aria-hidden="true"
-                    className={`absolute left-0 top-1 h-[7px] w-[7px] rounded-full transition-colors duration-300 motion-reduce:transition-none md:-top-[3px] ${
+                    className={`absolute left-0 top-1 h-[7px] w-[7px] rounded-full md:-top-[3px] ${
                       on ? "bg-[#0a0a0a]" : "bg-[#d4d4d4]"
                     }`}
                   />
@@ -8610,14 +8881,14 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
                     {content.phaseLabel} {step.num}
                   </InstrumentLabel>
                   <h3
-                    className={`mb-3 text-lg font-semibold tracking-tight transition-colors duration-300 motion-reduce:transition-none ${
+                    className={`mb-3 text-lg font-semibold tracking-tight ${
                       on ? "text-[#0a0a0a]" : "text-[#737373]"
                     }`}
                   >
                     {step.title}
                   </h3>
                   <p
-                    className={`text-sm leading-relaxed transition-colors duration-300 motion-reduce:transition-none ${
+                    className={`text-sm leading-relaxed ${
                       on ? "text-[#525252]" : "text-[#737373]"
                     }`}
                   >
@@ -8640,7 +8911,7 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
 // Cierre (§5.9 del diseño): el relieve en su zona inferior, con desplazamiento
 // lento (0,3× el scroll), detrás de "Hablemos de su próximo sistema.".
 //
-// - El título es un <h2> con el texto real desde el servidor: sin ScrambleText
+// - El título es un <h2> con el texto real desde el servidor, sin efecto de texto codificado
 //   y sin ningún ancestro con opacity 0 (se ve sin JavaScript).
 // - Contraste AA: un degradado #0a0a0a (sólido arriba y abajo, 80 % en el
 //   centro) cubre la imagen. Peor píxel medido en la zona visible del relieve:
@@ -8891,7 +9162,7 @@ Después:
 ```
 No se tocan `faqJsonLd`, el `<script type="application/ld+json">` ni `ctaContent`. **Orden final** del `return` (§3.5), para comprobarlo a ojo: `<script …FAQPage…>`, `HomeHero`, `Thesis`, `CapabilitiesIndex`, `Dossier`, `BuiltProof`, `MethodologyLine`, `TechStack`, `FAQ`, `CTA`.
 
-**2.5 `src/components/sections/TechStack.tsx`: comprobar y ajustar solo si hace falta.** La sección conserva `bg-[#f8f8f8]`, su `border-t` y su contenido, logos de T6 incluidos. Revisión:
+**2.5 `src/components/sections/TechStack.tsx`: `h2` sin `RevealText` y `data-header-theme`.** T6 deja los dos pendientes (su Decisión 9: "convertirlo es trabajo de T10"), así que los dos cambios se aplican siempre; la prueba "todos los h2 de la home se ven sin JavaScript" falla si falta el primero. La sección conserva `bg-[#f8f8f8]`, su `border-t` y su contenido, logos de T6 incluidos. Revisión:
 ```bash
 grep -n "RevealText\|data-header-theme" src/components/sections/TechStack.tsx
 ```
@@ -8927,7 +9198,7 @@ grep -n "RevealText\|data-header-theme" src/components/sections/TechStack.tsx
         className="py-16 sm:py-32 bg-[#f8f8f8] border-t border-[#e5e5e5]"
       >
   ```
-- Si T6 ya hizo ambas cosas, `TechStack.tsx` no se toca en esta tarea.
+- Si algún bloque ya no casa exacto (otra tarea tocó el formato), aplica el mismo cambio sobre el código vigente.
 
 **2.6 Borrar la metodología anterior:**
 ```bash
@@ -8940,7 +9211,7 @@ git rm src/components/sections/Methodology.tsx
 cd /home/user/wt/task10
 npm run lint                     # 0 errores, 0 warnings nuevos
 npx tsc --noEmit                 # sin salida
-PORT=3100 npx playwright test e2e/home.spec.ts -g "T10 ·" --reporter=line                  # 10 passed
+PORT=3100 npx playwright test e2e/home.spec.ts -g "T10 ·" --reporter=line                  # 11 passed
 PORT=3100 npx playwright test e2e/a11y.spec.ts -g "violations on /es$" --reporter=line      # 1 passed (axe AA en /es)
 PORT=3100 npx playwright test e2e/home.spec.ts e2e/smoke.spec.ts --reporter=line           # todo verde
 PORT=3100 npx playwright test --reporter=line                                              # suite completa en verde
@@ -8976,12 +9247,15 @@ Decisiones:
 - Paralaje: y = 0,3 × el scroll desde la sección centrada, acotado al margen de la capa (20 % del alto).
 - "Imagen ilustrativa" del cierre reutiliza hero.imageLabel: no hay claves nuevas.
 - El panel de cada respuesta vive siempre en el DOM con `hidden`: aria-controls apunta a un id real.
+- Tecnologías: el h2 deja RevealText (palabras en translateY(100%) hasta hidratar) y gana
+  data-header-theme="light". Una prueba sin JavaScript recorre todos los h2 de la home.
+- Fases de Metodología: el color cambia de forma discreta, sin transition-colors (diseño §5).
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
 EOF
 ```
-(`TechStack.tsx` solo aparece en el commit si 2.5 lo cambió; si no, `git add` lo ignora sin error.)
+(`TechStack.tsx` siempre cambia en 2.5.)
 
 ### Decisiones
 
@@ -8991,7 +9265,7 @@ EOF
 4. **Encuadre inferior.** La capa sobresale `-top-[50%]` y `-bottom-[20%]` (1,7 × el alto de la sección) y `FocalCover` va anclado abajo (`[--fy:100%]`). En casi todas las proporciones `cover` queda limitado por la altura, y el recorte lo decide la geometría de la capa: la ventana muestra aprox. el 30–90 % inferior de la imagen. `--fy` solo pesa en pantallas muy anchas (2560×1080). `sizes="(min-width: 768px) 140vw, 520vw"` sale de ese cálculo. En móvil la imagen se sirve grande, pero es perezosa y está al final de la página.
 5. **Contraste AA del cierre.** Degradado `from-[#0a0a0a] via-[#0a0a0a]/80 to-[#0a0a0a]`. Medido sobre `design/moodboard/A1-v2.png` en la banda visible (filas 33–89 %, columnas 20–80 %): máximo 200/255, p99 124–131. Con el 80 % el peor píxel queda en ≈ 48, y `#a3a3a3` en ≈ 5,2:1. El título es blanco. La etiqueta "Imagen ilustrativa" usa `hero.imageLabel` (clave de T6) como prop nueva `imageLabel` de `CTA`, así que no hay claves nuevas (§3.2, T10).
 6. **FAQ.** El panel existe siempre en el DOM con `hidden`, `role="region"` y `aria-labelledby`, así que `aria-controls` nunca apunta a un id inexistente y las respuestas están en el HTML. Se quita la animación de `height` (diseño §11). El panel entra con opacidad y 6 px de `y`, y el "+" gira. El `h2` deja `RevealText`, igual que el del cierre deja ScrambleText. No se añade analítica (`faq_expand` existe en el tipo, pero no se pidió).
-7. **Estados iniciales y sin JavaScript.** Las fases de Metodología salen del servidor inactivas (`#737373`, AA) con la línea en `scaleX(0)`. Sin JavaScript se leen, pero no se ven activas. Todos los `h2` de esta tarea son visibles desde el servidor, y la prueba sin JavaScript lo verifica en el cierre con `effectiveOpacity`.
+7. **Estados iniciales y sin JavaScript.** Las fases de Metodología salen del servidor inactivas (`#737373`, AA) con la línea en `scaleX(0)`. Sin JavaScript se leen, pero no se ven activas. El color de fases, puntos y textos cambia de forma discreta, sin `transition-colors` (diseño §5, contrato §3.6); solo la línea interpola (`scaleX`/`scaleY`). Todos los `h2` de la home son visibles desde el servidor: la prueba sin JavaScript los recorre todos con `effectiveOpacity` y comprueba que ninguno esconde palabras con `translateY(100%)` (el patrón de `RevealText`, que la opacidad no detecta).
 8. **Pruebas globales.** La regla del azul recorre toda la home en pasos de ½ pantalla, en 1440×900 y 390×844, con y sin reducir movimiento. Antes espera `.site-header[data-tone]` (hidratación) y el modo esperado en `#metodologia`. La misma prueba recoge errores de hidratación en consola. La prueba de orden usa los `sectionId` del diccionario, porque el `id="inicio"` de la portada no es una clave del contrato. `MethodologyLine` se importa de forma estática: según la guía de *lazy loading* de Next 16, `dynamic()` desde un Server Component no divide en trozos los Client Components.
 
 ---
@@ -9021,14 +9295,23 @@ ls src/app/opengraph-image.tsx src/app/twitter-image.tsx 2>&1
 grep -rn "images.social\|images.twitter\|NF<" src
 # ScrambleText ya no debe aparecer en títulos de la home ni de ProductLanding/DataEnrichmentLanding
 grep -rn "ScrambleText" src/components/sections
+# Restos que T4, T7 y T9 dejaron expresamente para esta tarea (sus decisiones)
+grep -rnE "exploreLabel|services\.description|caseStudy\.(sectionId|eyebrow)" src e2e --include=*.ts --include=*.tsx | grep -v src/content/dictionaries/
+grep -rnE "\.icon\b|\.bullets\b" src e2e --include=*.ts --include=*.tsx | grep -v src/content/dictionaries/
+grep -rlE "useParallax|useScrollScale|useSectionEntrance|useScrollVelocity" src --include=*.ts --include=*.tsx
 ```
 **Esperado antes de limpiar:** solo coincidencias legítimas. `liveStudio.titleLead` (Live Studio, otra clave) es legítima y se queda; `ScrambleText` puede seguir en `ScheduleForm.tsx` (fuera del alcance de fase 1). Cualquier otra coincidencia se elimina en el paso 2.
+
+Restos diferidos (T7 Decisión 7, T9 Decisión 8, auditoría de T4). Resultado esperado de los tres últimos `grep`:
+- `exploreLabel`, `services.description`, `caseStudy.sectionId` y `caseStudy.eyebrow`: **sin coincidencias** fuera de los diccionarios. Si `CapabilitiesIndex` o `BuiltProof` recibieran el objeto entero (`content.description`, `caseStudy.eyebrow`…), revisa además sus interfaces de props: ninguna de estas claves debe figurar.
+- `.icon` / `.bullets`: solo `e2e/home.spec.ts` (T7), que lee `es.services.items[0].bullets[0]` para afirmar que las viñetas **no** se muestran. `bullets` se queda, porque tiene uso en `e2e/` (§3.2: "comprobar con `grep` sobre `src/` y `e2e/`"); `items[].icon` no tiene ningún uso.
+- Hooks: solo sus propios archivos, `src/hooks/useParallax.ts` y `src/hooks/useScrollVelocity.ts`: no tienen consumidores.
 
 ### Paso 2 — Implementación
 
 #### 2.1 Limpieza
-1. Borra las claves de diccionario sin uso que liste el paso 1 (en **ambos** diccionarios, misma forma).
-2. Borra imports y archivos muertos que el paso 1 detecte.
+1. Borra las claves de diccionario sin uso que liste el paso 1 (en **ambos** diccionarios, misma forma). Como mínimo, las diferidas: `services.description`, `services.exploreLabel`, `services.items[].icon` (en los 8 ítems), `caseStudy.sectionId` y `caseStudy.eyebrow`. **Se quedan:** `services.items[].bullets` (lo lee la prueba de T7), `caseStudy.title`, `industry`, `context`, `solution` y `outcome` (`llms.txt` y `BuiltProof`) y `caseStudy.ownership`, `summary`, `capabilitiesTitle`, `capabilities` y `cta` (`BuiltProof`).
+2. Borra imports y archivos muertos que el paso 1 detecte; como mínimo `src/hooks/useParallax.ts` y `src/hooks/useScrollVelocity.ts` (`git rm`), si el paso 1 confirmó que no tienen consumidores.
 3. `npm run lint && npx tsc --noEmit` en verde.
 
 #### 2.2 `CLAUDE.md`
@@ -9040,7 +9323,15 @@ Añade, después de la regla de tipografía, una regla nueva:
 ```md
 - **Home "Cartografía soberana"** (`src/components/sections/home/`): monocromo Orbexs. El azul `#2563eb` significa "lo que el sistema está procesando ahora" y solo lo llevan el punto de la cumbre (portada), el nodo activo (Capacidades) y el recuadro del campo activo (Del papel al dato); nunca hay más de un elemento azul visible a la vez (`e2e/home.spec.ts` lo verifica). Las imágenes viven en `design/source/` y se procesan con `npm run images` (salida en `src/assets/images/` y `public/images/og/`); no se generan imágenes nuevas y las ilustraciones llevan la etiqueta "Imagen ilustrativa". Las superposiciones SVG usan `viewBox="0 0 1536 1024"` dentro de `FocalCover` y sus coordenadas viven en `home/geometry.ts`. El movimiento solo anima `transform`, `opacity` y `pathLength`; la altura larga y el `sticky` los pone CSS (`stage:`), y `useStageMode()` decide `scrub` / `inView` / `static`.
 ```
-Revisa la regla **"NO DESTRUYAS EL SEO"**: sigue siendo cierta (el `FAQPage` de la home se genera desde `dict.faq.items` en `src/app/[locale]/page.tsx`). Si alguna tarea cambió el nombre o la ubicación de algo que la regla cita, actualízala.
+En la regla **"NO DESTRUYAS EL SEO"**, lo del `FAQPage` sigue siendo cierto (el de la home se genera desde `dict.faq.items` en `src/app/[locale]/page.tsx`), pero su última frase ya no: desde T2 ninguna página llama a `buildAlternates()` directamente (nota de T2 para T11). Sustituye esa frase:
+```md
+Cada página define su `canonical`/`hreflang` con `buildAlternates()` de `src/lib/i18n.ts`.
+```
+por:
+```md
+Cada página obtiene título, descripción, `canonical`/`hreflang` (vía `buildAlternates()` de `src/lib/i18n.ts`), Open Graph y Twitter con `pageMetadata(locale, "<ruta>")` de `src/lib/metadata.ts` en su `generateMetadata`, sin declararlos a mano; su imagen para redes la da su `opengraph-image.tsx`.
+```
+En la regla **"Sin claims de partnership"**, `TrustBar` ya no existe (T6 lo sustituyó por `TrustLogos`, dentro de Tecnologías). Sustituye `(TrustBar incluido)` por `(la fila de logos TrustLogos de Tecnologías incluida)`.
 
 #### 2.3 `AGENTS.md`
 Es el espejo de `CLAUDE.md` para Codex y está desactualizado (cita `src/app/page.tsx` y `@studio-freight/lenis`). Reemplaza **solo** el bloque de reglas anterior a `<!-- BEGIN:nextjs-agent-rules -->` por el mismo contenido de "Reglas de Arquitectura" de `CLAUDE.md` (cambiando "Claude" por "Codex" en los títulos). El bloque `nextjs-agent-rules` queda intacto.
@@ -9160,7 +9451,8 @@ console.log(JSON.stringify({ viewport: result.viewport, throttle, ...result.medi
 #### 2.5 `scripts/capture-home.mjs`
 ```js
 // Capturas del viewport de la home en puntos repartidos por todo el scroll, para revisar
-// el diseño a ojo. Por defecto: 1440×900 y 390×844, con y sin "reducir movimiento".
+// el diseño a ojo. Por defecto: 1440×900 y 390×844, con y sin "reducir movimiento", y
+// 1920×1080 y 2560×1440 con "reducir movimiento" (alineación de superposiciones, diseño §13).
 //
 //   node scripts/capture-home.mjs --url http://localhost:3111/es --out /ruta/capturas --points 12
 import { mkdirSync } from 'node:fs'
@@ -9182,6 +9474,9 @@ const PASSES = [
   { name: 'mobile', viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'no-preference' },
   { name: 'desktop-reduced', viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' },
   { name: 'mobile-reduced', viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' },
+  // Pantallas grandes (diseño §13): con reducir movimiento todas las superposiciones están completas.
+  { name: 'fhd-reduced', viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1, reducedMotion: 'reduce' },
+  { name: 'qhd-reduced', viewport: { width: 2560, height: 1440 }, deviceScaleFactor: 1, reducedMotion: 'reduce' },
 ]
 
 mkdirSync(outDir, { recursive: true })
@@ -9226,9 +9521,17 @@ console.log(JSON.stringify(index, null, 2))
 ```
 
 #### 2.6 `package.json`
+T1 dejó `images:verify` como último script, sin coma. Antes:
 ```json
-"measure:home": "node scripts/measure-home.mjs",
-"capture:home": "node scripts/capture-home.mjs"
+    "images:verify": "node scripts/verify-images.mjs"
+  },
+```
+Después:
+```json
+    "images:verify": "node scripts/verify-images.mjs",
+    "measure:home": "node scripts/measure-home.mjs",
+    "capture:home": "node scripts/capture-home.mjs"
+  },
 ```
 
 ### Paso 3 — Verificación final (obligatoria)
@@ -9252,13 +9555,22 @@ for vp in desktop mobile; do
   node scripts/measure-home.mjs --url http://localhost:3111/es --viewport $vp --out $V/perf-$vp.json
 done
 ```
-**Esperado:** LCP (mediana) < 2 500 ms con Slow 4G + CPU 4× en `desktop` y `mobile`; CLS < 0,1. Comparar `jsBytes` con la línea base del §0 (239 002 bytes, medida con el mismo método en `desktop` sin limitar): el diseño limita el JS nuevo de las islas de la home a ≤ 30 KB gzip. Si se supera, identificar el bloque con `jsFiles`/`runs` y reducirlo (p. ej. `next/dynamic` para islas bajo el pliegue) antes de cerrar.
+**Esperado:** LCP (mediana) < 2 500 ms con Slow 4G + CPU 4× en `desktop` y `mobile`; CLS < 0,1.
+
+**JS (diseño §11, ≤ 30 KB gzip de JS cliente nuevo):** PASA si `median.jsBytes` de `$V/perf-desktop.json` − 239 002 (línea base del §0, mismo método: `desktop` sin limitar, bytes transferidos con compresión) ≤ 30 720. Si no pasa, la tarea no se cierra: identifica el bloque con `jsFiles`/`runs` y redúcelo en su origen (por ejemplo, importaciones de `motion` fuera de `LazyMotion`, como `animate` o `useAnimate`, o dependencias pesadas dentro de una isla). `next/dynamic` llamado desde un Server Component no divide el código del cliente (Decisión 8 de T7 y de T10), y un componente dinámico con SSR se sigue descargando al cargar la página, así que no es el remedio. Anota la diferencia medida en "Estado al cierre".
+
+**Imagen de portada (diseño §7, ≤ 250 KB en AVIF a 1920 px):** contra el mismo `next start`:
+```bash
+HERO=$(curl -s http://localhost:3111/es | grep -io '<img[^>]*fetchpriority="high"[^>]*>' | grep -io 'srcset="[^"]*"' | tr ',' '\n' | grep ' 1920w' | sed -E 's/^[^/]*(\/_next\/image[^ ]*) 1920w.*/\1/; s/&amp;/\&/g')
+curl -s -H 'Accept: image/avif' -o /dev/null -w '%{content_type} %{size_download}\n' "http://localhost:3111$HERO" | tee $V/hero-avif-1920.txt
+```
+**Esperado:** `image/avif` y ≤ 256 000 bytes (250 KB; medido con el relieve procesado: ≈ 116 000). La prueba de T6 lo comprueba también en desarrollo.
 
 Capturas y revisión visual:
 ```bash
 node scripts/capture-home.mjs --url http://localhost:3111/es --out <scratchpad>/captures --points 12
 ```
-Son 48 capturas (12 puntos × 4 pasadas). Se revisan **una por una** contra el diseño (§4 identidad, §5 secciones, §3.1 del plan): encuadre de las imágenes, alineación de las superposiciones con la imagen (ruta sobre la cresta, nodos sobre la lámina, recuadros sobre los valores del expediente), un solo azul, contraste, textos cortados, saltos, estados finales con reducir movimiento. Todo lo que no cuadre se corrige y se vuelve a capturar.
+Son 72 capturas (12 puntos × 6 pasadas). Se revisan **una por una** contra el diseño (§4 identidad, §5 secciones, §3.1 del plan): encuadre de las imágenes, alineación de las superposiciones con la imagen (ruta sobre la cresta, nodos sobre la lámina, recuadros sobre los valores del expediente) en los cuatro tamaños que pide el diseño §13 (1440×900, 1920×1080, 2560×1440 y 390×844), un solo azul, contraste, textos cortados, saltos, estados finales con reducir movimiento. Todo lo que no cuadre se corrige y se vuelve a capturar.
 
 ### Paso 4 — Estado al cierre y commit
 Añade al final de `docs/superpowers/handoff/2026-09-23-home-redesign-handoff.md` la sección **"## 7. Estado al cierre"**: qué se hizo (tabla de tareas y commits), qué se decidió y por qué (las "Decisiones" de cada commit), resultados de verificación con cifras (lint, `tsc`, build, e2e, LCP, CLS, JS antes/después), desviaciones del diseño, pendientes (fase 2 y lo que no se pudo hacer: dominio, Vercel, credenciales) y cómo retomarlo.
@@ -9279,6 +9591,6 @@ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
 ```
 
 ### Decisiones
-- Las capturas no se versionan (≈ 48 PNG de varios cientos de KB); se versionan los logs y las mediciones en JSON.
+- Las capturas no se versionan (≈ 72 PNG de varios cientos de KB); se versionan los logs y las mediciones en JSON.
 - `AGENTS.md` se sincroniza con `CLAUDE.md` porque ya contradecía el código (Lenis, `src/app/page.tsx`); el resto de la documentación (README, `plan.md`, `docs/architecture-3d.md`) queda para la fase 2, como fija el diseño §3.
 - La medición usa el mismo método que la línea base del §0 para que los bytes de JS sean comparables.
