@@ -262,34 +262,22 @@ const es = {
     description: "Ingeniería y estrategia detrás de Orbexs.",
     members: [
       {
-        name: "Johan Rocuts",
-        initials: "JR",
-        role: "CEO - Director Ejecutivo",
-        tagline: "Estratega de productos digitales de alta escala.",
-      },
-      {
         name: "Mauricio Solano",
         initials: "MS",
-        role: "Director de Ventas",
-        tagline: "Especialista en ventas consultivas B2B, enterprise y gobierno.",
+        role: "CEO - Director Ejecutivo",
+        tagline: "Dirige la estrategia y el crecimiento de Orbexs.",
+      },
+      {
+        name: "Johan Rocuts",
+        initials: "JR",
+        role: "CTO - Director de Tecnología",
+        tagline: "Arquitecto de productos digitales de alta escala.",
       },
       {
         name: "Yeison Grisales",
         initials: "YG",
         role: "CCO - Director de Estrategia Comercial",
         tagline: "Especialista en soluciones tecnológicas B2B.",
-      },
-      {
-        name: "Cristian Mancilla",
-        initials: "CM",
-        role: "CTO - Director de Tecnología",
-        tagline: "Especialista en arquitectura de sistemas distribuidos.",
-      },
-      {
-        name: "Andres Rodriguez",
-        initials: "AR",
-        role: "Ingeniero Full Stack Senior",
-        tagline: "Experto en desarrollo web de alto rendimiento.",
       },
     ],
   },
@@ -1064,19 +1052,18 @@ const es = {
       ],
     },
     team: {
-      title: "Equipo Fundador",
+      title: "Equipo Directivo",
       description: "Ingeniería y estrategia detrás de Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala. Define la visión de producto y la estrategia de mercado de Orbexs en el sector enterprise y gobierno." },
+        { name: "Mauricio Solano", initials: "MS", role: "CEO - Director Ejecutivo", bio: "Dirige la estrategia y el crecimiento de Orbexs. Especialista en ventas consultivas B2B y en la relación con clientes enterprise y gobierno." },
+        { name: "Johan Rocuts", initials: "JR", role: "CTO - Director de Tecnología", bio: "Estratega de productos digitales de alta escala. Lidera la arquitectura técnica y el diseño de todas las soluciones de Orbexs." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B. Gestiona las relaciones comerciales y la expansión de Orbexs en industrias reguladas." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad. Lidera el diseño técnico de todas las soluciones de Orbexs." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento. Construye las interfaces y sistemas que conectan la tecnología de Orbexs con los usuarios finales." },
       ],
     },
     vision: {
       quote: "La soberanía digital no es una tendencia — es el estándar inevitable para toda organización que opera con datos sensibles. Estamos construyendo la infraestructura que lo hace posible.",
       author: "Johan Rocuts",
-      role: "CEO, Orbexs",
+      role: "CTO, Orbexs",
     },
     cta: {
       title: "Hablemos",
@@ -1109,11 +1096,9 @@ const es = {
       title: "Nuestro Equipo",
       description: "Ingeniería y estrategia detrás de Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Director Ejecutivo", bio: "Estratega de productos digitales de alta escala con enfoque en mercados enterprise y gobierno." },
-        { name: "Mauricio Solano", initials: "MS", role: "Director de Ventas", bio: "Especialista en ventas consultivas B2B. Lidera el desarrollo de negocio y la relación con clientes enterprise y gobierno." },
+        { name: "Mauricio Solano", initials: "MS", role: "CEO - Director Ejecutivo", bio: "Dirige la estrategia y el crecimiento de Orbexs, con foco en ventas consultivas B2B para clientes enterprise y gobierno." },
+        { name: "Johan Rocuts", initials: "JR", role: "CTO - Director de Tecnología", bio: "Estratega de productos digitales de alta escala. Lidera la arquitectura técnica de las soluciones de Orbexs." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Director de Estrategia Comercial", bio: "Especialista en soluciones tecnológicas B2B para industrias reguladas." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Director de Tecnología", bio: "Especialista en arquitectura de sistemas distribuidos y plataformas de alta disponibilidad." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Ingeniero Full Stack Senior", bio: "Experto en desarrollo web de alto rendimiento y sistemas de interfaz enterprise." },
       ],
     },
     values: {

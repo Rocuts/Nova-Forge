@@ -152,7 +152,7 @@
 #eyebrow("Equipo")
 #v(7pt)
 #mono(
-  "JR Johan Rocuts · CEO  |  YG Yeison Grisales · CCO  |  CM Cristian Mancilla · CTO  |  AR Andres Rodriguez · Lead Engineer",
+  "MS Mauricio Solano · CEO  |  JR Johan Rocuts · CTO  |  YG Yeison Grisales · CCO",
   size: 8pt, fill: ink-2,
 )
 #v(11pt)
@@ -165,7 +165,7 @@
   font: "Inter", size: 11pt, style: "italic", fill: ink,
 )
 #v(4pt)
-#mono("— Johan Rocuts, CEO", size: 7.5pt, fill: ink-2)
+#mono("— Johan Rocuts, CTO", size: 7.5pt, fill: ink-2)
 #v(11pt)
 #hline
 #v(9pt)

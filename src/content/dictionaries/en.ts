@@ -262,34 +262,22 @@ const en = {
     description: "Engineering and strategy behind Orbexs.",
     members: [
       {
-        name: "Johan Rocuts",
-        initials: "JR",
-        role: "CEO - Chief Executive Officer",
-        tagline: "Strategist for high-scale digital products.",
-      },
-      {
         name: "Mauricio Solano",
         initials: "MS",
-        role: "Sales Director",
-        tagline: "Specialist in consultative B2B, enterprise, and government sales.",
+        role: "CEO - Chief Executive Officer",
+        tagline: "Leads Orbexs's strategy and growth.",
+      },
+      {
+        name: "Johan Rocuts",
+        initials: "JR",
+        role: "CTO - Chief Technology Officer",
+        tagline: "Architect of high-scale digital products.",
       },
       {
         name: "Yeison Grisales",
         initials: "YG",
         role: "CCO - Chief Commercial Officer",
         tagline: "Specialist in B2B technology solutions.",
-      },
-      {
-        name: "Cristian Mancilla",
-        initials: "CM",
-        role: "CTO - Chief Technology Officer",
-        tagline: "Specialist in distributed systems architecture.",
-      },
-      {
-        name: "Andres Rodriguez",
-        initials: "AR",
-        role: "Senior Full Stack Engineer",
-        tagline: "Expert in high-performance web development.",
       },
     ],
   },
@@ -1064,19 +1052,18 @@ const en = {
       ],
     },
     team: {
-      title: "Founding Team",
+      title: "Leadership Team",
       description: "Engineering and strategy behind Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist. Defines Orbexs's product vision and market strategy in the enterprise and government sector." },
+        { name: "Mauricio Solano", initials: "MS", role: "CEO - Chief Executive Officer", bio: "Leads Orbexs's strategy and growth. Specialist in consultative B2B sales and relationships with enterprise and government clients." },
+        { name: "Johan Rocuts", initials: "JR", role: "CTO - Chief Technology Officer", bio: "High-scale digital product strategist. Leads the technical architecture and design of all Orbexs solutions." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions. Manages commercial relationships and Orbexs's expansion in regulated industries." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms. Leads the technical design of all Orbexs solutions." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development. Builds the interfaces and systems that connect Orbexs's technology with end users." },
       ],
     },
     vision: {
       quote: "Digital sovereignty is not a trend — it is the inevitable standard for every organization operating with sensitive data. We are building the infrastructure that makes it possible.",
       author: "Johan Rocuts",
-      role: "CEO, Orbexs",
+      role: "CTO, Orbexs",
     },
     cta: {
       title: "Let's Talk",
@@ -1109,11 +1096,9 @@ const en = {
       title: "Our Team",
       description: "Engineering and strategy behind Orbexs.",
       members: [
-        { name: "Johan Rocuts", initials: "JR", role: "CEO - Chief Executive Officer", bio: "High-scale digital product strategist focused on enterprise and government markets." },
-        { name: "Mauricio Solano", initials: "MS", role: "Sales Director", bio: "Specialist in consultative B2B sales. Leads business development and relationships with enterprise and government clients." },
+        { name: "Mauricio Solano", initials: "MS", role: "CEO - Chief Executive Officer", bio: "Leads Orbexs's strategy and growth, with a focus on consultative B2B sales for enterprise and government clients." },
+        { name: "Johan Rocuts", initials: "JR", role: "CTO - Chief Technology Officer", bio: "High-scale digital product strategist. Leads the technical architecture of Orbexs solutions." },
         { name: "Yeison Grisales", initials: "YG", role: "CCO - Chief Commercial Officer", bio: "Specialist in B2B technology solutions for regulated industries." },
-        { name: "Cristian Mancilla", initials: "CM", role: "CTO - Chief Technology Officer", bio: "Specialist in distributed systems architecture and high-availability platforms." },
-        { name: "Andres Rodriguez", initials: "AR", role: "Senior Full Stack Engineer", bio: "Expert in high-performance web development and enterprise interface systems." },
       ],
     },
     values: {
