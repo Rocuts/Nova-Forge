@@ -395,13 +395,18 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
 - `inView` (< 768 px): sin sticky; la animación se dispara una vez al entrar en pantalla.
 - `scrub` (≥ 768 px): el avance del contenedor (0→1) controla la animación.
 - `h1`/`h2` visibles desde el servidor: nunca `opacity: 0` ni `visibility: hidden` en ellos ni en sus ancestros.
-- Superposiciones SVG: `viewBox="0 0 1536 1024"`, `preserveAspectRatio="xMidYMid slice"`, `aria-hidden="true"`, dentro de `FocalCover`. Trazos con `vectorEffect="non-scaling-stroke"`.
+- Superposiciones SVG: `viewBox="0 0 1536 1024"`, `preserveAspectRatio="xMidYMid slice"`, `aria-hidden="true"`, dentro de `FocalCover`.
+- Trazos: **nunca** combinar `vectorEffect="non-scaling-stroke"` con un trazo animado por `pathLength` (en Chromium el guion se calcula en unidades de la imagen y se pinta en píxeles de pantalla: una línea al 50 % a media escala sale entera, y la ruta de la portada se quedaría en ~60–80 % en pantallas grandes). Los trazos animados con `pathLength` fijan su grosor en unidades de la imagen (≈ 1,1 unidades ≈ 1 px a 1440 px de ancho). `non-scaling-stroke` solo en trazos que no usan `pathLength` (p. ej. los recuadros del expediente, que aparecen con un fundido).
 - Hidratación: nada que dependa de `window`, `matchMedia` o `useReducedMotion` puede cambiar el HTML del primer render; los `initial` de `m.*` son idénticos para todos.
 
 ### 3.7 Convenciones de pruebas e2e
 - `e2e/helpers.ts` (lo crea T4; los demás lo amplían, nunca lo duplican):
   - `effectiveOpacity(locator)` → producto de la opacidad calculada del elemento y todos sus ancestros (`toBeVisible()` considera visible un elemento con `opacity: 0`).
   - `scrollToY(page, y)` → `window.scrollTo({ top: y, behavior: "instant" })` + espera de dos frames (`globals.css` tiene `scroll-behavior: smooth`).
+  - `waitForFrames(page, count)` → espera `count` frames de animación (T5).
+  - `countVisibleBlue(page): Promise<number>` → cuenta los elementos **visibles dentro del viewport** cuyo `color`, `fill`, `stroke`, `background-color` o `border-color` calculado es `rgb(37, 99, 235)` (T6).
+  - `settledTopOffset(locator)` → distancia del elemento al borde superior del viewport, medida cuando el scroll lleva dos frames quieto; para usar con `expect.poll` (T8).
+  - `FORBIDDEN_STEMS`, `FORBIDDEN_WORDS`, `findForbiddenTerms(text)` → lista negra de RealTy compartida con `e2e/realty.spec.ts` (T9).
 - Pruebas sin JavaScript: `test.use({ javaScriptEnabled: false })` en un `describe` propio.
 - Reducir movimiento: `test.use({ contextOptions: { reducedMotion: 'reduce' } })` (en Playwright 1.58 `reducedMotion` no es una opción de primer nivel de `test.use`: `tsc` da TS2353) o `page.emulateMedia({ reducedMotion: 'reduce' })` **antes** de `goto`.
 - Textos esperados siempre desde los diccionarios (`import es from '../src/content/dictionaries/es'`), nunca literales duplicados.
