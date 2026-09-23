@@ -239,3 +239,62 @@ La prueba de axe escanea con la página arriba, con todo en su estado inicial:
 - `orbexs.tech` no resuelve DNS y `orbexs-alpha.vercel.app` da 404 (proyecto de Vercel `nova-forge`). No es tarea de código; hay que avisarle al usuario.
 - Next 16 ya no imprime el peso de JavaScript por ruta al compilar. Para comparar, medir los bytes de JS transferidos al cargar `/es` con `next start`, en `main` y en esta rama.
 - La documentación de Next 16 está en `node_modules/next/dist/docs/`. Consultarla antes de usar cualquier API (lo pide AGENTS.md).
+
+## 7. Estado a la pausa (2026-09-23, sesión 1)
+
+La ejecución se detuvo a petición del usuario para continuar en otra sesión. Esta sección manda sobre §1 y §2 (desactualizadas: el plan ya existe y las imágenes están en `design/source/`).
+
+### Hecho y publicado en `origin/redesign/home`
+| Paso | Commit | Resultado |
+|---|---|---|
+| Plan completo (11 tareas, contrato §3), revisión cruzada con 32 hallazgos corregidos | `6cc0b01`, `637c1be` | `docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md` |
+| Tarea 0: `PORT` configurable en Playwright | `e826c94` | — |
+| **T1** imágenes y logo | `233446e` | lint/tsc ✅, `images:verify` ✅, e2e 41/41 |
+| **T3** copy de riesgo | `748567c` | lint/tsc ✅, e2e 46/46 (prueba verificada con mutación) |
+| **T4** títulos visibles y reducir movimiento | `2e61a3b` | lint/tsc ✅, e2e 60/60 |
+
+T1, T3 y T4 pasaron por implementador, dos revisores independientes (cumplimiento y calidad, ambos aprobados) y un integrador. Sus hallazgos menores se corrigieron al integrar (ver cada commit).
+
+**Línea base (antes de tocar código, `b65e497`):** e2e 39/39; JS de `/es` = 239 002 bytes (15 scripts, `next start`, 1440×900, sin caché, mediana de 3); LCP 900 ms con Slow 4G (150 ms RTT, 1,6 Mbps) + CPU 4×; CLS 0,007. La tarea 11 compara con el mismo método (`scripts/measure-home.mjs`, que crea T11).
+
+### Pendiente
+T2 (metadatos e imágenes para redes) ∥ T5 (navegación y encabezado); después T6 → T7 → T8 → T9 → T10; después T11 (limpieza, docs y verificación final). Todas las dependencias de T2 y T5 ya están integradas.
+
+### Preparar un contenedor nuevo
+1. `npm ci` en la raíz (Node 22).
+2. **Chromium de Playwright:** Playwright 1.58 espera la revisión 1208. Si `ls $PLAYWRIGHT_BROWSERS_PATH` no la tiene y el entorno prohíbe `playwright install`, enlazar la revisión preinstalada R (en la sesión 1 era 1194):
+   ```bash
+   B=$PLAYWRIGHT_BROWSERS_PATH; R=1194
+   mkdir -p $B/chromium-1208 $B/chromium_headless_shell-1208
+   ln -sfn $B/chromium-$R/chrome-linux $B/chromium-1208/chrome-linux64
+   ln -sfn headless_shell $B/chromium_headless_shell-$R/chrome-linux/chrome-headless-shell
+   ln -sfn $B/chromium_headless_shell-$R/chrome-linux $B/chromium_headless_shell-1208/chrome-headless-shell-linux64
+   touch $B/chromium-1208/{INSTALLATION_COMPLETE,DEPENDENCIES_VALIDATED} $B/chromium_headless_shell-1208/{INSTALLATION_COMPLETE,DEPENDENCIES_VALIDATED}
+   ```
+3. Comprobar la punta: `npm run lint`, `npx tsc --noEmit` y `npx playwright test` deben dar 60/60 en `2e61a3b`.
+4. Por worktree (plan §1.1): `cp -al` de `node_modules` (nunca `npm install` dentro: comparte inodos), `npx next typegen` y `PORT=30N0`. Para tocar el lockfile: `npx -y npm@11 install … --package-lock-only` (npm 10.9.7 corrompe los campos `libc`).
+
+### Lecciones de la sesión 1 (aplicarlas)
+- **Tailwind v4 escanea los `.md`:** T1 añadió `@source not "../../docs"`. No escribir clases con valores elididos en ningún archivo.
+- **Correctores interrumpidos:** un corrector de T3 se cortó a mitad de una prueba de mutación y dejó `es.ts` alterado. Si un agente se interrumpe, revisar su diff antes de integrar.
+- **Condición de carrera en la a11y de `/es`:** el H1 rotativo antiguo puede fallar el escaneo de contraste a media transición (~1 de cada 6). Desaparece en T6; hasta entonces, si falla solo esa prueba, repetirla una vez para confirmarlo, y dejarlo anotado.
+- **Carga de CPU:** con 4 CPU, cada `next dev` más Playwright satura la máquina. Limitar a dos ejecuciones de e2e o build a la vez (p. ej. `flock /tmp/e2e-slot-{1,2}.lock`), y no ejecutar un build en paralelo con e2e. Antes de cada ejecución, comprobar con `ss -ltnp` que el puerto está libre, porque `reuseExistingServer` reutilizaría el servidor de otro worktree.
+- `next dev` reescribe el bloque `nextjs-agent-rules` de `AGENTS.md`: `git checkout AGENTS.md` antes de cada commit (salvo en T11).
+- `test.use({ reducedMotion })` no compila en Playwright 1.58: usar `contextOptions: { reducedMotion }`.
+
+### Paralelismo recomendado para lo que falta
+Esta es una propuesta de la auditoría de la sesión 1 que se aparta de la secuencia estricta del plan §2. Las secciones de la home se implementan en paralelo y solo la integración va en serie:
+```
+F1  T2 ∥ T5                      → integrar T2, luego T5
+F2  T6 (sola; incluye build)     → integrar
+F3  T7 ∥ T8 ∥ T9 ∥ T10a          (worktrees desde el commit de T6; cada una con su propio spec temporal)
+F4  integrar en serie T7 → T8 → T9 → T10a (resolver page.tsx, diccionarios y helpers.ts; fundir los specs en e2e/home.spec.ts)
+    → T10b: pruebas de la home completa (orden de secciones, h2 sin JS, regla del azul en todo el scroll)
+F5  T11 (verificación con revisores visuales y de rama en paralelo)
+```
+T10a abarca Metodología, CTA, FAQ y TechStack, con sus pruebas. T10b añade las tres pruebas de la home completa, que necesitan todas las secciones integradas.
+
+Riesgos y cómo cubrirlos:
+- Los anclajes "Antes" del plan suponen el estado secuencial. El integrador escribe el `page.tsx` final con el orden del contrato §3.5.
+- En `helpers.ts`, T8 y T9 añaden al final del archivo. Se conservan ambos bloques, nunca duplicados.
+- Algunas cosas solo se ven integradas: la regla del azul entre secciones, el ancla `#gobierno` y el peso de JS. Se verifican tras cada integración, y el JS se mide después de T9 y de T10.
