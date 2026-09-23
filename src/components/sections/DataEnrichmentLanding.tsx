@@ -2,7 +2,6 @@
 import { m } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { RevealText } from "@/components/ui/RevealText"
-import { ScrambleText } from "@/components/ui/ScrambleText"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 
@@ -64,16 +63,10 @@ export function DataEnrichmentLanding({
             </p>
           </m.div>
 
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={stagger(1)}
-            className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-8"
-          >
-            <ScrambleText as="h1" className="text-[#0a0a0a]" delay={0.15} duration={1400}>
-              {content.title}
-            </ScrambleText>
-          </m.div>
+          {/* Plain h1: visible in the server HTML, with no opacity:0 entrance and no scramble (design §9.3). */}
+          <h1 className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.05] mb-8 text-[#0a0a0a]">
+            {content.title}
+          </h1>
 
           <m.p
             initial={{ opacity: 0, y: 20 }}

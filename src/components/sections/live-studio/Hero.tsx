@@ -1,5 +1,5 @@
 "use client"
-import { m } from "motion/react"
+import { m, useReducedMotion } from "motion/react"
 import { Button } from "@/components/ui/Button"
 import { trackEvent } from "@/lib/analytics"
 import { applyHref, resolveHref } from "./shared"
@@ -8,8 +8,22 @@ import type { LiveStudioContent } from "./shared"
 /** Deterministic bar heights — no Math.random, so SSR and hydration agree. */
 const EQ_BARS = [38, 72, 54, 88, 46, 64, 30, 78, 58, 42]
 
+/**
+ * Every bar sits in a fixed 28 px box (h-7) and animates `scaleY` from its
+ * bottom edge — a compositor-only transform, never `height` (design §11). The
+ * keyframes are the original pixel heights divided by that box; the tallest
+ * peak, 88 × 0.28 ≈ 24.6 px, fits inside it.
+ */
+const EQ_BOX_PX = 28
+const eqScale = (px: number) => px / EQ_BOX_PX
+
 /** The 9:16 booth frame — corner brackets, scanline sweep, level meter. */
 function BroadcastFrame({ onAir }: { onAir: string }) {
+  // null on the server, a boolean on the client's first render. It only feeds
+  // `animate` and `transition`, which never reach the server markup; `initial`
+  // is the same for everyone, so hydration always matches.
+  const reduceMotion = useReducedMotion()
+
   return (
     <div
       aria-hidden="true"
@@ -47,20 +61,35 @@ function BroadcastFrame({ onAir }: { onAir: string }) {
 
         {/* Bottom strip: audio level meter */}
         <div className="absolute bottom-0 inset-x-0 h-14 border-t border-white/8 px-3 flex items-end gap-[3px] pb-3">
-          {EQ_BARS.map((height, i) => (
-            <m.span
-              key={i}
-              className="flex-1 rounded-[1px] bg-gradient-to-t from-[#25f4ee]/50 to-[#fe2c55]/50"
-              initial={{ height: 4 }}
-              animate={{ height: [4, height * 0.28, 6, height * 0.2, 4] }}
-              transition={{
-                duration: 1.6 + (i % 4) * 0.35,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.07,
-              }}
-            />
-          ))}
+          {EQ_BARS.map((height, i) => {
+            // Reduced motion: a still meter, each bar parked at its peak
+            // (height × 0.28 px inside the 28 px box).
+            const level = height / 100
+            return (
+              <m.span
+                key={i}
+                data-eq-bar
+                data-eq-level={level}
+                className="h-7 flex-1 origin-bottom rounded-[1px] bg-gradient-to-t from-[#25f4ee]/50 to-[#fe2c55]/50"
+                initial={{ scaleY: eqScale(4) }}
+                animate={
+                  reduceMotion
+                    ? { scaleY: level }
+                    : { scaleY: [4, height * 0.28, 6, height * 0.2, 4].map(eqScale) }
+                }
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : {
+                        duration: 1.6 + (i % 4) * 0.35,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: i * 0.07,
+                      }
+                }
+              />
+            )
+          })}
         </div>
       </div>
 
@@ -132,16 +161,12 @@ export function LiveStudioHero({
               </span>
             </m.div>
 
-            <m.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-              className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.02] text-white mb-8"
-            >
+            {/* Plain h1: visible in the server HTML, never behind an opacity:0 entrance (design §9.3). */}
+            <h1 className="font-heading text-fluid-hero font-bold tracking-tight leading-[1.02] text-white mb-8">
               {titleLead}{" "}
               <span className="chroma-text">{titleAccent}</span>{" "}
               {titleTail}
-            </m.h1>
+            </h1>
 
             <m.p
               initial={{ opacity: 0, y: 20 }}

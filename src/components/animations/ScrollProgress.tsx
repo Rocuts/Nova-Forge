@@ -25,7 +25,7 @@ export function ScrollProgress() {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-      innerRef.current.style.height = `${progress}%`
+      innerRef.current.style.transform = `scaleY(${progress / 100})`
     }
 
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -46,8 +46,9 @@ export function ScrollProgress() {
         {/* Fill */}
         <div
           ref={innerRef}
-          className="absolute top-0 left-0 w-full bg-[#0a0a0a] opacity-60"
-          style={{ height: "0%" }}
+          data-scroll-progress-fill
+          className="absolute inset-0 origin-top bg-[#0a0a0a] opacity-60"
+          style={{ transform: "scaleY(0)" }}
         />
       </div>
     </div>
