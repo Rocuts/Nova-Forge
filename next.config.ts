@@ -60,6 +60,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  images: {
+    // AVIF first, WebP as fallback (design §7). Next 16's default quality
+    // allowlist ([75]) is kept: enough for the greyscale home imagery.
+    formats: ["image/avif", "image/webp"],
+  },
   experimental: {
     optimizePackageImports: ["@tabler/icons-react", "motion/react", "lucide-react"],
   },

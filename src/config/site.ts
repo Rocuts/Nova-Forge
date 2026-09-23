@@ -11,7 +11,7 @@ export const siteConfig = {
   url: siteUrl,
   contactEmail,
   images: {
-    logo: "/logo.svg",
+    logo: "/logo.png",
     social: "/opengraph-image",
     twitter: "/twitter-image",
   },
