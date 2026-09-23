@@ -1,27 +1,16 @@
 import type { Metadata } from "next"
 import { DiagnosticWizard } from "@/components/diagnostic/DiagnosticWizard"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, buildAlternates } from "@/lib/i18n"
+import { isValidLocale } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
-import { siteConfig } from "@/config/site"
+import { pageMetadata } from "@/lib/metadata"
 import { notFound } from "next/navigation"
 
 type Props = { params: Promise<{ locale: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
-  if (!isValidLocale(locale)) return {}
-  const dict = await getDictionary(locale as Locale)
-
-  return {
-    title: dict.diagnosticPage.pageTitle,
-    description: dict.diagnosticPage.pageSubtitle,
-    alternates: buildAlternates("/diagnostico", locale),
-    openGraph: {
-      title: `${dict.diagnosticPage.pageTitle} | ${siteConfig.name}`,
-      description: dict.diagnosticPage.pageSubtitle,
-    },
-  }
+  return pageMetadata(locale, "/diagnostico")
 }
 
 export default async function DiagnosticoPage({ params }: Props) {

@@ -315,29 +315,28 @@ This pattern keeps the initial bundle small. Hero and TrustBar load inline.
 
 ### Page Metadata Template
 
+Every page under `src/app/[locale]` delegates to `pageMetadata()`
+(`src/lib/metadata.ts`). It builds title, description, canonical + hreflang
+(`buildAlternates()`), Open Graph and the Twitter card from the dictionary via
+`getPageMeta()` (`src/lib/page-meta.ts`):
+
 ```tsx
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/metadata"
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
-  const t = getDictionary(locale)
-  return {
-    title: t.page.meta.title,
-    description: t.page.meta.description,
-    alternates: {
-      canonical: `${siteConfig.url}/${locale}/page-slug`,
-      languages: { es: `${siteConfig.url}/es/page-slug`, en: `${siteConfig.url}/en/page-slug` }
-    },
-    openGraph: {
-      type: "website",
-      locale,
-      url: `${siteConfig.url}/${locale}/page-slug`,
-      title: t.page.meta.title,
-      description: t.page.meta.description,
-      images: [{ url: siteConfig.images.social, width: 1200, height: 630 }]
-    },
-    twitter: { card: "summary_large_image" }
-  }
+  return pageMetadata(locale, "/page-slug") // internal (Spanish) path
 }
 ```
+
+- Never set `openGraph` or `images` in a page: a page's `openGraph` replaces
+  the layout's as a whole, and og:image comes from the route's own
+  `opengraph-image.tsx` (`renderPageSocialImage()` in `src/lib/social-image.tsx`).
+  Next copies it into twitter:image.
+- A new route adds its path to `PAGE_PATHS` with its case in `getPageMeta()`,
+  and its own `opengraph-image.tsx` (copy a sibling and change the path), on
+  top of `pathMap` and the sitemap (see CLAUDE.md).
 
 ### JSON-LD (Organization)
 

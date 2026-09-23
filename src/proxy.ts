@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 const PUBLIC_FILE = /\.(.+)$/
-const SKIP_PATHS = ["/_next", "/api", "/opengraph-image", "/twitter-image", "/favicon", "/logo", "/robots", "/sitemap"]
+const SKIP_PATHS = ["/_next", "/api", "/favicon", "/logo", "/robots", "/sitemap"]
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

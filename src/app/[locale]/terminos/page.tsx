@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { LegalPage } from "@/components/sections/LegalPage"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, buildAlternates } from "@/lib/i18n"
+import { isValidLocale } from "@/lib/i18n"
+import { pageMetadata } from "@/lib/metadata"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 
@@ -9,14 +10,7 @@ type Props = { params: Promise<{ locale: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
-  if (!isValidLocale(locale)) return {}
-  const dict = await getDictionary(locale as Locale)
-
-  return {
-    title: dict.terms.title,
-    description: dict.terms.description,
-    alternates: buildAlternates("/terminos", locale),
-  }
+  return pageMetadata(locale, "/terminos")
 }
 
 export default async function TermsPage({ params }: Props) {

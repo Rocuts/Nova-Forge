@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { Hero } from "@/components/sections/Hero"
 import { TrustBar } from "@/components/sections/TrustBar"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, buildLocalePath, buildAlternates } from "@/lib/i18n"
+import { isValidLocale, buildLocalePath } from "@/lib/i18n"
+import { pageMetadata } from "@/lib/metadata"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 
@@ -19,10 +20,7 @@ const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ defau
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
-  if (!isValidLocale(locale)) return {}
-  return {
-    alternates: buildAlternates("/", locale),
-  }
+  return pageMetadata(locale, "/")
 }
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {

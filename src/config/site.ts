@@ -12,8 +12,6 @@ export const siteConfig = {
   contactEmail,
   images: {
     logo: "/logo.png",
-    social: "/opengraph-image",
-    twitter: "/twitter-image",
   },
   siteLastModified: "2026-09-03",
   links: {

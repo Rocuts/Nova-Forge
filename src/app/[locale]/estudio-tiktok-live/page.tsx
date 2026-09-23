@@ -3,7 +3,8 @@ import { JsonLd } from "@/components/ui/JsonLd"
 import { breadcrumbJsonLd, ORG_ID } from "@/lib/seo"
 import { siteConfig } from "@/config/site"
 import { getDictionary } from "@/content/dictionaries"
-import { isValidLocale, buildAlternates, buildLocalePath } from "@/lib/i18n"
+import { isValidLocale, buildLocalePath } from "@/lib/i18n"
+import { pageMetadata } from "@/lib/metadata"
 import type { Locale } from "@/lib/i18n"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
@@ -12,19 +13,8 @@ const INTERNAL_PATH = "/estudio-tiktok-live"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
-  if (!isValidLocale(locale)) return {}
-  const dict = await getDictionary(locale)
-  const studio = dict.liveStudio
-  return {
-    title: `Orbexs Live Studio — ${studio.subtitle}`,
-    description: studio.description,
-    alternates: buildAlternates(INTERNAL_PATH, locale),
-    openGraph: {
-      title: `Orbexs Live Studio — ${studio.subtitle}`,
-      description: studio.description,
-      url: `${siteConfig.url}${buildLocalePath(locale, INTERNAL_PATH)}`,
-    },
-  }
+  // The title keeps its "Orbexs Live Studio — {subtitle}" format (see getPageMeta).
+  return pageMetadata(locale, INTERNAL_PATH)
 }
 
 export default async function LiveStudioPage({ params }: { params: Promise<{ locale: string }> }) {

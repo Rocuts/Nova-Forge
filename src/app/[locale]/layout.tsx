@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "../globals.css"
 import { siteConfig } from "@/config/site"
-import { isValidLocale, locales, localePrefix } from "@/lib/i18n"
+import { isValidLocale, locales } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { getDictionary } from "@/content/dictionaries"
 import { Header } from "@/components/layout/Header"
@@ -45,28 +45,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       shortcut: "/icon.svg",
       apple: "/icon.svg",
     },
+    // Fallback for routes without metadata of their own (the 404 page). Every
+    // page sets its title, og:url and description through pageMetadata()
+    // (src/lib/metadata.ts), and its opengraph-image.tsx adds og:image.
     openGraph: {
       type: "website",
+      siteName: siteConfig.name,
       locale: dict.meta.ogLocale,
       alternateLocale: locale === "es" ? "en_US" : "es_ES",
-      url: `${siteConfig.url}${localePrefix[locale]}`,
-      title: siteConfig.name,
-      description: dict.meta.description,
-      siteName: siteConfig.name,
-      images: [
-        {
-          url: `${siteConfig.url}/opengraph-image`,
-          width: 1200,
-          height: 630,
-          alt: `${siteConfig.name} — ${dict.meta.titleSuffix}`,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: siteConfig.name,
-      description: dict.meta.description,
-      images: [`${siteConfig.url}/twitter-image`],
     },
   }
 }
