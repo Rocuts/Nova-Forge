@@ -403,7 +403,7 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
   - `effectiveOpacity(locator)` → producto de la opacidad calculada del elemento y todos sus ancestros (`toBeVisible()` considera visible un elemento con `opacity: 0`).
   - `scrollToY(page, y)` → `window.scrollTo({ top: y, behavior: "instant" })` + espera de dos frames (`globals.css` tiene `scroll-behavior: smooth`).
 - Pruebas sin JavaScript: `test.use({ javaScriptEnabled: false })` en un `describe` propio.
-- Reducir movimiento: `test.use({ reducedMotion: "reduce" })` o `page.emulateMedia({ reducedMotion: "reduce" })` **antes** de `goto`.
+- Reducir movimiento: `test.use({ contextOptions: { reducedMotion: 'reduce' } })` (en Playwright 1.58 `reducedMotion` no es una opción de primer nivel de `test.use`: `tsc` da TS2353) o `page.emulateMedia({ reducedMotion: 'reduce' })` **antes** de `goto`.
 - Textos esperados siempre desde los diccionarios (`import es from '../src/content/dictionaries/es'`), nunca literales duplicados.
 - Nada de `waitForTimeout` para esperar estados que tienen un atributo observable: usar `expect.poll` o `toHaveAttribute`.
 
