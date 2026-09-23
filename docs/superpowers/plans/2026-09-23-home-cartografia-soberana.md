@@ -352,7 +352,7 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
 ### 3.4 Atributos para pruebas (`data-*`)
 | Atributo | Dónde | Valores |
 |---|---|---|
-| `data-header-theme` | toda sección de la home y de las páginas existentes | `light` \| `dark` |
+| `data-header-theme` | toda sección nueva de la home (T6–T10) y las secciones oscuras existentes (las claras de otras páginas pueden omitirlo: sin atributo cuenta como clara) | `light` \| `dark` |
 | `data-header-start="dark"` | primera sección de: portada de la home, `realty/Hero.tsx`, primera sección de `InvestorsPage.tsx`, `live-studio/Hero.tsx` | — |
 | `.site-header[data-tone]` | `<header>` | ausente antes de hidratar; luego `light` \| `dark` \| `menu` |
 | `.site-header[data-scrolled="true"]` | `<header>` | presente tras 50 px de scroll |
