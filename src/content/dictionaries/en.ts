@@ -304,7 +304,7 @@ const en = {
       {
         question: "How do you structure engagements with government and defense organizations?",
         answer:
-          "Every engagement with the public sector and defense operates under confidentiality by default. We work under NDA-bound contracts, isolated infrastructure, and a specialized onboarding process that includes compliance requirements assessment, data perimeter definition, and assignment of appropriately cleared personnel. We do not publish government client names or implementation details — operational discretion is an integral part of our service standard.",
+          "Every engagement with the public sector and defense operates under confidentiality by default. We work under NDA-bound contracts, isolated infrastructure, and a specialized onboarding process that includes compliance requirements assessment, data perimeter definition, and a dedicated team bound by confidentiality agreements. We do not publish government client names or implementation details — operational discretion is an integral part of our service standard.",
       },
     ],
   },
@@ -790,13 +790,13 @@ const en = {
       features: [
         { title: "Structured Extraction at Scale", description: "Conversion of web pages, PDFs, and unstructured documents into clean, validated data." },
         { title: "AI-Adaptive Parsing", description: "Language models that adapt to layout changes without manual selector maintenance." },
-        { title: "Global Proxy Infrastructure", description: "Global residential proxy network for continuous, unblocked collection." },
-        { title: "OSINT & Threat Intelligence", description: "Systematic collection from forums, social media, and dark web surfaces for intelligence agencies." },
+        { title: "Public Portals & Registries", description: "Extraction from government portals, public registries, and scanned documents." },
+        { title: "Open-Source OSINT", description: "Systematic collection from media outlets, forums, and public social media for risk and reputation analysis." },
         { title: "Regulatory Monitoring", description: "Tracking changes in legislation, sanctions lists, and license databases across jurisdictions." },
         { title: "Scheduling & Alerts", description: "Automated runs with failure detection, change monitoring, and notifications." },
       ],
       capabilities: [
-        { title: "Collection Infrastructure", items: ["Global Proxy Network", "Headless Browser Rendering", "Automatic CAPTCHA Resolution"] },
+        { title: "Collection Infrastructure", items: ["Scheduled Collectors", "Dynamic Page Rendering", "Source Change Detection"] },
         { title: "Extraction & Transformation", items: ["AI-Adaptive Parsers", "Per-Source Template Library", "Custom Extraction Pipelines"] },
         { title: "Delivery & Governance", items: ["API/Webhook/S3 Delivery", "Full Provenance Logging", "PII Redaction & Compliance"] },
       ],

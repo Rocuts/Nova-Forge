@@ -304,7 +304,7 @@ const es = {
       {
         question: "¿Cómo estructuran los compromisos con organizaciones gubernamentales y de defensa?",
         answer:
-          "Cada compromiso con el sector público y defensa opera bajo confidencialidad por defecto. Trabajamos con contratos bajo NDA, infraestructura aislada y un proceso de onboarding especializado que incluye evaluación de requisitos de cumplimiento, definición de perímetro de datos y asignación de equipo con clearance apropiado. No publicamos nombres de clientes gubernamentales ni detalles de implementación — la discreción operativa es parte integral de nuestro estándar de servicio.",
+          "Cada compromiso con el sector público y defensa opera bajo confidencialidad por defecto. Trabajamos con contratos bajo NDA, infraestructura aislada y un proceso de onboarding especializado que incluye evaluación de requisitos de cumplimiento, definición de perímetro de datos y asignación de un equipo dedicado bajo acuerdos de confidencialidad. No publicamos nombres de clientes gubernamentales ni detalles de implementación — la discreción operativa es parte integral de nuestro estándar de servicio.",
       },
     ],
   },
@@ -790,13 +790,13 @@ const es = {
       features: [
         { title: "Extracción Estructurada a Escala", description: "Conversión de páginas web, PDFs y documentos no estructurados en datos limpios y validados." },
         { title: "Parseo Adaptativo con IA", description: "Modelos de lenguaje que se adaptan a cambios de layout sin mantenimiento manual de selectores." },
-        { title: "Infraestructura de Proxies Global", description: "Red global de proxies residenciales para recolección continua sin bloqueos." },
-        { title: "OSINT e Inteligencia de Amenazas", description: "Recolección sistemática de foros, redes sociales y superficies de la dark web para agencias de inteligencia." },
+        { title: "Portales y Registros Públicos", description: "Extracción desde portales gubernamentales, registros públicos y documentos escaneados." },
+        { title: "OSINT de Fuentes Abiertas", description: "Recolección sistemática de medios, foros y redes sociales públicas para análisis de riesgo y reputación." },
         { title: "Monitoreo Regulatorio", description: "Seguimiento de cambios en legislación, listas de sanciones y bases de datos de licencias entre jurisdicciones." },
         { title: "Programación y Alertas", description: "Ejecuciones automatizadas con detección de fallos, monitoreo de cambios y notificaciones." },
       ],
       capabilities: [
-        { title: "Infraestructura de Recolección", items: ["Red Global de Proxies", "Renderizado Headless Browser", "Resolución Automática de CAPTCHAs"] },
+        { title: "Infraestructura de Recolección", items: ["Colectores Programados", "Renderizado de Páginas Dinámicas", "Detección de Cambios en la Fuente"] },
         { title: "Extracción y Transformación", items: ["Parsers Adaptativos con IA", "Biblioteca de Templates por Fuente", "Pipelines de Extracción Personalizados"] },
         { title: "Entrega y Gobierno", items: ["Entrega via API/Webhook/S3", "Logging de Proveniencia Completo", "Redacción de PII y Cumplimiento"] },
       ],
