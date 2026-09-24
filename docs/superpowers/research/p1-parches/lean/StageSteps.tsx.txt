@@ -1,0 +1,111 @@
+"use client"
+// Prototipo de medición (no va al repo): isla genérica mínima. El marcado llega
+// del servidor como children; la isla solo calcula el avance y escribe data-*.
+import { useEffect, useRef } from "react"
+
+type Mode = "scrub" | "inView" | "static"
+type Kind = "count" | "center" | "extract"
+const REDUCED = "(prefers-reduced-motion: reduce)"
+const SCRUB = "(min-width: 768px) and (min-height: 600px) and (prefers-reduced-motion: no-preference)"
+
+// Avance 0→1 entre dos líneas del viewport (fracciones de alto), como offset ["start a", "end b"].
+function progressOf(el: Element, startAt: number, endAt: number, useEnd: boolean) {
+  const r = el.getBoundingClientRect()
+  const vh = window.innerHeight
+  const from = vh * startAt
+  const to = vh * endAt
+  const span = useEnd ? r.height + from - to : from - to
+  const p = (from - r.top) / (span || 1)
+  return p < 0 ? 0 : p > 1 ? 1 : p
+}
+
+interface Props {
+  kind: Kind
+  /** offset [inicio, fin] en fracciones del viewport; useEnd = el fin se mide con el borde inferior */
+  at: [number, number, boolean]
+  stepMs: number
+  children: React.ReactNode
+}
+
+export function StageSteps({ kind, at, stepMs, children }: Props) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const root = ref.current
+    if (!root) return
+    const section = root.closest("section")
+    const items = Array.from(root.querySelectorAll<HTMLElement>("[data-step]"))
+    const total = items.length
+    const counter = root.querySelector<HTMLElement>("[data-counter]")
+    const reduced = matchMedia(REDUCED)
+    const scrub = matchMedia(SCRUB)
+    let last = -2
+    let raf = 0
+    let timer = 0
+    let io: IntersectionObserver | undefined
+
+    const paint = (n: number) => {
+      if (n === last) return
+      last = n
+      items.forEach((el, i) => {
+        const state =
+          kind === "extract"
+            ? i < Math.floor(n) ? "done" : i === Math.floor(n) && n % 1 > 0.15 ? "active" : "idle"
+            : i < n ? "true" : "false"
+        el.dataset.state = state
+        el.dataset.active = String(kind === "center" ? i === n : i < n)
+      })
+      if (counter) counter.textContent = `${String(Math.min(Math.ceil(n), total)).padStart(2, "0")} / ${String(total).padStart(2, "0")}`
+    }
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const p = progressOf(root, at[0], at[1], at[2])
+        paint(kind === "extract" ? Math.min(1, p * 1.1) * total : Math.round(p * total))
+      })
+    }
+    const stop = () => {
+      removeEventListener("scroll", onScroll)
+      removeEventListener("resize", onScroll)
+      clearInterval(timer)
+      io?.disconnect()
+    }
+    const start = () => {
+      stop()
+      const mode: Mode = reduced.matches ? "static" : scrub.matches ? "scrub" : "inView"
+      if (section) section.dataset.stageMode = mode
+      if (mode === "static") return paint(total)
+      if (mode === "scrub") {
+        addEventListener("scroll", onScroll, { passive: true })
+        addEventListener("resize", onScroll)
+        return onScroll()
+      }
+      io = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return
+        io?.disconnect()
+        let n = 0
+        timer = window.setInterval(() => {
+          paint(++n)
+          if (n >= total) clearInterval(timer)
+        }, stepMs)
+      }, { threshold: 0.4 })
+      io.observe(root)
+    }
+    start()
+    reduced.addEventListener("change", start)
+    scrub.addEventListener("change", start)
+    return () => {
+      stop()
+      cancelAnimationFrame(raf)
+      reduced.removeEventListener("change", start)
+      scrub.removeEventListener("change", start)
+    }
+  }, [kind, at, stepMs])
+
+  return (
+    <div ref={ref} className="contents">
+      {children}
+    </div>
+  )
+}

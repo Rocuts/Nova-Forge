@@ -1,0 +1,35 @@
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index 1941654..2bd1c72 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -1,4 +1,3 @@
+-import dynamic from "next/dynamic"
+ import type { Metadata } from "next"
+ import { notFound } from "next/navigation"
+ import { HomeHero } from "@/components/sections/home/HomeHero"
+@@ -8,15 +7,16 @@ import type { Locale } from "@/lib/i18n"
+ import { pageMetadata } from "@/lib/metadata"
+ 
+ // La portada se importa de forma estática: es el LCP y su HTML tiene que salir
+-// del servidor sin esperar a ningún chunk. El resto de secciones, bajo el pliegue.
+-const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
+-const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
+-const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
+-const LiveStudioTeaser = dynamic(() => import("@/components/sections/LiveStudioTeaser").then(m => ({ default: m.LiveStudioTeaser })))
+-const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
+-const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
+-const FAQ = dynamic(() => import("@/components/sections/FAQ").then(m => ({ default: m.FAQ })))
+-const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
++// del servidor sin esperar a ningún chunk. El resto, también estático: dynamic()
++// desde un Server Component no divide el código (lazy-loading.md) y solo añade su runtime.
++import { Services } from "@/components/sections/Services"
++import { FlagshipAI } from "@/components/sections/FlagshipAI"
++import { CaseStudy } from "@/components/sections/CaseStudy"
++import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
++import { Methodology } from "@/components/sections/Methodology"
++import { TechStack } from "@/components/sections/TechStack"
++import { FAQ } from "@/components/sections/FAQ"
++import { CTA } from "@/components/sections/CTA"
+ 
+ export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+   const { locale } = await params

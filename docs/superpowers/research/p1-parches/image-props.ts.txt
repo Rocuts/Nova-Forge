@@ -1,0 +1,18 @@
+import { getImgProps } from "next/dist/shared/lib/get-img-props"
+import type { ImageConfigComplete } from "next/dist/shared/lib/image-config"
+import defaultLoader from "next/dist/shared/lib/image-loader"
+import type { ImageProps } from "next/image"
+
+// getImageProps de next/image sin importar next/image: ese módulo requiere
+// client/image-component ('use client') y mete el componente Image en el JS
+// del cliente aunque no se use. Misma lógica que next/dist/shared/lib/image-external.js.
+export function getStaticImgProps(imgProps: ImageProps) {
+  const { props } = getImgProps(imgProps, {
+    defaultLoader,
+    imgConf: process.env.__NEXT_IMAGE_OPTS as unknown as ImageConfigComplete,
+  })
+  for (const [key, value] of Object.entries(props)) {
+    if (value === undefined) delete (props as Record<string, unknown>)[key]
+  }
+  return props
+}

@@ -1,0 +1,124 @@
+diff --git a/package.json b/package.json
+index 1d0379e..ba54465 100644
+--- a/package.json
++++ b/package.json
+@@ -32,10 +32,10 @@
+     "zod": "^4.3.6"
+   },
+   "browserslist": [
+-    "last 2 Chrome versions",
+-    "last 2 Firefox versions",
+-    "last 2 Safari versions",
+-    "last 2 Edge versions"
++    "chrome 111",
++    "edge 111",
++    "firefox 111",
++    "safari 16.4"
+   ],
+   "devDependencies": {
+     "@axe-core/playwright": "^4.13.0",
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index 1941654..2bd1c72 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -1,4 +1,3 @@
+-import dynamic from "next/dynamic"
+ import type { Metadata } from "next"
+ import { notFound } from "next/navigation"
+ import { HomeHero } from "@/components/sections/home/HomeHero"
+@@ -8,15 +7,16 @@ import type { Locale } from "@/lib/i18n"
+ import { pageMetadata } from "@/lib/metadata"
+ 
+ // La portada se importa de forma estática: es el LCP y su HTML tiene que salir
+-// del servidor sin esperar a ningún chunk. El resto de secciones, bajo el pliegue.
+-const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
+-const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
+-const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
+-const LiveStudioTeaser = dynamic(() => import("@/components/sections/LiveStudioTeaser").then(m => ({ default: m.LiveStudioTeaser })))
+-const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
+-const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
+-const FAQ = dynamic(() => import("@/components/sections/FAQ").then(m => ({ default: m.FAQ })))
+-const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
++// del servidor sin esperar a ningún chunk. El resto, también estático: dynamic()
++// desde un Server Component no divide el código (lazy-loading.md) y solo añade su runtime.
++import { Services } from "@/components/sections/Services"
++import { FlagshipAI } from "@/components/sections/FlagshipAI"
++import { CaseStudy } from "@/components/sections/CaseStudy"
++import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
++import { Methodology } from "@/components/sections/Methodology"
++import { TechStack } from "@/components/sections/TechStack"
++import { FAQ } from "@/components/sections/FAQ"
++import { CTA } from "@/components/sections/CTA"
+ 
+ export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+   const { locale } = await params
+diff --git a/src/components/sections/home/HeroRoute.tsx b/src/components/sections/home/HeroRoute.tsx
+index 91fb4b1..8b20119 100644
+--- a/src/components/sections/home/HeroRoute.tsx
++++ b/src/components/sections/home/HeroRoute.tsx
+@@ -1,7 +1,7 @@
+ "use client"
+ 
+ import { useEffect, useRef, useState } from "react"
+-import { animate, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
++import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
+ import type { MotionValue } from "motion/react"
+ import type { StageMode } from "@/hooks/useStageProgress"
+ import { ROUTE_PATH, ROUTE_SUMMIT, VIEWBOX } from "./geometry"
+@@ -36,8 +36,11 @@ export function HeroRoute({ progress, mode }: { progress: MotionValue<number>; m
+       return
+     }
+     if (mode !== "inView" || !inView) return
+-    const controls = animate(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
+-    return () => controls.stop()
++    // animateSingleValue: lo mismo que animate(mv, …) hace por dentro, sin arrastrar
++    // el animate híbrido (secuencias, ObjectVisualElement…). stop() en el propio valor:
++    // con animaciones instantáneas animateSingleValue no devuelve controles.
++    animateSingleValue(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
++    return () => ownDraw.stop()
+   }, [mode, inView, ownDraw])
+ 
+   const draw = mode === "scrub" ? scrubDraw : ownDraw
+diff --git a/src/components/ui/Button.tsx b/src/components/ui/Button.tsx
+index 0ed0b27..e935f1f 100644
+--- a/src/components/ui/Button.tsx
++++ b/src/components/ui/Button.tsx
+@@ -2,7 +2,6 @@
+ import { forwardRef } from "react"
+ import { m } from "motion/react"
+ import { cn } from "@/lib/utils"
+-import { MagneticButton } from "./MagneticButton"
+ 
+ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
+   variant?: "primary" | "secondary" | "ghost"
+@@ -11,11 +10,10 @@ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"
+   target?: string
+   children: React.ReactNode
+   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+-  magnetic?: boolean
+ }
+ 
+ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
+-  ({ className, variant = "primary", size = "md", onClick, href, target, children, magnetic = false, ...props }, ref) => {
++  ({ className, variant = "primary", size = "md", onClick, href, target, children, ...props }, ref) => {
+     const baseStyles = "inline-flex items-center justify-center rounded-[2px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+ 
+     const variants = {
+@@ -53,7 +51,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+           {children}
+         </m.a>
+       )
+-      return magnetic ? <MagneticButton>{anchor}</MagneticButton> : anchor
++      return anchor
+     }
+ 
+     const button = (
+@@ -69,7 +67,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+         {children}
+       </m.button>
+     )
+-    return magnetic ? <MagneticButton>{button}</MagneticButton> : button
++    return button
+   }
+ )
+ Button.displayName = "Button"

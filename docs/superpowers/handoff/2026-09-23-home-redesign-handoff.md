@@ -298,3 +298,76 @@ Riesgos y cómo cubrirlos:
 - Los anclajes "Antes" del plan suponen el estado secuencial. El integrador escribe el `page.tsx` final con el orden del contrato §3.5.
 - En `helpers.ts`, T8 y T9 añaden al final del archivo. Se conservan ambos bloques, nunca duplicados.
 - Algunas cosas solo se ven integradas: la regla del azul entre secciones, el ancla `#gobierno` y el peso de JS. Se verifican tras cada integración, y el JS se mide después de T9 y de T10.
+
+## 8. Estado a la pausa 2 (2026-09-24, sesión 2 → se continúa en el Mac)
+
+> **Trabajo nocturno tras el primer commit de esta sección (sesión 2, hasta ~11:00 UTC del 2026-09-24):** P1 y T7 ∥ T8 (con integración directa T7 → T8, specs temporales fundidos por el integrador) se ejecutan en el contenedor con el mismo workflow y los scripts portables. Al cierre, esta sección se actualiza con el estado real (§8.7), y el trabajo sin integrar queda como parches en `docs/superpowers/handoff/wip/`.
+
+La sesión 2 se ejecutó en el contenedor de Claude Code on the web (4 CPU, 15 GB): con 4 CPU el runtime solo permitía **2 agentes simultáneos**, y cada fase tardaba horas. El usuario decidió continuar en su **MacBook Pro M5 Pro (24 GB)** desde VS Code con Claude Code. Esta sección manda sobre §7 en lo que se contradigan. El prompt para continuar está en `docs/superpowers/handoff/2026-09-24-prompt-continuacion-mac.md`.
+
+### 8.1 Hecho y publicado en `origin/redesign/home`
+| Paso | Commit | Resultado |
+|---|---|---|
+| Sesión 1: plan, T1, T3, T4 | `233446e`, `748567c`, `2e61a3b` | ver §7 |
+| **T2** metadatos e imágenes para redes | `1bbd6ad` | lint/tsc ✅, e2e 103/103, build con las 34 imágenes prerenderizadas. 1 ronda de revisión (11 hallazgos menores, todos arreglados). |
+| **T5** navegación y encabezado | `182001a` | lint/tsc ✅, e2e 123/123. 3 rondas de revisión (1 mayor de a11y en la 1.ª, 1 mayor en la 2.ª: «Empresa» y Atrás no cerraban el mega menú). |
+| **T6** primitivas y portada | `5cf73de` | lint/tsc ✅, e2e 146/146, build ✅. 3 rondas de revisión con tres lentes (cumplimiento, calidad, visual): 5 mayores en la 1.ª (foco en enlaces invisibles, iPad Pro vertical sin cumbre, contraste en tabletas), 1 mayor en la 2.ª (media queries en px frente a rem), 0 en la 3.ª. |
+| Materiales de traspaso | `(commit «docs(home): traspaso de la sesión 2…», el que añade esta sección)` | esta sección, investigación de JS, scripts portables, workflow guardado y prompt para el Mac |
+
+Cada commit lleva un bloque «Decisiones» completo: **léelo** (`git show <commit>`) antes de tocar los archivos que cambió. Resumen de lo que se aparta del plan y ya está en el código (manda el código integrado):
+- **T2:** la tarjeta para redes de Live Studio lleva `liveStudio.status` (solicitud en revisión) en el eyebrow; `realtyMetaDescription` recupera el calificador «Versión de demostración»; la plantilla de metadatos del skill `orbexs-design-system/layout.md` pasa a `pageMetadata()`; el título de las tarjetas usa `textWrap: "balance"`.
+- **T5:** `SmoothScroll` conserva el `scrollTo(0,0)` suave al montar y salta con `behavior: "instant"` solo al cambiar de ruta; `<html data-scroll-behavior="smooth">`; sin JS el encabezado se oscurece con `animation-timeline: scroll(root)` y `@media (scripting: none)`; `nav.items[1].menuBlock = "products"` (el foco de «Productos» cae en RealTy); `<main>` y `.site-footer` quedan `inert` con el menú abierto; todo cambio de ruta cierra el menú; footer con `data-header-theme="dark"` y clase `site-footer`, siete columnas desde `xl`; `BrandLogo` con `tabIndex={-1}`.
+- **T6:** `placeholder={coverPlaceholder(img)}` (`src/lib/image-placeholder.ts`) en lugar de `placeholder="blur"`: el SVG con `feGaussianBlur` a pantalla completa bloqueaba el hilo principal 6–8 s por fotograma sin GPU. Rondas de revisión (ver `git show 5cf73de`): encuadre `--fx` 50 % en lg solo con proporción ≥ 11:10; subida del texto acotada por la posición del eyebrow (0 en la banda vertical); la fila de índice no sube; máscara de la ruta en la banda vertical y en el pie; foco al final del escenario con `pointer-events` y `has-focus-visible`; `stage:` exige `(scripting: enabled)` y las media queries van en **rem** (con letra de 20 px, 768px y 48rem no coincidían); `sizes` con la banda vertical; `useMediaQuery` nuevo. **Pendiente para T11 (decisión 15 de T6): LCP móvil con DPR alto medido en revisión en 2,66–2,92 s, por encima de 2 500 ms** — P1 (imagen como slot) y T11 deben atacarlo.
+
+### 8.2 Presupuesto de JS: hallazgo principal y tarea P1
+Informe completo: `docs/superpowers/research/2026-09-24-presupuesto-js.md` (5 agentes, builds y mediciones reales).
+- **Todo el JS del sitio salía compilado a ES5**: `browserslist: ["last 2 … versions"]` se resuelve a versiones (Chrome 151, Safari 26.4…) que Turbopack no conoce, y SWC activa todas las transformaciones (vercel/next.js#92091, abierto). Con versiones fijas (`chrome 111`, `edge 111`, `firefox 111`, `safari 16.4`, el objetivo por defecto de Next) la salida es moderna.
+- Medido sobre T6 (`32836e8`), con `scripts/agent/measure-js.mjs` (mismo método que la línea base): **250 331 B → 219 972 B (−30 359 B)** aplicando cuatro cambios: browserslist fijo (−23 582), `animateSingleValue` en lugar de `animate()` en `HeroRoute` (−4 988), quitar `MagneticButton` (código muerto) de `Button` (−2 900) e imports estáticos en `page.tsx` en lugar de `next/dynamic` (−2 578). El HTML del servidor no cambia.
+- **P1** (tarea de rendimiento, *antes* de la Fase 3): esos cuatro cambios + la imagen de la portada renderizada en el servidor y pasada a `HomeHero` como prop `media` (sin `next/image` dentro de la isla) + `scripts/check-modern-js.mjs` con `npm run check:modern-js` (falla si la salida vuelve a ES5). Especificación: §4 del informe; parches de referencia en `docs/superpowers/research/p1-parches/` (hechos sobre `32836e8`: adáptalos al código de T6 integrado). Revisión con las tres lentes (el cambio de browserslist también altera el CSS que genera Lightning CSS: capturas antes/después).
+- **Evolución del JS de `/es`:** 239 002 B (línea base `b65e497`, ES5) → 233 003 B (T5) → 250 331 B (T6 sin corregir) → ≈ 250 KB tras T6 (250 331 B medidos sobre 32836e8; las rondas 2–3 no se midieron) → ≈ 220 KB esperado tras P1 → ≈ 221–230 KB proyectado al cerrar T10 (tope 269 722 B).
+- **Reglas para T7–T10** (obligatorias; detalle y topes por tarea en §5 del informe): imágenes con `<Image … placeholder={coverPlaceholder(img)}>` renderizadas en el servidor y pasadas a la isla como `media`; nunca `placeholder="blur"`; motion solo `m`, `useScroll`/`useStageProgress`, `useTransform`, `useMotionValue`, `useMotionValueEvent`, `useInView`, `animateSingleValue` (prohibidos `animate`, `useAnimate`, `useSpring`, `stagger`, `AnimatePresence`, `domMax`, `motion.*`); sin dependencias nuevas ni `next/dynamic`; T9 saca `ConsoleFrame` a `src/components/sections/realty/ConsoleFrame.tsx` **sin** `"use client"`. Topes: T7 +4 000 B, T8 +3 000 B, T9 +2 500 B, T10 +3 000 B sobre la medida anterior. Cada tarea mide al cerrar y lo anota.
+- **Descartado** (ver §6 del informe): quitar cabeceras de seguridad de `/_next/static` (solo baja la métrica local), hidratar en diferido (no baja el total), `next/dynamic` desde servidor (no divide y añade ~2,6 KB), reemplazar la arquitectura del plan por animaciones CSS ligadas al scroll (Firefox estable aún no las trae; quedan como técnica para fases futuras). **Opcionales para T11, solo si el usuario los quiere:** `tailwind-merge` fuera del cliente (−9 KB), `AnimatePresence` fuera del mega menú (−2 KB), `next/image` fuera de `/es` (−6 KB, rutas internas de Next).
+
+### 8.3 Lo que falta, en orden
+1. **P1 · rendimiento** (§8.2). Worktree desde la punta, `PORT=3130`, lentes `compliance`, `quality`, `visual`, `build` e `integBuild`.
+2. **F3 · T7 ∥ T8 ∥ T9 ∥ T10a** en worktrees desde el commit de P1, cada una con su spec temporal (`e2e/home-t7.spec.ts`, `home-t8`, `home-t9`, `home-t10.spec.ts`), **sin integrar**. Argumentos listos en `docs/superpowers/handoff/2026-09-24-args-f3.json` (recalcula antes las líneas de cada sección: `grep -n '^## Tarea' docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md`; las tareas documentan decisiones en el plan y los números se desplazan). T10a = T10 sin los tres `describe` que necesitan la home entera («todos los h2 de la home se ven sin JavaScript», «T10 · Orden de la home», «T10 · Regla del azul en toda la home»).
+3. **F4 · integración en serie** T7 → T8 → T9 → T10a en `redesign/home`: `page.tsx` con el orden del contrato §3.5; unir las claves de diccionario (cada tarea añade o borra solo las suyas); en `e2e/helpers.ts` conservar sin duplicar los añadidos (T8 `settledTopOffset`, T9 `FORBIDDEN_*`); fundir cada spec temporal en `e2e/home.spec.ts` (sin duplicar helpers locales) y borrarlo; lint, tsc, e2e **completo**, build tras T9 y T10a; medir el JS tras T9 y tras T10a. Después **T10b**: los tres `describe` de la home completa (regla del azul a 1440×900 y 390×844, con y sin reducir movimiento), con su revisión. Solo integrados se ven: la regla del azul entre secciones, el ancla `#gobierno` y el peso total.
+4. **F5 · T11** (sección del plan) + lo que la investigación deja para T11 (§5 del informe: borrar `MagneticButton.tsx`, `CustomCursor`, `IntroSequence`, `SoundToggle`, `HeroCanvas`, `GlobalParticles`, `HeroScene` si siguen sin importadores; corregir el comentario de `MotionProvider`; proponer al usuario la línea de CLAUDE.md sobre browserslist) + **lo prometido al usuario en la sesión 2**:
+   - `docs/superpowers/playbooks/rediseno-scroll-animado.md`: proceso (diseño → plan con contrato → tareas en worktrees → revisores independientes → integración en serie), patrones reutilizables (`FocalCover`, `ScrollStage`, `useStageProgress` y sus tres modos, variante `stage:`, velos de contraste medidos, regla del azul, `coverPlaceholder`, imagen como slot), presupuesto de JS y buenas prácticas 2026 con cifras, y los tropiezos de las sesiones 1 y 2.
+   - Lista de preparación para el usuario antes de cada producto: qué imágenes hacen falta y cómo generarlas (prompts de ejemplo, 1536×1024, grises, nunca fotos falsas de equipo/clientes/despliegues), dónde dejarlas (`design/source/`), con qué nombres, y cómo se miden las coordenadas de las superposiciones (traspaso §3).
+   - Workflow guardado `.claude/workflows/home-task-cycle.js` (ya existe: revisar y mejorar con lo aprendido en F3–F5).
+   - Referencia de movimiento y scroll en el skill `.claude/skills/orbexs-design-system/` (lo usan los agentes de todos los productos Orbexs).
+   - Verificación final (plan T11 paso 3 y prompt original §6): lint, tsc, build, `check:modern-js`, e2e completo; capturas (1440×900, 390×844, 10+ puntos, reducir movimiento, 1920×1080, 2560×1440) revisadas una a una; LCP < 2 500 ms y CLS < 0,1 con Slow 4G + CPU 4× en escritorio y móvil; JS − 239 002 ≤ 30 720; revisores visuales (escritorio, móvil, reducir movimiento, 1920/2560) y de rama (cumplimiento, calidad, rendimiento, a11y) en paralelo. Salidas en `docs/superpowers/verification/2026-09-23/`.
+   - Sección «Estado al cierre» en este traspaso e informe final en español para el usuario (tareas y commits, pruebas con cifras, LCP y JS antes/después, desviaciones, pendientes: dominio `orbexs.tech`, 404 de `orbexs-alpha.vercel.app`, fase 2).
+
+### 8.4 Preparar el Mac
+```bash
+git clone https://github.com/Rocuts/Nova-Forge.git && cd Nova-Forge   # o: git fetch && git checkout redesign/home && git pull
+git checkout redesign/home
+node -v                      # Node 22 (el contenedor usó 22.22)
+npm ci
+npx playwright install chromium          # en el Mac sí se permite (en el contenedor web no)
+npx next typegen >/dev/null
+export HEAVY_SLOTS=3                                  # procesos pesados a la vez (24 GB)
+export CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8   # antes de abrir Claude Code
+npm run lint && npx tsc --noEmit && npx playwright test   # debe quedar en verde (146 pruebas)
+```
+- Worktrees en `../wt/` (por defecto del workflow: carpeta hermana del repo). `scripts/agent/new-worktree.sh` clona `node_modules` con `cp -cR` (copy-on-write de APFS).
+- `.env.local` no se versiona: sin `OPENAI_API_KEY` el diagnóstico devuelve el informe de respaldo (lo esperado en local); sin `REALTY_VOICE_DEMO_ENABLED` la demo de voz queda apagada, que es lo que prueban los e2e.
+- Si una ejecución deja candados colgados: `rm -rf "${TMPDIR:-/tmp}/heavy-slots"`.
+
+### 8.5 Cómo se ejecuta cada fase
+Workflow guardado: `Workflow({ name: "home-task-cycle", args })`. Argumentos (cabecera del script): `repo` (ruta absoluta del checkout en el Mac), `wtRoot`, `agentBin` (por defecto `<repo>/scripts/agent`), `branch` (`redesign/home`), `integrate`, `maxRounds`, `machineNote`, `tasks[]` con `id`, `title`, `lines`, `port`, `build`, `integBuild`, `visual`, `visualHint`, `lenses`, `extra` e `impl` (para retomar una implementación ya hecha). Garantías: un revisor o corrector que no responde (p. ej. límite de uso) deja la tarea **sin integrar**; el integrador solo actúa con todas las revisiones recibidas y sin hallazgos bloqueantes ni mayores.
+- **P1:** `integrate: true`, una tarea (`id: "P1"`, `lines`: las de §0–§4 del plan, `extra` = §4 del informe de JS).
+- **F3:** `integrate: false`, las cuatro tareas de `2026-09-24-args-f3.json`.
+- **F4:** escribir un workflow propio (integradores en serie + revisión del resultado integrado) y luego `home-task-cycle` para T10b.
+- **F5:** workflow propio para T11 (implementador + revisores visuales y de rama en paralelo + corrector).
+
+### 8.6 Lecciones de la sesión 2
+- **Límite de uso de la cuenta:** a las 01:30 UTC se agotó; los tres revisores de T6 y su integrador fallaron al instante y la primera versión del script tomó «0 hallazgos» como aprobación (el integrador no llegó a actuar). Corregido: sin todas las revisiones no se integra, y se retoma con `tasks[i].impl`. Con más agentes en paralelo (Mac) el límite llega antes.
+- **Los revisores encuentran fallos reales**: en T6, iPad Pro vertical (la cumbre fuera de pantalla), tabletas en scrub (contraste del texto que sube fuera del velo), foco en enlaces ya invisibles, `px` frente a `rem` entre `useStageMode` y la variante `stage:` (con letra grande del navegador, JS y CSS no coincidían). Mantén la lente `visual` en toda tarea que se vea, con viewports 1440×900, 1366×768, 1920×1080, 2560×1440, 2560×1080, 1024×1366, 820×1180, 390×844 y 844×390.
+- **Medir antes de optimizar:** el peso de JS no venía de motion sino de una configuración (browserslist). Dos agentes independientes lo confirmaron con la misma cifra.
+- **El contenedor web no trae `ss`** (se usó `/proc/net/tcp`) y **macOS no trae `flock`**: `scripts/agent/heavy.sh` usa candados con `mkdir` y funciona en ambos.
+- Durante una integración, el checkout principal tiene cambios sin commitear (el `merge --squash`): es lo esperado; no los commitees a mano.
+- Las líneas de las secciones del plan se desplazan cuando una tarea documenta decisiones en él: recalcula con `grep -n '^## Tarea'` antes de cada fase.
+- e2e al cierre de la sesión 2: 146 pruebas en verde.

@@ -1,0 +1,27 @@
+diff --git a/src/components/sections/home/HeroRoute.tsx b/src/components/sections/home/HeroRoute.tsx
+index 91fb4b1..8b20119 100644
+--- a/src/components/sections/home/HeroRoute.tsx
++++ b/src/components/sections/home/HeroRoute.tsx
+@@ -1,7 +1,7 @@
+ "use client"
+ 
+ import { useEffect, useRef, useState } from "react"
+-import { animate, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
++import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
+ import type { MotionValue } from "motion/react"
+ import type { StageMode } from "@/hooks/useStageProgress"
+ import { ROUTE_PATH, ROUTE_SUMMIT, VIEWBOX } from "./geometry"
+@@ -36,8 +36,11 @@ export function HeroRoute({ progress, mode }: { progress: MotionValue<number>; m
+       return
+     }
+     if (mode !== "inView" || !inView) return
+-    const controls = animate(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
+-    return () => controls.stop()
++    // animateSingleValue: lo mismo que animate(mv, …) hace por dentro, sin arrastrar
++    // el animate híbrido (secuencias, ObjectVisualElement…). stop() en el propio valor:
++    // con animaciones instantáneas animateSingleValue no devuelve controles.
++    animateSingleValue(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
++    return () => ownDraw.stop()
+   }, [mode, inView, ownDraw])
+ 
+   const draw = mode === "scrub" ? scrubDraw : ownDraw

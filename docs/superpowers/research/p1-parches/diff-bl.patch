@@ -1,0 +1,19 @@
+diff --git a/package.json b/package.json
+index 1d0379e..ba54465 100644
+--- a/package.json
++++ b/package.json
+@@ -32,10 +32,10 @@
+     "zod": "^4.3.6"
+   },
+   "browserslist": [
+-    "last 2 Chrome versions",
+-    "last 2 Firefox versions",
+-    "last 2 Safari versions",
+-    "last 2 Edge versions"
++    "chrome 111",
++    "edge 111",
++    "firefox 111",
++    "safari 16.4"
+   ],
+   "devDependencies": {
+     "@axe-core/playwright": "^4.13.0",

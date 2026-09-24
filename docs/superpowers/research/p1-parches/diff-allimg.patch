@@ -1,0 +1,217 @@
+diff --git a/package.json b/package.json
+index 1d0379e..ba54465 100644
+--- a/package.json
++++ b/package.json
+@@ -32,10 +32,10 @@
+     "zod": "^4.3.6"
+   },
+   "browserslist": [
+-    "last 2 Chrome versions",
+-    "last 2 Firefox versions",
+-    "last 2 Safari versions",
+-    "last 2 Edge versions"
++    "chrome 111",
++    "edge 111",
++    "firefox 111",
++    "safari 16.4"
+   ],
+   "devDependencies": {
+     "@axe-core/playwright": "^4.13.0",
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index 1941654..7c0ebce 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -1,22 +1,38 @@
+-import dynamic from "next/dynamic"
+ import type { Metadata } from "next"
+ import { notFound } from "next/navigation"
+ import { HomeHero } from "@/components/sections/home/HomeHero"
++import relieve from "@/assets/images/relieve.jpg"
++import { coverPlaceholder } from "@/lib/image-placeholder"
++import { getStaticImgProps } from "@/lib/image-props"
+ import { getDictionary } from "@/content/dictionaries"
+ import { isValidLocale, buildLocalePath } from "@/lib/i18n"
+ import type { Locale } from "@/lib/i18n"
+ import { pageMetadata } from "@/lib/metadata"
+ 
+ // La portada se importa de forma estática: es el LCP y su HTML tiene que salir
+-// del servidor sin esperar a ningún chunk. El resto de secciones, bajo el pliegue.
+-const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
+-const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
+-const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
+-const LiveStudioTeaser = dynamic(() => import("@/components/sections/LiveStudioTeaser").then(m => ({ default: m.LiveStudioTeaser })))
+-const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
+-const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
+-const FAQ = dynamic(() => import("@/components/sections/FAQ").then(m => ({ default: m.FAQ })))
+-const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
++// del servidor sin esperar a ningún chunk. El resto, también estático: dynamic()
++// desde un Server Component no divide el código (lazy-loading.md) y solo añade su runtime.
++import { Services } from "@/components/sections/Services"
++import { FlagshipAI } from "@/components/sections/FlagshipAI"
++import { CaseStudy } from "@/components/sections/CaseStudy"
++import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
++import { Methodology } from "@/components/sections/Methodology"
++import { TechStack } from "@/components/sections/TechStack"
++import { FAQ } from "@/components/sections/FAQ"
++import { CTA } from "@/components/sections/CTA"
++
++// Relieve de la portada: <img> generado en el servidor (srcset, fetchpriority) y
++// pasado como slot a la isla, para que next/image no entre en el JS del cliente.
++const relieveImg = getStaticImgProps({
++  src: relieve,
++  alt: "",
++  fill: true,
++  sizes: "(max-aspect-ratio: 3/2) 150vh, 100vw",
++  placeholder: coverPlaceholder(relieve),
++  loading: "eager",
++  fetchPriority: "high",
++  className: "object-cover",
++})
+ 
+ export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+   const { locale } = await params
+@@ -64,7 +80,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
+   return (
+     <>
+       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+-      <HomeHero content={heroContent} />
++      <HomeHero
++        content={heroContent}
++        // eslint-disable-next-line @next/next/no-img-element -- srcset de next/image calculado en el servidor
++        media={<img {...relieveImg} alt="" />}
++      />
+       <Services content={dict.services} locale={locale} />
+       <FlagshipAI content={dict.flagshipAI} />
+       <CaseStudy content={dict.caseStudy} locale={locale} />
+diff --git a/src/components/sections/home/HeroRoute.tsx b/src/components/sections/home/HeroRoute.tsx
+index 91fb4b1..8b20119 100644
+--- a/src/components/sections/home/HeroRoute.tsx
++++ b/src/components/sections/home/HeroRoute.tsx
+@@ -1,7 +1,7 @@
+ "use client"
+ 
+ import { useEffect, useRef, useState } from "react"
+-import { animate, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
++import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
+ import type { MotionValue } from "motion/react"
+ import type { StageMode } from "@/hooks/useStageProgress"
+ import { ROUTE_PATH, ROUTE_SUMMIT, VIEWBOX } from "./geometry"
+@@ -36,8 +36,11 @@ export function HeroRoute({ progress, mode }: { progress: MotionValue<number>; m
+       return
+     }
+     if (mode !== "inView" || !inView) return
+-    const controls = animate(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
+-    return () => controls.stop()
++    // animateSingleValue: lo mismo que animate(mv, …) hace por dentro, sin arrastrar
++    // el animate híbrido (secuencias, ObjectVisualElement…). stop() en el propio valor:
++    // con animaciones instantáneas animateSingleValue no devuelve controles.
++    animateSingleValue(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
++    return () => ownDraw.stop()
+   }, [mode, inView, ownDraw])
+ 
+   const draw = mode === "scrub" ? scrubDraw : ownDraw
+diff --git a/src/components/sections/home/HomeHero.tsx b/src/components/sections/home/HomeHero.tsx
+index 7789f25..488732c 100644
+--- a/src/components/sections/home/HomeHero.tsx
++++ b/src/components/sections/home/HomeHero.tsx
+@@ -1,16 +1,14 @@
+ "use client"
+ 
+ import { useRef } from "react"
+-import Image from "next/image"
++import type { ReactNode } from "react"
+ import { m, useMotionValue, useTransform } from "motion/react"
+-import relieve from "@/assets/images/relieve.jpg"
+ import { Button } from "@/components/ui/Button"
+ import { FocalCover } from "@/components/ui/FocalCover"
+ import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
+ import { ScrollStage } from "@/components/ui/ScrollStage"
+ import { useStageProgress } from "@/hooks/useStageProgress"
+ import { trackEvent } from "@/lib/analytics"
+-import { coverPlaceholder } from "@/lib/image-placeholder"
+ import { HeroRoute } from "./HeroRoute"
+ import { IMAGE_HEIGHT, IMAGE_WIDTH, ROUTE_SUMMIT } from "./geometry"
+ 
+@@ -36,12 +34,6 @@ export interface HomeHeroContent {
+ const FOCAL_CLASS = "[--fx:92%] md:[--fx:80%] lg:[--fx:50%]"
+ // El zoom se ancla en la cumbre (83,5 % 41,1 %): el punto azul no se mueve al escalar.
+ const SUMMIT_ORIGIN = `${(ROUTE_SUMMIT.x / IMAGE_WIDTH) * 100}% ${(ROUTE_SUMMIT.y / IMAGE_HEIGHT) * 100}%`
+-// El marco 3:2 mide max(100vw, 150svh): en pantallas más altas que 3:2 es más
+-// ancho que el viewport, y la imagen debe pedirse a ese ancho.
+-const IMAGE_SIZES = "(max-aspect-ratio: 3/2) 150vh, 100vw"
+-// Vista previa mientras carga, sin el SVG con desenfoque de placeholder="blur"
+-// (demasiado caro a este tamaño sin GPU: ver src/lib/image-placeholder.ts).
+-const RELIEVE_PLACEHOLDER = coverPlaceholder(relieve)
+ // Foco visible sobre fondo oscuro (el anillo del Button y el outline global son #0a0a0a).
+ const DARK_FOCUS = "focus-visible:ring-white focus-visible:ring-offset-[#0a0a0a]"
+ 
+@@ -55,7 +47,7 @@ const DARK_FOCUS = "focus-visible:ring-white focus-visible:ring-offset-[#0a0a0a]
+  * En vertical por debajo de lg (celular, tableta) la imagen es una banda de
+  * 73 svh con la cumbre a 30 svh, y el texto empieza en 36 svh, debajo de ella.
+  */
+-export function HomeHero({ content }: { content: HomeHeroContent }) {
++export function HomeHero({ content, media }: { content: HomeHeroContent; media: ReactNode }) {
+   const stageRef = useRef<HTMLElement>(null)
+   const { progress, mode } = useStageProgress(stageRef)
+   const scrub = mode === "scrub"
+@@ -94,16 +86,7 @@ export function HomeHero({ content }: { content: HomeHeroContent }) {
+         {/* Relieve: es el LCP. Sale en el HTML del servidor y se pide con prioridad alta. */}
+         <FocalCover className={FOCAL_CLASS}>
+           <m.div className="absolute inset-0" style={{ scale, transformOrigin: SUMMIT_ORIGIN }}>
+-            <Image
+-              src={relieve}
+-              alt=""
+-              fill
+-              sizes={IMAGE_SIZES}
+-              placeholder={RELIEVE_PLACEHOLDER}
+-              loading="eager"
+-              fetchPriority="high"
+-              className="object-cover"
+-            />
++            {media}
+           </m.div>
+         </FocalCover>
+ 
+diff --git a/src/components/ui/Button.tsx b/src/components/ui/Button.tsx
+index 0ed0b27..e935f1f 100644
+--- a/src/components/ui/Button.tsx
++++ b/src/components/ui/Button.tsx
+@@ -2,7 +2,6 @@
+ import { forwardRef } from "react"
+ import { m } from "motion/react"
+ import { cn } from "@/lib/utils"
+-import { MagneticButton } from "./MagneticButton"
+ 
+ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
+   variant?: "primary" | "secondary" | "ghost"
+@@ -11,11 +10,10 @@ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"
+   target?: string
+   children: React.ReactNode
+   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+-  magnetic?: boolean
+ }
+ 
+ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
+-  ({ className, variant = "primary", size = "md", onClick, href, target, children, magnetic = false, ...props }, ref) => {
++  ({ className, variant = "primary", size = "md", onClick, href, target, children, ...props }, ref) => {
+     const baseStyles = "inline-flex items-center justify-center rounded-[2px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+ 
+     const variants = {
+@@ -53,7 +51,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+           {children}
+         </m.a>
+       )
+-      return magnetic ? <MagneticButton>{anchor}</MagneticButton> : anchor
++      return anchor
+     }
+ 
+     const button = (
+@@ -69,7 +67,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+         {children}
+       </m.button>
+     )
+-    return magnetic ? <MagneticButton>{button}</MagneticButton> : button
++    return button
+   }
+ )
+ Button.displayName = "Button"

@@ -1,0 +1,43 @@
+diff --git a/src/components/ui/Button.tsx b/src/components/ui/Button.tsx
+index 0ed0b27..e935f1f 100644
+--- a/src/components/ui/Button.tsx
++++ b/src/components/ui/Button.tsx
+@@ -2,7 +2,6 @@
+ import { forwardRef } from "react"
+ import { m } from "motion/react"
+ import { cn } from "@/lib/utils"
+-import { MagneticButton } from "./MagneticButton"
+ 
+ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
+   variant?: "primary" | "secondary" | "ghost"
+@@ -11,11 +10,10 @@ type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"
+   target?: string
+   children: React.ReactNode
+   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+-  magnetic?: boolean
+ }
+ 
+ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
+-  ({ className, variant = "primary", size = "md", onClick, href, target, children, magnetic = false, ...props }, ref) => {
++  ({ className, variant = "primary", size = "md", onClick, href, target, children, ...props }, ref) => {
+     const baseStyles = "inline-flex items-center justify-center rounded-[2px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+ 
+     const variants = {
+@@ -53,7 +51,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+           {children}
+         </m.a>
+       )
+-      return magnetic ? <MagneticButton>{anchor}</MagneticButton> : anchor
++      return anchor
+     }
+ 
+     const button = (
+@@ -69,7 +67,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
+         {children}
+       </m.button>
+     )
+-    return magnetic ? <MagneticButton>{button}</MagneticButton> : button
++    return button
+   }
+ )
+ Button.displayName = "Button"
