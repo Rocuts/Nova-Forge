@@ -1,6 +1,6 @@
 # T8 «Del papel al dato»: trabajo sin integrar (sesión 2)
 
-**Estado al guardar (2026-09-24, ~10:25 UTC):** implementada y corregida en dos rondas de revisión con tres lentes (cumplimiento, calidad, visual). **Falta:** la ronda 3 de revisión (estaba en curso al guardar; ver tabla), y la integración sobre `redesign/home` (que ya tiene P1 `25f4227` y T7 `27d841d`).
+**Estado al guardar (2026-09-24, ~10:25 UTC):** implementada y corregida en dos rondas de revisión con tres lentes (cumplimiento, calidad, visual). **Falta:** la ronda 3 de revisión (con 1 mayor nuevo de calidad: ver tabla) y una **ronda 4** con su corrector, y la integración sobre `redesign/home` (que ya tiene P1 `25f4227` y T7 `27d841d`).
 
 - **Base de los parches:** `ca0dd63` (T6 + primer commit de traspaso, *antes* de P1 y de T7).
 - **Parches** (`git format-patch ca0dd63..wt/task8`, rama `wt/task8`):
@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | 1 | cambios (2 mayores: foco invisible en los enlaces sobre `#0a0a0a`; panel roto en tabletas verticales 768–900 px) | cambios (los mismos 2 mayores) | cambios (1 mayor) | 7 arreglados, 0 rechazados |
 | 2 | cambios (1 mayor: en celular apaisado < 768 px la secuencia `inView` nunca arrancaba, `amount: 0.5` de un marco más alto que la pantalla) | 2 menores | aprueba (1 detalle) | 5 arreglados, 0 rechazados |
-| 3 | en curso al cerrar | en curso al cerrar | pendiente | — |
+| 3 | en curso al cerrar | **cambios: 1 mayor.** En celular (`inView`) la secuencia depende solo de `useInView(frameRef)`: al bajar hasta el panel (debajo de la imagen) el marco sale de la franja central y la secuencia se congela en «00/06» o «01/06» con una fila «Procesando» fija; si se llega al panel de un salto, ni arranca. Arreglo propuesto: `ref` en el panel, segundo `useInView(panelRef, { margin: "-25% 0px -25% 0px" })` y `running = frameInView \|\| panelInView` (o semántica «una vez» con `once: true`). + 1 detalle: el grep del paso 3 del plan anuncia «una sola línea» y también encuentra `HeroRoute.tsx`. | en curso al cerrar | pendiente (ronda 4) |
 
 Verificación del corrector de la ronda 2: lint y tsc limpios; `e2e/home-t8.spec.ts` 16/16; suite completa 162/162 (146 + 16). Una primera pasada dio 42 «Internal Server Error» del servidor de desarrollo en los últimos archivos (seo, smoke, wizard) por carga de la máquina; al repetir, todo en verde. JS: +1 786 B sobre su base en ES5 (implementador), dentro del tope de +3 000 B.
 
