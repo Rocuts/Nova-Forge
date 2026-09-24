@@ -436,6 +436,53 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
   }
 }
 
+/* ── Del papel al dato (home) ────────────────────────────────────────
+   Compactación del expediente en scrub (DossierStage.tsx, siempre junto a
+   stage:). dossier-compact: hasta 48rem de alto (la short: compartida de la
+   portada llega a 45rem) y, en la franja md estrecha (hasta 56rem de ancho),
+   hasta 54rem. dossier-narrow: solo esa franja, donde la columna del texto y
+   del panel mide 272–325 px y el contenido compactado aún no cabía (el marco
+   fijo dejaba filas del panel bajo el borde de la pantalla). En rem, como
+   stage: (plan §3.6). En bloque: la forma corta de @custom-variant parte en
+   las comas y no admite una lista de media queries. */
+@custom-variant dossier-compact {
+  @media (max-height: 48rem), (max-width: 56rem) and (max-height: 54rem) {
+    @slot;
+  }
+}
+@custom-variant dossier-narrow {
+  @media (max-width: 56rem) and (max-height: 54rem) {
+    @slot;
+  }
+}
+
+/* Sin JavaScript: el HTML del servidor trae el primer render (scrub, avance
+   0): recuadros transparentes, «00 / 06» y seis filas «En espera», como un
+   proceso que nunca arrancó. Como en la portada y en Capacidades, se pinta el
+   estado final, el mismo que con reducir movimiento: los 6 recuadros en
+   #0a0a0a (el CSS gana al atributo opacity que pone motion en el SVG), cada
+   fila con el nombre en blanco y «Extraído», y sin azul. Cada fila apila sus
+   tres etiquetas de estado (DossierStage.tsx) y visibility decide cuál se ve
+   (y cuál lee un lector de pantalla). El contador se oculta: sin scroll que
+   seguir no dice nada, y «Campos extraídos» queda como título de la lista. */
+@media (scripting: none) {
+  [data-dossier-field] {
+    opacity: 1;
+  }
+  [data-dossier-row] > :first-child {
+    color: #ffffff;
+  }
+  [data-dossier-status] {
+    visibility: hidden;
+  }
+  [data-dossier-status="done"] {
+    visibility: visible;
+  }
+  [data-dossier-counter] {
+    display: none;
+  }
+}
+
 /* ── Orbexs Live Studio ──────────────────────────────────────────────
    Broadcast-signal treatments. Scoped to the Live Studio surfaces; the
    spectral cyan/magenta pair reads as a live feed without ever being

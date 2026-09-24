@@ -168,6 +168,29 @@ const es = {
       },
     ],
   },
+  dossier: {
+    sectionId: "gobierno",
+    eyebrow: "GOBIERNO Y DATOS",
+    title: "Del expediente al dato estructurado.",
+    description:
+      "Automatizamos trámites y registros: los documentos entran, cada campo se identifica y se valida, y cada dato queda con su trazabilidad.",
+    fields: [
+      "Nombre",
+      "Fecha de nacimiento",
+      "Domicilio",
+      "Correo electrónico",
+      "Tipo de trámite",
+      "Fecha de solicitud",
+    ],
+    status: { idle: "En espera", active: "Procesando", done: "Extraído" },
+    counterLabel: "Campos extraídos",
+    imageAlt: "Expediente de solicitud abierto sobre un escritorio, con formularios mecanografiados",
+    imageLabel: "Ilustración · datos ficticios",
+    links: [
+      { label: "Automatización de gobierno", href: "/automatizacion-gobierno" },
+      { label: "Extracción de datos", href: "/extraccion-datos" },
+    ],
+  },
   caseStudy: {
     sectionId: "casos",
     eyebrow: "CASO DE ESTUDIO",

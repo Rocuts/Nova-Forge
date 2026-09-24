@@ -13,10 +13,13 @@ import { pageMetadata } from "@/lib/metadata"
 // (node_modules/next/dist/docs/01-app/02-guides/lazy-loading.md) y solo añade su
 // runtime (React.lazy, PreloadChunks, BailoutToCSR). La imagen de la lámina de
 // Capacidades se renderiza en el servidor (CapabilitiesMedia) y llega a la isla
-// como slot, igual que la de la portada (HeroMedia).
+// como slot, igual que la de la portada (HeroMedia). La del expediente la
+// renderiza la propia sección de servidor Dossier y la pasa a su isla
+// (DossierStage) de la misma forma.
 import { Thesis } from "@/components/sections/home/Thesis"
 import { CapabilitiesIndex } from "@/components/sections/home/CapabilitiesIndex"
 import { CapabilitiesMedia } from "@/components/sections/home/CapabilitiesMedia"
+import { Dossier } from "@/components/sections/home/Dossier"
 import { CaseStudy } from "@/components/sections/CaseStudy"
 import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
 import { Methodology } from "@/components/sections/Methodology"
@@ -73,6 +76,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <HomeHero content={heroContent} media={<HeroMedia />} />
       <Thesis text={dict.thesis.text} />
       <CapabilitiesIndex content={dict.services} locale={locale} media={<CapabilitiesMedia />} />
+      <Dossier content={dict.dossier} locale={locale} />
       <CaseStudy content={dict.caseStudy} locale={locale} />
       <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
       <Methodology content={dict.methodology} />

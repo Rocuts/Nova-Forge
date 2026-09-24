@@ -168,6 +168,22 @@ const en = {
       },
     ],
   },
+  dossier: {
+    sectionId: "government",
+    eyebrow: "GOVERNMENT & DATA",
+    title: "From case file to structured data.",
+    description:
+      "We automate procedures and records: documents come in, every field is identified and validated, and every data point keeps its audit trail.",
+    fields: ["Name", "Date of birth", "Address", "Email", "Procedure type", "Application date"],
+    status: { idle: "Waiting", active: "Processing", done: "Extracted" },
+    counterLabel: "Fields extracted",
+    imageAlt: "Open application case file on a desk, with typed forms",
+    imageLabel: "Illustration · fictitious data",
+    links: [
+      { label: "Government automation", href: "/automatizacion-gobierno" },
+      { label: "Data extraction", href: "/extraccion-datos" },
+    ],
+  },
   caseStudy: {
     sectionId: "casos",
     eyebrow: "CASE STUDY",

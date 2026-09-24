@@ -246,7 +246,10 @@ export function HomeHero({ content, media }: { content: HomeHeroContent; media: 
             </Button>
           </div>
 
-          {/* href tal cual (#gobierno / #government): ancla de esta misma página */}
+          {/* href tal cual (#gobierno / #government): ancla de esta misma página.
+              <a> nativo a propósito, no <Link>: el navegador mueve el punto de
+              partida del Tab a la sección y vuelve a bajar en un segundo clic.
+              El estado del router para Atrás lo pone SmoothScroll. */}
           <a
             href={content.nurtureCta.href}
             onClick={() => trackEvent(content.nurtureCta.analyticsEvent)}

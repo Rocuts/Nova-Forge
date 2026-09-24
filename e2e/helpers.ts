@@ -130,3 +130,26 @@ export async function countVisibleBlue(page: Page): Promise<number> {
     return count
   }, ORBEXS_BLUE)
 }
+
+// ── T8 ──────────────────────────────────────────────────────────────────────
+
+/**
+ * |top| del elemento respecto al borde superior del viewport, medido solo cuando
+ * el scroll lleva dos frames quieto; mientras se mueve devuelve Infinity.
+ * Pensado para `expect.poll` tras un scroll suave (globals.css tiene
+ * `scroll-behavior: smooth`, así que un clic en un ancla anima el scroll).
+ */
+export async function settledTopOffset(locator: Locator): Promise<number> {
+  return locator.evaluate(
+    (element) =>
+      new Promise<number>((resolve) => {
+        const startY = window.scrollY
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const moving = window.scrollY !== startY
+            resolve(moving ? Number.POSITIVE_INFINITY : Math.abs(element.getBoundingClientRect().top))
+          })
+        })
+      })
+  )
+}
