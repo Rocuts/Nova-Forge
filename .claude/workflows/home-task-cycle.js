@@ -22,7 +22,10 @@ export const meta = {
 //   machineNote: nota de capacidad (p. ej. "Mac M5 Pro, HEAVY_SLOTS=3")
 //   attribution: líneas de atribución de los commits (si falta: las que indique el entorno)
 //   tasks: [{ id, title, lines: "a-b" (sección del plan), port, build, integBuild, visual,
-//             visualHint, lenses: ["compliance","quality","visual"], extra, impl? (retomar) }]
+//             visualHint, lenses: ["compliance","quality","visual"], extra, impl? (retomar),
+//             pendingFindings? (hallazgos abiertos de una sesión anterior: se corrigen antes de revisar),
+//             startRound? (número de la primera ronda de revisión), history? (rondas anteriores),
+//             fixExtra? (instrucciones extra para el corrector), integExtra? (para el integrador) }]
 // }
 // Nota: un revisor o corrector que no responde (p. ej. límite de uso) deja la tarea SIN
 // integrar (ok=false). Para retomar, pasa en tasks[i].impl el resultado del implementador.
@@ -176,7 +179,7 @@ Trabajas en ${WT}/task${t.id} (rama wt/task${t.id}), PORT=${t.port}.
 ${JSON.stringify(findings, null, 1)}
 ## Historial previo
 ${JSON.stringify(history.slice(0, -1), null, 1).slice(0, 20000)}
-## Qué haces
+${t.fixExtra ? '## Antes de corregir (instrucciones específicas de esta tarea)\n' + t.fixExtra + '\n' : ''}## Qué haces
 - Verifica cada hallazgo. Arregla TODOS los correctos (también minor y nit si son correctos). Rechaza los incorrectos con su motivo concreto. Nunca debilites una prueba para ponerla en verde.
 - Verificación: lint, tsc, spec(s) de la tarea y suite completa con PORT=${t.port} bajo heavy${t.build ? ' (y build con heavy --exclusive si tocaste algo que afecte al build)' : ''}.
 - Commit en wt/task${t.id}. Deja \`git status\` limpio (AGENTS.md revertido), sin mutaciones de prueba ni archivos temporales, y ningún servidor encendido.
@@ -212,9 +215,23 @@ async function runCycle(t) {
     if (!impl) await agent(recoveryPrompt(t, 'implementador'), { label: `recover:T${t.id}:impl`, phase: 'Implement' })
     return { task: t.id, ok: false, impl }
   }
-  const history = []
+  const history = t.history ? [...t.history] : []
   let blockingLeft = null
-  for (let round = 1; round <= MAX_ROUNDS; round++) {
+  const startRound = t.startRound || 1
+  // Hallazgos que dejó abiertos una sesión anterior: primero un corrector, luego las rondas de revisión.
+  if (t.pendingFindings && t.pendingFindings.length) {
+    const r0 = startRound - 1
+    const carried = { round: r0, verdicts: ['(sesión anterior)'], findings: t.pendingFindings, carried: true }
+    history.push(carried)
+    let fix0 = await agent(fixPrompt(t, r0, t.pendingFindings, history), { label: `fix:T${t.id}:r${r0}`, phase: 'Fix', schema: FIX_SCHEMA })
+    if (!fix0) {
+      await agent(recoveryPrompt(t, `corrector r${r0}`), { label: `recover:T${t.id}:r${r0}`, phase: 'Fix' })
+      fix0 = await agent(fixPrompt(t, r0, t.pendingFindings, history), { label: `fix:T${t.id}:r${r0}b`, phase: 'Fix', schema: FIX_SCHEMA })
+    }
+    carried.fix = fix0
+    if (!fix0) { log(`T${t.id} r${r0}: el corrector no respondió — NO se integra`); return { task: t.id, ok: false, reason: 'missing-fix', impl, history } }
+  }
+  for (let round = startRound; round < startRound + MAX_ROUNDS; round++) {
     const lenses = t.lenses || ['compliance', 'quality']
     let reviews = await parallel(lenses.map(lens => () =>
       agent(reviewPrompt(t, lens, round, impl.base_commit, history), { label: `review:${lens}:T${t.id}:r${round}`, phase: 'Review', schema: REVIEW_SCHEMA })))
