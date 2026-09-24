@@ -54,7 +54,7 @@ export function InvestorsPage({ content, locale }: { content: InvestorsPageConte
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]" data-header-theme="dark">
+      <section className="min-h-[70vh] flex items-center bg-[#0a0a0a]" data-header-theme="dark" data-header-start="dark">
         <div className="mx-auto max-w-7xl px-6 py-32">
           <m.p
             initial={{ opacity: 0, y: 20 }}

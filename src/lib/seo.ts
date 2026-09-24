@@ -51,16 +51,11 @@ export function webSiteJsonLd() {
   }
 }
 
-/** Resolves the human-readable service name for an internal path from the nav dictionary. */
+/** Resolves the human-readable service or product name for an internal path from the nav dictionary. */
 export function serviceNameForPath(dict: Dictionary, internalPath: string): string | undefined {
-  for (const item of dict.nav.items) {
-    if ("platformChildren" in item) {
-      const all = [...(item.platformChildren ?? []), ...(item.solutionsChildren ?? [])]
-      const match = all.find((child) => child.href === internalPath)
-      if (match) return match.name
-    }
-  }
-  return undefined
+  const { platformLinks, solutionsLinks, productLinks } = dict.nav
+  const links: readonly { name: string; href: string }[] = [...platformLinks, ...solutionsLinks, ...productLinks]
+  return links.find((link) => link.href === internalPath)?.name
 }
 
 export function serviceJsonLd(opts: {

@@ -115,7 +115,7 @@ export function RealtyHero({ content, eyebrow, demoLabel, demoSrText, locale }: 
   const [drawn, setDrawn] = useState(false)
 
   return (
-    <section className="relative flex min-h-[92vh] items-center overflow-hidden bg-[#0a0a0a]" data-header-theme="dark">
+    <section className="relative flex min-h-[92vh] items-center overflow-hidden bg-[#0a0a0a]" data-header-theme="dark" data-header-start="dark">
       {/* Ambient hairline rulers */}
       <div aria-hidden="true" className="absolute inset-0">
         {RULERS.map((left) => (

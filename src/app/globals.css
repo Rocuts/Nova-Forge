@@ -146,6 +146,115 @@
   transform: scaleX(0);
 }
 
+/* ── Site header ─────────────────────────────────────────────────────
+   Header.tsx takes every color from these variables (Tailwind arbitrary
+   values with the `color:` hint). The tone comes from data-tone
+   ("light" | "dark" | "menu"), which the client sets once it knows the
+   section under the header, plus data-scrolled="true" past 50 px.
+   Before hydration there is no data-tone: a page whose first section
+   carries data-header-start="dark" gets the dark tone from CSS alone, so
+   the server HTML is already right — also with JavaScript disabled.
+   Contrast (WCAG AA, text): light — #0a0a0a 19.8:1 and #525252 7.8:1 on
+   #fff, #525252 7.1:1 on the #f5f5f5 control; dark / menu — #fff 19.8:1
+   and #a3a3a3 7.8:1 on #0a0a0a, still ≥ 6:1 on the 90 % scrolled bars. */
+.site-header {
+  --hdr-bg: #ffffff;
+  --hdr-border: transparent;
+  --hdr-fg: #0a0a0a;
+  --hdr-link: #525252;
+  --hdr-link-hover: #0a0a0a;
+  --hdr-control-bg: #f5f5f5;
+  --hdr-control-bg-hover: #e5e5e5;
+  --hdr-control-fg: #525252;
+  --hdr-control-fg-hover: #0a0a0a;
+  --hdr-control-border: #e5e5e5;
+  --hdr-control-border-hover: rgba(10, 10, 10, 0.3);
+  --hdr-cta-bg: #0a0a0a;
+  --hdr-cta-bg-hover: #1a1a1a;
+  --hdr-cta-fg: #ffffff;
+  --hdr-cta-border: #0a0a0a;
+  --hdr-cta-border-hover: #1a1a1a;
+  --hdr-focus: #0a0a0a;
+  --hdr-focus-offset: #ffffff;
+}
+.site-header[data-scrolled="true"] {
+  --hdr-bg: rgba(255, 255, 255, 0.9);
+  --hdr-border: #e5e5e5;
+}
+.site-header[data-tone="dark"],
+.site-header[data-tone="menu"],
+body:has([data-header-start="dark"]) .site-header:not([data-tone]) {
+  --hdr-bg: transparent;
+  --hdr-border: transparent;
+  --hdr-fg: #ffffff;
+  --hdr-link: #a3a3a3;
+  --hdr-link-hover: #ffffff;
+  --hdr-control-bg: rgba(255, 255, 255, 0.1);
+  --hdr-control-bg-hover: rgba(255, 255, 255, 0.16);
+  --hdr-control-fg: #ffffff;
+  --hdr-control-fg-hover: #ffffff;
+  --hdr-control-border: rgba(255, 255, 255, 0.2);
+  --hdr-control-border-hover: rgba(255, 255, 255, 0.4);
+  --hdr-cta-bg: transparent;
+  --hdr-cta-bg-hover: rgba(255, 255, 255, 0.1);
+  --hdr-cta-fg: #ffffff;
+  --hdr-cta-border: rgba(255, 255, 255, 0.3);
+  --hdr-cta-border-hover: rgba(255, 255, 255, 0.5);
+  --hdr-focus: #ffffff;
+  --hdr-focus-offset: #0a0a0a;
+}
+.site-header[data-tone="dark"][data-scrolled="true"],
+body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled="true"] {
+  --hdr-bg: rgba(10, 10, 10, 0.9);
+  --hdr-border: rgba(255, 255, 255, 0.1);
+}
+.site-header[data-tone="menu"] {
+  --hdr-bg: #0a0a0a;
+  --hdr-border: rgba(255, 255, 255, 0.1);
+}
+/* Nothing sets data-scrolled without JavaScript (nor before hydration, e.g.
+   when the browser restores a scroll halfway down on reload), so on a page
+   that starts dark the transparent header would stay white on white over the
+   light sections below the hero. A scroll-driven animation gives it the dark
+   scrolled bar over the first 50 px, CSS only: at the top it is still
+   transparent. Browsers without scroll timelines get the bar from the start,
+   only when scripting is off (with JavaScript, hydration sets data-tone). */
+@keyframes hdr-start-dark-scrolled {
+  to {
+    background-color: rgba(10, 10, 10, 0.9);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
+/* Longhands on purpose: from the `animation` shorthand plus
+   animation-timeline, the CSS minifier emits a single shorthand with the
+   timeline inside, which Chromium rejects as a whole. */
+@supports (animation-timeline: scroll()) {
+  body:has([data-header-start="dark"]) .site-header:not([data-tone]) {
+    animation-name: hdr-start-dark-scrolled;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px 50px;
+  }
+}
+@media (scripting: none) {
+  @supports not (animation-timeline: scroll()) {
+    body:has([data-header-start="dark"]) .site-header:not([data-tone]) {
+      --hdr-bg: rgba(10, 10, 10, 0.9);
+      --hdr-border: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+/* The global focus ring is #0a0a0a: invisible on the dark tones, and on the
+   mega menu panel and the footer, which are dark and sit outside the header. */
+.site-header :focus-visible {
+  outline-color: var(--hdr-focus);
+}
+#site-mega-menu :focus-visible,
+.site-footer :focus-visible {
+  outline-color: #ffffff;
+}
+
 /* Logo micro-glitch: runs once on mount */
 @keyframes logoGlitch {
   0%, 100% { opacity: 1; }

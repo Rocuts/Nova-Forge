@@ -7,25 +7,25 @@ const es = {
   },
   nav: {
     items: [
-      {
-        name: "Servicios",
-        children: [{ name: "", href: "" }],
-        platformChildren: [
-          { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
-          { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
-          { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
-          { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde fuentes verificadas" },
-          { name: "Extracción de Datos", href: "/extraccion-datos", description: "Scrapers con IA para OSINT y registros públicos" },
-          { name: "RealTy", href: "/realty", description: "Infraestructura de ventas con IA para promotores inmobiliarios" },
-        ],
-        solutionsChildren: [
-          { name: "Sistemas Críticos", href: "/sistemas-criticos", description: "Arquitectura de alta disponibilidad" },
-          { name: "Inteligencia Operativa", href: "/inteligencia-operativa", description: "Centros de comando y datos unificados" },
-          { name: "Automatización de Gobierno", href: "/automatizacion-gobierno", description: "Workflows gubernamentales digitalizados" },
-        ],
-      },
-      { name: "Live Studio", href: "/estudio-tiktok-live", accent: true },
+      { name: "Servicios", opensMenu: true },
+      { name: "Productos", opensMenu: true, menuBlock: "products" },
       { name: "Empresa", href: "/nosotros" },
+    ],
+    platformLinks: [
+      { name: "IA Soberana", href: "/soberania-ia", description: "Infraestructura de IA bajo su control total" },
+      { name: "Ciberseguridad", href: "/ciberseguridad", description: "Defensa autónoma con agentes de IA" },
+      { name: "Fuerza Digital", href: "/fuerza-digital", description: "Asistentes ejecutivos en todos sus canales" },
+      { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos", description: "Inteligencia accionable desde fuentes verificadas" },
+      { name: "Extracción de Datos", href: "/extraccion-datos", description: "Scrapers con IA para OSINT y registros públicos" },
+    ],
+    solutionsLinks: [
+      { name: "Sistemas Críticos", href: "/sistemas-criticos", description: "Arquitectura de alta disponibilidad" },
+      { name: "Inteligencia Operativa", href: "/inteligencia-operativa", description: "Centros de comando y datos unificados" },
+      { name: "Automatización de Gobierno", href: "/automatizacion-gobierno", description: "Workflows gubernamentales digitalizados" },
+    ],
+    productLinks: [
+      { name: "RealTy", href: "/realty", description: "Infraestructura de ventas con IA para promotores inmobiliarios" },
+      { name: "Orbexs Live Studio", href: "/estudio-tiktok-live", description: "Estudio de producción en vivo para creadores de LATAM" },
     ],
     contact: "Contacto",
     schedule: "Agendar",
@@ -343,10 +343,16 @@ const es = {
       { name: "Fuerza de Trabajo Digital", href: "/fuerza-digital" },
       { name: "Enriquecimiento de Datos", href: "/enriquecimiento-datos" },
       { name: "Extracción de Datos", href: "/extraccion-datos" },
-      { name: "RealTy", href: "/realty" },
     ],
-    studio: "Live Studio",
-    studioLinks: [
+    solutions: "Soluciones",
+    solutionsLinks: [
+      { name: "Sistemas Críticos", href: "/sistemas-criticos" },
+      { name: "Inteligencia Operativa", href: "/inteligencia-operativa" },
+      { name: "Automatización de Gobierno", href: "/automatizacion-gobierno" },
+    ],
+    products: "Productos",
+    productLinks: [
+      { name: "RealTy", href: "/realty" },
       { name: "Orbexs Live Studio", href: "/estudio-tiktok-live" },
       { name: "Programa para creadores", href: "/estudio-tiktok-live" },
       { name: "Marcas y campañas", href: "/agendar" },

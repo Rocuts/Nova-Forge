@@ -1,24 +1,11 @@
 import { getDictionary } from "@/content/dictionaries"
-import type { Dictionary } from "@/content/dictionaries"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
 import { siteConfig } from "@/config/site"
 
 export const dynamic = "force-static"
 
-function navChildren(dict: Dictionary) {
-  for (const item of dict.nav.items) {
-    if ("platformChildren" in item) {
-      return {
-        platform: item.platformChildren ?? [],
-        solutions: item.solutionsChildren ?? [],
-      }
-    }
-  }
-  return { platform: [], solutions: [] }
-}
-
-function serviceLines(dict: Dictionary, locale: Locale, links: readonly { name: string; href: string; description?: string }[]) {
+function serviceLines(locale: Locale, links: readonly { name: string; href: string; description?: string }[]) {
   return links
     .map((link) => `- [${link.name}](${siteConfig.url}${buildLocalePath(locale, link.href)}): ${link.description ?? ""}`.trimEnd())
     .join("\n")
@@ -27,8 +14,6 @@ function serviceLines(dict: Dictionary, locale: Locale, links: readonly { name: 
 export async function GET() {
   const es = await getDictionary("es")
   const en = await getDictionary("en")
-  const esNav = navChildren(es)
-  const enNav = navChildren(en)
 
   const complianceCategories = ["Marcos de Cumplimiento", "Automatización de Cumplimiento"]
   const compliance = es.techStack.categories
@@ -46,16 +31,22 @@ Contacto comercial: ${siteConfig.contactEmail}
 Audiencia: gobiernos, defensa y grandes organizaciones reguladas. Compromisos bajo NDA, infraestructura aislada y despliegue soberano (on-premise o cloud soberana).
 
 ## Plataforma (Español)
-${serviceLines(es, "es", esNav.platform)}
+${serviceLines("es", es.nav.platformLinks)}
 
 ## Soluciones (Español)
-${serviceLines(es, "es", esNav.solutions)}
+${serviceLines("es", es.nav.solutionsLinks)}
+
+## Productos (Español)
+${serviceLines("es", es.nav.productLinks)}
 
 ## Platform (English)
-${serviceLines(en, "en", enNav.platform)}
+${serviceLines("en", en.nav.platformLinks)}
 
 ## Solutions (English)
-${serviceLines(en, "en", enNav.solutions)}
+${serviceLines("en", en.nav.solutionsLinks)}
+
+## Products (English)
+${serviceLines("en", en.nav.productLinks)}
 
 ## Orbexs Live Studio (división de producción en vivo)
 - [Orbexs Live Studio — Español](${siteConfig.url}${buildLocalePath("es", "/estudio-tiktok-live")}): ${es.liveStudio.description}

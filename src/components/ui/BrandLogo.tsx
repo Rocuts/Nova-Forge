@@ -12,7 +12,11 @@ export function BrandLogo({ className = "", size = 24, loading = false }: BrandL
   const springConfig = { type: "spring" as const, stiffness: 400, damping: 25 }
 
   return (
+    // tabIndex={-1}: motion's press gesture (whileTap) gives a non-focusable
+    // element tabIndex=0 unless it already has one. The logo sits inside a
+    // link, so that would add a nameless, role-less tab stop after it.
     <m.div
+      tabIndex={-1}
       className={`relative inline-flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
       animate={{ 

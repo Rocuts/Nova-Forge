@@ -133,6 +133,7 @@ export function LiveStudioHero({
     <section
       className="relative min-h-[92vh] flex items-center overflow-hidden bg-[#0a0a0a]"
       data-header-theme="dark"
+      data-header-start="dark"
     >
       <div aria-hidden="true" className="absolute inset-0 live-aurora" />
       <div aria-hidden="true" className="absolute inset-0 live-frame-grid opacity-40" />

@@ -66,8 +66,11 @@ export default async function LocaleLayout({ params, children }: Props) {
 
   const dict = await getDictionary(locale as Locale)
 
+  // data-scroll-behavior="smooth": globals.css sets `scroll-behavior: smooth` on
+  // <html> for anchor links, and Next 16 only turns it off around its own
+  // navigation scroll when this attribute is present (otherwise it warns in dev).
   return (
-    <html lang={locale} className={`${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" className={`${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
       <body className="bg-white text-[#0a0a0a] min-h-screen flex flex-col" suppressHydrationWarning>
         <JsonLd data={[organizationJsonLd(dict.meta.description), webSiteJsonLd()]} />
         <MotionProvider>

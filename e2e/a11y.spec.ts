@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import es from '../src/content/dictionaries/es'
+import { effectiveOpacity } from './helpers'
 
 /**
  * Gate de accesibilidad automatizado (WCAG 2.0/2.1 A + AA).
@@ -21,7 +23,36 @@ const ROUTES = [
   '/es/inversores',
 ]
 
+const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
 const BLOCKING_IMPACTS = new Set(['serious', 'critical'])
+
+type AxeResults = Awaited<ReturnType<AxeBuilder['analyze']>>
+
+function expectNoBlockingViolations(label: string, results: AxeResults) {
+  const blocking = results.violations.filter(
+    (v) => v.impact && BLOCKING_IMPACTS.has(v.impact)
+  )
+  const advisory = results.violations.filter(
+    (v) => !v.impact || !BLOCKING_IMPACTS.has(v.impact)
+  )
+
+  // No bloquean el gate, pero deben quedar visibles en el log de CI.
+  if (advisory.length > 0) {
+    console.log(
+      `[a11y advisory] ${label}:`,
+      advisory.map((v) => `${v.id} (${v.impact}) x${v.nodes.length}`).join(', ')
+    )
+  }
+
+  expect(
+    blocking.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      help: v.help,
+      nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 10),
+    }))
+  ).toEqual([])
+}
 
 for (const route of ROUTES) {
   test(`no serious/critical a11y violations on ${route}`, async ({ page }) => {
@@ -59,7 +90,7 @@ for (const route of ROUTES) {
     await page.waitForTimeout(1500)
 
     const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .withTags(WCAG_TAGS)
       // WCAG 1.4.3 exceptua los logotipos del minimo de contraste. El unico
       // nodo marcado asi es el wordmark de marca del TrustBar, atenuado para
       // igualar los logos <img> vecinos. Es una exencion nominal y auditable,
@@ -67,28 +98,28 @@ for (const route of ROUTES) {
       .exclude('[data-brand-wordmark]')
       .analyze()
 
-    const blocking = results.violations.filter(
-      (v) => v.impact && BLOCKING_IMPACTS.has(v.impact)
-    )
-    const advisory = results.violations.filter(
-      (v) => !v.impact || !BLOCKING_IMPACTS.has(v.impact)
-    )
-
-    // No bloquean el gate, pero deben quedar visibles en el log de CI.
-    if (advisory.length > 0) {
-      console.log(
-        `[a11y advisory] ${route}:`,
-        advisory.map((v) => `${v.id} (${v.impact}) x${v.nodes.length}`).join(', ')
-      )
-    }
-
-    expect(
-      blocking.map((v) => ({
-        id: v.id,
-        impact: v.impact,
-        help: v.help,
-        nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 10),
-      }))
-    ).toEqual([])
+    expectNoBlockingViolations(route, results)
   })
 }
+
+test('no serious/critical a11y violations on /es with the mega menu open', async ({ page }) => {
+  await page.goto('/es', { waitUntil: 'networkidle' })
+  await page.getByRole('button', { name: es.nav.menuLabel }).click()
+
+  const menu = page.locator('#site-mega-menu')
+  await expect(menu).toBeVisible()
+  // El panel entra con un fundido y el encabezado cambia de tono con una
+  // transición de color: se escanea con ambos en su estado final, no a medias.
+  await expect.poll(() => effectiveOpacity(menu)).toBe(1)
+  await expect(page.locator('.site-header')).toHaveCSS('background-color', 'rgb(10, 10, 10)')
+
+  // Con el menú abierto, lo que queda debajo del panel no se ve: se escanean
+  // el panel y el encabezado (con sus botones en aria-expanded="true").
+  const results = await new AxeBuilder({ page })
+    .withTags(WCAG_TAGS)
+    .include('#site-mega-menu')
+    .include('.site-header')
+    .analyze()
+
+  expectNoBlockingViolations('/es + mega menú', results)
+})

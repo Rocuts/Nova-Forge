@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
 import en from '../src/content/dictionaries/en'
+import { waitForHydration } from './helpers'
 
 const hero = es.hero
 const nav = es.nav
@@ -25,22 +26,23 @@ test('navigation works on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 })
   await page.goto('/es')
 
-  // First nav item has children → rendered as a mega-menu trigger button
-  const servicesTrigger = page.getByRole('navigation').getByRole('button', { name: nav.items[0].name })
+  // "Servicios" and "Productos" open the mega menu; "Empresa" is a direct link
+  const servicesTrigger = page.getByRole('navigation').getByRole('button', { name: nav.items[0].name, exact: true })
   await expect(servicesTrigger).toBeVisible()
-
-  // Second nav item is a direct link
-  await expect(page.getByRole('navigation').getByRole('link', { name: nav.items[1].name })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('button', { name: nav.items[1].name, exact: true })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('link', { name: nav.items[2].name })).toHaveAttribute('href', '/es/nosotros')
 
   // Opening the mega menu reveals platform links
   await servicesTrigger.click()
-  const firstPlatformLink = nav.items[0].platformChildren![0]
-  await expect(page.getByRole('link', { name: new RegExp(firstPlatformLink.name) }).first()).toBeVisible()
+  const firstPlatformLink = nav.platformLinks[0]
+  await expect(page.locator('#site-mega-menu').getByRole('link', { name: new RegExp(firstPlatformLink.name) })).toBeVisible()
 })
 
 test('mobile menu works', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/es')
+  // The click must reach a hydrated header: nothing else opens the panel
+  await waitForHydration(page)
 
   // Desktop nav should not be visible at mobile width
   const desktopNav = page.locator('nav.hidden.md\\:flex')
@@ -51,8 +53,10 @@ test('mobile menu works', async ({ page }) => {
   await expect(hamburger).toBeVisible()
   await hamburger.click()
 
-  const firstPlatformLink = nav.items[0].platformChildren![0]
-  await expect(page.getByRole('link', { name: new RegExp(firstPlatformLink.name) }).first()).toBeVisible()
+  await expect(hamburger).toHaveAttribute('aria-expanded', 'true')
+  // Scoped to the panel: the same link name also exists in <main> and the footer
+  const firstPlatformLink = nav.platformLinks[0]
+  await expect(page.locator('#site-mega-menu').getByRole('link', { name: new RegExp(firstPlatformLink.name) })).toBeVisible()
 })
 
 test('CTA buttons have real destinations', async ({ page }) => {
@@ -119,12 +123,29 @@ test('realty page renders and routes in both locales', async ({ page }) => {
 
 test('home page links to the live studio division', async ({ page }) => {
   await page.goto('/es')
-  const navLink = page.getByRole('navigation').getByRole('link', { name: /Live Studio/ })
-  await expect(navLink).toHaveAttribute('href', '/es/estudio-tiktok-live')
+
+  // The nav reaches the studio through the mega menu's Products block
+  await page.getByRole('navigation').getByRole('button', { name: nav.items[1].name, exact: true }).click()
+  const studio = nav.productLinks.find((link) => link.href === '/estudio-tiktok-live')!
+  await expect(page.locator('#site-mega-menu').getByRole('link', { name: studio.name })).toHaveAttribute(
+    'href',
+    '/es/estudio-tiktok-live'
+  )
+  await page.keyboard.press('Escape')
+
   await expect(page.getByRole('link', { name: es.liveStudioTeaser.action.label })).toHaveAttribute(
     'href',
     '/es/estudio-tiktok-live'
   )
+})
+
+test('llms.txt lists the platform, solutions and products from the nav', async ({ request }) => {
+  const body = await (await request.get('/llms.txt')).text()
+  expect(body).toContain('## Productos (Español)')
+  expect(body).toContain('## Products (English)')
+  for (const link of [...nav.platformLinks, ...nav.solutionsLinks, ...nav.productLinks]) {
+    expect(body).toContain(`- [${link.name}](`)
+  }
 })
 
 test('SEO essentials are present', async ({ page }) => {
