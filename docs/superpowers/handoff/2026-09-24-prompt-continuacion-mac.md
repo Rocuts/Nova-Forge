@@ -19,8 +19,8 @@ Si falta algo de esto, hazlo tú (en el Mac `npx playwright install chromium` s�
 7. `scripts/agent/README.md` y la cabecera de `.claude/workflows/home-task-cycle.js` y de `.claude/workflows/home-integrate-serial.js`.
 
 ## 2. Estado de partida (verifícalo)
-- Punta de `origin/redesign/home`: la del último commit de traspaso (`git log -1`: «docs(home): cierre de la sesión 2…») o posterior. **Integradas:** T1 (`233446e`), T3 (`748567c`), T4 (`2e61a3b`), T2 (`1bbd6ad`), T5 (`182001a`), T6 (`5cf73de`), **P1** rendimiento (`25f4227`) y **T7** tesis y capacidades (`27d841d`). La suite e2e da 171/171 en la punta de T7.
-- **T8 a medias:** implementada y corregida en dos rondas de revisión, guardada como parches en `docs/superpowers/handoff/wip/task8/` (léelo: estado de la ronda 3, cómo aplicarla con `git am`, cruces esperables al integrar).
+- Punta de `origin/redesign/home`: `b10ff10` («docs(home): T8 — ronda 3 completa…», último commit de la sesión 2) o posterior. **Integradas:** T1 (`233446e`), T3 (`748567c`), T4 (`2e61a3b`), T2 (`1bbd6ad`), T5 (`182001a`), T6 (`5cf73de`), **P1** rendimiento (`25f4227`) y **T7** tesis y capacidades (`27d841d`). La suite e2e da 171/171 en la punta de T7.
+- **T8 a medias:** implementada y corregida en dos rondas de revisión, guardada como parches en `docs/superpowers/handoff/wip/task8/`; la ronda 3 ya se hizo y los tres revisores piden el mismo arreglo mayor (léelo: qué corregir en la ronda 4, cómo aplicar los parches con `git am`, cruces esperables al integrar).
 - **Pendiente:** terminar e integrar T8; T9 y T10a (en paralelo); integrarlas; T10b (pruebas de la home completa); T11 (limpieza, documentación, verificación final y lo prometido en la sesión 2: guía, lista de preparación de imágenes, workflows guardados y referencia de movimiento en el skill del design system).
 - **Peso de JS de `/es`:** 239 002 B antes del rediseño (compilado a ES5) → 250 849 B tras T6 → **219 595 B tras P1** → **220 233 B tras T7**. Tope: 269 722 B. **LCP móvil** (390×844, DPR 3, Slow 4G, CPU 4×): 2 724 ms tras P1, por encima del objetivo de 2 500 ms; lo cierra T11 (traspaso §8.7). CLS 0. LCP de escritorio de la línea base: 900 ms.
 
@@ -66,8 +66,8 @@ Si en F3 el paralelo genera más conflictos de los que se resuelven con segurida
 ## 7. Al terminar
 - Añade al traspaso la sección «Estado al cierre»: qué se hizo, qué decidiste y por qué, qué quedó pendiente y cómo retomarlo. Luego el último commit y push.
 - Escríbeme un informe en español:
-  - tareas completadas, con sus commits (incluidas T2, T5 y T6 de la sesión 2);
+  - tareas completadas, con sus commits (incluidas T2, T5, T6, P1 y T7 de la sesión 2);
   - resultados de las pruebas, con cifras;
-  - LCP y peso de JS antes y después (con la evolución: 239 002 → T6 → P1 → final);
+  - LCP y peso de JS antes y después (con la evolución: 239 002 → 250 849 tras T6 → 219 595 tras P1 → 220 233 tras T7 → final);
   - desviaciones del diseño y por qué;
   - pendientes, entre ellos el dominio `orbexs.tech`, el 404 de `orbexs-alpha.vercel.app` (proyecto de Vercel `nova-forge`) y la fase 2 (resto de páginas).
