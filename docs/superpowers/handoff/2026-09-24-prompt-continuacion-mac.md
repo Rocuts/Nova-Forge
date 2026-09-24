@@ -1,13 +1,7 @@
 ultracode — Continúa de forma autónoma, de principio a fin, el rediseño de la home de Orbexs en Rocuts/Nova-Forge, rama `redesign/home`, ahora en mi MacBook Pro M5 Pro (24 GB) desde VS Code. Usa workflows multiagente: varios en secuencia, uno por fase, sin límite de tamaño de workflow. Revisa los resultados de cada uno antes de lanzar el siguiente. Ya aprobé el diseño y te autorizo a ejecutar todo, hacer commit y hacer push a `redesign/home` sin pedirme aprobaciones, confirmaciones ni decisiones. **Mantén el rigor actual** (lo elegí frente a modos más rápidos): rondas de revisión hasta que no quede ningún hallazgo bloqueante ni mayor, tres lentes (cumplimiento, calidad, visual) en toda tarea que se vea, verificación final completa.
 
 ## 0. Preparación que ya hice en la terminal (compruébala)
-```bash
-cd <ruta-del-repo>/Nova-Forge && git checkout redesign/home && git pull
-npm ci && npx playwright install chromium && npx next typegen >/dev/null
-export HEAVY_SLOTS=3
-export CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8
-```
-Si falta algo de esto, hazlo tú (en el Mac `npx playwright install chromium` sí está permitido). Anota `sysctl -n hw.ncpu` y `sysctl -n hw.memsize`, y la concurrencia real de agentes (min(16, CPU − 2) o `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS`).
+Seguí el traspaso §8.4: clon en `~/Documents/GitHub/Nova-Forge` en la rama `redesign/home`, `npm ci`, `npx playwright install chromium`, `npx next typegen`, y en `~/.claude/settings.json` la clave `env` con `HEAVY_SLOTS=3` y `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8`. Compruébalo: `git status` y `git log -1` (rama `redesign/home` al día con origin), `node -v` (≥ 20.9), `echo $HEAVY_SLOTS` (si sale vacío, antepón `HEAVY_SLOTS=3` a cada `scripts/agent/heavy.sh`), `sysctl -n hw.ncpu` y `sysctl -n hw.memsize`, y anota la concurrencia real de agentes (min(16, CPU − 2) o `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS`). Si falta algo, hazlo tú (en el Mac `npx playwright install chromium` sí está permitido). Mi shell es zsh: si me das órdenes para pegar, sin comentarios `#`.
 
 ## 1. Lee primero, en este orden
 1. `CLAUDE.md` y `AGENTS.md`. Antes de usar cualquier API de Next 16, consulta `node_modules/next/dist/docs/`.

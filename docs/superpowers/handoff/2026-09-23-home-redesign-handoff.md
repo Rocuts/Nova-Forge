@@ -341,17 +341,36 @@ Informe completo: `docs/superpowers/research/2026-09-24-presupuesto-js.md` (5 ag
    - Sección «Estado al cierre» en este traspaso e informe final en español para el usuario (tareas y commits, pruebas con cifras, LCP y JS antes/después, desviaciones, pendientes: dominio `orbexs.tech`, 404 de `orbexs-alpha.vercel.app`, fase 2).
 
 ### 8.4 Preparar el Mac
+Los bloques de esta sección no llevan comentarios a propósito: zsh (el shell de macOS) no acepta `#` en la terminal interactiva salvo con `setopt interactivecomments`, y un comentario al final de una orden se convierte en argumentos (`git clone … # …` falla con «Too many arguments»).
+
+1. Node 20.9 o superior (recomendado 22): `node -v`.
+2. Clonar (o actualizar un clon existente) y pasar a la rama:
 ```bash
-git clone https://github.com/Rocuts/Nova-Forge.git && cd Nova-Forge   # o: git fetch && git checkout redesign/home && git pull
+mkdir -p ~/Documents/GitHub
+cd ~/Documents/GitHub
+git clone https://github.com/Rocuts/Nova-Forge.git
+cd Nova-Forge
 git checkout redesign/home
-node -v                      # Node 22 (el contenedor usó 22.22)
-npm ci
-npx playwright install chromium          # en el Mac sí se permite (en el contenedor web no)
-npx next typegen >/dev/null
-export HEAVY_SLOTS=3                                  # procesos pesados a la vez (24 GB)
-export CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8   # antes de abrir Claude Code
-npm run lint && npx tsc --noEmit && npx playwright test   # debe quedar en verde (171 pruebas tras T7)
 ```
+   Si ya existía el clon: `cd ~/Documents/GitHub/Nova-Forge`, `git status` (debe estar limpio), `git fetch origin`, `git checkout redesign/home`, `git pull`.
+3. Dependencias y navegador de pruebas (en el Mac `playwright install` sí se permite):
+```bash
+npm ci
+npx playwright install chromium
+npx next typegen
+```
+4. Variables para Claude Code, en `~/.claude/settings.json` (clave `env`), para que lleguen a la extensión de VS Code aunque se abra desde el Dock. Este comando las añade sin tocar el resto del archivo (si el JSON no se puede leer, falla sin escribir):
+```bash
+node -e 'const fs=require("fs"),os=require("os"),d=os.homedir()+"/.claude",p=d+"/settings.json";let s={};if(fs.existsSync(p)){s=JSON.parse(fs.readFileSync(p,"utf8"))}s.env={...(s.env||{}),HEAVY_SLOTS:"3",CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS:"8"};fs.mkdirSync(d,{recursive:true});fs.writeFileSync(p,JSON.stringify(s,null,2)+"\n");console.log("listo:",p,JSON.stringify(s.env))'
+```
+   `HEAVY_SLOTS=3`: procesos pesados a la vez (24 GB). `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8`: agentes simultáneos por workflow (sin ella, el tope sería min(16, CPU − 2); con más agentes el límite de uso de la cuenta se agota antes).
+5. Abrir VS Code en el repo y copiar el prompt al portapapeles:
+```bash
+open -a "Visual Studio Code" .
+pbcopy < docs/superpowers/handoff/2026-09-24-prompt-continuacion-mac.md
+```
+   En el panel de Claude Code, pegar (Cmd+V) y enviar. El prompt empieza por `ultracode`: esa palabra tiene que ir en el mensaje para que Claude pueda usar workflows. (El comando `code` solo existe si se instaló desde VS Code: Cmd+Shift+P → «Shell Command: Install 'code' command in PATH».)
+6. La verificación inicial (lint, tsc, e2e completo: 171 pruebas tras T7) la hace Claude en su Fase 0.
 - Worktrees en `../wt/` (por defecto del workflow: carpeta hermana del repo). `scripts/agent/new-worktree.sh` clona `node_modules` con `cp -cR` (copy-on-write de APFS).
 - `.env.local` no se versiona: sin `OPENAI_API_KEY` el diagnóstico devuelve el informe de respaldo (lo esperado en local); sin `REALTY_VOICE_DEMO_ENABLED` la demo de voz queda apagada, que es lo que prueban los e2e.
 - Si una ejecución deja candados colgados: `rm -rf "${TMPDIR:-/tmp}/heavy-slots"`.
