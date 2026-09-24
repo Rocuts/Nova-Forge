@@ -5,6 +5,13 @@ import { useEffect, useRef, useState } from "react"
  * Vertical scroll progress indicator on the right side of the viewport.
  * Uses vanilla scroll listener for reliable cross-environment behavior.
  * Hidden on mobile and when prefers-reduced-motion is active.
+ *
+ * Va en el margen de la página (`right-2`): con `right-6` caía justo sobre el
+ * borde derecho del contenido `max-w-7xl px-6` en anchos ≤ 80rem (p. ej. sobre
+ * el borde de la lámina de Capacidades en la home). La pista y el relleno
+ * llevan su transparencia en el color de fondo, no en `opacity`: con `opacity`
+ * en la pista, el relleno (su hijo) quedaba multiplicado a ~5 % y el avance
+ * apenas se veía.
  */
 export function ScrollProgress() {
   const innerRef = useRef<HTMLDivElement>(null)
@@ -38,16 +45,16 @@ export function ScrollProgress() {
 
   return (
     <div
-      className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:block"
+      className="fixed right-2 top-1/2 -translate-y-1/2 z-40 hidden md:block"
       aria-hidden
     >
       {/* Track */}
-      <div className="w-[1px] h-[120px] bg-[#0a0a0a] opacity-[0.08] relative">
+      <div className="w-[1px] h-[120px] bg-[#0a0a0a]/8 relative">
         {/* Fill */}
         <div
           ref={innerRef}
           data-scroll-progress-fill
-          className="absolute inset-0 origin-top bg-[#0a0a0a] opacity-60"
+          className="absolute inset-0 origin-top bg-[#0a0a0a]/60"
           style={{ transform: "scaleY(0)" }}
         />
       </div>

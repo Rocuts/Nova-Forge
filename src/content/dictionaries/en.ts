@@ -59,9 +59,13 @@ const en = {
     // Technologies we use — not partnerships or certifications. See CLAUDE.md
     label: "We build with",
   },
+  thesis: {
+    text: "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option.",
+  },
   services: {
     sectionId: "capacidades",
     title: "Engineering Capabilities",
+    imageLabel: "Illustrative image",
     exploreLabel: "Explore",
     description:
       "We design, deploy, and operate software, artificial intelligence, and cybersecurity systems for organizations where failure is not an option.",
@@ -163,34 +167,6 @@ const en = {
         href: "/extraccion-datos",
       },
     ],
-  },
-  flagshipAI: {
-    sectionId: "sistemas-ia",
-    title: "Sovereign AI Deployment",
-    description:
-      "Your organization needs artificial intelligence that operates under your rules, on your infrastructure, with your data. No external dependencies, no third-party risks. For solutions requiring third-party API integration, we implement data processing agreements and privacy architectures that keep operational control within your organization.",
-    items: [
-      {
-        title: "Cyber Defense Agents",
-        description:
-          "AI that monitors your attack surface, identifies vulnerabilities, and executes response protocols without human intervention.",
-        icon: "cyber",
-      },
-      {
-        title: "Digital Workforce",
-        description:
-          "AI executive assistants deployed across all your communication channels: calendar management, information triage, and operational coordination.",
-        icon: "workforce",
-      },
-      {
-        title: "On-Premise AI Infrastructure",
-        description:
-          "Language models, data pipelines, and autonomous agents operating within your security perimeter with total data sovereignty.",
-        icon: "infra",
-      },
-    ],
-    caption:
-      "Total control. Complete sovereignty. Measurable impact.",
   },
   caseStudy: {
     sectionId: "casos",

@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from '@playwright/test'
 import es from '../src/content/dictionaries/es'
 import en from '../src/content/dictionaries/en'
+import { buildLocalePath } from '../src/lib/i18n'
 import { countVisibleBlue, effectiveOpacity, scrollToY, waitForHydration } from './helpers'
 
 /**
@@ -507,5 +508,482 @@ test.describe('portada · inglés (revisión 5)', () => {
     await expect(stage.getByText(en.hero.scrollHint, { exact: true })).toBeVisible()
     await expect(stage.getByRole('link', { name: en.hero.nurtureCta.label })).toHaveAttribute('href', en.hero.nurtureCta.href)
     await expect(stage.getByRole('link', { name: en.hero.primaryAction.label })).toHaveAttribute('href', '/en/diagnostic')
+  })
+})
+
+// ── Tarea 7 — Tesis y Capacidades ──────────────────────────────────────────
+
+test.describe('T7 · Tesis y Capacidades · sin JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('el h2, la tesis y los 8 enlaces llegan visibles desde el servidor', async ({ page }) => {
+    await page.goto('/es')
+    const section = page.locator(`#${es.services.sectionId}`)
+    const heading = section.getByRole('heading', { level: 2 })
+    await expect(heading).toHaveText(es.services.title)
+    await expect(heading).toBeVisible()
+    expect(await effectiveOpacity(heading)).toBe(1)
+    await expect(section).toHaveAttribute('data-header-theme', 'light')
+
+    await expect(page.locator('p:has([data-thesis-word])')).toHaveText(es.thesis.text)
+
+    const links = section.locator('[data-capability-row] a')
+    await expect(links).toHaveCount(es.services.items.length)
+    for (const [i, item] of es.services.items.entries()) {
+      await expect(links.nth(i)).toHaveAttribute('href', buildLocalePath('es', item.href))
+      await expect(links.nth(i)).toContainText(`/${String(i + 1).padStart(2, '0')}`)
+      await expect(links.nth(i)).toContainText(item.title)
+      await expect(links.nth(i)).toContainText(item.benefit)
+    }
+    // Las viñetas (bullets) no se muestran en la home (diseño §5.3)
+    await expect(section).not.toContainText(es.services.items[0].bullets[0])
+    await expect(section.locator('figcaption')).toContainText(es.services.imageLabel)
+  })
+
+  test('se pinta el estado final: tesis en negro, red completa, sin azul ni contador', async ({ page }) => {
+    await page.goto('/es')
+    const section = page.locator(`#${es.services.sectionId}`)
+    // Como en la portada (@media (scripting: none)): el mismo estado que con reducir movimiento
+    const words = page.locator('[data-thesis-word]')
+    await expect(words.first()).toHaveCSS('color', 'rgb(10, 10, 10)')
+    await expect(words.last()).toHaveCSS('color', 'rgb(10, 10, 10)')
+    const circles = section.locator('[data-node] > circle')
+    await expect(circles).toHaveCount(es.services.items.length)
+    for (let i = 0; i < es.services.items.length; i++) {
+      await expect(circles.nth(i)).toHaveCSS('fill', 'rgb(10, 10, 10)')
+    }
+    const edges = section.locator('[data-capability-edge]')
+    await expect(edges).toHaveCount(es.services.items.length - 1)
+    for (let i = 0; i < es.services.items.length - 1; i++) {
+      await expect(edges.nth(i)).toHaveCSS('stroke-dasharray', 'none')
+    }
+    await expect(section.locator('[data-capability-row] a').first().locator(':scope > :first-child')).toHaveCSS(
+      'color',
+      'rgb(10, 10, 10)'
+    )
+    // «00 / 08» no significaría nada sin scroll que seguir
+    await expect(section.locator('[data-capabilities-counter]')).toBeHidden()
+    await section.locator('figure').scrollIntoViewIfNeeded()
+    expect(await countVisibleBlue(page)).toBe(0)
+  })
+})
+
+test.describe('T7 · Tesis y Capacidades · reducir movimiento', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' }, viewport: { width: 1440, height: 900 } })
+
+  test('red completa en negro, ningún nodo activo, tesis entera y sin sticky', async ({ page }) => {
+    const total = es.services.items.length
+    const words = es.thesis.text.split(' ').length
+    await page.goto('/es')
+    const section = page.locator(`#${es.services.sectionId}`)
+    await expect(section).toHaveAttribute('data-stage-mode', 'static')
+    await expect(section.locator('[data-node]')).toHaveCount(total)
+    await expect(section.locator('[data-node][data-lit="true"]')).toHaveCount(total)
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(0)
+    await expect(section.locator('[data-capabilities-counter]')).toHaveText('08 / 08')
+    await expect(section.locator('figure')).toHaveCSS('position', 'static')
+    // Red completa en negro: cada arista trazada entera (pathLength 1 → guion 1, desfase 0)
+    // y cada nodo relleno de #0a0a0a
+    const edges = section.locator('[data-capability-edge]')
+    await expect(edges).toHaveCount(total - 1)
+    for (let i = 0; i < total - 1; i++) {
+      await expect(edges.nth(i)).toHaveAttribute('pathLength', '1')
+      await expect(edges.nth(i)).toHaveCSS('stroke-dasharray', '1px, 1px')
+      await expect(edges.nth(i)).toHaveCSS('stroke-dashoffset', '0px')
+    }
+    const circles = section.locator('[data-node] > circle')
+    await expect(circles).toHaveCount(total)
+    for (let i = 0; i < total; i++) {
+      await expect(circles.nth(i)).toHaveCSS('fill', 'rgb(10, 10, 10)')
+    }
+    await section.locator('figure').scrollIntoViewIfNeeded()
+    expect(await countVisibleBlue(page)).toBe(0)
+
+    await expect(page.locator('section:has([data-thesis-word])')).toHaveAttribute('data-stage-mode', 'static')
+    await expect(page.locator('[data-thesis-word]')).toHaveCount(words)
+    await expect(page.locator('[data-thesis-word][data-active="true"]')).toHaveCount(words)
+  })
+})
+
+test.describe('T7 · Tesis y Capacidades · scrub (1440×900)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('la tesis pasa de #737373 a #0a0a0a palabra a palabra', async ({ page }) => {
+    await page.goto('/es')
+    // data-stage-mode="scrub" ya está en el HTML del servidor: sin esta espera, el
+    // scroll llegaría antes de hidratar y SmoothScroll lo desharía (§3.7).
+    await waitForHydration(page)
+    const thesis = page.locator('p:has([data-thesis-word])')
+    await expect(page.locator('section:has([data-thesis-word])')).toHaveAttribute('data-stage-mode', 'scrub')
+    await expect(page.locator('[data-thesis-word][data-active="true"]')).toHaveCount(0)
+    await expect(thesis.locator('[data-thesis-word]').first()).toHaveCSS('color', 'rgb(115, 115, 115)')
+
+    // A mitad del recorrido (offset "start 0.85" → "end 0.5"), las palabras activas son
+    // las k primeras, con 0 < k < total: se encienden palabra a palabra, no de golpe.
+    const mid = await thesis.evaluate((el) => {
+      const rect = el.getBoundingClientRect()
+      const start = window.scrollY + rect.top - window.innerHeight * 0.85
+      const end = window.scrollY + rect.bottom - window.innerHeight * 0.5
+      return (start + end) / 2
+    })
+    await scrollToY(page, mid)
+    await expect
+      .poll(() =>
+        thesis
+          .locator('[data-thesis-word]')
+          .evaluateAll((words) => words.map((word) => (word.getAttribute('data-active') === 'true' ? '1' : '0')).join(''))
+      )
+      .toMatch(/^1+0+$/)
+    const activeWords = thesis.locator('[data-thesis-word][data-active="true"]')
+    await expect(activeWords.last()).toHaveCSS('color', 'rgb(10, 10, 10)')
+    await expect(thesis.locator('[data-thesis-word][data-active="false"]').first()).toHaveCSS(
+      'color',
+      'rgb(115, 115, 115)'
+    )
+
+    // Borde inferior de la frase al 40 % del viewport → avance 1 (offset "end 0.5")
+    const y = await thesis.evaluate((el) => window.scrollY + el.getBoundingClientRect().bottom - window.innerHeight * 0.4)
+    await scrollToY(page, y)
+    await expect(page.locator('[data-thesis-word][data-active="false"]')).toHaveCount(0)
+    await expect(thesis.locator('[data-thesis-word]').last()).toHaveCSS('color', 'rgb(10, 10, 10)')
+  })
+
+  test('con la fila 3 en el centro se encienden los nodos 0–2 y hay un solo azul', async ({ page }) => {
+    await page.goto('/es')
+    await waitForHydration(page)
+    const section = page.locator(`#${es.services.sectionId}`)
+    await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
+    await expect(section.locator('figure')).toHaveCSS('position', 'sticky')
+    const rows = section.locator('[data-capability-row]')
+    await expect(rows).toHaveCount(es.services.items.length)
+
+    // Centro de la fila 3 sobre el centro del viewport: su borde superior queda por
+    // encima del centro y el de la fila 4 por debajo → índice activo 2.
+    const y = await rows.nth(2).evaluate((row) => {
+      const rect = row.getBoundingClientRect()
+      return window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2
+    })
+    await scrollToY(page, y)
+
+    const nodes = section.locator('[data-node]')
+    await expect(nodes.nth(2)).toHaveAttribute('data-active', 'true')
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(1)
+    for (let i = 0; i < es.services.items.length; i++) {
+      await expect(nodes.nth(i)).toHaveAttribute('data-lit', i <= 2 ? 'true' : 'false')
+    }
+    await expect(section.locator('[data-capabilities-counter]')).toHaveText('03 / 08')
+    await expect(nodes.nth(2).locator('circle').first()).toHaveCSS('fill', 'rgb(37, 99, 235)')
+    await expect.poll(() => countVisibleBlue(page)).toBe(1)
+  })
+})
+
+// La red se completa cuando el borde inferior de la última fila cruza el centro. En ese
+// momento la lámina tiene que seguir fija (top-24) y entera, del ancho de su columna y con
+// el contador alineado a su borde derecho y en una línea. 1366×657 y 768×600: lámina
+// limitada por el alto; 768×600: además «Imagen ilustrativa» en dos líneas.
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1366, height: 657 },
+  { width: 1024, height: 768 },
+  { width: 768, height: 600 },
+  { width: 768, height: 1024 },
+]) {
+  test.describe(`T7 · Capacidades · final del scrub (${viewport.width}×${viewport.height})`, () => {
+    test.use({ viewport })
+
+    test('red completa sin azul, con la lámina fija, entera y alineada con su leyenda', async ({ page }) => {
+      await page.goto('/es')
+      await waitForHydration(page)
+      const section = page.locator(`#${es.services.sectionId}`)
+      await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
+      const last = section.locator('[data-capability-row]').last()
+      const y = await last.evaluate(
+        (row) => Math.ceil(window.scrollY + row.getBoundingClientRect().bottom - window.innerHeight / 2) + 1
+      )
+      await scrollToY(page, y)
+
+      await expect(section.locator('[data-capabilities-counter]')).toHaveText('08 / 08')
+      await expect(section.locator('[data-node][data-lit="true"]')).toHaveCount(es.services.items.length)
+      await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(0)
+      await expect.poll(() => countVisibleBlue(page)).toBe(0)
+
+      const box = await section.locator('figure').evaluate((figure) => {
+        const lamina = figure.firstElementChild!.getBoundingClientRect()
+        const counter = figure.querySelector('figcaption')!.lastElementChild!
+        const counterRect = counter.getBoundingClientRect()
+        return {
+          figureTop: figure.getBoundingClientRect().top,
+          figureBottom: figure.getBoundingClientRect().bottom,
+          figureWidth: figure.getBoundingClientRect().width,
+          laminaWidth: lamina.width,
+          laminaRight: lamina.right,
+          counterRight: counterRect.right,
+          counterLines: counterRect.height / parseFloat(getComputedStyle(counter).lineHeight),
+          viewportHeight: window.innerHeight,
+          rem: parseFloat(getComputedStyle(document.documentElement).fontSize),
+        }
+      })
+      // Fija en top-24 (6rem) y entera dentro del viewport
+      expect(Math.abs(box.figureTop - 6 * box.rem)).toBeLessThanOrEqual(1)
+      expect(box.figureBottom).toBeLessThanOrEqual(box.viewportHeight)
+      // Del ancho de la columna (no más estrecha por el max-h) y con el contador a su borde derecho
+      expect(Math.abs(box.laminaWidth - box.figureWidth)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.counterRight - box.laminaRight)).toBeLessThanOrEqual(1)
+      // El contador nunca se parte en dos líneas
+      expect(box.counterLines).toBeLessThan(1.5)
+    })
+  })
+}
+
+test.describe('T7 · Tesis y Capacidades · celular (390×844)', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('la tesis se revela entera al entrar en pantalla', async ({ page }) => {
+    await page.goto('/es')
+    await waitForHydration(page)
+    const thesis = page.locator('p:has([data-thesis-word])')
+    await expect(page.locator('section:has([data-thesis-word])')).toHaveAttribute('data-stage-mode', 'inView')
+    await expect(page.locator('[data-thesis-word][data-active="true"]')).toHaveCount(0)
+
+    const y = await thesis.evaluate((el) => window.scrollY + el.getBoundingClientRect().top - window.innerHeight * 0.2)
+    await scrollToY(page, y)
+    await expect(page.locator('[data-thesis-word][data-active="false"]')).toHaveCount(0, { timeout: 10_000 })
+    await expect(thesis.locator('[data-thesis-word]').last()).toHaveCSS('color', 'rgb(10, 10, 10)')
+  })
+
+  test('la secuencia de la red, una vez disparada, termina en N aunque la lámina salga de pantalla', async ({
+    page,
+  }) => {
+    await page.goto('/es')
+    await waitForHydration(page)
+    const section = page.locator(`#${es.services.sectionId}`)
+    await expect(section).toHaveAttribute('data-stage-mode', 'inView')
+    await expect(section.locator('figure')).toHaveCSS('position', 'static')
+    const counter = section.locator('[data-capabilities-counter]')
+    await expect(counter).toHaveText('00 / 08')
+
+    const figureY = await section
+      .locator('figure')
+      .evaluate((el) => window.scrollY + el.getBoundingClientRect().top - 80)
+    await scrollToY(page, figureY)
+    // Arranca: un nodo activo (azul)…
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(1)
+    // …y la lámina sale de pantalla a mitad de la secuencia
+    const below = await section.evaluate((el) => window.scrollY + el.getBoundingClientRect().bottom)
+    await scrollToY(page, below)
+    await expect(counter).toHaveText('08 / 08', { timeout: 10_000 })
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(0)
+    await expect(section.locator('[data-node][data-lit="true"]')).toHaveCount(es.services.items.length)
+
+    await scrollToY(page, figureY)
+    await expect.poll(() => countVisibleBlue(page)).toBe(0)
+  })
+})
+
+test.describe('T7 · Capacidades · de escritorio a celular (revisión 3)', () => {
+  test('pasa a inView sin errores y completa la red', async ({ page }) => {
+    const errors: Error[] = []
+    page.on('pageerror', (error) => errors.push(error))
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/es')
+    // data-stage-mode="scrub" ya viene del servidor: sin esta espera, el cambio de
+    // tamaño llegaría antes de hidratar y la isla arrancaría directamente en inView.
+    await waitForHydration(page)
+    const section = page.locator(`#${es.services.sectionId}`)
+    await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
+    // Componente hidratado y en marcha en scrub (fila 4 en el centro) antes de pasar a celular
+    const row = section.locator('[data-capability-row]').nth(3)
+    const rowY = await row.evaluate((el) => {
+      const rect = el.getBoundingClientRect()
+      return window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2
+    })
+    await scrollToY(page, rowY)
+    await expect(section.locator('[data-node]').nth(3)).toHaveAttribute('data-active', 'true')
+    await expect(section.locator('[data-capabilities-counter]')).toHaveText('04 / 08')
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(section).toHaveAttribute('data-stage-mode', 'inView')
+
+    const y = await section.locator('figure').evaluate((el) => window.scrollY + el.getBoundingClientRect().top - 80)
+    await scrollToY(page, y)
+    // 9 pasos de 220 ms: la secuencia termina con la red completa y sin azul
+    await expect(section.locator('[data-node][data-lit="true"]')).toHaveCount(es.services.items.length, {
+      timeout: 10_000,
+    })
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(0)
+    await expect(section.locator('[data-capabilities-counter]')).toHaveText('08 / 08')
+    expect(errors).toEqual([])
+  })
+})
+
+// Ronda 2 · 320 px: la tesis (2,25rem por debajo de 22,5rem) y los títulos de
+// capacidad (text-xl) caben en su caja; a 2,5rem y text-2xl, «organizaciones»,
+// «ciberseguridad», «Automatización» y «Enriquecimiento» se salían.
+test.describe('T7 · Tesis y Capacidades · 320 px', () => {
+  test.use({ viewport: { width: 320, height: 568 } })
+
+  for (const locale of ['es', 'en'] as const) {
+    test(`${locale}: ninguna palabra de la tesis ni título de capacidad se sale de su caja`, async ({ page }) => {
+      await page.goto(`/${locale}`)
+      const overflow = await page.evaluate(() => {
+        const thesis = document.querySelector('p:has([data-thesis-word])')!
+        const right = thesis.getBoundingClientRect().right
+        const words = Array.from(thesis.querySelectorAll('[data-thesis-word]'))
+          .filter((word) => word.getBoundingClientRect().right > right + 0.5)
+          .map((word) => word.textContent)
+        const titles = Array.from(document.querySelectorAll('[data-capability-row] h3'))
+          .filter((title) => title.scrollWidth > title.clientWidth)
+          .map((title) => title.textContent)
+        return { words, titles, pageOverflow: document.documentElement.scrollWidth > window.innerWidth }
+      })
+      expect(overflow).toEqual({ words: [], titles: [], pageOverflow: false })
+    })
+  }
+})
+
+// Ronda 2 · el `sizes` de la lámina es una cota superior ajustada del marco 3:2 que
+// se pinta (FocalCover). Una imagen de prueba con el mismo `sizes` y un srcset denso
+// (un candidato por píxel) revela el ancho de ranura que calcula el navegador: tiene
+// que cubrir el marco y no pasarlo en más de un 5 %. 844×390: celular apaisado, marco
+// limitado por el alto (76vw pedía 641 px para un marco de ~390).
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1366, height: 657 },
+  { width: 1024, height: 768 },
+  { width: 844, height: 390 },
+  { width: 390, height: 844 },
+]) {
+  test.describe(`T7 · Capacidades · tamaño de la imagen de la lámina (${viewport.width}×${viewport.height})`, () => {
+    test.use({ viewport })
+
+    test('el sizes cubre el marco sin pedir de más', async ({ page }) => {
+      await page.route('**/__sizes-probe/**', (route) => route.fulfill({ status: 204 }))
+      await page.goto('/es')
+      const { frame, slot } = await page.locator(`#${es.services.sectionId} figure img`).evaluate(async (img) => {
+        const frameWidth = img.closest('.focal-cover')!.getBoundingClientRect().width
+        const probe = new Image()
+        probe.sizes = img.getAttribute('sizes') ?? ''
+        const candidates: string[] = []
+        for (let width = 100; width <= 4000; width += 1) candidates.push(`/__sizes-probe/${width}.png ${width}w`)
+        probe.srcset = candidates.join(', ')
+        for (let i = 0; i < 100 && !probe.currentSrc; i++) await new Promise((resolve) => setTimeout(resolve, 20))
+        return { frame: frameWidth, slot: Number(/__sizes-probe\/(\d+)/.exec(probe.currentSrc)?.[1]) }
+      })
+      expect(slot).toBeGreaterThanOrEqual(Math.floor(frame))
+      expect(slot).toBeLessThanOrEqual(frame * 1.05)
+    })
+  })
+}
+
+// Ronda 2 · celular apaisado: la lámina mide ~262 px de alto. Las aristas van a 4
+// unidades del viewBox (≈ 1 px) y cada nodo se escala ×1,5 sobre su centro: el
+// punto azul activo ronda los 9 px, como en un celular vertical, y no los 6 px.
+test.describe('T7 · Capacidades · celular apaisado (844×390)', () => {
+  test.use({ viewport: { width: 844, height: 390 } })
+
+  test('nodos de ~9 px sobre los extremos de sus aristas, y aristas de ~1 px', async ({ page }) => {
+    await page.goto('/es')
+    await waitForHydration(page)
+    const section = page.locator(`#${es.services.sectionId}`)
+    await expect(section).toHaveAttribute('data-stage-mode', 'inView')
+    const y = await section.locator('figure').evaluate((el) => window.scrollY + el.getBoundingClientRect().top - 72)
+    await scrollToY(page, y)
+    await expect(section.locator('[data-node][data-active="true"]')).toHaveCount(1)
+
+    const geometry = await section.locator('svg').evaluate((svg) => {
+      const svgElement = svg as SVGSVGElement
+      const scale = svgElement.getScreenCTM()!.a
+      const circles = Array.from(svg.querySelectorAll('[data-node] > circle:first-child'))
+      const centers = circles.map((circle) => {
+        const rect = circle.getBoundingClientRect()
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, diameter: rect.width }
+      })
+      const edges = Array.from(svg.querySelectorAll<SVGLineElement>('[data-capability-edge]'))
+      const offsets = edges.map((edge, k) => {
+        const start = new DOMPoint(edge.x1.baseVal.value, edge.y1.baseVal.value).matrixTransform(edge.getScreenCTM()!)
+        const end = new DOMPoint(edge.x2.baseVal.value, edge.y2.baseVal.value).matrixTransform(edge.getScreenCTM()!)
+        return Math.max(
+          Math.hypot(start.x - centers[k].x, start.y - centers[k].y),
+          Math.hypot(end.x - centers[k + 1].x, end.y - centers[k + 1].y)
+        )
+      })
+      const ring = svg.querySelector('[data-node][data-active="true"] > circle + circle')!.getBoundingClientRect()
+      return {
+        minDiameter: Math.min(...centers.map((center) => center.diameter)),
+        ring: ring.width,
+        maxOffset: Math.max(...offsets),
+        edgeWidth: parseFloat(getComputedStyle(edges[0]).strokeWidth) * scale,
+      }
+    })
+    expect(geometry.minDiameter).toBeGreaterThanOrEqual(9)
+    expect(geometry.ring).toBeGreaterThanOrEqual(18)
+    // Escalados sobre su propio centro: siguen en los extremos de las aristas
+    expect(geometry.maxOffset).toBeLessThanOrEqual(0.5)
+    expect(geometry.edgeWidth).toBeGreaterThanOrEqual(1)
+  })
+})
+
+// Ronda 2 · el indicador global de avance (ScrollProgress) iba en right-6, justo sobre
+// el borde derecho de la lámina en anchos ≤ 80rem. Ahora va en el margen, y su relleno
+// lleva el alfa en el color (antes quedaba multiplicado por la opacidad de la pista).
+for (const viewport of [
+  { width: 1280, height: 800 },
+  { width: 1024, height: 768 },
+]) {
+  test.describe(`T7 · Capacidades · indicador de avance junto a la lámina (${viewport.width}×${viewport.height})`, () => {
+    test.use({ viewport, contextOptions: { reducedMotion: 'no-preference' } })
+
+    test('queda en el margen, fuera de la lámina, y su relleno se ve', async ({ page }) => {
+      await page.goto('/es')
+      await waitForHydration(page)
+      const fill = page.locator('[data-scroll-progress-fill]')
+      await expect(fill).toBeAttached({ timeout: 15_000 })
+      const section = page.locator(`#${es.services.sectionId}`)
+      const y = await section.locator('figure').evaluate((el) => window.scrollY + el.getBoundingClientRect().top - 96)
+      await scrollToY(page, y)
+
+      const layout = await fill.evaluate((element, sectionId) => {
+        const track = element.parentElement!.getBoundingClientRect()
+        const laminaRect = document.querySelector(`#${sectionId} figure`)!.getBoundingClientRect()
+        // Alfa del color de fondo, sea cual sea su sintaxis (rgb, oklab…)
+        const canvas = document.createElement('canvas')
+        canvas.width = canvas.height = 1
+        const context = canvas.getContext('2d')!
+        context.fillStyle = getComputedStyle(element).backgroundColor
+        context.fillRect(0, 0, 1, 1)
+        return {
+          trackLeft: track.left,
+          trackRight: track.right,
+          trackTop: track.top,
+          trackBottom: track.bottom,
+          laminaRight: laminaRect.right,
+          laminaTop: laminaRect.top,
+          laminaBottom: laminaRect.bottom,
+          viewportWidth: window.innerWidth,
+          fillAlpha: context.getImageData(0, 0, 1, 1).data[3] / 255,
+        }
+      }, es.services.sectionId)
+      // A la altura de la lámina, pero a su derecha y dentro del viewport
+      expect(layout.trackTop).toBeLessThan(layout.laminaBottom)
+      expect(layout.trackBottom).toBeGreaterThan(layout.laminaTop)
+      expect(layout.trackLeft).toBeGreaterThan(layout.laminaRight + 8)
+      expect(layout.trackRight).toBeLessThanOrEqual(layout.viewportWidth)
+      expect(await effectiveOpacity(fill)).toBe(1)
+      expect(layout.fillAlpha).toBeGreaterThanOrEqual(0.5)
+    })
+  })
+}
+
+test.describe('T7 · Tesis y Capacidades · inglés (revisión 5)', () => {
+  test('/en muestra la tesis, el título y la etiqueta de la lámina traducidos', async ({ page }) => {
+    await page.goto('/en')
+    await expect(page.locator('p:has([data-thesis-word])')).toHaveText(en.thesis.text)
+    const section = page.locator(`#${en.services.sectionId}`)
+    await expect(section.getByRole('heading', { level: 2 })).toHaveText(en.services.title)
+    await expect(section.locator('figcaption')).toContainText(en.services.imageLabel)
+    await expect(section.locator('[data-capability-row] a').first()).toHaveAttribute(
+      'href',
+      buildLocalePath('en', en.services.items[0].href)
+    )
   })
 })

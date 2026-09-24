@@ -59,9 +59,13 @@ const es = {
     // Tecnologías que usamos, no partnerships ni certificaciones — ver CLAUDE.md
     label: "Construimos con",
   },
+  thesis: {
+    text: "Diseñamos, desplegamos y operamos sistemas de software, inteligencia artificial y ciberseguridad para organizaciones donde la falla no es una opción.",
+  },
   services: {
     sectionId: "capacidades",
     title: "Capacidades de Ingeniería",
+    imageLabel: "Imagen ilustrativa",
     exploreLabel: "Explorar",
     description:
       "Diseñamos, desplegamos y operamos sistemas de software, inteligencia artificial y ciberseguridad para organizaciones donde la falla no es una opción.",
@@ -163,34 +167,6 @@ const es = {
         href: "/extraccion-datos",
       },
     ],
-  },
-  flagshipAI: {
-    sectionId: "sistemas-ia",
-    title: "Despliegue de IA Soberana",
-    description:
-      "Su organización necesita inteligencia artificial que opere bajo sus reglas, en su infraestructura, con sus datos. No dependencias externas, no riesgos de terceros. Para soluciones que requieren integración con APIs de terceros, implementamos contratos de procesamiento de datos y arquitecturas de privacidad que mantienen el control operativo en su organización.",
-    items: [
-      {
-        title: "Agentes de Defensa Cibernética",
-        description:
-          "IA que monitorea su superficie de ataque, identifica vulnerabilidades y ejecuta protocolos de respuesta sin intervención humana.",
-        icon: "cyber",
-      },
-      {
-        title: "Fuerza de Trabajo Digital",
-        description:
-          "Asistentes ejecutivos con IA desplegados en todos sus canales de comunicación: gestión de agenda, triaje de información y coordinación operativa.",
-        icon: "workforce",
-      },
-      {
-        title: "Infraestructura de IA On-Premise",
-        description:
-          "Modelos de lenguaje, pipelines de datos y agentes autónomos operando dentro de su perímetro de seguridad, con soberanía total sobre los datos.",
-        icon: "infra",
-      },
-    ],
-    caption:
-      "Control total. Soberanía completa. Impacto medible.",
   },
   caseStudy: {
     sectionId: "casos",

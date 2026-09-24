@@ -120,13 +120,6 @@
     color: var(--color-text-on-dark);
   }
 
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, rgba(10, 10, 10, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-
 }
 
 /* ── Standalone classes (outside @layer to avoid Tailwind purge) ── */
@@ -397,6 +390,49 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
   }
   [data-hero-summit] {
     opacity: 1;
+  }
+}
+
+/* ── Tesis y Capacidades (home) ──────────────────────────────────────
+   - Sin JavaScript: el HTML del servidor trae el primer render (scrub, avance
+     0): tesis en gris, red sin empezar y contador «00 / 08». Como en la
+     portada, se pinta el estado final, el mismo que con reducir movimiento:
+     tesis en #0a0a0a, índices /0N en #0a0a0a, nodos rellenos, aristas enteras
+     (el CSS gana a los atributos de presentación que pone motion) y sin azul.
+     El contador se oculta: sin scroll que seguir, no dice nada.
+   - Pantallas bajas (< 37,5rem, celular apaisado): la lámina mide ~260 px de
+     alto y las aristas (2,5 unidades del viewBox) saldrían por debajo de 1 px.
+     Con 4 unidades rondan 1 px (plan §3.6). El grosor va en unidades del
+     viewBox: las aristas no admiten non-scaling-stroke (usan pathLength).
+     Los nodos (radio 12, anillo 24) medirían ~6 px de diámetro, y el azul
+     activo es la señal de lo que se está procesando: cada nodo se escala ×1,5
+     sobre su centro (~9 px, como en un celular vertical). Escala y no `r` en
+     CSS, que no todos los navegadores aceptan; los trazos de los círculos son
+     non-scaling-stroke y no engordan. */
+@media (scripting: none) {
+  [data-thesis-word],
+  [data-capability-row] > a > :first-child {
+    color: #0a0a0a;
+  }
+  [data-node] > circle {
+    fill: #0a0a0a;
+    stroke: none;
+  }
+  [data-capability-edge] {
+    stroke-dasharray: none;
+  }
+  [data-capabilities-counter] {
+    display: none;
+  }
+}
+@media (height < 37.5rem) {
+  [data-capability-edge] {
+    stroke-width: 4;
+  }
+  [data-node] {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(1.5);
   }
 }
 

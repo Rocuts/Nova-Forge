@@ -11,9 +11,12 @@ import { pageMetadata } from "@/lib/metadata"
 // del servidor sin esperar a ningún chunk. El resto, también estático: dynamic()
 // desde un Server Component no divide el código del cliente
 // (node_modules/next/dist/docs/01-app/02-guides/lazy-loading.md) y solo añade su
-// runtime (React.lazy, PreloadChunks, BailoutToCSR).
-import { Services } from "@/components/sections/Services"
-import { FlagshipAI } from "@/components/sections/FlagshipAI"
+// runtime (React.lazy, PreloadChunks, BailoutToCSR). La imagen de la lámina de
+// Capacidades se renderiza en el servidor (CapabilitiesMedia) y llega a la isla
+// como slot, igual que la de la portada (HeroMedia).
+import { Thesis } from "@/components/sections/home/Thesis"
+import { CapabilitiesIndex } from "@/components/sections/home/CapabilitiesIndex"
+import { CapabilitiesMedia } from "@/components/sections/home/CapabilitiesMedia"
 import { CaseStudy } from "@/components/sections/CaseStudy"
 import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
 import { Methodology } from "@/components/sections/Methodology"
@@ -68,8 +71,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <HomeHero content={heroContent} media={<HeroMedia />} />
-      <Services content={dict.services} locale={locale} />
-      <FlagshipAI content={dict.flagshipAI} />
+      <Thesis text={dict.thesis.text} />
+      <CapabilitiesIndex content={dict.services} locale={locale} media={<CapabilitiesMedia />} />
       <CaseStudy content={dict.caseStudy} locale={locale} />
       <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
       <Methodology content={dict.methodology} />
