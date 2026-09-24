@@ -33,18 +33,9 @@ const en = {
   },
   hero: {
     eyebrow: "MISSION-CRITICAL INFRASTRUCTURE",
-    titleLead: "We build",
-    titleHighlight: "digital sovereignty.",
-    titleRotating: [
-      "digital sovereignty.",
-      "cyber defense.",
-      "autonomous operations.",
-      "critical systems.",
-    ],
+    title: "We build digital sovereignty.",
     description:
       "We build sovereign AI infrastructure, agentic cybersecurity systems, and autonomous operations platforms for governments and organizations operating under the world's most demanding standards.",
-    trustLine:
-      "Precision engineering for critical state and enterprise operations.",
     primaryAction: {
       label: "Start Technical Consultation",
       analyticsEvent: "hero_cta_primary",
@@ -56,9 +47,13 @@ const en = {
     },
     nurtureCta: {
       label: "View use cases for public sector",
-      href: "/automatizacion-gobierno",
+      // Anchor of the "From case file to structured data" section on this page (id = dossier.sectionId)
+      href: "#government",
       analyticsEvent: "hero_nurture_cta",
     },
+    indexItems: ["SOVEREIGN AI", "CYBER DEFENSE", "AUTONOMOUS OPERATIONS", "CRITICAL SYSTEMS"],
+    imageLabel: "Illustrative image",
+    scrollHint: "Scroll",
   },
   trustBar: {
     // Technologies we use — not partnerships or certifications. See CLAUDE.md

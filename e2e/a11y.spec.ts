@@ -92,7 +92,7 @@ for (const route of ROUTES) {
     const results = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       // WCAG 1.4.3 exceptua los logotipos del minimo de contraste. El unico
-      // nodo marcado asi es el wordmark de marca del TrustBar, atenuado para
+      // nodo marcado asi es el wordmark de marca de TrustLogos, atenuado para
       // igualar los logos <img> vecinos. Es una exencion nominal y auditable,
       // no un relajamiento del gate.
       .exclude('[data-brand-wordmark]')

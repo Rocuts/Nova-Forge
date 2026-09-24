@@ -33,18 +33,9 @@ const es = {
   },
   hero: {
     eyebrow: "INFRAESTRUCTURA DE MISIÓN CRÍTICA",
-    titleLead: "Construimos",
-    titleHighlight: "soberanía digital.",
-    titleRotating: [
-      "soberanía digital.",
-      "defensa cibernética.",
-      "operaciones autónomas.",
-      "sistemas críticos.",
-    ],
+    title: "Construimos soberanía digital.",
     description:
       "Construimos infraestructura de IA soberana, sistemas de ciberseguridad agéntica y plataformas de operaciones autónomas para gobiernos y organizaciones que operan bajo los estándares más exigentes del mundo.",
-    trustLine:
-      "Ingeniería de precisión para operaciones críticas de estado y empresa.",
     primaryAction: {
       label: "Iniciar Consulta Técnica",
       analyticsEvent: "hero_cta_primary",
@@ -56,9 +47,13 @@ const es = {
     },
     nurtureCta: {
       label: "Ver casos de uso para sector público",
-      href: "/automatizacion-gobierno",
+      // Ancla de la sección "Del papel al dato" de esta misma página (id = dossier.sectionId)
+      href: "#gobierno",
       analyticsEvent: "hero_nurture_cta",
     },
+    indexItems: ["IA SOBERANA", "DEFENSA CIBERNÉTICA", "OPERACIONES AUTÓNOMAS", "SISTEMAS CRÍTICOS"],
+    imageLabel: "Imagen ilustrativa",
+    scrollHint: "Desplazar",
   },
   trustBar: {
     // Tecnologías que usamos, no partnerships ni certificaciones — ver CLAUDE.md

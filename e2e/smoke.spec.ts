@@ -9,7 +9,7 @@ const nav = es.nav
 test('homepage loads and renders all sections', async ({ page }) => {
   await page.goto('/es')
   await expect(page).toHaveTitle(/Orbexs/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(hero.titleLead)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(hero.title)
   await expect(page.locator(`#${es.services.sectionId}`)).toBeAttached()
   await expect(page.locator(`#${es.caseStudy.sectionId}`)).toBeAttached()
   await expect(page.locator(`#${es.methodology.sectionId}`)).toBeAttached()

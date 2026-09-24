@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @source not "../../docs";
 
+/* Viewport de poca altura (≤ 720 px): portátiles de 1366×768 con la barra del
+   navegador (~657 px de alto). La portada compacta su ritmo vertical con `short:`. */
+@custom-variant short (@media (max-height: 45rem));
+/* Modo "scrub" de la home: escritorio o tableta con alto suficiente, movimiento
+   permitido y JavaScript (sin JS nada se anima: la sección alta y el sticky solo
+   dejarían scroll muerto). Debe coincidir con SCRUB_QUERY de
+   src/hooks/useStageProgress.ts. */
+@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled));
+
 @theme {
   --color-surface-base: #ffffff;
   --color-surface-elevated: #f8f8f8;
@@ -280,6 +289,115 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
 }
 .hero-enter {
   animation: heroEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── FocalCover ──────────────────────────────────────────────────────
+   Marco 3:2 que se comporta como `object-fit: cover` con punto focal
+   (--fx / --fy). La imagen y su superposición SVG (viewBox 1536×1024) van
+   dentro y comparten caja: coinciden en cualquier proporción de pantalla.
+   Punto focal con clases, p. ej. [--fx:92%] md:[--fx:80%] lg:[--fx:50%].
+   Fuera de @layer: para cambiar su tamaño, se envuelve en otro contenedor. */
+.focal-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+}
+.focal-cover {
+  position: absolute;
+  left: var(--fx, 50%);
+  top: var(--fy, 50%);
+  width: max(100cqw, 150cqh);
+  aspect-ratio: 3 / 2;
+  translate: calc(var(--fx, 50%) * -1) calc(var(--fy, 50%) * -1);
+}
+
+/* ── Portada de la home: velos de contraste ──────────────────────────
+   AA garantizado para #a3a3a3 (4,5:1) sobre el píxel más claro del relieve
+   (233/255): hace falta ≥ 0,785 de #0a0a0a debajo de cualquier texto.
+   - .hero-veil-side (≥ lg o apaisado): 0,86–0,9 bajo la columna de texto,
+     que termina como mucho en 50 % + 56 px (max-w-7xl centrado + max-w-2xl;
+     43,5rem por debajo de 80rem de ancho); se desvanece hacia la derecha y
+     llega a 0 en 75 % + 5rem. Sin el antiguo mínimo de 70rem: de 1024 a
+     ~1390 px de ancho (iPad, portátiles) el velo seguía más allá de la
+     pantalla y dejaba la cumbre bajo ~0,48; ahora queda fuera, como a 1440.
+     Va DEBAJO de la ruta: la ruta no se atenúa.
+     Apaisado < lg (celular apaisado): la columna termina como mucho en 43,5rem
+     (1,5rem + max-w-2xl) y el velo se desvanece en los 8rem siguientes, para
+     que el relieve se vea a la derecha del texto.
+   - .hero-veil: franja del encabezado (≥ 0,8 en los 4,5rem superiores: el
+     encabezado es transparente sobre la portada) y suelo de 6rem ≥ 0,8 para el
+     índice y la capa de instrumento. Va ENCIMA de la ruta. Los tramos que van
+     a 0 se acortan con svh en pantallas bajas; las zonas ≥ 0,8, no.
+   - .hero-route (capa de la ruta): sin ruta en los 6,5rem inferiores, y
+     aparece del todo en 10rem. El suelo solo la atenuaba (al 8–15 %): cruzaba
+     «/04 SISTEMAS CRÍTICOS» o «Desplazar» en static (1366–2560 px, 1024×1366)
+     y en scrub a media escena. Ahí están la fila de índice (que no sube con el
+     scroll: HomeHero) y la capa de instrumento, con el índice en dos líneas.
+   - Vertical < lg: la imagen es una banda de 73 svh con la cumbre al 30 svh y
+     el texto empieza en 36 svh (en scrub no sube: HomeHero); el velo sube a
+     0,85 justo antes del texto, y .hero-route corta la ruta ahí mismo (en vez
+     del pie): no pasa por detrás del texto. Solo queda a la vista el 11 % final
+     del trazado, y HeroRoute reparte el dibujo sobre ese tramo.
+   - Sin JavaScript: el HTML del servidor trae la ruta sin dibujar y la cumbre
+     apagada (scrub, avance 0). La portada es un bloque estático (stage: exige
+     scripting), así que se muestra el estado final, como con reducir
+     movimiento. El CSS gana a los atributos de presentación que pone motion. */
+.hero-veil-side,
+.hero-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-veil-side {
+  background: linear-gradient(
+    to right,
+    rgb(10 10 10 / 0.9),
+    rgb(10 10 10 / 0.86) max(50% + 5rem, 45rem),
+    rgb(10 10 10 / 0) max(75% + 5rem, 52rem)
+  );
+}
+.hero-veil {
+  background:
+    linear-gradient(to bottom, rgb(10 10 10 / 0.85), rgb(10 10 10 / 0.8) 4.5rem, rgb(10 10 10 / 0) min(11rem, 30svh)),
+    linear-gradient(to top, rgb(10 10 10 / 0.92), rgb(10 10 10 / 0.8) 6rem, rgb(10 10 10 / 0) min(16rem, 40svh));
+}
+.hero-route {
+  -webkit-mask-image: linear-gradient(to top, transparent 6.5rem, #000 10rem);
+  mask-image: linear-gradient(to top, transparent 6.5rem, #000 10rem);
+}
+@media (width < 64rem) and (orientation: landscape) {
+  .hero-veil-side {
+    background: linear-gradient(to right, rgb(10 10 10 / 0.9), rgb(10 10 10 / 0.86) 44rem, rgb(10 10 10 / 0) 52rem);
+  }
+}
+@media (width < 64rem) and (orientation: portrait) {
+  .hero-veil-side {
+    display: none;
+  }
+  .hero-veil {
+    background:
+      linear-gradient(to bottom, rgb(10 10 10 / 0.85), rgb(10 10 10 / 0.8) 4.5rem, rgb(10 10 10 / 0) min(11rem, 30svh)),
+      linear-gradient(
+        to bottom,
+        rgb(10 10 10 / 0) 44%,
+        rgb(10 10 10 / 0.85) 49%,
+        rgb(10 10 10 / 0.85) 80%,
+        rgb(10 10 10) 100%
+      );
+  }
+  .hero-route {
+    -webkit-mask-image: linear-gradient(to bottom, #000 44%, transparent 49%);
+    mask-image: linear-gradient(to bottom, #000 44%, transparent 49%);
+  }
+}
+@media (scripting: none) {
+  [data-hero-route] path {
+    stroke-dasharray: none;
+  }
+  [data-hero-summit] {
+    opacity: 1;
+  }
 }
 
 /* ── Orbexs Live Studio ──────────────────────────────────────────────

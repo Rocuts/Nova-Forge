@@ -129,8 +129,7 @@ export function getPageMeta(dict: Dictionary, path: InternalPath): PageMeta {
         absoluteTitle: true,
         description: dict.meta.description,
         eyebrow: dict.hero.eyebrow,
-        // Task 6 switches this to dict.hero.title when the fixed H1 lands.
-        cardTitle: `${dict.hero.titleLead} ${dict.hero.titleHighlight}`,
+        cardTitle: dict.hero.title,
       }
     case "/agendar":
       return entry(dict.schedule.pageTitle, dict.schedule.pageSubtitle, dict.schedule.badge)

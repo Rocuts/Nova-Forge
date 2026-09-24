@@ -1,13 +1,14 @@
 import dynamic from "next/dynamic"
 import type { Metadata } from "next"
-import { Hero } from "@/components/sections/Hero"
-import { TrustBar } from "@/components/sections/TrustBar"
+import { notFound } from "next/navigation"
+import { HomeHero } from "@/components/sections/home/HomeHero"
 import { getDictionary } from "@/content/dictionaries"
 import { isValidLocale, buildLocalePath } from "@/lib/i18n"
-import { pageMetadata } from "@/lib/metadata"
 import type { Locale } from "@/lib/i18n"
-import { notFound } from "next/navigation"
+import { pageMetadata } from "@/lib/metadata"
 
+// La portada se importa de forma estática: es el LCP y su HTML tiene que salir
+// del servidor sin esperar a ningún chunk. El resto de secciones, bajo el pliegue.
 const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
 const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
 const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
@@ -16,7 +17,6 @@ const Methodology = dynamic(() => import("@/components/sections/Methodology").th
 const TechStack = dynamic(() => import("@/components/sections/TechStack").then(m => ({ default: m.TechStack })))
 const FAQ = dynamic(() => import("@/components/sections/FAQ").then(m => ({ default: m.FAQ })))
 const CTA = dynamic(() => import("@/components/sections/CTA").then(m => ({ default: m.CTA })))
-
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
@@ -43,20 +43,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     })),
   }
 
+  // secondaryAction (#capacidades) y nurtureCta (#gobierno / #government) son
+  // anclas de esta misma página: su href va tal cual, sin buildLocalePath.
   const heroContent = {
     ...dict.hero,
     primaryAction: {
       ...dict.hero.primaryAction,
       href: buildLocalePath(locale, "/diagnostico"),
     },
-    secondaryAction: {
-      ...dict.hero.secondaryAction,
-      href: dict.hero.secondaryAction.href,
-    },
-    nurtureCta: dict.hero.nurtureCta ? {
-      ...dict.hero.nurtureCta,
-      href: buildLocalePath(locale, dict.hero.nurtureCta.href),
-    } : undefined,
   }
 
   const ctaContent = {
@@ -70,14 +64,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Hero content={heroContent} />
-      <TrustBar label={dict.trustBar.label} />
+      <HomeHero content={heroContent} />
       <Services content={dict.services} locale={locale} />
       <FlagshipAI content={dict.flagshipAI} />
       <CaseStudy content={dict.caseStudy} locale={locale} />
       <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
       <Methodology content={dict.methodology} />
-      <TechStack content={dict.techStack} />
+      <TechStack content={dict.techStack} trustLabel={dict.trustBar.label} />
       <FAQ content={dict.faq} />
       <CTA content={ctaContent} />
     </>

@@ -273,15 +273,23 @@ export type StageMode = "scrub" | "inView" | "static"
 export function useStageMode(): StageMode
 //   "scrub" en el servidor y en el primer render del cliente (hidratación idéntica).
 //   Tras montar: (prefers-reduced-motion: reduce) → "static";
-//   (min-width: 768px) and (min-height: 600px) and (prefers-reduced-motion: no-preference) → "scrub"; si no → "inView".
-//   Es la misma condición que la variante CSS `stage:` (§3.6).
-//   Escucha los cambios de ambas media queries; setState dentro de queueMicrotask.
+//   (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled) → "scrub"; si no → "inView".
+//   Es la misma cadena que la variante CSS `stage:` (§3.6), en rem: en una media query, rem se calcula sobre la letra por
+//   defecto del navegador, así que con px no coincidiría con CSS si el usuario la agranda (decisión 14 de T6).
+//   Sigue los cambios de ambas media queries con useMediaQuery (abajo); hasta conocer las dos, "scrub".
 type ScrollOptions = NonNullable<Parameters<typeof useScroll>[0]>
 export type StageOffset = ScrollOptions["offset"]
 export function useStageProgress(
   ref: React.RefObject<HTMLElement | null>,
   offset?: StageOffset,               // por defecto ["start start", "end end"]
 ): { progress: MotionValue<number>; mode: StageMode }
+
+// src/hooks/useMediaQuery.ts  ("use client")                  — T6 (añadido en la revisión: decisión 15 de T6)
+export function useMediaQuery(query: string): boolean | null
+//   null en el servidor y en el primer render del cliente (hidratación idéntica); tras montar, matchMedia(query)
+//   y sus cambios, con setState dentro de queueMicrotask. Toda condición de media query en JavaScript usa este hook
+//   (no otra suscripción a matchMedia), con la misma cadena en rem que la variante de Tailwind con la que deba
+//   coincidir (§3.6). La usan useStageMode y la banda vertical de la portada.
 
 // src/components/ui/InstrumentLabel.tsx  (sin hooks)          — T6
 export function InstrumentLabel(props: {
@@ -296,6 +304,13 @@ export function FocalCover(props: {
   className?: string                   // marco: posición absoluta + punto focal, p. ej. "[--fx:92%] md:[--fx:80%] lg:[--fx:50%]"
   children: React.ReactNode            // <Image fill className="object-cover" …/> + <svg viewBox="0 0 1536 1024" …/>
 }): JSX.Element                        // <div class="focal-frame {className}"><div class="focal-cover">{children}</div></div>
+
+// src/lib/image-placeholder.ts  (sin hooks)                    — T6 (añadido al implementar: decisión 12 de T6)
+export function coverPlaceholder(image: StaticImageData): NonNullable<ImageProps["placeholder"]>
+//   El blurDataURL del import estático como placeholder (data URL), o "empty" si no es un data URL.
+//   Toda <Image> dentro de FocalCover usa placeholder={coverPlaceholder(img)}, NUNCA placeholder="blur"
+//   (portada en T6, lámina en T7, expediente en T8, cierre en T10): el SVG con feGaussianBlur de "blur",
+//   pintado al tamaño del marco, bloquea el hilo principal varios segundos por fotograma sin GPU.
 
 // src/components/ui/ScrollStage.tsx  (sin hooks; se usa desde islas cliente)   — T6
 export function ScrollStage(props: {
@@ -315,6 +330,7 @@ export const IMAGE_WIDTH = 1536, IMAGE_HEIGHT = 1024
 export const VIEWBOX = "0 0 1536 1024"
 export const ROUTE_PATH: string        // literal del traspaso §3
 export const ROUTE_SUMMIT: { readonly x: 1283; readonly y: 421 }
+export const ROUTE_BAND_VISIBLE_FROM: number   // 0,88: fracción de la ruta desde la que asoma en la banda vertical (decisión 3 de T6)
 export const CAPABILITY_NODES: readonly { x: number; y: number }[]   // 8, orden de dict.services.items
 export const DOSSIER_FIELDS: readonly { x: number; y: number; width: number; height: number }[]  // 6, orden de dict.dossier.fields
 
@@ -396,9 +412,9 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
 ### 3.6 Reglas de movimiento (todas las secciones animadas)
 - Solo se animan `transform`, `opacity` y `pathLength` (y `stroke`/`fill`/`color` como cambio de estado discreto, sin interpolar en bucle).
 - `static` (reducir movimiento): estado final, sin sticky (lo quita CSS), sin zoom.
-- `inView` (< 768 px de ancho, o < 600 px de alto como un celular apaisado): sin sticky; la animación se dispara una vez al entrar en pantalla.
-- `scrub` (≥ 768 px de ancho **y** ≥ 600 px de alto, sin reducir movimiento): el avance del contenedor (0→1) controla la animación.
-- **Variante CSS `stage:`** (la crea T6 en `globals.css`): `@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference));`. Toda altura larga, `sticky` o ajuste propio del modo `scrub` usa `stage:` (nunca `md:motion-safe:`), para que CSS y `useStageMode()` coincidan siempre. *Decisión:* sin el requisito de alto, un celular apaisado de ≥ 768 px de ancho (844×390) entraba en `scrub` y el marco `h-svh` con `overflow-hidden` recortaba el contenido.
+- `inView` (< 48rem de ancho, o < 37,5rem de alto como un celular apaisado; 768 y 600 px con la letra por defecto de 16 px): sin sticky; la animación se dispara una vez al entrar en pantalla.
+- `scrub` (≥ 48rem de ancho **y** ≥ 37,5rem de alto, sin reducir movimiento): el avance del contenedor (0→1) controla la animación.
+- **Variante CSS `stage:`** (la crea T6 en `globals.css`): `@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled));`. Toda altura larga, `sticky` o ajuste propio del modo `scrub` usa `stage:` (nunca `md:motion-safe:`), para que CSS y `useStageMode()` coincidan siempre. *Decisión:* sin el requisito de alto, un celular apaisado de ≥ 768 px de ancho (844×390) entraba en `scrub` y el marco `h-svh` con `overflow-hidden` recortaba el contenido. *Decisión (revisión de T6):* `(scripting: enabled)`, también en `SCRUB_QUERY`: sin JavaScript nada se anima, y la sección alta con el marco `sticky` solo dejaba ~60 svh de scroll muerto con la portada congelada; ahora cada escenario es un bloque normal. *Decisión (revisión de T6, ronda 2):* toda media query escrita en JavaScript o en un `sizes` que deba coincidir con una variante de Tailwind (`stage:`, `md:`, `lg:`, `max-lg:`) va en rem, como la variante (`48rem`, `64rem`), nunca en px: con la letra del navegador a 20 px, `768px` y `48rem` dejan de coincidir (960 px) y el modo de JS se separa del layout de CSS.
 - El marco `sticky` (`h-svh` + `overflow-hidden`) nunca recorta contenido ni lo deja bajo el encabezado fijo de 64 px: `scrub` empieza en 600 px de alto, así que una sección cuyo contenido pueda no caber compacta su ritmo con `short:` (≤ 720 px de alto) y lleva además `stage:h-auto stage:min-h-svh` en `frameClassName` para crecer en lugar de recortar (portada en T6, expediente en T8).
 - `h1`/`h2` visibles desde el servidor: nunca `opacity: 0` ni `visibility: hidden` en ellos ni en sus ancestros.
 - Superposiciones SVG: `viewBox="0 0 1536 1024"`, `preserveAspectRatio="xMidYMid slice"`, `aria-hidden="true"`, dentro de `FocalCover`.
@@ -4661,7 +4677,8 @@ grep -n 'data-header-start="dark"' src/app/globals.css
 
 | Acción | Archivo |
 |---|---|
-| Crear | `src/hooks/useStageProgress.ts` |
+| Crear | `src/hooks/useStageProgress.ts`, `src/hooks/useMediaQuery.ts` (revisión: decisión 15) |
+| Crear | `src/lib/image-placeholder.ts` (al implementar: decisión 12) |
 | Crear | `src/components/ui/InstrumentLabel.tsx`, `src/components/ui/FocalCover.tsx`, `src/components/ui/ScrollStage.tsx`, `src/components/ui/TrustLogos.tsx` |
 | Crear | `src/components/sections/home/geometry.ts`, `src/components/sections/home/HomeHero.tsx`, `src/components/sections/home/HeroRoute.tsx` |
 | Crear | `e2e/home.spec.ts` |
@@ -5146,7 +5163,7 @@ Bloque 1. Variantes justo después del import y del `@source not` que añadió T
 @custom-variant short (@media (max-height: 45rem));
 /* Modo "scrub" de la home: escritorio o tableta con alto suficiente y movimiento
    permitido. Debe coincidir con SCRUB_QUERY de src/hooks/useStageProgress.ts. */
-@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference));
+@custom-variant stage (@media (min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled));
 ```
 
 Bloque 2. `FocalCover` y los velos de la portada, detrás de la animación `.hero-enter`. Esa animación **se queda**, porque la usa `realty/Hero.tsx`.
@@ -5285,10 +5302,10 @@ import type { MotionValue } from "motion/react"
 
 /**
  * Cómo se anima una sección de la home (plan §3.6):
- * - `scrub`: ≥ 768 px de ancho y ≥ 600 px de alto, sin reducir movimiento. El
+ * - `scrub`: ≥ 48rem de ancho y ≥ 37,5rem de alto, sin reducir movimiento. El
  *   avance del escenario (0→1) controla la animación; el `sticky` y la altura
  *   larga los pone CSS (`stage:`), no este hook.
- * - `inView`: < 768 px de ancho o < 600 px de alto (celular apaisado). Sin
+ * - `inView`: más estrecho o más bajo (celular, celular apaisado). Sin
  *   sticky; la animación se dispara una vez al entrar.
  * - `static`: reducir movimiento. Estado final, sin animar.
  */
@@ -5298,9 +5315,9 @@ type ScrollOptions = NonNullable<Parameters<typeof useScroll>[0]>
 export type StageOffset = ScrollOptions["offset"]
 
 const REDUCED_QUERY = "(prefers-reduced-motion: reduce)"
-// Misma condición que las variantes `stage:` de Tailwind: el modo que
+// La misma cadena que la variante `stage:` de globals.css, en rem: el modo que
 // decide JavaScript coincide siempre con el layout que decide CSS.
-const SCRUB_QUERY = "(min-width: 768px) and (min-height: 600px) and (prefers-reduced-motion: no-preference)"
+const SCRUB_QUERY = "(min-width: 48rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled)"
 
 // Offsets en texto a propósito: motion solo acelera con ViewTimeline los
 // offsets de sus presets numéricos. Con texto, `progress` siempre lo calcula
@@ -6036,11 +6053,11 @@ cd /home/user/wt/task6
 npm run lint                                   # 0 errores, 0 avisos nuevos
 npx tsc --noEmit                               # sin salida (e2e/ incluido)
 PORT=3060 npx playwright test e2e/home.spec.ts --reporter=line
-#   → 11 passed
+#   → 23 passed
 PORT=3060 npx playwright test e2e/smoke.spec.ts e2e/a11y.spec.ts --reporter=line
 #   → todo passed; el escaneo "on /es" sin violaciones serious/critical
 PORT=3060 npx playwright test --reporter=line
-#   → suite completa en verde (las de T1–T5 + las 11 nuevas)
+#   → suite completa en verde (las de T1–T5 + las 23 de home.spec.ts)
 npm run build                                  # compila sin errores ni avisos de tipos
 ```
 
@@ -6104,19 +6121,26 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
 
 1. **Velos de contraste con AA garantizado por construcción** (diseño §11, traspaso "Contraste").
    - El píxel más claro del relieve es 233/255. Para que `#a3a3a3` llegue a 4,5:1 hace falta ≥ 0,785 de `#0a0a0a` debajo de cualquier texto.
-   - `.hero-veil-side` (≥ lg o apaisado) cubre la columna de texto con 0,86–0,9 hasta `max(50% + 5rem, 45rem)`. La columna termina como mucho en 50 % + 56 px.
+   - `.hero-veil-side` (≥ lg o apaisado) cubre la columna de texto con 0,86–0,9 hasta `max(50% + 5rem, 45rem)`. La columna termina como mucho en 50 % + 56 px (43,5rem por debajo de 80rem de ancho).
+   - *Revisión (ronda 3):* el velo lateral llega a 0 en `max(75% + 5rem, 52rem)`; antes, en `max(75% + 5rem, 70rem)`, y de 1024 a ~1390 px de ancho seguía más allá de la pantalla (decisión 15).
    - `.hero-veil` pone ≥ 0,8 en los 4,5rem superiores, porque el encabezado de T5 es transparente sobre la portada, y ≥ 0,8 en los 6rem inferiores (índice y capa de instrumento).
-   - **Resultado medido:** el texto `#a3a3a3` queda ≥ 6,6:1; la franja del encabezado ≥ 5,5:1 (peor caso: 2560×1080 con el zoom de 1,12); el H1 ≥ 10:1.
+   - *Revisión:* los tramos que bajan a 0 (arriba hasta `min(11rem, 30svh)`, abajo hasta `min(16rem, 40svh)`) se acortan en pantallas bajas; las zonas ≥ 0,8 no cambian. En apaisado por debajo de lg (celular apaisado), el velo lateral se queda en 0,86 hasta 44rem (la columna termina como mucho en 43,5rem) y se desvanece en los 8rem siguientes. A 844×390 los velos se solapaban y el relieve casi no se veía; ahora asoma a la derecha del texto (el texto sigue ≥ 6,8:1).
+   - **Resultado medido:** el texto `#a3a3a3` queda ≥ 6,6:1 (≥ 6,3:1 en la banda vertical del celular); la franja del encabezado ≥ 5,5:1 (peor caso: 2560×1080 con el zoom de 1,12); el H1 ≥ 10:1 en reposo (≥ 9,4:1 a media escena en scrub).
+   - *Medido de nuevo en la ronda 3* (texto y encabezado ocultos, píxel más claro bajo cada línea, `es` y `en`): de 1024×768 a 1440×900 y a 1024×1366, en `static` y en scrub con avance 0, 0,3 y 0,6, ≥ 6,61:1; tabletas verticales (768×1024, 820×1180, 834×1194) ≥ 6,68:1; 844×390, 6,83:1; celular vertical 6,46:1 a 390×844 y 6,53:1 a 360×640 (la revisión midió 6,36:1 en la descripción a 390×844, de ahí el ≥ 6,3:1). El H1 da 10,37:1 en reposo a 1440×900 y 9,44:1 con avance 0,6 (zoom de 1,07 y 84 px más arriba). Son las cifras con las que T11 debe comparar, con el mismo método.
    - axe no puede comprobar texto sobre `<img>`: lo deja como *incomplete*. Por eso la garantía está en los velos y no en la prueba.
 2. **Orden de capas:** relieve → velo lateral → ruta y cumbre → velo de encabezado y suelo → empalme → texto → capa de instrumento.
-   - Así la ruta no se atenúa al cruzar el degradado lateral, y tampoco cruza la fila de índice: el suelo la oscurece.
+   - Así la ruta no se atenúa al cruzar el degradado lateral.
+   - *Revisión (ronda 2):* el suelo solo atenuaba la ruta (al 8–15 % de su brillo), y en `static` o a media escena en scrub la línea cruzaba «/04 SISTEMAS CRÍTICOS», «/03 OPERACIONES AUTÓNOMAS» o «Desplazar» (1366×768, 1440×900, 1024×1366, 2560×1440; 5,08–5,85:1 medido). Ahora la capa de la ruta (`.hero-route`) lleva una máscara que la deja sin ruta en los 6,5rem inferiores y la muestra entera desde 10rem: ahí caben la fila de índice (también en dos líneas) y la capa de instrumento. Medido: ningún píxel de ruta bajo el índice ni la capa de instrumento, y ≥ 7,37:1 en `static` (de 900×650 a 2560×1440, y 844×390). Una prueba lo comprueba comparando capturas con y sin ruta.
+   - *Revisión (ronda 1):* la fila de índice va en su propio `m.div`, que se desvanece con el texto pero no sube. Dentro del bloque que sube (−140 px), a 1024–1180 px de ancho la fila salía del suelo y la ruta cruzaba «/04 SISTEMAS CRÍTICOS» con opacidad 1 (2,65:1 medido). Ahora queda ≥ 7,6:1 en scrub.
    - Imagen y ruta van en dos `FocalCover` idénticos, con el mismo `scale` y el mismo `transformOrigin`. Siguen alineadas con el zoom.
 3. **Vertical por debajo de lg (celular y tableta): banda de 73 svh.**
    - A pantalla completa, a 390×844 la ruta y el punto azul caían detrás de la descripción y de los CTA.
    - Con la banda (`max-lg:portrait:h-[73svh]`), la cumbre queda a 30 svh y el texto empieza en 36 svh (`max-lg:portrait:pt-[36svh]`). El velo sube a 0,85 justo antes del texto.
+   - *Revisión:* en la banda el texto no sube con el scroll (tabletas en vertical en scrub): con −140 px el eyebrow salía del velo y quedaba sobre la cresta iluminada (1,04–1,28:1 medido a 768–834 px de ancho), y a 820×1180 llegaba a tapar la cumbre. Y la ruta se corta con una máscara (`.hero-route`) donde empieza el velo: antes pasaba atenuada por detrás del eyebrow, el H1 y la descripción.
+   - *Consecuencia de la máscara (ronda 2):* en la banda solo queda a la vista el 11 % final del trazado (el 4 % sin atenuar): unos 50 px a 390×844 y 70 px a 820×1180, bajo la cumbre. Con el dibujo sin repartir, en tableta vertical en scrub la ruta no se veía hasta el avance 0,61 (se dibujaba oculta entre 0,06 y 0,61), y en celular solo asomaba al final. Ahora, en la banda, `HeroRoute` reparte el dibujo sobre ese tramo: el largo pintado va de `ROUTE_BAND_VISIBLE_FROM` (0,88, en `geometry.ts`; el cruce con el 49 % de la imagen está en 0,8885) a 1, y el trazo que se ve crece durante todo el recorrido (scrub) o toda la animación (inView). El avance, la cumbre y `data-complete` no cambian. Se descartó cambiar `--fy`: en la banda el marco 3:2 mide exactamente lo mismo que la banda (1,095 × alto > ancho en vertical), así que `--fy` no mueve nada; y alargar la banda empujaría los CTA fuera del primer pliegue a 390×844.
    - El CTA primario sigue en el primer pliegue a 390×844.
    - En horizontal y en ≥ lg, la imagen ocupa todo el marco.
-   - Los `--fx` del traspaso (92 / 80 / 50 %) no cambian. La media query de `.hero-veil` es la misma que `max-lg:portrait:`.
+   - Los `--fx` del traspaso (92 / 80 / 50 %) se mantienen, salvo que el 50 % de lg exige proporción ≥ 11:10 (decisión 13). La media query de `.hero-veil` y `.hero-route` es la misma que `max-lg:portrait:`.
 4. **H1: desviación de `text-fluid-hero` y de `max-w-[18ch]`.**
    - Con `text-fluid-hero` (8vw), 1366×768 cabía con 0 px de margen y 1280×720 no cabía. Se usa `text-[length:clamp(2.5rem,min(8vw,12svh),7rem)]`: a 1366×768 quedan 20 px.
    - 18ch mide ≈ 12,8em en Geist Bold, y "We build digital sovereignty." mide 12,7em: en inglés el H1 salía a una línea en algunos tamaños. Con 16ch (≈ 11,2em) queda en dos líneas en los dos idiomas. "soberanía digital." mide 7,8em y cabe.
@@ -6131,11 +6155,13 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
    - Comprobado en Chromium: `non-scaling-stroke` + `pathLength="1"` + `stroke-dasharray="1 1"` dibuja el 50 % de la línea a escala 2×.
    - La cumbre es un `m.circle` con `r=6` y `fill="#2563eb"`, con `data-hero-summit` en el propio círculo.
 7. **Modos:**
-   - En `inView` y `static` se enlazan `MotionValue` propios, no estilos fijos: zoom 1, texto quieto y empalme inferior en su estado final (1).
+   - En `inView` y `static` se enlazan `MotionValue` propios, no estilos fijos: zoom 1, texto quieto y visible, y empalme inferior en 0.
+   - *Revisión:* el empalme iba en 1 ("estado final"). El servidor lo pinta en 0 (scrub, avance 0), así que al hidratar la mitad inferior del relieve se oscurecía de golpe, y en `static` la mitad baja de la ruta quedaba casi oculta. El empalme solo tiene sentido al final del escenario de scrub; fuera de él, el borde inferior lo oscurece el suelo de `.hero-veil` (0,92). La fila de índice quedaba ≥ 5,08:1 en `static` con la ruta cruzándola; desde la ronda 2 la ruta no llega al pie (decisión 2) y queda ≥ 7,37:1.
    - La ruta usa su propio valor: `animate(…, { duration: 1.8, delay: 0.3 })` cuando entra en pantalla (`useInView`, `once`) o `.set(1)` en `static`. La cumbre se enciende en el último 5 % de ese valor.
    - `data-complete` se actualiza con `useMotionValueEvent`, y se vuelve a sincronizar en un microtask cuando cambia el modo (al cambiar de modo cambia el valor que se lee).
    - Los offsets de `useStageProgress` se pasan como texto: motion no los acelera con ViewTimeline, y los `MotionValue` (y los `data-*` que leen las pruebas) reflejan el scroll real.
-8. **Imagen:** `sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"`, porque el marco mide `max(100vw, 150svh)`.
+8. **Imagen:** `sizes="(width < 64rem) and (orientation: portrait) 110vh, (max-aspect-ratio: 3/2) 150vh, 100vw"`, porque el marco mide `max(100vw, 150svh)` y, en la banda vertical, `max(100vw, 109,5svh)`. La primera condición es `BAND_QUERY`, la misma que `max-lg:portrait:` (en rem, §3.6): un navegador sin sintaxis de rango tampoco aplica la banda de CSS y salta a `150vh`, que es lo correcto para él.
+   - *Revisión:* con solo `150vh`, un celular con DPR 2 pedía la variante de 3840w para un marco de 924 px (+52 KB en el LCP móvil).
    - Como `sizes` contiene `100vw`, Next genera el `srcset` completo desde 640 px.
    - `loading="eager"` + `fetchPriority="high"`, sin `priority` ni `preload` (Next 16, `image.md`). La prueba del HTML del servidor lo comprueba.
 9. **TechStack sigue siendo cliente.**
@@ -6153,12 +6179,45 @@ Las decisiones de layout y contraste se midieron antes de escribir este plan, si
     - La fila de índice no lleva "·": los números `/0N` (blancos, `aria-hidden`) hacen de separador, y con `flex-wrap` un punto al principio de línea se veía roto en celular.
     - Foco visible sobre oscuro: anillo blanco con offset `#0a0a0a` en los botones y `outline` blanco en el enlace de sector público. El foco del `Button` y el global son `#0a0a0a` e invisibles sobre la portada.
     - `nurtureCta.href = "#gobierno"` / `"#government"` apunta a una sección que crea T8. Hasta entonces el ancla no lleva a ningún sitio. La revisión 2 se prueba en T8.
+12. **Lo que el código de arriba no recoge (implementación).** Manda el código integrado.
+    - **Vista previa de la imagen:** `placeholder={coverPlaceholder(relieve)}` (`src/lib/image-placeholder.ts`, contrato §3.3) en lugar de `placeholder="blur"`. Con "blur", Next pinta un SVG con dos `feGaussianBlur` al tamaño del marco (2560 × 1707 px a 2560 × 1080). En Chromium headless (sin GPU) cada fotograma bloqueaba el hilo principal 6–8 s antes de hidratar: `data-complete` tardaba 17–25 s y la prueba de 2560 × 1080 falló una vez con la suite en paralelo. Con la miniatura del import estático como data URL (8 px, escalada y suavizada por el navegador), la portada hidrata en ~1 s. Se descartó quitar la vista previa (`"empty"`): el diseño §7 pide una vista previa borrosa, y esta lo es. T7, T8 y T10 deben usar el mismo helper en sus `FocalCover`.
+    - **Contraste de la franja del encabezado (decisión 12 de T5):** medido en Chromium con el encabezado oculto, el píxel más claro de los 64 px superiores de la portada da ≥ 6,3:1 para `#a3a3a3` y ≥ 15,9:1 para el blanco (peor caso 2560 × 1080; 1440×900, 1920×1080, 1366×657, 390×844, 844×390, 1024×1366 y `/en` quedan por encima).
+    - `useScroll` con `target` avisa en desarrollo ("Please ensure that the container has a non-static position…") porque `<html>` es `static`. El cálculo no se ve afectado (la cadena de `offsetParent` termina en `<body>`, que empieza en el borde superior del documento, así que la suma de `offsetTop` es la posición real también para las secciones de T7–T10) y el aviso no sale en producción; no se cambia la posición de `<html>` para no alterar el bloque contenedor de toda la web.
+13. **Revisión de T6 (ronda 1).** Además de lo anotado en las decisiones 1, 2, 3, 7 y 8:
+    - **Encuadre en vertical ≥ lg:** el 50 % de `--fx` solo se aplica con proporción ≥ 11:10 (`lg:[@media(min-aspect-ratio:11/10)]:[--fx:50%]`). A 1024×1366 (iPad Pro en vertical) el marco 3:2 mide 2049 px y con el 50 % la cumbre caía en x ≈ 1199, fuera de la pantalla: sin ruta ni punto azul. Con el 80 % de md cae en x ≈ 891, a la derecha del texto. Se eligió la proporción y no `landscape`: con el 50 %, una ventana ≥ 1024 px casi cuadrada (1024×1000) también sacaba la ruta por la derecha. Desde 3:2 `--fx` no cambia nada.
+    - **Subida del texto con tope:** `rise = min(140, (y del eyebrow en reposo − 4,5rem) / 0,62)`, medido tras montar y al redimensionar (`offsetTop`, que ignora el transform). El eyebrow no llega al encabezado fijo (4rem + 1 px de borde + respiro; 72 px con la letra por defecto, en rem desde la ronda 2) antes de que empiece el fundido. Es la garantía: hasta el avance 0,62, con opacidad 1; después el texto sigue subiendo mientras se desvanece y puede pasar bajo el encabezado (a 1440×900, en 0,8, con opacidad 0,45). A 1366×657 sube 27 px (antes el eyebrow quedaba oculto bajo el encabezado con opacidad 1 desde el avance 0,17, y en 0,7 se cortaba el H1); a 1024×768, 124 px; a 1440×900 y más, los 140 px del traspaso. En la banda vertical, 0. Solo cambia estilos tras hidratar: con avance 0 el texto no se mueve.
+    - **Foco y clics al final del escenario:** desde 0,95 el texto tiene opacidad 0 pero sus enlaces siguen en el viewport. `pointer-events` se deriva de la opacidad (`none` por debajo de 0,05), y `has-focus-visible:opacity-100!` (con `!important`, gana al estilo en línea de motion) devuelve el bloque a la vista si uno de sus enlaces recibe el foco del teclado (Mayús+Tab desde la sección siguiente, WCAG 2.4.7). Con `:focus-visible` y no `:focus-within`, un clic con el ratón no deja el bloque visible al volver a desplazarse.
+    - **Capa propia en scrub:** `stage:will-change-transform` en las dos capas que escalan. Sin ella, cada fotograma del zoom rasterizaba de nuevo el relieve (la revisión midió 964 ms de raster en 30 fotogramas frente a 414 ms; el hilo principal no cambia). Solo en scrub: en celular no hay zoom y no se reserva memoria de GPU. A 1,12 el compositor escala la textura: en la foto no se nota.
+    - **Sin JavaScript:** la variante `stage:` (y `SCRUB_QUERY`) exige `(scripting: enabled)`, ver §3.6.
+    - **Logos de Tecnologías:** `loading="lazy"`. Sin él, React emitía un `<link rel="preload" as="image">` por logo, muy por debajo del pliegue, que competía con el LCP.
+    - **Eyebrow:** el índice decorativo `/0.1 · ` va en un `<span aria-hidden="true">`, como los `/0N` de la fila de índice.
+    - **Pruebas:** `countVisibleBlue` compara con `ORBEXS_BLUE`. Nuevas: tabletas en vertical (820×1180 y 1024×1366) en «pantallas extremas»; scrub en tableta vertical (el texto no sube y la cumbre queda por encima), en portátil bajo (el eyebrow no pasa bajo el encabezado mientras se ve) y en escritorio (subida de 140 px, índice quieto, y foco con Mayús+Tab al final del escenario); sin JavaScript, bloque normal sin scroll muerto.
+    - **Peso de JS (dato para T11):** el dato del commit de T6 comparaba con `b65e497` (239 002 bytes, antes de T1–T5). La base de T6 es `182001a`: 233 003 bytes (medido en la revisión: `next start`, 1440×900, sin caché, mediana de 3). Con la revisión, T6 da 250 762 bytes en 15 scripts (antes, 250 333): la portada añade ≈ +17,8 KB transferidos, más de la mitad del presupuesto de ≤ 30 KB gzip para las islas de la home (diseño §11). Estimado con webpack + terser + gzip -9 sobre la base de `LazyMotion` + `domAnimation` (que ya carga el layout), lo que la portada importa de motion suma ≈ 7,7 KB: `useScroll` ≈ 2,9 KB (imprescindible para scrub), `animate()` ≈ 2,2 KB y `useInView` ≈ 0,2 KB. No se sustituye `animate()` por animaciones declarativas en esta tarea: T9 y T10 usan el mismo `animate()` + `useInView` (plan), así que el ahorro desaparecería en cuanto entren salvo que cambien las tres. Lo decide T11 con la medida de la home completa.
+
+14. **Revisión de T6 (ronda 2).** Además de lo anotado en las decisiones 2, 3, 7, 8 y 13:
+    - **Media queries en rem:** `SCRUB_QUERY` es ahora la misma cadena que la variante `stage:`, carácter a carácter (`(min-width: 48rem) and (min-height: 37.5rem) and …`), y el contrato §3.3/§3.6 lo exige. En una media query, rem se calcula sobre la letra por defecto del navegador: con la letra "Grande" (20 px), `stage:` empieza en 960 × 750 px y `768px` / `600px` no. A 1366×657, 1440×700 o 900×1000, JavaScript entraba en scrub sin el sticky de CSS: el avance recorría ~0–40 px y el primer golpe de rueda dejaba el H1 y los CTA con opacidad 0 dentro del viewport (con una letra de 12 px, al revés: sección de 160 svh sticky sin animar). También en rem: `BAND_QUERY` (ya lo estaba), la primera condición de `IMAGE_SIZES` (es `BAND_QUERY`) y la holgura del encabezado de la subida (`4.5rem`, calculada con la letra raíz: con 20 px el encabezado mide 81 px). Prueba nueva: con `Page.setFontSizes({ standard: 20 })` (CDP), 1440×700 da `inView` sin sticky y 1440×900 `scrub` con sticky.
+    - **Ruta en la banda vertical:** el dibujo se reparte sobre el tramo que deja ver la máscara (decisión 3). Opción elegida frente a mover `--fy` (no tiene efecto en la banda) o solo documentarlo. La banda se conoce tras montar (`useBand`, con `matchMedia(BAND_QUERY)`; la comparte `useTextRise`): el HTML del servidor no cambia. Prueba nueva: a 820×1180 en scrub, con avance 0,3 y 0,5 la ruta ya pinta píxeles en la banda.
+    - **Pie de la ruta:** máscara de `.hero-route` fuera de la banda (decisión 2), con `-webkit-mask-image` además de `mask-image`, como el bloque de Live Studio (Chromium < 120 no conoce la forma sin prefijo). Prueba nueva: en «pantallas extremas» y a 1024×1366 en scrub (avance 0,3 y 0,7), la ruta no pinta ningún píxel bajo el texto del índice ni de la capa de instrumento. Se compara una captura con la ruta y otra sin ella (`visibility: hidden` en el `<svg>`), con el indicador de `next dev` oculto. En el celular apaisado (844×390) la ruta se desvanece unos 60 px antes que con el solo suelo del velo, que ahí ya la dejaba por debajo del 20 %: se acepta.
+    - **Sin JavaScript:** `@media (scripting: none)` pinta la ruta entera y enciende la cumbre (`stroke-dasharray: none`, `opacity: 1`). Un estilo CSS gana a los atributos de presentación que motion escribe en el HTML del servidor (`stroke-dasharray="0 1"`, `opacity="0"`), y con JS la media query no se cumple. La prueba sin JavaScript comprueba el trazo, la opacidad de la cumbre y un único azul.
+    - **Foco al final del escenario:** `has-focus-visible:transform-none!` además de la opacidad: el bloque vuelve a su sitio de reposo mientras uno de sus enlaces tiene el foco del teclado. Con la subida de −140 px, el eyebrow quedaba bajo el encabezado (y = 23 a 1440×900). Solo cambia `transform`: sin CLS.
+    - **Prueba del portátil bajo:** afirmaba y ≥ 64 también con avance 0,8, algo que el código no garantiza (pasaba a 1366×657 con 3,4 px de margen, y fallaría con el eyebrow en reposo por debajo de y ≈ 100). Ahora comprueba la garantía documentada (opacidad 1 y eyebrow bajo el encabezado medido con avance 0,3 y 0,61; 0,62 exacto puede caer ya en el fundido al redondear el scroll a px) y, en 0,8, la posición exacta que da la fórmula de la subida.
+    - **Plan de T7, T8 y T10:** sus `sizes` pasan de `(min-width: 768px)` a `(min-width: 48rem)`, como exige ahora §3.6 (coinciden con `md:`).
+    - **Peso de JS:** +118 bytes transferidos (243 403 → 243 521, 16 scripts; `next start`, 1440×900, sin caché, tres cargas idénticas; suma de `transferSize` de Resource Timing). Este método da cifras absolutas distintas de las de la decisión 13, que se midieron de otra forma: T11 debe comparar siempre con el mismo método.
+
+15. **Revisión de T6 (ronda 3).** Además de lo anotado en la decisión 1:
+    - **Vista previa en T7, T8 y T10:** el código del plan de la lámina, el expediente y el cierre usa ahora `placeholder={coverPlaceholder(lamina)}` (y `expediente` y `relieve`, respectivamente), con su import, como exige el contrato §3.3, y la nota de APIs de T10 también. Antes seguían con `placeholder="blur"`: quien copiara su bloque habría vuelto a meter el SVG con desenfoque (decisión 12). `coverPlaceholder` figura también en el «Depende de» de T7 y T10. El bloque de código de esta tarea (arriba) se deja como estaba: manda la decisión 12 y el código integrado.
+    - **Contrato §3.3 y tabla de archivos:** se añaden `ROUTE_BAND_VISIBLE_FROM` (en `geometry.ts`), `src/lib/image-placeholder.ts` y `src/hooks/useMediaQuery.ts`.
+    - **`useMediaQuery` (`src/hooks/useMediaQuery.ts`, contrato §3.3):** la banda vertical (antes `useBand` en `HomeHero`) copiaba casi línea a línea la suscripción a `matchMedia` de `useStageMode`. Ahora las dos usan este hook, que devuelve `null` en el servidor y al hidratar y después sigue a `matchMedia` (con `setState` en un microtask, como antes). `useStageMode` sigue en "scrub" hasta conocer sus dos condiciones: la hidratación y los modos no cambian. T7–T10 lo usan para cualquier otra condición, con la cadena en rem de su variante de Tailwind, en lugar de otra copia (cada copia era un sitio más donde el JS podía separarse del CSS).
+    - **Fila de índice con el foco:** el bloque de texto es `peer`, y la fila de índice lleva `peer-has-focus-visible:opacity-100!`, el mismo mecanismo que devuelve el texto. Antes, si un enlace de la portada recibía el foco del teclado con el fundido en curso o terminado, el texto volvía entero y la fila (un `m.div` hermano con la misma opacidad) se quedaba a medio fundir (≈ 0,45 con avance 0,8). No era un fallo de WCAG, porque la fila no tiene nada enfocable, pero sí una incoherencia visual. La prueba del foco al final del escenario comprueba ahora también la opacidad de la fila.
+    - **Velo lateral de 1024 a ~1390 px:** con `max(75% + 5rem, 70rem)`, a 1024 px de ancho el velo llegaba a 0 en 1120 px, fuera de la pantalla, y dejaba la cumbre (x ≈ 891–898 a 1024×768 y 1024×1366) bajo ≈ 0,48: el relieve alrededor de la ruta se veía mucho más apagado que a 1440, donde la cumbre ya queda fuera del velo. Con `max(75% + 5rem, 52rem)` termina en 848 px a 1024, la cumbre queda fuera y el velo empalma con el del apaisado por debajo de lg (0 en 52rem). Desde ~1390 px no cambia nada, y el tope de 0,86 tampoco. Medido antes y después (decisión 1): `#a3a3a3`, las mismas cifras en todos los casos (≥ 6,61:1); el blanco baja como mucho de 12,27 a 11,2:1 (H1 a 1280×1024).
+    - **Prueba del portátil bajo:** la subida esperada con avance 0,8 se calcula ahora con el reposo que usa el código (`offsetTop` del bloque más el del eyebrow, en px enteros) y se resta del reposo real (`boundingBox`, fraccionario). Con el reposo de `boundingBox` dentro de la fórmula, el redondeo desplazaba el resultado hasta 0,66 px, y `toBeCloseTo` con 0 decimales solo tolera 0,5 px: a 1024×768 o 1100×700 la prueba habría fallado con el código correcto. Comprobado con una copia temporal de la prueba en 8 viewports de scrub (de 1024×768 a 1440×900): diferencia ≤ 0,07 px, frente a 0,66 px con la fórmula anterior. La aserción y su tolerancia no cambian; además, la prueba exige que las dos medidas del reposo difieran menos de 1 px.
+    - **LCP en celular con DPR alto (dato para T11, sin cambios en T6):** la revisión midió con Slow 4G + CPU 4× (`next start`, sin caché, tres cargas por caso) que en celular el LCP es la `<img>` del relieve y pasa de 2,5 s: 2,66–2,72 s a 412×823 con DPR 1,75 y a 390×844 con DPR 2, y 2,86–2,92 s a 390×844 con DPR 3. Con DPR 1 da 1,38–1,43 s, y en escritorio (1440×900) el LCP es el H1, en 1,24 s. La imagen (116 KB en AVIF a 1920w) se descarga a la vez que los 16 chunks de JS (≈ 244 KB) y las dos fuentes, y con el ancho de banda repartido `fetchPriority="high"` no la adelanta. Salvedad: el throttling de DevTools sobre HTTP/1.1 en localhost no reproduce la priorización de HTTP/2, y en producción la cifra puede ser mejor. T11 lo mide con el perfil `mobile` de `measure-home.mjs` (390×844, DPR 3). Si no pasa, la palanca principal es el JS de la carga inicial (trabajo del presupuesto de JS), y la segunda, una variante más ligera solo para la portada: añadir 60 a `images.qualities` en `next.config.ts` y `quality={60}` en su `Image`, midiendo antes y después. Recortar `sizes` no sirve: con DPR 1,75 la banda pide 1584 px, y después de 1200w el siguiente escalón es 1920w.
 
 ---
 
 ## Tarea 7 — Tesis y Capacidades
 
-**Depende de:** T6 integrada en `redesign/home` (existen `src/assets/images/{lamina,expediente}.jpg`, `src/hooks/useStageProgress.ts`, `src/components/ui/{InstrumentLabel,FocalCover,ScrollStage}.tsx`, `src/components/sections/home/geometry.ts`, las clases `.focal-frame` / `.focal-cover` en `globals.css`, `e2e/home.spec.ts` y `e2e/helpers.ts` con `effectiveOpacity`, `scrollToY`, `countVisibleBlue` y `waitForHydration` de T5). La home renderiza `HomeHero` y después los antiguos `Services`, `FlagshipAI`, `CaseStudy`, `LiveStudioTeaser`, `Methodology`, `TechStack`, `FAQ` y `CTA`.
+**Depende de:** T6 integrada en `redesign/home` (existen `src/assets/images/{lamina,expediente}.jpg`, `src/hooks/useStageProgress.ts`, `src/components/ui/{InstrumentLabel,FocalCover,ScrollStage}.tsx`, `src/components/sections/home/geometry.ts`, `src/lib/image-placeholder.ts` (`coverPlaceholder`, contrato §3.3), las clases `.focal-frame` / `.focal-cover` en `globals.css`, `e2e/home.spec.ts` y `e2e/helpers.ts` con `effectiveOpacity`, `scrollToY`, `countVisibleBlue` y `waitForHydration` de T5). La home renderiza `HomeHero` y después los antiguos `Services`, `FlagshipAI`, `CaseStudy`, `LiveStudioTeaser`, `Methodology`, `TechStack`, `FAQ` y `CTA`.
 
 **Archivos compartidos (obligan a ir en serie):** `src/content/dictionaries/es.ts`, `src/content/dictionaries/en.ts`, `src/app/[locale]/page.tsx`, `e2e/home.spec.ts` (se añaden bloques al final). `e2e/smoke.spec.ts` no cambia (ver 2.6).
 
@@ -6555,6 +6614,7 @@ import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
 import { useStageMode } from "@/hooks/useStageProgress"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
+import { coverPlaceholder } from "@/lib/image-placeholder"
 import { CAPABILITY_NODES, VIEWBOX } from "./geometry"
 
 const INK = "#0a0a0a"
@@ -6661,8 +6721,8 @@ export function CapabilitiesIndex({ content, locale }: { content: CapabilitiesCo
                     src={lamina}
                     alt=""
                     fill
-                    placeholder="blur"
-                    sizes="(min-width: 768px) 960px, 170vw"
+                    placeholder={coverPlaceholder(lamina)}
+                    sizes="(min-width: 48rem) 960px, 170vw"
                     className="object-cover"
                   />
                   <svg
@@ -7281,6 +7341,7 @@ import { ScrollStage } from "@/components/ui/ScrollStage"
 import { useStageProgress } from "@/hooks/useStageProgress"
 import { buildLocalePath } from "@/lib/i18n"
 import type { Locale } from "@/lib/i18n"
+import { coverPlaceholder } from "@/lib/image-placeholder"
 import {
   DOSSIER_STEP_MS,
   EXTRACTION_IDLE,
@@ -7393,8 +7454,8 @@ export function Dossier({ content, locale }: { content: DossierContent; locale: 
                 src={expediente}
                 alt={content.imageAlt}
                 fill
-                placeholder="blur"
-                sizes="(min-width: 768px) 1152px, 170vw"
+                placeholder={coverPlaceholder(expediente)}
+                sizes="(min-width: 48rem) 1152px, 170vw"
                 className="object-cover"
               />
               <svg
@@ -8519,7 +8580,7 @@ El borrado de 2.8 ya quedó en el índice con `git rm`.
 
 > Diseño §5.6–§5.9, §11 · traspaso "Contraste" (fases inactivas `#737373`) y "Contenido" (FAQ `bg-white`) · contrato §3.2 (T10: sin claves nuevas), §3.4 (`data-method-phase`, `data-active`, `data-method-line`), §3.5 (orden final), §3.6, §3.7.
 
-**Depende de:** T9 integrada en `redesign/home`. También T6, por `FocalCover`, `InstrumentLabel`, `useStageProgress`, `src/assets/images/relieve.jpg`, `hero.imageLabel` y `countVisibleBlue`.
+**Depende de:** T9 integrada en `redesign/home`. También T6, por `FocalCover`, `coverPlaceholder` (`src/lib/image-placeholder.ts`), `InstrumentLabel`, `useStageProgress`, `src/assets/images/relieve.jpg`, `hero.imageLabel` y `countVisibleBlue`.
 
 **Archivos compartidos:** `src/app/[locale]/page.tsx`, `e2e/home.spec.ts`, `src/components/sections/TechStack.tsx` (ver 2.5). `src/app/globals.css` figura en la tabla §2 para T10, pero **esta tarea no lo necesita** y no lo toca.
 
@@ -8531,7 +8592,7 @@ cp -al /home/user/Nova-Forge/node_modules /home/user/wt/task10/node_modules
 cd /home/user/wt/task10
 ```
 
-**APIs de Next usadas:** `next/image` con importación estática (`fill`, `sizes`, `placeholder="blur"`, `loading` perezoso por defecto) dentro de `FocalCover`. Consultado `node_modules/next/dist/docs/01-app/03-api-reference/02-components/image.md`: en Next 16 `priority` está obsoleto y aquí no hace falta, porque la imagen está al final de la página.
+**APIs de Next usadas:** `next/image` con importación estática (`fill`, `sizes`, `placeholder={coverPlaceholder(relieve)}` —la miniatura del import como data URL, contrato §3.3; nunca `placeholder="blur"`—, `loading` perezoso por defecto) dentro de `FocalCover`. Consultado `node_modules/next/dist/docs/01-app/03-api-reference/02-components/image.md`: en Next 16 `priority` está obsoleto y aquí no hace falta, porque la imagen está al final de la página.
 
 ### Archivos
 
@@ -8933,6 +8994,7 @@ import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
 import { useStageProgress } from "@/hooks/useStageProgress"
 import type { StageOffset } from "@/hooks/useStageProgress"
 import { trackEvent } from "@/lib/analytics"
+import { coverPlaceholder } from "@/lib/image-placeholder"
 import relieve from "@/assets/images/relieve.jpg"
 
 interface CTAContent {
@@ -8997,8 +9059,8 @@ export function CTA({ content, imageLabel }: { content: CTAContent; imageLabel: 
             src={relieve}
             alt=""
             fill
-            sizes="(min-width: 768px) 140vw, 520vw"
-            placeholder="blur"
+            sizes="(min-width: 48rem) 140vw, 520vw"
+            placeholder={coverPlaceholder(relieve)}
             className="object-cover"
           />
         </FocalCover>
@@ -9264,7 +9326,7 @@ EOF
 1. **Dos elementos `data-method-line`.** §3.4 nombra un solo atributo sin valores. Aquí hay una línea horizontal (`md:block`, `scaleX`, origen a la izquierda) y otra vertical (`md:hidden`, `scaleY`, origen arriba), movidas por el mismo `MotionValue`, y se distinguen con `data-method-line="horizontal|vertical"`. Las pruebas las eligen por valor: Playwright considera no visible un elemento con `scaleX(0)` (caja de ancho 0), así que `filter({ visible: true })` no sirve para esto.
 2. **Cuándo "alcanza" la línea una fase.** Los nodos están al inicio de cada columna, en `i / 5` del trazo, y una fase se activa cuando la línea pasa `i / 5 + 0,04`. En `scrub` el avance va de la fila de fases al 80 % del viewport (0) a la fila al 30 % (1): a mitad de camino hay 3 de 5 activas, que es lo que comprueba la prueba intermedia. En `inView` la línea se traza en 1,6 s con `easing.entrance`. En `static` queda completa y las 5 fases activas desde el primer render tras montar.
 3. **Paralaje del cierre.** `y = clamp(0,3 × (p − 0,5) × (alto del viewport + alto de la sección), ±0,2 × alto)`. Es decir: la imagen se desplaza 0,3 px por cada px de scroll respecto de la sección, vale 0 con la sección centrada y queda acotada por el 20 % de margen de la capa por debajo. Solo se aplica en `scrub`. En `inView` (móvil: §5 pide animaciones al entrar, no ligadas al scroll) y en `static` vale 0. Las medidas viven en `MotionValue`s, así que no hay estado de React ni re-renders.
-4. **Encuadre inferior.** La capa sobresale `-top-[50%]` y `-bottom-[20%]` (1,7 × el alto de la sección) y `FocalCover` va anclado abajo (`[--fy:100%]`). En casi todas las proporciones `cover` queda limitado por la altura, y el recorte lo decide la geometría de la capa: la ventana muestra aprox. el 30–90 % inferior de la imagen. `--fy` solo pesa en pantallas muy anchas (2560×1080). `sizes="(min-width: 768px) 140vw, 520vw"` sale de ese cálculo. En móvil la imagen se sirve grande, pero es perezosa y está al final de la página.
+4. **Encuadre inferior.** La capa sobresale `-top-[50%]` y `-bottom-[20%]` (1,7 × el alto de la sección) y `FocalCover` va anclado abajo (`[--fy:100%]`). En casi todas las proporciones `cover` queda limitado por la altura, y el recorte lo decide la geometría de la capa: la ventana muestra aprox. el 30–90 % inferior de la imagen. `--fy` solo pesa en pantallas muy anchas (2560×1080). `sizes="(min-width: 48rem) 140vw, 520vw"` sale de ese cálculo. En móvil la imagen se sirve grande, pero es perezosa y está al final de la página.
 5. **Contraste AA del cierre.** Degradado `from-[#0a0a0a] via-[#0a0a0a]/80 to-[#0a0a0a]`. Medido sobre `design/moodboard/A1-v2.png` en la banda visible (filas 33–89 %, columnas 20–80 %): máximo 200/255, p99 124–131. Con el 80 % el peor píxel queda en ≈ 48, y `#a3a3a3` en ≈ 5,2:1. El título es blanco. La etiqueta "Imagen ilustrativa" usa `hero.imageLabel` (clave de T6) como prop nueva `imageLabel` de `CTA`, así que no hay claves nuevas (§3.2, T10).
 6. **FAQ.** El panel existe siempre en el DOM con `hidden`, `role="region"` y `aria-labelledby`, así que `aria-controls` nunca apunta a un id inexistente y las respuestas están en el HTML. Se quita la animación de `height` (diseño §11). El panel entra con opacidad y 6 px de `y`, y el "+" gira. El `h2` deja `RevealText`, igual que el del cierre deja ScrambleText. No se añade analítica (`faq_expand` existe en el tipo, pero no se pidió).
 7. **Estados iniciales y sin JavaScript.** Las fases de Metodología salen del servidor inactivas (`#737373`, AA) con la línea en `scaleX(0)`. Sin JavaScript se leen, pero no se ven activas. El color de fases, puntos y textos cambia de forma discreta, sin `transition-colors` (diseño §5, contrato §3.6); solo la línea interpola (`scaleX`/`scaleY`). Todos los `h2` de la home son visibles desde el servidor: la prueba sin JavaScript los recorre todos con `effectiveOpacity` y comprueba que ninguno esconde palabras con `translateY(100%)` (el patrón de `RevealText`, que la opacidad no detecta).
@@ -9558,6 +9620,7 @@ for vp in desktop mobile; do
 done
 ```
 **Esperado:** LCP (mediana) < 2 500 ms con Slow 4G + CPU 4× en `desktop` y `mobile`; CLS < 0,1.
+*Dato de T6 (decisión 15):* en `mobile` el LCP es la imagen de la portada, y en la revisión de T6 daba 2,86–2,92 s con este mismo perfil, por el JS que se descarga a la vez. Si sigue por encima, aplica las palancas de esa decisión en ese orden y mide antes y después.
 
 **JS (diseño §11, ≤ 30 KB gzip de JS cliente nuevo):** PASA si `median.jsBytes` de `$V/perf-desktop.json` − 239 002 (línea base del §0, mismo método: `desktop` sin limitar, bytes transferidos con compresión) ≤ 30 720. Si no pasa, la tarea no se cierra: identifica el bloque con `jsFiles`/`runs` y redúcelo en su origen (por ejemplo, importaciones de `motion` fuera de `LazyMotion`, como `animate` o `useAnimate`, o dependencias pesadas dentro de una isla). `next/dynamic` llamado desde un Server Component no divide el código del cliente (Decisión 8 de T7 y de T10), y un componente dinámico con SSR se sigue descargando al cargar la página, así que no es el remedio. Anota la diferencia medida en "Estado al cierre".
 

@@ -2,6 +2,7 @@
 
 import { m } from "motion/react"
 import { RevealText } from "@/components/ui/RevealText"
+import { TrustLogos } from "@/components/ui/TrustLogos"
 
 interface TechStackContent {
   sectionId: string
@@ -51,7 +52,7 @@ function CategoryRow({
   )
 }
 
-export function TechStack({ content }: { content: TechStackContent }) {
+export function TechStack({ content, trustLabel }: { content: TechStackContent; trustLabel: string }) {
   return (
     <section
       id={content.sectionId}
@@ -64,6 +65,9 @@ export function TechStack({ content }: { content: TechStackContent }) {
         >
           {content.title}
         </RevealText>
+
+        {/* "Construimos con": tecnologías que usamos, no alianzas (CLAUDE.md). Antes era TrustBar bajo la portada. */}
+        <TrustLogos label={trustLabel} className="mb-10 sm:mb-12" />
 
         <div className="bg-white border border-[#e5e5e5] rounded-[6px] px-6 sm:px-10">
           {content.categories.map((cat, i) => (
