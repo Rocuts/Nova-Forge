@@ -256,6 +256,26 @@
      "suggested_fix": "`grep -rn \"2563eb\" src/components/sections/home/DossierStage.tsx   # una sola línea: la constante BLUE`. O bien dejar el directorio y cambiar el comentario a «en T8, solo DossierStage.tsx:25 (HeroRoute.tsx es de T6)»."
     }
    ]
+  },
+  {
+   "agent": "review:compliance:T8:r3",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En modo inView la secuencia solo avanza mientras el MARCO de la imagen está en la franja central (useInView(frameRef, margin -25%), y el efecto de las líneas 84-92 se pausa cuando sale). El panel queda debajo del marco y no cuenta. En los celulares apaisados de menos de 768 px (los mismos viewports del hallazgo mayor de la ronda 2), el marco mide más del doble del viewport y nunca coincide en pantalla con el panel. Quien baja para leer el panel lo encuentra congelado en «00 / 06», con «NOMBRE · PROCESANDO» fijo y el resto «En espera». En 390×844 pasa lo mismo tras un scroll rápido. Contradice el diseño §5.4 («Móvil: … las filas aparecen al entrar en pantalla») y el §3.6 del plan («la animación se dispara una vez al entrar en pantalla»). La prueba de la ronda 2, «celular apaisado (667×375)», no lo detecta: centra el marco y espera, algo que un usuario no hace.",
+     "evidence": "Spec temporal con PORT=3081 bajo heavy.sh. Scroll constante de 1000 px/s desde el marco hasta el panel centrado y luego 6 s de espera. 667×375: al llegar «00 / 06» (filas a,i,i,i,i,i) y 6 s después igual, con el panel entero en pantalla (top 83, bottom 357; frameBottom 43). 740×360: «01 / 06» (d,a,i,i,i,i) sin cambios tras 6 s. 390×844 a ese ritmo sí llega a 06/06. En cambio, a 3000 px/s con el panel arriba (panelTop 72, frameBottom 32), 6 s después sigue en «00 / 06» y todas las filas «En espera». La captura rev3-read-panel-667x375.png muestra el panel congelado en «00 / 06 · NOMBRE PROCESANDO». Probé el arreglo de abajo en mi worktree: 667×375 y 740×360 llegan a «06 / 06» en 6 s leyendo el panel, 390×844 sigue igual (arranca con el marco en 633 px), y home-t8 pasa 16/16. Después revertí el cambio.",
+     "suggested_fix": "Que la secuencia avance mientras el marco O el panel estén en la franja central. Así se mantiene la pausa de la decisión 4 y no cambia el arranque en celular vertical: `const panelRef = useRef<HTMLDivElement>(null)`, `const panelInView = useInView(panelRef, { margin: \"-25% 0px -25% 0px\" })`, `const running = frameInView || panelInView`; en el efecto, `!running` y la dependencia `[mode, running]`; y `ref={panelRef}` en el div del panel (línea 196). Hay que actualizar la decisión 4 del plan. También una prueba a 667×375 que baje por pasos (sin quedarse en el marco) hasta dejar el panel entero en pantalla y compruebe `expect(counter).toHaveText('06 / 06', { timeout: 10_000 })` y expectVisibleStatus ×6 done."
+    },
+    {
+     "severity": "nit",
+     "file": "docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md",
+     "issue": "El arreglo de la ronda 2 dejó mal el resultado esperado del paso 3. `grep -rn \"2563eb\" src/components/sections/home/` debería dar «una sola línea, en DossierStage.tsx», pero da dos, porque la portada de T6 también es azul. Tras integrar T7 (nodo activo de Capacidades), dará más todavía. El integrador sigue el plan al pie de la letra y verá una discrepancia que no es un fallo. Quedan además restos de texto viejo: el mensaje de commit de plantilla del paso 4 (líneas 7603 y 7608) sigue diciendo «el marco de la imagen al 50 % visible» y «short: compacta la sección», y el contrato §3.6 (línea 418) sigue citando «expediente en T8» como sección que compacta con `short:` (≤ 720 px). T8 usa ahora la variante local `[@media(max-height:48rem)]:stage:`, documentada en el commit y en la decisión 8.",
+     "evidence": "En el worktree de wt/task8 (e445319), `grep -rn \"2563eb\" src/components/sections/home/` da `DossierStage.tsx:25:const BLUE = \"#2563eb\"` y `HeroRoute.tsx:99:        fill=\"#2563eb\"`. Con `grep -n` salen las líneas 7603 y 7608 del plan (plantilla del paso 4) y la 418 (§3.6).",
+     "suggested_fix": "Paso 3: `grep -rn \"2563eb\" src/components/sections/home/Dossier*.tsx   # una sola línea: la constante BLUE de DossierStage.tsx`. En la plantilla del paso 4, poner la franja central y la variante local, o anotar que es la versión inicial. En §3.6, añadir «(el expediente, con la variante local hasta 48rem: decisión 8 de T8)»."
+    }
+   ]
   }
  ]
 }
