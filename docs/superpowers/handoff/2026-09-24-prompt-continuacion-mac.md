@@ -34,7 +34,7 @@ Paraleliza la implementación y la revisión; la integración en `redesign/home`
 
 | Fase | Workflow | Paralelo | Integración (en serie) |
 |---|---|---|---|
-| F3′ | T8: aplica los parches de `wip/task8/` en `../wt/task8` y lanza `home-task-cycle` con `integrate: false` y `tasks[0].impl` (ronda 3 de revisión y corrector). En paralelo, **T9 y T10a** con `home-task-cycle`, `integrate: false`, args de `docs/superpowers/handoff/2026-09-24-args-f3.json` (rellena `repo`; recalcula `lines`) | 3 tareas y sus revisores (tres lentes) | — |
+| F3′ | T8: aplica los parches de `wip/task8/` en `../wt/task8` y corrige los hallazgos de la ronda 3 que lista su README y lanza `home-task-cycle` con `integrate: false` y `tasks[0].impl` (ronda 4 de revisión). En paralelo, **T9 y T10a** con `home-task-cycle`, `integrate: false`, args de `docs/superpowers/handoff/2026-09-24-args-f3.json` (rellena `repo`; recalcula `lines`) | 3 tareas y sus revisores (tres lentes) | — |
 | F4 | `home-integrate-serial` (`.claude/workflows/`) con `measure: true` | — | T8 → T9 → T10a: `page.tsx` con el orden del contrato §3.5, unir las claves de diccionario, conservar sin duplicar los añadidos a `e2e/helpers.ts`, fundir cada spec temporal `e2e/home-tN.spec.ts` en `e2e/home.spec.ts` y borrarlo; lint, tsc, e2e completo, build, `check:modern-js` y medida de JS tras cada una. Después **T10b** con `home-task-cycle` (`integrate: true`): los tres `describe` de la home completa (orden de secciones, h2 sin JS y regla del azul en todo el scroll, a 1440×900 y 390×844, con y sin reducir movimiento). |
 | F5 | workflow propio | revisores visuales (escritorio, móvil, reducir movimiento, 1920/2560) y de rama (cumplimiento, calidad, rendimiento, a11y) | T11 |
 

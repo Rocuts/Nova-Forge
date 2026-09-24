@@ -276,6 +276,33 @@
      "suggested_fix": "Paso 3: `grep -rn \"2563eb\" src/components/sections/home/Dossier*.tsx   # una sola línea: la constante BLUE de DossierStage.tsx`. En la plantilla del paso 4, poner la franja central y la variante local, o anotar que es la versión inicial. En §3.6, añadir «(el expediente, con la variante local hasta 48rem: decisión 8 de T8)»."
     }
    ]
+  },
+  {
+   "agent": "review:visual:T8:r3",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En modo inView (celular) la secuencia se pausa cuando el marco de la imagen sale de la franja central (líneas 81, 85 y 91; decisión 4 del plan: «se pausa y sigue al volver»). En celular el panel va debajo de la imagen. Si el visitante baja a ritmo normal hasta el panel, el marco sale de la franja antes de que terminen los 4,9 s de la secuencia, y el panel se queda congelado a medias mientras el visitante lo lee: por ejemplo «02 / 06», una fila «PROCESANDO» y tres «EN ESPERA», sin fin. Esto contradice el contrato §3.6 («inView: la animación se dispara una vez al entrar en pantalla») y el diseño §5 («whileInView, una vez»; §5.4: «las filas aparecen al entrar en pantalla»). Es un hallazgo nuevo: ninguna ronda anterior midió la pausa.",
+     "evidence": "Spec temporal zz-rev-freeze con PORT=3083 bajo heavy.sh. Se baja a velocidad constante desde el inicio de #gobierno hasta dejar el panel entero bajo el encabezado, y se esperan 6 s. 390×844: a 150 px/s → 06/06; a 250 px/s → 04/06 al llegar y 04/06 seis segundos después (filas ddddai); a 400 px/s → 02/06 y 02/06 (ddaiii). 360×640: los mismos valores. 667×375 a 400 px/s: 03/06 y 03/06. La captura freeze-390x844-400.png muestra el panel entero a la vista con «02 / 06», «DOMICILIO PROCESANDO» y tres «EN ESPERA», con el marco ya fuera (su borde inferior en y=32, bajo el encabezado). Contraprueba en mi worktree con `useInView(frameRef, { once: true, margin: \"-25% 0px -25% 0px\" })`: con 390×844 y 667×375, a 150, 250 y 400 px/s, todo termina en 06/06 (dddddd). Con ese cambio, las pruebas «módulo puro» y «celular» de home-t8 pasan 4/4; después restauré el archivo.",
+     "suggested_fix": "Que la secuencia, una vez disparada, llegue siempre al final, como en Capacidades (T7): «una secuencia temporizada que termina en N». El cambio mínimo es añadir `once: true` a `useInView` en la línea 81; el efecto y el intervalo pueden quedarse igual. Después, actualizar la decisión 4 del plan (quitar «se pausa y sigue al volver») y añadir al describe «celular» a 390×844 una prueba así: centrar el marco y esperar a que haya un recuadro `active`; llevar el panel bajo el encabezado con `scrollToY` (el marco queda fuera de la franja); `expect(counter).toHaveText('06 / 06', { timeout: 6000 })` y `expectVisibleStatus(rows, done×6)`. Con el código actual se queda en 01/06 o 02/06."
+    },
+    {
+     "severity": "minor",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En celulares apaisados de menos de 768 px de ancho (667×375, 740×360, 736×414), el disparador arreglado en la ronda 2 arranca la secuencia cuando el borde superior del marco entra en la franja (≤ 75 % del alto). Los campos están entre el 26 % y el 58 % de un marco de 774–865 px, así que en ese momento quedan todos por debajo del borde de la pantalla. Si el visitante se queda leyendo el texto y los enlaces, la extracción entera (y el único azul) ocurre fuera de la vista: cuando baja, ya ve «06 / 06».",
+     "evidence": "Spec zz-rev-perf/trig (next start bajo heavy --exclusive): borde superior del marco 10 px dentro de la franja y muestreo cada 200 ms durante 6 s. 667×375: pasa de 00/06 a 06/06 con 0/6 recuadros a la vista todo el tiempo (el primero con top en 471). 740×360: 0/6 (top 484). 736×414: 0/6 (top 523). Como control, 390×844: 4/6 a la vista; 360×640: 3/6; 844×390, 915×412 y 932×430 (md inView): 2/6. La prueba «lector parado» da 06/06 tras 5,5 s a 667×375 y a 740×360. Experimento en mi worktree observando la región de los campos en lugar del marco, con un `<rect>` invisible sobre el recuadro que envuelve a DOSSIER_FIELDS (x 448–563, y 265–595) y el mismo margen: la secuencia arranca con 4/6 recuadros a la vista en los tres apaisados (antes 0/6), y 390×844 y 360×640 no cambian (6/6). Sin `once`, al salir de la franja la secuencia se quedaba a medias, así que hay que combinarlo con el arreglo del hallazgo mayor.",
+     "suggested_fix": "Observar la región de los campos, no el marco. Dentro del <svg>, un `<rect ref={fieldsRef} … fill=\"none\" />` con el recuadro que envuelve a DOSSIER_FIELDS, calculado a partir de geometry.ts para no repetir cifras. Después, `useInView(fieldsRef, { once: true, margin: \"-25% 0px -25% 0px\" })`. En la prueba «celular apaisado (667×375)», añadir que al activarse el primer recuadro este esté dentro del viewport y bajo el encabezado."
+    },
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "Sin JavaScript, la sección muestra el estado inicial: sin recuadros, «Campos extraídos 00 / 06» y seis filas «EN ESPERA». Parece un proceso que nunca arrancó. La portada, en cambio, muestra sin JavaScript su estado final, «como con reducir movimiento» (comentario de los velos en globals.css). El plan fija este comportamiento: su prueba «sin JavaScript» exige «00 / 06». Por eso es una decisión de diseño para el integrador o T11, no un fallo de T8.",
+     "evidence": "Captura n-1440x900-top.png, y n-390x844-top.png y n-390x844-panel.png: 00 / 06, EN ESPERA ×6 y los 6 recuadros con opacidad calculada 0; la sección como bloque (frame position: relative).",
+     "suggested_fix": "Opcional, a decidir en el plan: o se acepta y se anota, o se muestra el estado final sin JavaScript (por ejemplo, `@media (scripting: none)` que dé opacidad 1 a los recuadros, y el contador y las etiquetas con los dos estados apilados). Esto exigiría cambiar la prueba del plan."
+    }
+   ]
   }
  ]
 }
