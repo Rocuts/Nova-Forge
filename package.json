@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/check-modern-js.mjs",
     "start": "next start",
     "lint": "eslint .",
     "test:e2e": "npx playwright test",
     "images": "node scripts/process-images.mjs",
-    "images:verify": "node scripts/verify-images.mjs"
+    "images:verify": "node scripts/verify-images.mjs",
+    "check:modern-js": "node scripts/check-modern-js.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.50",
@@ -32,10 +34,10 @@
     "zod": "^4.3.6"
   },
   "browserslist": [
-    "last 2 Chrome versions",
-    "last 2 Firefox versions",
-    "last 2 Safari versions",
-    "last 2 Edge versions"
+    "chrome 111",
+    "edge 111",
+    "firefox 111",
+    "safari 16.4"
   ],
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

@@ -86,7 +86,7 @@ npx tsc --noEmit
 PORT=30N0 npx playwright test e2e/<spec-de-la-tarea>.spec.ts --reporter=line
 PORT=30N0 npx playwright test --reporter=line      # suite completa antes de entregar
 ```
-`npm run build` solo en las tareas que lo indiquen (1, 2, 6, 11): es lento y comparte CPU con otros worktrees.
+`npm run build` solo en las tareas que lo indiquen (1, 2, 6, 11): es lento y comparte CPU con otros worktrees. Cada `npm run build` termina con `check:modern-js` (script `postbuild`, §3.8): si la salida vuelve a ES5, el build falla.
 
 ---
 
@@ -312,6 +312,18 @@ export function coverPlaceholder(image: StaticImageData): NonNullable<ImageProps
 //   (portada en T6, lámina en T7, expediente en T8, cierre en T10): el SVG con feGaussianBlur de "blur",
 //   pintado al tamaño del marco, bloquea el hilo principal varios segundos por fotograma sin GPU.
 
+// src/components/sections/home/hero-band.ts  (sin directiva ni dependencias)   — P1
+export const BAND_QUERY = "(width < 64rem) and (orientation: portrait)"
+//   Banda vertical de la portada (la misma condición que max-lg:portrait: y que .hero-veil/.hero-route).
+//   La leen la isla (HomeHero, con useMediaQuery) y el servidor (hero-media.tsx, en el sizes de la imagen).
+
+// src/components/sections/home/hero-media.tsx  (sin directiva, sin hooks: Server Component)   — P1
+export function HeroMedia(): JSX.Element
+//   <Image src={relieve} alt="" fill sizes={`${BAND_QUERY} 110vh, (max-aspect-ratio: 3/2) 150vh, 100vw`}
+//     placeholder={coverPlaceholder(relieve)} loading="eager" fetchPriority="high" className="object-cover" />
+//   page.tsx: <HomeHero content={heroContent} media={<HeroMedia />} />. HomeHero declara media: React.ReactNode
+//   y lo pinta dentro de su capa con zoom (m.div con la escala y el origen en la cumbre). Patrón de §3.8.
+
 // src/components/ui/ScrollStage.tsx  (sin hooks; se usa desde islas cliente)   — T6
 export function ScrollStage(props: {
   ref?: React.Ref<HTMLElement>
@@ -434,6 +446,19 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
 - Reducir movimiento: `test.use({ contextOptions: { reducedMotion: 'reduce' } })` (en Playwright 1.58 `reducedMotion` no es una opción de primer nivel de `test.use`: `tsc` da TS2353) o `page.emulateMedia({ reducedMotion: 'reduce' })` **antes** de `goto`.
 - Textos esperados siempre desde los diccionarios (`import es from '../src/content/dictionaries/es'`), nunca literales duplicados.
 - Nada de `waitForTimeout` para esperar estados que tienen un atributo observable: usar `expect.poll` o `toHaveAttribute`.
+
+### 3.8 Presupuesto de JS (tarea P1; vinculante desde T7)
+Fuente y cifras: `docs/superpowers/research/2026-09-24-presupuesto-js.md` (§5: topes por tarea). **Línea base de T7–T10, medida al cerrar P1:** **219 595 B** de JS transferido al cargar `/es` (`scripts/agent/measure-js.mjs`, `next start`, 1440×900, caché desactivada, mediana de 3; 14 scripts más el 404 local de `/_vercel/insights`). Tope global: 269 722 B (diseño §11).
+
+**Prevalece sobre los bloques de código de T7–T10**, redactados antes de P1: si un bloque importa una imagen, `next/image` o `@/lib/image-placeholder` dentro de una isla `"use client"`, usa `animate()` o supone `next/dynamic` en `page.tsx`, manda esta sección, con las instrucciones por tarea del informe (§5; allí también T9 saca `ConsoleFrame` a un módulo sin directiva). Ya corregidos en el plan: los bloques de `page.tsx` de T7 (2.4), T9 y T10 (2.4), `BuiltScaleIn` (T9) y `MethodologyLine` (T10). Siguen con la imagen dentro de la isla, y se adaptan al aplicarlos: la lámina (T7 2.3), el expediente (T8 2.3) y el cierre (T10 2.2, `CTA.tsx`).
+
+- **browserslist solo con versiones fijas** (`package.json`: `chrome 111`, `edge 111`, `firefox 111`, `safari 16.4`, el objetivo por defecto de Next). Nunca consultas relativas (`last N versions`, `defaults`, `> 0.2%`): se resuelven a versiones que el browserslist de Turbopack no conoce y todo el JS sale en ES5 sin aviso (vercel/next.js#92091; +23,6 KB en `/es`).
+- **`npm run build` termina con `check:modern-js`** (script `postbuild` → `scripts/check-modern-js.mjs`; a mano, `npm run check:modern-js`): el build falla si `.next/static/chunks` parece ES5 (menos de 500 `let` o de 20 `class`), igual en local, en CI y en Vercel. En P1: ES5 → `FALLO: let=24 class=2`; moderno → `OK: let=3510 class=167`.
+- **motion en las islas de la home:** solo `m`, `useStageProgress` (o `useScroll` si no encaja), `useTransform`, `useMotionValue`, `useMotionValueEvent`, `useInView`, `animateSingleValue` y tipos. Para animar un MotionValue una vez: `animateSingleValue(valor, 1, opciones)` y limpieza `return () => valor.stop()` (con animaciones instantáneas no devuelve controles). Prohibidos: `animate`, `useAnimate`, `useSpring`, `stagger`, `AnimatePresence`, `domMax`, `motion.*` (usar `m.*`) y cualquier otro export sin medirlo antes. Lo vigila ESLint (`no-restricted-imports` en `eslint.config.mjs`, archivos `src/components/sections/home/**`; T10 añade `src/components/sections/CTA.tsx` y `FAQ.tsx` a ese bloque al reescribirlos).
+- **Imágenes siempre como slot desde el servidor, con `coverPlaceholder`:** el import estático y el `<Image … placeholder={coverPlaceholder(img)}>` van en un Server Component (la sección de servidor, `page.tsx` o un módulo sin directiva como `home/hero-media.tsx`); la isla recibe el elemento ya renderizado como prop `media: React.ReactNode` y lo pinta dentro de `FocalCover`. Ninguna isla importa una imagen, `next/image` ni `@/lib/image-placeholder`, y nunca `placeholder="blur"`. Lo vigila `e2e/home.spec.ts` («ningún script de /es lleva un import estático de imagen»).
+- `page.tsx` importa las secciones de forma estática, nunca con `next/dynamic` (desde un Server Component no divide el código y añade su runtime; ESLint lo prohíbe en `src/app/[locale]/page.tsx`). Ninguna dependencia nueva sin medirla.
+- Cada tarea mide al cerrar (`heavy.sh --exclusive npm run build`, que ya incluye `check:modern-js`, y `measure-js.mjs … --budget 269722`) y anota el total y el delta frente a la tarea anterior.
+- **LCP al cerrar P1** (`/es` contra `next start`, Slow 4G —150 ms RTT, 1,6 Mbps— y CPU 4×, caché del navegador desactivada, la del optimizador de imágenes caliente, mediana de 3 tras una carga de calentamiento). **Celular** (390×844, DPR 3): **2 892 ms → 2 724 ms** (≈ −170 ms); el elemento LCP es la imagen del relieve antes y después, CLS ≤ 0,0016. La mejora cuadra con los ≈ 30 KB menos de JS que comparten el enlace con la imagen; el slot no cambia la petición de la imagen (mismos `srcset` y `sizes`). Sigue por encima de 2 500 ms: lo cierra T11. **Escritorio** (1440×900): el LCP es el h1, no la imagen (ocupa todo el viewport y Chrome no la toma como candidata), 1 400 → 1 344 ms, CLS ≤ 0,0082. Quien optimice el LCP de escritorio, que mire el texto, no la imagen.
 
 ---
 
@@ -6842,12 +6867,12 @@ import { CapabilitiesIndex } from "@/components/sections/home/CapabilitiesIndex"
 import { getDictionary } from "@/content/dictionaries"
 ```
 
-Antes (`src/app/[locale]/page.tsx`):
+Antes (`src/app/[locale]/page.tsx`; desde P1, imports estáticos, §3.8):
 ```tsx
-const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
-const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
+import { Services } from "@/components/sections/Services"
+import { FlagshipAI } from "@/components/sections/FlagshipAI"
 ```
-Después: *(nada; las dos líneas desaparecen. `dynamic` sigue importado porque lo usan las secciones que quedan.)*
+Después: *(nada; las dos líneas desaparecen. `page.tsx` ya no usa `next/dynamic` desde P1: no lo reintroduzcas.)*
 
 Antes (`src/app/[locale]/page.tsx`):
 ```tsx
@@ -8194,7 +8219,7 @@ export function BuiltStage({
 // JavaScript la tarjeta se ve a su tamaño final). Solo después de montar, y con
 // la tarjeta todavía fuera de pantalla, el efecto la lleva a 0,92.
 import { useEffect, useRef } from "react"
-import { animate, m, useInView, useMotionValue, useTransform } from "motion/react"
+import { animateSingleValue, m, useInView, useMotionValue, useTransform } from "motion/react"
 import { useStageProgress } from "@/hooks/useStageProgress"
 import type { StageOffset } from "@/hooks/useStageProgress"
 import { easing } from "@/lib/motion"
@@ -8231,8 +8256,10 @@ export function BuiltScaleIn({
       amount.set(0)
       return
     }
-    const controls = animate(amount, 1, { duration: 0.7, ease: easing.entrance })
-    return () => controls.stop()
+    // animateSingleValue en lugar de animate() (§3.8); stop() en el propio
+    // valor: con animaciones instantáneas no devuelve controles.
+    animateSingleValue(amount, 1, { duration: 0.7, ease: easing.entrance })
+    return () => amount.stop()
   }, [mode, inView, progress, amount])
 
   return (
@@ -8491,10 +8518,10 @@ Después:
 import { getDictionary } from "@/content/dictionaries"
 import { BuiltProof } from "@/components/sections/home/BuiltProof"
 ```
-Antes (se eliminan las dos líneas):
+Antes (se eliminan las dos líneas; desde P1, imports estáticos, §3.8):
 ```tsx
-const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
-const LiveStudioTeaser = dynamic(() => import("@/components/sections/LiveStudioTeaser").then(m => ({ default: m.LiveStudioTeaser })))
+import { CaseStudy } from "@/components/sections/CaseStudy"
+import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
 ```
 Después: *(nada)*. Si T6–T8 cambiaron la forma de importar estas dos secciones, se eliminan igual, estén como estén escritas.
 
@@ -8825,7 +8852,7 @@ PORT=3100 npx playwright test e2e/home.spec.ts -g "T10 ·" --reporter=line
 // Hidratación: `line` empieza en 0 para todos y el modo empieza en "scrub", así
 // que el HTML del servidor y el primer render coinciden (fases inactivas).
 import { useEffect, useRef, useState } from "react"
-import { animate, m, useInView, useMotionValue, useMotionValueEvent } from "motion/react"
+import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent } from "motion/react"
 import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
 import { useStageProgress } from "@/hooks/useStageProgress"
 import type { StageOffset } from "@/hooks/useStageProgress"
@@ -8883,8 +8910,10 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
       line.set(0)
       return
     }
-    const controls = animate(line, 1, { duration: INVIEW_DURATION, ease: easing.entrance })
-    return () => controls.stop()
+    // animateSingleValue en lugar de animate() (§3.8); stop() en el propio
+    // valor: con animaciones instantáneas no devuelve controles.
+    animateSingleValue(line, 1, { duration: INVIEW_DURATION, ease: easing.entrance })
+    return () => line.stop()
   }, [mode, inView, progress, line])
 
   const active = mode === "static" ? total : reached
@@ -8969,6 +8998,9 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
 ```
 
 **2.2 `src/components/sections/CTA.tsx`** (reescrito completo):
+
+> **P1 (§3.8): el bloque es anterior al presupuesto de JS.** El `<Image>` del relieve, su import, `next/image` y `coverPlaceholder` salen de la isla: los renderiza un Server Component (la sección de servidor, `page.tsx` o un módulo sin directiva, como `home/hero-media.tsx`) y llegan a `CTA` como prop `media: React.ReactNode`, que la isla pinta dentro de su `FocalCover` (informe §5, T10). Añade `CTA.tsx` y `FAQ.tsx` a los `files` del bloque de motion de `eslint.config.mjs`.
+
 ```tsx
 "use client"
 // Cierre (§5.9 del diseño): el relieve en su zona inferior, con desplazamiento
@@ -9202,9 +9234,9 @@ Después:
 import { BuiltProof } from "@/components/sections/home/BuiltProof"
 import { MethodologyLine } from "@/components/sections/home/MethodologyLine"
 ```
-Antes (se elimina la línea):
+Antes (se elimina la línea; desde P1, import estático, §3.8):
 ```tsx
-const Methodology = dynamic(() => import("@/components/sections/Methodology").then(m => ({ default: m.Methodology })))
+import { Methodology } from "@/components/sections/Methodology"
 ```
 Después: *(nada)*.
 

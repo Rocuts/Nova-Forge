@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { animate, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
+import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent, useTransform } from "motion/react"
 import type { MotionValue } from "motion/react"
 import type { StageMode } from "@/hooks/useStageProgress"
 import { ROUTE_BAND_VISIBLE_FROM, ROUTE_PATH, ROUTE_SUMMIT, VIEWBOX } from "./geometry"
@@ -50,8 +50,13 @@ export function HeroRoute({
       return
     }
     if (mode !== "inView" || !inView) return
-    const controls = animate(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
-    return () => controls.stop()
+    // animateSingleValue: lo mismo que animate(mv, …) hace por dentro con un
+    // MotionValue, sin arrastrar el animate híbrido (secuencias,
+    // ObjectVisualElement…). stop() en el propio valor: con animaciones
+    // instantáneas (skipAnimations, instantAnimations o duración 0)
+    // animateSingleValue no devuelve controles.
+    animateSingleValue(ownDraw, 1, { duration: 1.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] })
+    return () => ownDraw.stop()
   }, [mode, inView, ownDraw])
 
   const draw = mode === "scrub" ? scrubDraw : ownDraw

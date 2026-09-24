@@ -115,6 +115,21 @@ test.describe('portada · HTML del servidor', () => {
     expect(response.headers()['content-type']).toBe('image/avif')
     expect((await response.body()).length).toBeLessThanOrEqual(250 * 1024)
   })
+
+  // Presupuesto de JS (P1, plan §3.8): las imágenes se renderizan en el servidor y
+  // llegan a las islas como slot (`media`). Un import estático de imagen dentro de
+  // una isla mete su objeto (ruta, medidas y blurDataURL) en el JS del cliente.
+  test('ningún script de /es lleva un import estático de imagen: van como slot del servidor (P1)', async ({ request }) => {
+    const html = await (await request.get('/es')).text()
+    const sources = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(([, src]) => src.replace(/&amp;/g, '&'))
+    expect(sources.length, 'scripts de /es').toBeGreaterThan(0)
+    for (const src of sources.filter((source) => source.startsWith('/_next/'))) {
+      const response = await request.get(src)
+      expect(response.status(), src).toBe(200)
+      const images = (await response.text()).match(/\/_next\/static\/media\/[\w.-]+\.(?:avif|gif|jpe?g|png|webp)/g)
+      expect(images, `${src} importa ${images?.join(', ')}`).toBeNull()
+    }
+  })
 })
 
 test.describe('portada · sin JavaScript (revisión 4)', () => {

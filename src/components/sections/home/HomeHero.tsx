@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import Image from "next/image"
 import { m, useMotionValue, useTransform } from "motion/react"
-import relieve from "@/assets/images/relieve.jpg"
 import { Button } from "@/components/ui/Button"
 import { FocalCover } from "@/components/ui/FocalCover"
 import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
@@ -11,10 +9,10 @@ import { ScrollStage } from "@/components/ui/ScrollStage"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useStageProgress } from "@/hooks/useStageProgress"
 import { trackEvent } from "@/lib/analytics"
-import { coverPlaceholder } from "@/lib/image-placeholder"
 import { cn } from "@/lib/utils"
 import { HeroRoute } from "./HeroRoute"
 import { IMAGE_HEIGHT, IMAGE_WIDTH, ROUTE_SUMMIT } from "./geometry"
+import { BAND_QUERY } from "./hero-band"
 
 interface HeroAction {
   label: string
@@ -42,21 +40,6 @@ export interface HomeHeroContent {
 const FOCAL_CLASS = "[--fx:92%] md:[--fx:80%] lg:[@media(min-aspect-ratio:11/10)]:[--fx:50%]"
 // El zoom se ancla en la cumbre (83,5 % 41,1 %): el punto azul no se mueve al escalar.
 const SUMMIT_ORIGIN = `${(ROUTE_SUMMIT.x / IMAGE_WIDTH) * 100}% ${(ROUTE_SUMMIT.y / IMAGE_HEIGHT) * 100}%`
-// Banda vertical: la misma condición que `max-lg:portrait:` y que las media
-// queries de .hero-veil y .hero-route en globals.css. En rem, como las
-// variantes de Tailwind: en una media query, rem se calcula sobre la letra por
-// defecto del navegador, así que con px no coincidiría con CSS si el usuario la
-// agranda (ver SCRUB_QUERY en useStageProgress.ts).
-const BAND_QUERY = "(width < 64rem) and (orientation: portrait)"
-// El marco 3:2 mide max(100vw, 150svh): en pantallas más altas que 3:2 es más
-// ancho que el viewport, y la imagen debe pedirse a ese ancho. En la banda
-// vertical (73 svh de alto) mide max(100vw, 109,5svh) ≈ 110vh. La primera
-// condición es BAND_QUERY: un navegador que no entienda la sintaxis de rango
-// tampoco aplica la banda de CSS, y salta a la entrada siguiente (150vh).
-const IMAGE_SIZES = `${BAND_QUERY} 110vh, (max-aspect-ratio: 3/2) 150vh, 100vw`
-// Vista previa mientras carga, sin el SVG con desenfoque de placeholder="blur"
-// (demasiado caro a este tamaño sin GPU: ver src/lib/image-placeholder.ts).
-const RELIEVE_PLACEHOLDER = coverPlaceholder(relieve)
 // Foco visible sobre fondo oscuro (el anillo del Button y el outline global son #0a0a0a).
 const DARK_FOCUS = "focus-visible:ring-white focus-visible:ring-offset-[#0a0a0a]"
 // Capas que escalan (imagen y ruta): en scrub, capa propia del compositor. Sin
@@ -132,8 +115,13 @@ function useTextRise(
  * banda de 73 svh con la cumbre a 30 svh, y el texto empieza en 36 svh, debajo
  * de ella: ahí el texto no sube con el scroll, la ruta se corta donde empieza
  * el velo del texto y su dibujo se reparte sobre el tramo que queda a la vista.
+ *
+ * `media`: la imagen de la portada (HeroMedia, hero-media.tsx), renderizada en
+ * el servidor y pasada como slot: la isla solo la coloca en la capa con zoom,
+ * y el import estático de la imagen (con su blurDataURL) no viaja en su JS
+ * (plan §3.8).
  */
-export function HomeHero({ content }: { content: HomeHeroContent }) {
+export function HomeHero({ content, media }: { content: HomeHeroContent; media: React.ReactNode }) {
   const stageRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -185,19 +173,10 @@ export function HomeHero({ content }: { content: HomeHeroContent }) {
       frameClassName="flex min-h-svh flex-col overflow-hidden stage:h-auto"
     >
       <div className="absolute inset-x-0 top-0 h-svh max-lg:portrait:h-[73svh] lg:h-full">
-        {/* Relieve: es el LCP. Sale en el HTML del servidor y se pide con prioridad alta. */}
+        {/* Relieve (slot del servidor, hero-media.tsx): el LCP en celular; en escritorio lo es el h1. */}
         <FocalCover className={FOCAL_CLASS}>
           <m.div className={SCALED_LAYER} style={{ scale, transformOrigin: SUMMIT_ORIGIN }}>
-            <Image
-              src={relieve}
-              alt=""
-              fill
-              sizes={IMAGE_SIZES}
-              placeholder={RELIEVE_PLACEHOLDER}
-              loading="eager"
-              fetchPriority="high"
-              className="object-cover"
-            />
+            {media}
           </m.div>
         </FocalCover>
 
