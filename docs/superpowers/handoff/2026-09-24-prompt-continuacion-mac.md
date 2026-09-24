@@ -12,16 +12,17 @@ Si falta algo de esto, hazlo tú (en el Mac `npx playwright install chromium` s�
 ## 1. Lee primero, en este orden
 1. `CLAUDE.md` y `AGENTS.md`. Antes de usar cualquier API de Next 16, consulta `node_modules/next/dist/docs/`.
 2. `docs/superpowers/handoff/2026-09-23-home-redesign-handoff.md`: **§8 «Estado a la pausa 2» primero** (lo hecho en la sesión 2, el presupuesto de JS, lo que falta y en qué orden, cómo preparar el Mac, cómo se ejecuta cada fase, lecciones); después §7 y el resto.
-3. `docs/superpowers/research/2026-09-24-presupuesto-js.md`: investigación con mediciones reales. Su §4 es la especificación de la tarea P1 y su §5 las reglas de peso e imágenes de T7–T11.
+3. `docs/superpowers/research/2026-09-24-presupuesto-js.md`: investigación con mediciones reales. Su §4 fue la especificación de P1 (ya integrada) y su §5 son las reglas de peso e imágenes de T8–T11 (también en el plan, §3.8).
 4. `docs/superpowers/specs/2026-09-23-home-cartografia-soberana-design.md`: el diseño aprobado, que es el contrato.
 5. `docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md`: §0–§4 son el protocolo y el contrato compartido, y son vinculantes. Después, una sección por tarea con código completo y la prueba escrita antes del código. Recalcula las líneas de cada sección con `grep -n '^## Tarea'`.
-6. `git log --oneline -20` y el bloque «Decisiones» de `git show 1bbd6ad`, `git show 182001a` y `git show 5cf73de`: son desviaciones del plan que ya están en el código y mandan sobre él.
-7. `scripts/agent/README.md` y la cabecera de `.claude/workflows/home-task-cycle.js`.
+6. `git log --oneline -20` y el bloque «Decisiones» de `git show 1bbd6ad`, `182001a`, `5cf73de`, `25f4227` y `27d841d`: son desviaciones del plan que ya están en el código y mandan sobre él. Después, `docs/superpowers/handoff/wip/task8/README.md`.
+7. `scripts/agent/README.md` y la cabecera de `.claude/workflows/home-task-cycle.js` y de `.claude/workflows/home-integrate-serial.js`.
 
 ## 2. Estado de partida (verifícalo)
-- Punta de `origin/redesign/home`: `la del último commit de traspaso (`git log -1`)` o posterior. **Integradas:** T1 (`233446e`), T3 (`748567c`), T4 (`2e61a3b`), T2 (`1bbd6ad`), T5 (`182001a`), T6 (`5cf73de`). La suite e2e da 146/146.
-- **Pendiente:** P1 (rendimiento), T7 a T10 (la home), T10b (pruebas de la home completa) y T11 (limpieza, documentación, verificación final y lo prometido en la sesión 2: guía, lista de preparación de imágenes, workflow guardado y referencia de movimiento en el skill del design system).
-- **Líneas base para comparar:** JS de `/es` = 239 002 bytes (antes del rediseño, compilado a ES5); tras T6: ≈ 250 KB (250 331 B medidos sobre 32836e8); LCP 900 ms con Slow 4G y CPU 4×; CLS 0,007. Tope de JS: 269 722 bytes.
+- Punta de `origin/redesign/home`: la del último commit de traspaso (`git log -1`: «docs(home): cierre de la sesión 2…») o posterior. **Integradas:** T1 (`233446e`), T3 (`748567c`), T4 (`2e61a3b`), T2 (`1bbd6ad`), T5 (`182001a`), T6 (`5cf73de`), **P1** rendimiento (`25f4227`) y **T7** tesis y capacidades (`27d841d`). La suite e2e da 171/171 en la punta de T7.
+- **T8 a medias:** implementada y corregida en dos rondas de revisión, guardada como parches en `docs/superpowers/handoff/wip/task8/` (léelo: estado de la ronda 3, cómo aplicarla con `git am`, cruces esperables al integrar).
+- **Pendiente:** terminar e integrar T8; T9 y T10a (en paralelo); integrarlas; T10b (pruebas de la home completa); T11 (limpieza, documentación, verificación final y lo prometido en la sesión 2: guía, lista de preparación de imágenes, workflows guardados y referencia de movimiento en el skill del design system).
+- **Peso de JS de `/es`:** 239 002 B antes del rediseño (compilado a ES5) → 250 849 B tras T6 → **219 595 B tras P1** → **220 233 B tras T7**. Tope: 269 722 B. **LCP móvil** (390×844, DPR 3, Slow 4G, CPU 4×): 2 724 ms tras P1, por encima del objetivo de 2 500 ms; lo cierra T11 (traspaso §8.7). CLS 0. LCP de escritorio de la línea base: 900 ms.
 
 ## 3. Fase 0: preparación (sin subagentes)
 - En la punta, `npm run lint`, `npx tsc --noEmit` y `npx playwright test` en verde. Si algo ya falla, anótalo como estado previo.
@@ -29,13 +30,12 @@ Si falta algo de esto, hazlo tú (en el Mac `npx playwright install chromium` s�
 - Worktrees en la carpeta hermana `../wt/` con `scripts/agent/new-worktree.sh` (clona `node_modules` con `cp -cR`; nunca `npm install` dentro).
 
 ## 4. Ejecución
-Paraleliza la implementación y la revisión; la integración en `redesign/home` va siempre en serie. Usa el workflow guardado `home-task-cycle` (`Workflow({ name: "home-task-cycle", args })`, con `repo` = ruta absoluta del checkout) salvo donde se indica un workflow propio.
+Paraleliza la implementación y la revisión; la integración en `redesign/home` va siempre en serie. Usa los workflows guardados en `.claude/workflows/`: `home-task-cycle` (implementar → revisar por lentes → corregir en bucle → integrar) y `home-integrate-serial` (integrar en serie tareas ya revisadas). Invócalos con `Workflow({ name: "…", args })` o con `scriptPath`, pasando `repo` = ruta absoluta del checkout; sus argumentos están en la cabecera de cada script. P1, T6 y T7 ya se ejecutaron así en la sesión 2.
 
 | Fase | Workflow | Paralelo | Integración (en serie) |
 |---|---|---|---|
-| P1 | `home-task-cycle`, `integrate: true`, tarea `P1` (puerto 3130; `lines`: §0–§4 del plan; `extra`: §4 del informe de JS; `build`, `integBuild`; lentes compliance, quality, visual) | 3 revisores | P1 |
-| F3 | `home-task-cycle`, `integrate: false`, args de `docs/superpowers/handoff/2026-09-24-args-f3.json` (rellena `repo`; recalcula `lines`) | 4 implementadores y sus 12 revisores | — |
-| F4 | workflow propio de integración | — | T7 → T8 → T9 → T10a: `page.tsx` con el orden del contrato §3.5, unir las claves de diccionario, conservar sin duplicar los añadidos a `e2e/helpers.ts`, fundir cada spec temporal `e2e/home-tN.spec.ts` en `e2e/home.spec.ts` y borrarlo; lint, tsc, e2e completo tras cada una; build y medida de JS tras T9 y T10a. Después **T10b** con `home-task-cycle`: los tres `describe` de la home completa (orden de secciones, h2 sin JS y regla del azul en todo el scroll, a 1440×900 y 390×844, con y sin reducir movimiento). |
+| F3′ | T8: aplica los parches de `wip/task8/` en `../wt/task8` y lanza `home-task-cycle` con `integrate: false` y `tasks[0].impl` (ronda 3 de revisión y corrector). En paralelo, **T9 y T10a** con `home-task-cycle`, `integrate: false`, args de `docs/superpowers/handoff/2026-09-24-args-f3.json` (rellena `repo`; recalcula `lines`) | 3 tareas y sus revisores (tres lentes) | — |
+| F4 | `home-integrate-serial` (`.claude/workflows/`) con `measure: true` | — | T8 → T9 → T10a: `page.tsx` con el orden del contrato §3.5, unir las claves de diccionario, conservar sin duplicar los añadidos a `e2e/helpers.ts`, fundir cada spec temporal `e2e/home-tN.spec.ts` en `e2e/home.spec.ts` y borrarlo; lint, tsc, e2e completo, build, `check:modern-js` y medida de JS tras cada una. Después **T10b** con `home-task-cycle` (`integrate: true`): los tres `describe` de la home completa (orden de secciones, h2 sin JS y regla del azul en todo el scroll, a 1440×900 y 390×844, con y sin reducir movimiento). |
 | F5 | workflow propio | revisores visuales (escritorio, móvil, reducir movimiento, 1920/2560) y de rama (cumplimiento, calidad, rendimiento, a11y) | T11 |
 
 Si en F3 el paralelo genera más conflictos de los que se resuelven con seguridad, vuelve a la secuencia estricta del plan (§2) y anótalo.

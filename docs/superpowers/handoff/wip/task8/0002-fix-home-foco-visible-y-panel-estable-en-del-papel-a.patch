@@ -1,0 +1,446 @@
+From 57042ff3c6cd47faadce035de8ba7981d8c74c72 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 09:04:26 +0000
+Subject: [PATCH 2/3] fix(home): foco visible y panel estable en del papel al
+ dato
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Revisión de T8, ronda 1. Los enlaces de la sección oscura tenían el anillo de
+foco global (#0a0a0a) sobre fondo #0a0a0a: ahora es blanco. En tabletas en
+scrub (768–~870 px) el contador se partía en dos líneas y el alto de cada
+fila dependía de su estado, así que el bloque saltaba ~8 px por campo. El
+sizes de la imagen tiene en cuenta el alto y deja de pedir de más.
+
+Decisiones:
+- Foco: focus-visible:outline-white en los dos enlaces, como en la portada;
+  la prueba espera el color final porque transition-colors anima el contorno.
+- Panel: contador shrink-0 whitespace-nowrap; columna de estado con el ancho
+  del texto más largo (las tres etiquetas apiladas en un grid, las inactivas
+  invisible y aria-hidden), sin anchos por idioma; nombre min-w-0.
+  Descartado 6/6 columnas entre md y lg: la imagen bajaba a 336 px y se
+  perdía el formulario. En es, entre 768 y ~870 px, algunos nombres y la
+  etiqueta ocupan dos líneas, pero ya no cambian al avanzar.
+- Una sola fuente para el número de campos: DOSSIER_FIELD_COUNT =
+  DOSSIER_FIELDS.length y DossierContent.fields es una tupla de esa longitud
+  (tsc falla si un diccionario no trae un nombre por recuadro).
+- sizes: 117vh hasta 61,5rem de alto, 72rem después (antes 1152px fijo) y
+  43,75rem en escritorio muy bajo. 844×390 a DPR 3 pide 1920w en vez de 3840w.
+- Comentarios al día en dossier-progress.ts y page.tsx.
+- Pruebas nuevas: extractionAtStep/extractionComplete y longitud de los
+  diccionarios; opacidad 1 de los recuadros al reducir movimiento; en celular,
+  un recuadro activo en azul y nunca más de un azul durante la secuencia;
+  foco blanco con teclado; tableta 768×1024 y 820×1180 (contador en una línea
+  y h2 y filas quietos). Foco y tableta fallan con el código anterior.
+
+Verificación: lint y tsc sin errores; home-t8 14/14 (las nuevas, 3 veces);
+e2e completo 160/160; build en verde. JS de /es (next start, 1440×900,
+mediana de 3): 252 744 B, +109 B sobre la implementación, +1 895 B sobre la
+base (tope +3 000 B).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../2026-09-23-home-cartografia-soberana.md   |   9 +-
+ e2e/home-t8.spec.ts                           | 120 +++++++++++++++++-
+ src/app/[locale]/page.tsx                     |   7 +-
+ src/components/sections/home/Dossier.tsx      |  24 +++-
+ src/components/sections/home/DossierStage.tsx |  51 ++++++--
+ .../sections/home/dossier-progress.ts         |   9 +-
+ 6 files changed, 189 insertions(+), 31 deletions(-)
+
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index 483f3a7..3a4df26 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -7615,13 +7615,20 @@ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
+ 7. **Degradados de borde** (`#0a0a0a` → transparente, 12 % vertical y 8 % horizontal) sobre el marco, para fundir la mesa oscura con el fondo sin cortes (§4 del diseño). No tapan ningún campo: los campos están entre el 26 % y el 58 % del alto.
+ 8. **Pantallas bajas en `scrub` (600–720 px de alto) y tabletas.** El marco fijo es `h-svh` con `overflow-hidden` y centra el contenido: si no cabe, lo recorta por arriba y por abajo, y el eyebrow queda debajo del encabezado fijo (medido: a 1280×600, eyebrow en y = 31; a 1024×600, en −11 y última fila en 642). `short:` (≤ 720 px de alto, la variante de T6) compacta la sección en `scrub`: rellenos `pt-20`/`pb-6`, título `text-4xl`, descripción `text-sm`, huecos menores, panel `p-4` y filas `py-1.5`. Como red de seguridad, el marco lleva `stage:h-auto stage:min-h-svh` (igual que la portada): en tabletas de 768–1100 px de ancho con poco alto el marco crece, el `sticky` fija su parte superior y el final del panel aparece al terminar el recorrido. Nada se oculta y nada queda bajo el encabezado. La prueba "scrub en pantallas bajas" lo comprueba a 1280×600, 1366×657 y 1024×600.
+ 9. **Dependencia de `countVisibleBlue`:** la prueba de scrub afirma que hay un solo azul y que el recuadro activo es azul. Juntas implican que el panel no tiene azul. Esto exige que el helper de T6 cuente solo lo visible dentro del viewport (la cumbre de la portada, azul en modo `static`, está fuera de pantalla en ese momento).
+-10. **Imagen como slot desde el servidor (implementación; presupuesto de JS §5 T8, acción 5).** El código de 2.3 se reparte en dos archivos: `Dossier.tsx` pasa a ser la sección de servidor (sin directiva) que importa `expediente`, renderiza `<Image … placeholder={coverPlaceholder(expediente)} sizes="(min-width: 48rem) 1152px, 170vw">` con carga diferida y lo pasa como `media` a `DossierStage.tsx`, la isla (`"use client"`) con el resto del código de 2.3 sin cambios. La isla ya no importa `next/image` ni la imagen: la miniatura del import estático no viaja en su JS (comprobado en el build: el data URL del expediente solo está en el HTML). `page.tsx` sigue importando `{ Dossier }` de `home/Dossier` (contrato §3.5), como import estático.
++10. **Imagen como slot desde el servidor (implementación; presupuesto de JS §5 T8, acción 5).** El código de 2.3 se reparte en dos archivos: `Dossier.tsx` pasa a ser la sección de servidor (sin directiva) que importa `expediente`, renderiza `<Image … placeholder={coverPlaceholder(expediente)} sizes={IMAGE_SIZES}>` (ver decisión 17) con carga diferida y lo pasa como `media` a `DossierStage.tsx`, la isla (`"use client"`) con el resto del código de 2.3 sin cambios. La isla ya no importa `next/image` ni la imagen: la miniatura del import estático no viaja en su JS (comprobado en el build: el data URL del expediente solo está en el HTML). `page.tsx` sigue importando `{ Dossier }` de `home/Dossier` (contrato §3.5), como import estático.
+ 11. **`media` dentro de un Fragment.** Suelto junto al `<svg>` dentro de `FocalCover`, el elemento que llega del servidor provocaba en desarrollo el aviso de React «Each child in a list should have a unique key prop» (dueño: Dossier). Envuelto en `<>{media}</>` es hijo único y el aviso desaparece; no cambia el DOM.
+ 12. **`frameClassName` del `ScrollStage`:** se mantiene el de 2.3 (`stage:flex stage:items-center stage:h-auto stage:min-h-svh`). La única sobrescritura es `stage:h-auto` sobre el `h-svh` del marco; las otras tres clases no chocan con `FRAME_CLASS`, así que no hay sobrescrituras nuevas (presupuesto de JS §5 T8).
+ 13. **Ejecución en paralelo (Fase 3).** Sin T7 integrada, `Dossier` se inserta tras `Services` (Capacidades en el estado actual) y antes de `FlagshipAI`, la posición del contrato §3.5; las pruebas van en el spec temporal `e2e/home-t8.spec.ts` (autocontenido; el integrador lo funde en `e2e/home.spec.ts`).
++14. **Foco visible en los enlaces (revisión de T8, ronda 1).** El anillo global de `*:focus-visible` es `colors.accent` = `#0a0a0a`, el mismo color que el fondo de la sección: no se veía (WCAG 2.4.7, diseño §11). Los dos enlaces llevan `focus-visible:outline-white`, como el enlace de sector público de la portada. `transition-colors` también anima `outline-color`: la prueba espera con `expect.poll` al color final.
++15. **Panel estable en tabletas en `scrub` (768–~870 px de ancho) y en 844×390 (revisión de T8, ronda 1).** Ahí la columna del panel (`md:col-span-5`) mide 272–304 px. El contador se partía en dos líneas («02 /» y «06», contra §3.4) y la etiqueta de estado también («EN / ESPERA»). Como el ancho del estado cambia con el estado, el nombre cambiaba de líneas y el bloque centrado saltaba ~8 px con cada campo terminado (CLS de 0,005 a 0,013, medido por los revisores). Arreglo: contador `shrink-0 whitespace-nowrap`; columna de estado con el ancho del texto más largo, apilando las tres etiquetas de `content.status` en la misma celda de un `grid` (las inactivas, `invisible` y `aria-hidden`), sin anchos afinados por idioma; nombre `min-w-0 break-words`. Medido en es y en a 768×1024, 820×1180, 844×390, 1024×768, 1024×1366, 1280×600 y 1440×900: contador en una línea, y altos de fila y `top` del h2 idénticos en p = 0; 0,03; 0,2; 0,38; 0,62; 0,8 y 0,95. *Descartado:* dar 6 columnas al texto y al panel entre md y lg. A 768 px de ancho el marco de la imagen bajaba a 336 px, los recuadros salían del recorte con `--fx: 10%` y, aun moviendo el encuadre, se perdían las etiquetas del formulario de la página izquierda. *Queda, estable:* en es, entre 768 y ~870 px, algunos nombres («Fecha de nacimiento», «Correo electrónico», «Tipo de trámite», «Fecha de solicitud») y la etiqueta «Campos extraídos» ocupan dos líneas (sin partirse harían falta 268 px útiles en el panel, y hay 224–256). Prueba nueva «tableta vertical en scrub» a 768×1024 y 820×1180.
++16. **Número de campos con una sola fuente (revisión de T8, ronda 1).** `DOSSIER_FIELD_COUNT = DOSSIER_FIELDS.length` (`dossier-progress.ts` importa `geometry.ts`, que también es puro) y `DossierContent.fields` es una tupla de la misma longitud (`NamePerItem<typeof DOSSIER_FIELDS>`, mapeo homomórfico). Si un diccionario trae más o menos nombres que recuadros, `tsc` falla. La prueba pura lo repite para es y en.
++17. **`sizes` según el alto (revisión de T8, ronda 1).** El ancho de la imagen es max(ancho del marco, 1,5 × su alto), y en md el alto es min(78svh, 48rem). `1152px` fijo pedía de más en pantallas bajas. Ahora `IMAGE_SIZES` = `(min-width: 80rem) and (max-height: 37.3rem) 43.75rem, (min-width: 48rem) and (max-height: 61.5rem) 117vh, (min-width: 48rem) 72rem, 170vw`, todo en rem (§3.6). `72rem` sustituye a `1152px`: con la letra del navegador a 20 px el marco llega a 1440 px. La primera condición cubre el escritorio muy bajo, donde manda el ancho del marco (≤ 699 px). Medido en dev (`currentSrc`): 844×390 a DPR 3 pinta 456 px y pide `w=1920` (antes 3840); 1024×600 a DPR 2, `w=1920` (antes 3840); 1440×900 a DPR 2, `w=3840`, y 390×844 a DPR 3, `w=2048` (sin cambios); 1440×500 a DPR 2, `w=1920`. El srcset sigue empezando en 1200w: Next filtra los anchos por el `170vw`. La aproximación aceptada (entre 48 y 80rem, ventanas más de dos veces más anchas que altas) está en el comentario de `IMAGE_SIZES`.
++18. **Pruebas añadidas (revisión de T8, ronda 1).** Tabla de `extractionAtStep` y `extractionComplete`. En reducir movimiento, opacidad 1 en los 6 recuadros. En celular, algún recuadro llega a `active` en azul, y `countVisibleBlue`, muestreado cada 100 ms durante la secuencia, nunca pasa de 1. Foco blanco con teclado en los dos enlaces. Tableta vertical (decisión 15). Con el código anterior fallan las pruebas de foco y de tableta (comprobado), y la de tableta falla también si solo se arregla el contador.
+ 
+ **Estado al cierre (T8, en paralelo, sin P1 ni T7):** JS de `/es` (`next start`, 1440×900, mediana de 3, `measure-js.mjs`): base del worktree (`ca0dd63`, todavía ES5) 250 849 B en 16 scripts → con T8 252 635 B en 16 scripts: **+1 786 B** (tope +3 000 B). e2e completo 156/156 en verde (146 + 10 de T8), lint, `tsc` y build en verde. Medidas del marco en `scrub`: 1440×900 eyebrow y = 181, última fila 750; 1366×657 eyebrow 122, última fila 574; 1024×600 marco 632 px, eyebrow 80.
+ 
++**Tras la revisión de T8 (ronda 1):** JS de `/es` con el mismo método: 252 744 B en 16 scripts, +109 B sobre la implementación y **+1 895 B** sobre la base (tope +3 000 B). e2e completo 160/160 en verde (146 + 14 de T8), lint, `tsc` y build en verde.
++
+ ---
+ 
+ ## Tarea 9 — Lo que ya construimos
+diff --git a/e2e/home-t8.spec.ts b/e2e/home-t8.spec.ts
+index 56f018f..6b08446 100644
+--- a/e2e/home-t8.spec.ts
++++ b/e2e/home-t8.spec.ts
+@@ -2,8 +2,14 @@ import { test, expect } from '@playwright/test'
+ import es from '../src/content/dictionaries/es'
+ import en from '../src/content/dictionaries/en'
+ import { buildLocalePath } from '../src/lib/i18n'
+-import { extractionAt, fieldState } from '../src/components/sections/home/dossier-progress'
+-import { countVisibleBlue, effectiveOpacity, scrollToY, settledTopOffset, waitForHydration } from './helpers'
++import {
++  DOSSIER_FIELD_COUNT,
++  extractionAt,
++  extractionAtStep,
++  extractionComplete,
++  fieldState,
++} from '../src/components/sections/home/dossier-progress'
++import { countVisibleBlue, effectiveOpacity, ORBEXS_BLUE, scrollToY, settledTopOffset, waitForHydration } from './helpers'
+ 
+ /**
+  * Spec TEMPORAL de la tarea 8 (Fase 3: T7 ∥ T8 ∥ T9 ∥ T10a en paralelo). Son los
+@@ -32,6 +38,19 @@ test.describe('Del papel al dato · extractionAt (módulo puro)', () => {
+       'idle',
+     ])
+   })
++
++  test('secuencia de celular, estado final y un nombre por recuadro (revisión de T8)', () => {
++    expect(extractionAtStep(-1)).toEqual({ done: 0, active: null }) // todavía no entró en pantalla
++    expect(extractionAtStep(0)).toEqual({ done: 0, active: 0 })
++    expect(extractionAtStep(3)).toEqual({ done: 3, active: 3 })
++    expect(extractionAtStep(6)).toEqual({ done: 6, active: null })
++    expect(extractionAtStep(9)).toEqual({ done: 6, active: null })
++    expect(extractionComplete()).toEqual({ done: 6, active: null })
++    // Contador «0N / 06», recuadros y filas del panel salen del mismo número
++    expect(DOSSIER_FIELD_COUNT).toBe(6)
++    expect(es.dossier.fields).toHaveLength(DOSSIER_FIELD_COUNT)
++    expect(en.dossier.fields).toHaveLength(DOSSIER_FIELD_COUNT)
++  })
+ })
+ 
+ test.describe('Del papel al dato · sin JavaScript', () => {
+@@ -73,6 +92,10 @@ test.describe('Del papel al dato · reducir movimiento', () => {
+     await expect(section.locator('[data-dossier-field][data-state="done"]')).toHaveCount(es.dossier.fields.length)
+     await expect(section.locator('[data-dossier-counter]')).toHaveText('06 / 06')
+     await expect(section.locator('[data-stage-frame]')).not.toHaveCSS('position', 'sticky')
++    // Terminados y además visibles: un recuadro en opacity 0 no se vería (revisión de T8)
++    await expect
++      .poll(() => section.locator('[data-dossier-field]').evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity)))
++      .toEqual(Array(es.dossier.fields.length).fill('1'))
+ 
+     const y = await section.evaluate((el) => window.scrollY + el.getBoundingClientRect().top)
+     await scrollToY(page, y)
+@@ -127,6 +150,30 @@ test.describe('Del papel al dato · scrub (1440×900)', () => {
+     // Un solo azul visible, y es el recuadro activo (que sí es azul): el panel no tiene azul
+     await expect.poll(() => countVisibleBlue(page)).toBe(1)
+   })
++
++  test('con teclado, el anillo de foco de los enlaces se ve blanco sobre el fondo oscuro (revisión de T8)', async ({ page }) => {
++    await page.goto('/es')
++    await waitForHydration(page)
++    const section = page.locator(`#${es.dossier.sectionId}`)
++    const [first, second] = es.dossier.links.map((link) => section.getByRole('link', { name: link.label }))
++    /** :focus-visible y contorno del enlace. El global (colors.accent) es #0a0a0a, igual que el fondo. */
++    const ring = (link: typeof first) =>
++      link.evaluate((el) => {
++        const style = getComputedStyle(el)
++        return { visible: el.matches(':focus-visible'), style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor }
++      })
++    const whiteRing = { visible: true, style: 'solid', width: '2px', color: 'rgb(255, 255, 255)' }
++
++    // Se llega a cada enlace con el teclado (Mayús+Tab y Tab): así casa :focus-visible
++    await second.focus()
++    await page.keyboard.press('Shift+Tab')
++    await expect(first).toBeFocused()
++    // transition-colors también anima outline-color: se espera al color final
++    await expect.poll(() => ring(first)).toEqual(whiteRing)
++    await page.keyboard.press('Tab')
++    await expect(second).toBeFocused()
++    await expect.poll(() => ring(second)).toEqual(whiteRing)
++  })
+ })
+ 
+ test.describe('Del papel al dato · scrub en pantallas bajas (§3.6: scrub desde 600 px de alto)', () => {
+@@ -160,6 +207,54 @@ test.describe('Del papel al dato · scrub en pantallas bajas (§3.6: scrub desde
+   }
+ })
+ 
++test.describe('Del papel al dato · tableta vertical en scrub (revisión de T8)', () => {
++  // Entre 768 y ~870 px de ancho el panel mide unos 270–300 px: el contador se
++  // partía en dos líneas y el alto de cada fila dependía de su estado, así que
++  // el bloque centrado saltaba unos 8 px con cada campo terminado.
++  for (const viewport of [
++    { width: 768, height: 1024 },
++    { width: 820, height: 1180 },
++  ]) {
++    test(`a ${viewport.width}×${viewport.height} el contador ocupa una línea y nada salta al avanzar`, async ({ page }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = page.locator(`#${es.dossier.sectionId}`)
++      await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
++      const counter = section.locator('[data-dossier-counter]')
++
++      const layoutAt = async (progress: number, expectedCounter: string) => {
++        const y = await section.evaluate((el, p) => {
++          const rect = el.getBoundingClientRect()
++          return window.scrollY + rect.top + p * (rect.height - window.innerHeight)
++        }, progress)
++        await scrollToY(page, y)
++        await expect(counter).toHaveText(expectedCounter)
++        return section.evaluate((el) => {
++          const counterEl = el.querySelector('[data-dossier-counter]')!
++          const range = document.createRange()
++          range.selectNodeContents(counterEl)
++          return {
++            // Líneas del contador: una caja por línea de texto
++            counterLines: new Set(Array.from(range.getClientRects(), (rect) => Math.round(rect.top))).size,
++            h2Top: Math.round(el.querySelector('h2')!.getBoundingClientRect().top),
++            rows: Array.from(el.querySelectorAll('[data-dossier-row]'), (row) => Math.round(row.getBoundingClientRect().height)),
++          }
++        })
++      }
++
++      const start = await layoutAt(0, '00 / 06')
++      const middle = await layoutAt(2.5 / 6.6, '02 / 06')
++      const end = await layoutAt(0.95, '06 / 06')
++      expect(start.counterLines).toBe(1)
++      expect(middle.counterLines).toBe(1)
++      expect(end.counterLines).toBe(1)
++      expect(middle).toEqual(start)
++      expect(end).toEqual(start)
++    })
++  }
++})
++
+ test.describe('Del papel al dato · celular', () => {
+   test.use({ viewport: { width: 390, height: 844 } })
+ 
+@@ -177,10 +272,23 @@ test.describe('Del papel al dato · celular', () => {
+       .first()
+       .evaluate((el) => window.scrollY + el.getBoundingClientRect().top - 200)
+     await scrollToY(page, y)
+-    // 7 pasos de 700 ms tras entrar en pantalla
+-    await expect(section.locator('[data-dossier-row][data-state="done"]')).toHaveCount(es.dossier.fields.length, {
+-      timeout: 10_000,
+-    })
++    // Algún recuadro llega a estar activo, y en azul
++    const active = section.locator('[data-dossier-field][data-state="active"]')
++    await expect(active).toHaveCount(1)
++    await expect(active).toHaveCSS('stroke', ORBEXS_BLUE)
++    // 7 pasos de 700 ms tras entrar en pantalla. Mientras avanza, nunca hay más
++    // de un azul visible (regla del azul, revisión de T8).
++    const blues: number[] = []
++    await expect
++      .poll(
++        async () => {
++          blues.push(await countVisibleBlue(page))
++          return section.locator('[data-dossier-row][data-state="done"]').count()
++        },
++        { timeout: 10_000, intervals: [100] }
++      )
++      .toBe(es.dossier.fields.length)
++    expect(Math.max(...blues), `azules visibles durante la secuencia: ${blues.join(',')}`).toBeLessThanOrEqual(1)
+     await expect(section.locator('[data-dossier-counter]')).toHaveText('06 / 06')
+   })
+ })
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index c514a6b..48efd6d 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -8,8 +8,11 @@ import { isValidLocale, buildLocalePath } from "@/lib/i18n"
+ import type { Locale } from "@/lib/i18n"
+ import { pageMetadata } from "@/lib/metadata"
+ 
+-// La portada se importa de forma estática: es el LCP y su HTML tiene que salir
+-// del servidor sin esperar a ningún chunk. El resto de secciones, bajo el pliegue.
++// La portada y "Del papel al dato" se importan de forma estática: la portada es
++// el LCP y su HTML tiene que salir del servidor sin esperar a ningún chunk, y las
++// secciones nuevas no usan next/dynamic (presupuesto de JS, traspaso §8.2). Las
++// secciones anteriores al rediseño siguen con next/dynamic, bajo el pliegue,
++// hasta que P1 las pase también a imports estáticos.
+ const Services = dynamic(() => import("@/components/sections/Services").then(m => ({ default: m.Services })))
+ const FlagshipAI = dynamic(() => import("@/components/sections/FlagshipAI").then(m => ({ default: m.FlagshipAI })))
+ const CaseStudy = dynamic(() => import("@/components/sections/CaseStudy").then(m => ({ default: m.CaseStudy })))
+diff --git a/src/components/sections/home/Dossier.tsx b/src/components/sections/home/Dossier.tsx
+index ece80fe..b77a6b5 100644
+--- a/src/components/sections/home/Dossier.tsx
++++ b/src/components/sections/home/Dossier.tsx
+@@ -5,12 +5,24 @@ import { coverPlaceholder } from "@/lib/image-placeholder"
+ import { DossierStage } from "./DossierStage"
+ import type { DossierContent } from "./DossierStage"
+ 
+-// Ancho del marco 3:2 de FocalCover: max(ancho del marco, 1,5 × su alto). En md
+-// el marco mide min(78svh, 48rem) de alto, así que la imagen nunca pasa de
+-// 1,5 × 48rem = 1152 px; en celular (aspect-[4/5] a todo el ancho) mide
+-// 1,5 × 1,25 = 1,875 × el ancho del marco, ≈ 170vw con los márgenes. En rem,
+-// como la variante md: (plan §3.6).
+-const IMAGE_SIZES = "(min-width: 48rem) 1152px, 170vw"
++// Ancho de la imagen = ancho del marco 3:2 de FocalCover = max(ancho del marco,
++// 1,5 × su alto). Todo en rem, como la variante md: (plan §3.6): con la letra
++// del navegador a 20 px, el layout y las media queries crecen a la vez.
++// - md: el marco mide min(78svh, 48rem) de alto → 1,5 × 78vh = 117vh hasta
++//   61,5rem de alto (donde 78vh llega a 48rem) y 1,5 × 48rem = 72rem después.
++// - md desde 80rem de ancho y ≤ 37,3rem de alto: el marco (7 de las 12
++//   columnas de max-w-7xl, 43,67rem ≈ 699 px) ya es más ancho que 117vh, así
++//   que manda su ancho.
++// - celular (aspect-[4/5] a todo el ancho): 1,5 × 1,25 = 1,875 × el ancho del
++//   marco, ≈ 170vw con los márgenes.
++// Aproximación aceptada: entre 48 y 80rem de ancho, en ventanas más de dos veces
++// más anchas que altas (escritorio muy bajo), el marco puede superar 117vh.
++const IMAGE_SIZES = [
++  "(min-width: 80rem) and (max-height: 37.3rem) 43.75rem",
++  "(min-width: 48rem) and (max-height: 61.5rem) 117vh",
++  "(min-width: 48rem) 72rem",
++  "170vw",
++].join(", ")
+ 
+ /**
+  * "Del papel al dato" — `#gobierno` / `#government` (diseño §5.4). Sección de
+diff --git a/src/components/sections/home/DossierStage.tsx b/src/components/sections/home/DossierStage.tsx
+index a6dccf2..65dea6b 100644
+--- a/src/components/sections/home/DossierStage.tsx
++++ b/src/components/sections/home/DossierStage.tsx
+@@ -10,6 +10,7 @@ import { useStageProgress } from "@/hooks/useStageProgress"
+ import { buildLocalePath } from "@/lib/i18n"
+ import type { Locale } from "@/lib/i18n"
+ import {
++  DOSSIER_FIELD_COUNT,
+   DOSSIER_STEP_MS,
+   EXTRACTION_IDLE,
+   extractionAt,
+@@ -17,12 +18,15 @@ import {
+   extractionComplete,
+   fieldState,
+ } from "./dossier-progress"
+-import type { Extraction } from "./dossier-progress"
++import type { Extraction, FieldState } from "./dossier-progress"
+ import { DOSSIER_FIELDS, VIEWBOX } from "./geometry"
+ 
+ const INK = "#0a0a0a"
+ const BLUE = "#2563eb"
+-const FIELD_COUNT = DOSSIER_FIELDS.length
++const STATES: readonly FieldState[] = ["idle", "active", "done"]
++
++/** Tupla de textos con la longitud de T (mapeo homomórfico: exige un parámetro de tipo). */
++type NamePerItem<T extends readonly unknown[]> = { readonly [K in keyof T]: string }
+ 
+ /** `dict.dossier` (plan §3.2, T8). */
+ export interface DossierContent {
+@@ -30,7 +34,8 @@ export interface DossierContent {
+   eyebrow: string
+   title: string
+   description: string
+-  fields: readonly string[]
++  /** Un nombre por recuadro de DOSSIER_FIELDS, en su orden (tupla de la misma longitud). */
++  fields: NamePerItem<typeof DOSSIER_FIELDS>
+   status: { idle: string; active: string; done: string }
+   counterLabel: string
+   /** Lo usa la sección de servidor (Dossier.tsx) en el <Image> que llega como `media`. */
+@@ -65,7 +70,7 @@ export function DossierStage({
+   // scrub: el avance del contenedor de 250 svh decide campos terminados y activo
+   const [scrub, setScrub] = useState<Extraction>(EXTRACTION_IDLE)
+   const onProgress = useCallback((latest: number) => {
+-    const next = extractionAt(latest, FIELD_COUNT)
++    const next = extractionAt(latest, DOSSIER_FIELD_COUNT)
+     setScrub((prev) => (prev.done === next.done && prev.active === next.active ? prev : next))
+   }, [])
+   useMotionValueEvent(progress, "change", onProgress)
+@@ -75,20 +80,20 @@ export function DossierStage({
+   const [step, setStep] = useState(-1)
+   const stepRef = useRef(-1)
+   useEffect(() => {
+-    if (mode !== "inView" || !frameInView || stepRef.current >= FIELD_COUNT) return
++    if (mode !== "inView" || !frameInView || stepRef.current >= DOSSIER_FIELD_COUNT) return
+     const timer = window.setInterval(() => {
+-      stepRef.current = Math.min(stepRef.current + 1, FIELD_COUNT)
++      stepRef.current = Math.min(stepRef.current + 1, DOSSIER_FIELD_COUNT)
+       setStep(stepRef.current)
+-      if (stepRef.current >= FIELD_COUNT) window.clearInterval(timer)
++      if (stepRef.current >= DOSSIER_FIELD_COUNT) window.clearInterval(timer)
+     }, DOSSIER_STEP_MS)
+     return () => window.clearInterval(timer)
+   }, [mode, frameInView])
+ 
+   const extraction =
+     mode === "static"
+-      ? extractionComplete(FIELD_COUNT)
++      ? extractionComplete(DOSSIER_FIELD_COUNT)
+       : mode === "inView"
+-        ? extractionAtStep(step, FIELD_COUNT)
++        ? extractionAtStep(step, DOSSIER_FIELD_COUNT)
+         : scrub
+   const fadeDuration = mode === "static" ? 0 : 0.2
+ 
+@@ -117,7 +122,9 @@ export function DossierStage({
+                 <li key={link.href}>
+                   <Link
+                     href={buildLocalePath(locale, link.href)}
+-                    className="inline-flex items-center gap-2 text-sm font-medium text-white transition-colors duration-200 hover:text-[#a3a3a3]"
++                    // Anillo blanco: el global (colors.accent = #0a0a0a) no se ve
++                    // sobre esta sección oscura (WCAG 2.4.7; como en HomeHero).
++                    className="inline-flex items-center gap-2 text-sm font-medium text-white transition-colors duration-200 hover:text-[#a3a3a3] focus-visible:outline-white"
+                   >
+                     {link.label}
+                     <span aria-hidden="true">→</span>
+@@ -183,11 +190,12 @@ export function DossierStage({
+           <div className="rounded-[6px] border border-[#1a1a1a] bg-[#141414] p-5 md:col-span-5 md:col-start-1 md:row-start-2 md:self-start md:p-6 short:stage:p-4">
+             <div className="flex items-baseline justify-between gap-4 border-b border-[#1a1a1a] pb-3">
+               <InstrumentLabel>{content.counterLabel}</InstrumentLabel>
++              {/* Siempre en una línea (§3.4: «0N / 06»); si falta sitio, se parte la etiqueta. */}
+               <span
+                 data-dossier-counter=""
+-                className="font-mono text-[10px] tracking-[0.3em] text-white md:text-[11px]"
++                className="shrink-0 whitespace-nowrap font-mono text-[10px] tracking-[0.3em] text-white md:text-[11px]"
+               >
+-                {`${pad(extraction.done)} / ${pad(FIELD_COUNT)}`}
++                {`${pad(extraction.done)} / ${pad(DOSSIER_FIELD_COUNT)}`}
+               </span>
+             </div>
+             <ol className="mt-1">
+@@ -201,8 +209,23 @@ export function DossierStage({
+                     data-state={state}
+                     className={`-mx-2 flex items-center justify-between gap-4 border-b border-[#1a1a1a] px-2 py-2 short:stage:py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] last:border-b-0 ${state === "active" ? "bg-[#1a1a1a]" : ""}`}
+                   >
+-                    <span className={tone}>{name}</span>
+-                    <span className={tone}>{content.status[state]}</span>
++                    <span className={`min-w-0 break-words ${tone}`}>{name}</span>
++                    {/* Columna de estado con el ancho del texto más largo: las tres
++                        etiquetas se apilan en la misma celda y solo se ve la actual.
++                        Así el nombre dispone siempre del mismo ancho y la fila no
++                        cambia de alto al avanzar la extracción (sin saltos del
++                        bloque centrado en tabletas, donde el panel es estrecho). */}
++                    <span className="grid shrink-0 justify-items-end whitespace-nowrap">
++                      {STATES.map((option) => (
++                        <span
++                          key={option}
++                          aria-hidden={option === state ? undefined : true}
++                          className={`col-start-1 row-start-1 ${option === state ? tone : "invisible"}`}
++                        >
++                          {content.status[option]}
++                        </span>
++                      ))}
++                    </span>
+                   </li>
+                 )
+               })}
+diff --git a/src/components/sections/home/dossier-progress.ts b/src/components/sections/home/dossier-progress.ts
+index 9fe4120..0f50cd0 100644
+--- a/src/components/sections/home/dossier-progress.ts
++++ b/src/components/sections/home/dossier-progress.ts
+@@ -1,7 +1,12 @@
+ // Estado de extracción del expediente ("Del papel al dato", §5.4 del diseño).
+-// Módulo puro, sin React ni DOM: lo usan Dossier.tsx y e2e/home.spec.ts.
++// Módulo puro, sin React ni DOM: lo usan DossierStage.tsx y las pruebas e2e.
+ 
+-export const DOSSIER_FIELD_COUNT = 6
++import { DOSSIER_FIELDS } from "./geometry"
++
++// Una sola fuente para el número de campos: los recuadros medidos sobre la
++// imagen. DossierContent.fields es una tupla de esa misma longitud (tsc obliga
++// a que los diccionarios traigan un nombre por recuadro).
++export const DOSSIER_FIELD_COUNT = DOSSIER_FIELDS.length
+ // Modo inView (celular): un campo cada 700 ms tras entrar en pantalla.
+ export const DOSSIER_STEP_MS = 700
+ 
+-- 
+2.43.0
+

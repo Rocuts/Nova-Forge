@@ -350,7 +350,7 @@ npx playwright install chromium          # en el Mac sí se permite (en el conte
 npx next typegen >/dev/null
 export HEAVY_SLOTS=3                                  # procesos pesados a la vez (24 GB)
 export CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS=8   # antes de abrir Claude Code
-npm run lint && npx tsc --noEmit && npx playwright test   # debe quedar en verde (146 pruebas)
+npm run lint && npx tsc --noEmit && npx playwright test   # debe quedar en verde (171 pruebas tras T7)
 ```
 - Worktrees en `../wt/` (por defecto del workflow: carpeta hermana del repo). `scripts/agent/new-worktree.sh` clona `node_modules` con `cp -cR` (copy-on-write de APFS).
 - `.env.local` no se versiona: sin `OPENAI_API_KEY` el diagnóstico devuelve el informe de respaldo (lo esperado en local); sin `REALTY_VOICE_DEMO_ENABLED` la demo de voz queda apagada, que es lo que prueban los e2e.
@@ -370,4 +370,38 @@ Workflow guardado: `Workflow({ name: "home-task-cycle", args })`. Argumentos (ca
 - **El contenedor web no trae `ss`** (se usó `/proc/net/tcp`) y **macOS no trae `flock`**: `scripts/agent/heavy.sh` usa candados con `mkdir` y funciona en ambos.
 - Durante una integración, el checkout principal tiene cambios sin commitear (el `merge --squash`): es lo esperado; no los commitees a mano.
 - Las líneas de las secciones del plan se desplazan cuando una tarea documenta decisiones en él: recalcula con `grep -n '^## Tarea'` antes de cada fase.
-- e2e al cierre de la sesión 2: 146 pruebas en verde.
+- e2e: 146 pruebas en verde tras T6; **171 tras T7** (ver §8.7).
+
+### 8.7 Estado real al cierre de la sesión 2 (~10:30 UTC del 2026-09-24)
+Esta subsección manda sobre §8.1–§8.5 donde difieran.
+
+| Paso | Commit | Resultado |
+|---|---|---|
+| T2 | `1bbd6ad` | e2e 103/103 |
+| T5 | `182001a` | e2e 123/123 |
+| T6 | `5cf73de` | e2e 146/146, build ✅ |
+| Traspaso (primer commit de §8) | `ca0dd63` | — |
+| **P1** rendimiento | `25f4227` | e2e 147/147, build ✅, `check:modern-js` OK (postbuild). **JS de `/es`: 250 849 → 219 595 B (−31 254)**; es la línea base de T7–T10. HTML de 5 páginas idéntico y capturas sin diferencias visibles. |
+| **T7** tesis y capacidades | `27d841d` | e2e **171/171**, build ✅, `check:modern-js` OK. JS de `/es` **220 233 B (+638)**. 2 rondas de revisión con tres lentes (ronda 1: la lámina se estrechaba con `md:max-h`, sin JS la red salía «sin empezar»; ronda 2: todos aprueban). Integrada con `home-integrate-serial` sobre P1: su spec temporal se fundió en `e2e/home.spec.ts`. |
+| **T8** del papel al dato | — (sin integrar) | Implementada (`5248386`) y corregida en 2 rondas (`57042ff`, `e445319`): foco visible sobre `#0a0a0a`, panel estable en tabletas, arranque en celular apaisado. **Guardada como parches** en `docs/superpowers/handoff/wip/task8/` (base `ca0dd63`). |
+
+**Qué hizo P1** (ver `git show 25f4227`): `browserslist` con versiones fijas (`chrome 111`, `edge 111`, `firefox 111`, `safari 16.4`), `scripts/check-modern-js.mjs` como `postbuild`; `animateSingleValue` en `HeroRoute`; fuera `MagneticButton` de `Button` (el archivo sigue, lo borra T11); `page.tsx` con imports estáticos; la imagen de la portada se renderiza en el servidor (`src/components/sections/home/hero-media.tsx`) y llega a `HomeHero` como prop `media` (`hero-band.ts` comparte la media query de la banda vertical); prueba e2e que falla si algún script de `/es` importa una imagen estática; regla ESLint `no-restricted-imports` para los imports de motion prohibidos en las islas; contrato del plan §3.8 «Presupuesto de JS».
+
+**LCP móvil (pendiente para T11):** a 390×844 con DPR 3, Slow 4G y CPU 4× contra `next start`: 2 880 ms antes de P1 → **2 724 ms** después (CLS 0). El elemento LCP es el relieve a 3840w (168 849 B); con DPR 2 pide 1920w (116 650 B) y queda en 2 540 ms. Propuesta para T11: quitar 3840 (y quizá 2048) de `images.deviceSizes` en `next.config.ts`, o bajar la calidad de esa variante, y medir de nuevo en escritorio y móvil (el objetivo del diseño es < 2 500 ms).
+
+**Trabajo sin integrar:** `docs/superpowers/handoff/wip/task8/` (parches `git format-patch`, `README.md` con el estado de cada ronda y cómo retomarla, `ciclo-revision.json` con las decisiones y los hallazgos). La ronda 3 de T8 estaba en curso al cerrar; su resultado, si llegó, está en ese README.
+
+**Lo que falta ahora, en orden** (sustituye a §8.3 donde difiera):
+1. **T8:** aplicar los parches (`README.md` de `wip/task8`), completar la ronda 3 de revisión con `home-task-cycle` (`impl` = resultado del implementador) y dejarla lista para integrar.
+2. **T9 ∥ T10a** en paralelo con `home-task-cycle` (`integrate: false`), args en `2026-09-24-args-f3.json` (T10a = T10 sin los tres `describe` de la home completa).
+3. **Integración en serie** T8 → T9 → T10a con `home-integrate-serial` (`measure: true`, `previousJs: "220 233 B (T7, 27d841d)"`), y **T10b** con `home-task-cycle`.
+4. **T11** con todo lo de §8.3 punto 4, más: el LCP móvil (arriba), borrar `MagneticButton.tsx` y los componentes 3D sin importadores, quitar `@tabler/icons-react` si sigue sin uso (decisiones 7, 19 y 24 de T7 en el plan), limpiar claves de `services` sin uso y actualizar el skill `orbexs-design-system` (aún cita `.bg-grid`).
+
+**Argumentos listos:** `docs/superpowers/handoff/2026-09-24-args-f3.json` (recalcula `lines` con `grep -n '^## Tarea'`; rellena `repo`). Para integraciones de tareas ya revisadas: workflow `.claude/workflows/home-integrate-serial.js` (argumentos en su cabecera; funde el spec temporal de cada tarea en `e2e/home.spec.ts`, e2e completo, build, `check:modern-js`, medida de JS, commit y push).
+
+**Lecciones de la noche (P1, T7, T8):**
+- En el contenedor web, `lsof` no ve los sockets de `next-server`: `portfree.sh` consulta ahora `/proc/net/tcp{,6}` y `lsof`, y dice qué proceso ocupa el puerto.
+- `next start`/`next dev` dejan un hijo `next-server` que sobrevive a `pkill -f "next start -p N"`: arranca el servidor en su propio grupo de procesos y para el grupo (`scripts/agent/README.md`).
+- Con dos workflows a la vez en 4 CPU, una pasada completa de e2e dio 42 «Internal Server Error» del servidor de desarrollo por carga; al repetir, todo en verde. En el Mac no debería pasar; si pasa, baja `HEAVY_SLOTS`.
+- Ejecutar P1 y T7 ∥ T8 con el mismo workflow y los mismos scripts que usará el Mac los validó en uso real: cada tarea integrada pasó revisión con tres lentes y e2e completo.
+

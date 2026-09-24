@@ -1,0 +1,241 @@
+{
+ "impl": {
+  "status": "done",
+  "base_commit": "ca0dd63370d79e7c726fa1d56826f9281be5ea85",
+  "head_commit": "5248386b1009c4f1aa99caa279f8198c29240f11",
+  "red_test_evidence": "Primera ejecución de e2e/home-t8.spec.ts (con e2e/helpers.ts ya ampliado): el archivo no cargaba con «Error: Cannot find module '../src/components/sections/home/dossier-progress'» y Playwright no encontró pruebas. Es el rojo que espera el plan, porque el módulo puro todavía no existía. Después creé dossier-progress.ts y repetí la ejecución: 1 prueba en verde («extractionAt (módulo puro)») y 9 en rojo, todas con «TypeError: Cannot read properties of undefined (reading 'sectionId')», porque es.dossier y en.dossier aún no existían. Coincide exactamente con el paso 1.4 del plan.",
+  "verification": "- npm run lint: 0 errores. npx tsc --noEmit: 0 errores.\n- Spec de la tarea: PORT=3080 heavy npx playwright test e2e/home-t8.spec.ts → 10/10 en verde, sin avisos de React.\n- Suite completa: PORT=3080 heavy npx playwright test → 156/156 en verde en 4,9 min (146 anteriores + 10 de T8). Incluye home, smoke y a11y. No hubo ninguna prueba intermitente.\n- Build: heavy --exclusive npm run build en verde, 75 páginas estáticas. El es.html prerenderizado contiene #gobierno con 6 data-dossier-row, y la etiqueta <img> del expediente lleva loading=\"lazy\" y la vista previa en data URL.\n- grep \"2563eb\" en Dossier.tsx, DossierStage.tsx y dossier-progress.ts: una sola línea, la constante BLUE de DossierStage.tsx, y solo la usa el stroke del recuadro activo.\n- La miniatura (data URL) del expediente no aparece en ningún chunk de .next/static/chunks. La que sí aparece es la del relieve, que es de HomeHero y corresponde a P1.\n- Peso de JS (measure-js.mjs contra next start en 3080, 1440×900, 3 ejecuciones, bajo heavy --exclusive): base del worktree (ca0dd63, sin mis cambios) 250 849 B en 16 scripts; con T8, 252 635 B en 16 scripts (las 3 ejecuciones idénticas). Delta: +1 786 B, dentro del tope de +3 000 B. Margen frente a 269 722 B: 17 087 B. La salida sigue en ES5 porque P1 no está en la base. check:modern-js no se ejecutó porque no existe en esta base.\n- Medidas en scrub (dev): a 1440×900, eyebrow en y = 181 y última fila en 750. A 1280×720, eyebrow en 153 y última fila en 606. A 1366×657, 122 y 574. A 1024×600, el marco mide 632 px y el eyebrow queda en 80. El encabezado toma data-tone=dark sobre la sección. Revisé las capturas a 1440×900 (p = 0 / 0,378 / 1), 1024×600, 390×844 y con reducir movimiento.\n- git status limpio (AGENTS.md sin cambios), sin push, y ningún servidor mío encendido (puerto 3080 libre).",
+  "decisions": [
+   "Imagen como slot, obligatorio por el presupuesto de JS: el código del plan (2.3) quedó repartido en dos archivos. src/components/sections/home/Dossier.tsx es ahora la sección de servidor, sin directiva. Importa expediente y renderiza <Image fill placeholder={coverPlaceholder(expediente)} sizes=\"(min-width: 48rem) 1152px, 170vw\" className=\"object-cover\"> con carga diferida, y se la pasa como `media` a src/components/sections/home/DossierStage.tsx. DossierStage.tsx es la isla \"use client\" y contiene el resto del código del plan sin cambios; ya no importa next/image ni la imagen. page.tsx sigue importando { Dossier } desde home/Dossier (contrato §3.5), así que su diff son solo 2 líneas. Lo elegí para que el integrador tenga los mínimos conflictos con P1 y T7 en page.tsx.",
+   "`media` va envuelto en un Fragment (<>{media}</>). Puesto suelto junto al <svg> dentro de FocalCover, el elemento que llega del servidor provocaba en desarrollo el aviso de React «Each child in a list should have a unique key prop» (Check the render method of FocalCover… passed a child from Dossier). Con el Fragment es hijo único, el aviso desaparece y el DOM no cambia.",
+   "frameClassName de ScrollStage: dejo el del plan tal cual (stage:flex stage:items-center stage:h-auto stage:min-h-svh). Interpreté «se mantiene frameClassName=\"stage:h-auto\" como está, sin nuevas sobrescrituras» así: la única sobrescritura es stage:h-auto sobre el h-svh de FRAME_CLASS, y las otras tres clases no chocan con él.",
+   "Posición en la home (Fase 3 en paralelo, sin T7): <Dossier> va justo después de <Services> (Capacidades en el estado actual) y antes de <FlagshipAI>, que T7 retira. Es la posición del contrato §3.5. Lo importé de forma estática, sin next/dynamic.",
+   "Diccionarios: solo añadí la clave `dossier`, con el texto exacto del plan, antes de `caseStudy` en es.ts y en.ts.",
+   "Pruebas: spec temporal y autocontenido e2e/home-t8.spec.ts con los 10 tests del plan. Solo importa ./helpers, los diccionarios, i18n y dossier-progress; no importa otros specs y no necesitó helpers locales de home.spec.ts. settledTopOffset quedó al final de e2e/helpers.ts, en el bloque «T8».",
+   "Documenté en la sección de T8 del plan (y solo en ella) las decisiones 10–13, el nuevo archivo DossierStage.tsx en «Archivos» y un «Estado al cierre» con la medida de JS."
+  ],
+  "deviations": [
+   "El plan crea un único Dossier.tsx con \"use client\" que importa next/image y expediente. Aquí Dossier.tsx (servidor) y DossierStage.tsx (isla) se separan, porque las instrucciones de peso (research §5 T8, acción 5) lo exigen. La API pública no cambia: <Dossier content={dict.dossier} locale={locale} />.",
+   "Añadí el Fragment alrededor de `media` (no está en el plan) para quitar el aviso de key de React que aparecía al pasar el elemento del servidor.",
+   "Las pruebas no van al final de e2e/home.spec.ts, como dice el plan, sino en e2e/home-t8.spec.ts, por las reglas de la Fase 3. El integrador debe fundirlas en home.spec.ts con la cabecera del plan (1.2) y borrar el spec temporal.",
+   "Base del delta de JS: no hay cierre de T7 medido, así que el delta se mide contra el build de este worktree antes de mis cambios (ca0dd63, ES5). La cifra absoluta no se puede comparar con la proyección de 220 KB posterior a P1."
+  ]
+ },
+ "rounds": [
+  {
+   "agent": "review:compliance:T8:r1",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "Los dos enlaces de la sección («Automatización de gobierno →», «Extracción de datos →») tienen un indicador de foco invisible. La regla global `*:focus-visible` pinta `outline: 2px solid theme('colors.accent')`, y `--color-accent` es `#0a0a0a` (globals.css:27 y 77). La sección tiene fondo `#0a0a0a`, así que el anillo sale negro sobre negro. Incumple WCAG 2.4.7 (foco visible) y el §11 del diseño. La portada ya lo resolvió con `focus-visible:outline-white` (HomeHero.tsx:274). En T6 se clasificó como mayor un fallo de este mismo tipo.",
+     "suggested_fix": "Añadir `focus-visible:outline-white` (o `focus-visible:outline-[#ffffff]`) al className del `<Link>` en DossierStage.tsx:120, igual que en HomeHero. Conviene cubrirlo con una prueba en home-t8: enfocar con Tab y comprobar que `outline-color` es `rgb(255, 255, 255)`."
+    },
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En tabletas verticales (768–~900 px de ancho, modo scrub) la columna del panel mide unos 245 px y el panel se rompe. El contador `0N / 06` se parte en dos líneas («00 /» y «06»), en contra del contrato §3.4 y del diseño §5.4 («Campos extraídos 0N / 06»). También se parten la etiqueta «Campos extraídos», los nombres («Fecha de / nacimiento») y los estados («En / espera»), y las filas quedan de alturas distintas. En 844×390 (celular apaisado) se parte «Fecha de nacimiento». El plan solo midió el alto, no el ancho intermedio de md. El traspaso §8.6 pide revisar 820×1180 y 1024×1366.",
+     "suggested_fix": "Como mínimo: `whitespace-nowrap` en el span del contador (línea 188) y `shrink-0 whitespace-nowrap` en el span del estado (línea 205), más `min-w-0` en el del nombre. Mejor aún: entre md y lg, dar más ancho a texto y panel, por ejemplo `md:col-span-6` para texto y panel, `md:col-start-7 md:col-span-6` para la imagen y el reparto actual 5/7 desde `lg:`. Después, comprobar que los recuadros siguen dentro del recorte con `[--fx:10%]`. Añadir una prueba a 820×1180 que compruebe que el contador ocupa una sola línea."
+    },
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/dossier-progress.ts",
+     "issue": "El comentario de cabecera dice «lo usan Dossier.tsx y e2e/home.spec.ts». Con la decisión 10, lo usa la isla DossierStage.tsx; Dossier.tsx ya no lo importa.",
+     "suggested_fix": "Cambiar a «lo usan DossierStage.tsx y e2e/home.spec.ts» (el spec temporal home-t8 se funde en home.spec.ts al integrar)."
+    },
+    {
+     "severity": "nit",
+     "file": "src/app/[locale]/page.tsx",
+     "issue": "El comentario «La portada se importa de forma estática… El resto de secciones, bajo el pliegue» ya no es exacto: Dossier también se importa de forma estática y está bajo el pliegue. P1 reescribe este bloque, así que esto va sobre todo para el integrador.",
+     "suggested_fix": "Al integrar con P1 (todo son imports estáticos), dejar un comentario que refleje ese estado, o quitarlo."
+    }
+   ]
+  },
+  {
+   "agent": "review:quality:T8:r1",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "Accesibilidad (WCAG 2.4.7 / 1.4.11): el foco de teclado no se ve en los dos enlaces de la sección («Automatización de gobierno →», «Extracción de datos →»). El anillo global de `*:focus-visible` es `theme('colors.accent')` = #0a0a0a, y la sección es #0a0a0a. Además, `transition-colors` (en Tailwind v4 incluye outline-color) hace que el color pase de currentColor (blanco) a #0a0a0a en 200 ms: hay un destello que se apaga y el anillo termina siendo invisible. La portada ya resolvió este mismo caso con `focus-visible:outline-white` (HomeHero.tsx:274), y el plan 2.3 lo omitió.",
+     "suggested_fix": "Añadir `focus-visible:outline-white` al className del <Link> (patrón de HomeHero), o una constante DARK_FOCUS compartida. Conviene cubrirlo con una prueba en home-t8.spec.ts: llegar con Tab al enlace, esperar a que termine la transición (expect.poll) y comprobar que outlineColor es 'rgb(255, 255, 255)'."
+    },
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "Tabletas en vertical en modo scrub (768–~900 px de ancho, p. ej. 768×1024 y 820×1180, viewports de la lista del traspaso §8.6). La columna del panel (md:col-span-5, unos 224 px útiles) es demasiado estrecha: (1) el contador se parte en dos líneas («02 /» y «06»); (2) «EN ESPERA» ocupa dos líneas y «EXTRAÍDO» una, así que el alto de cada fila depende de su estado. Al avanzar el scrub, el panel encoge y el bloque de texto (h2 incluido) salta 8 px con cada campo que termina.",
+     "suggested_fix": "En el <span data-dossier-counter>: `shrink-0 whitespace-nowrap`. Para el estado, una columna de ancho constante, el del texto más largo, sin afinarlo por idioma: `<span className=\"grid shrink-0 justify-items-end whitespace-nowrap\">` que contenga las tres etiquetas de `content.status` en `col-start-1 row-start-1`, con las inactivas `invisible` y `aria-hidden`. Otra opción: dar más columnas al panel entre md y lg (texto y panel `md:col-span-6 lg:col-span-5`; imagen `md:col-start-7 lg:col-start-6`). Añadir una prueba a 820×1180: contador en una línea y ningún layout-shift durante el scrub."
+    },
+    {
+     "severity": "minor",
+     "file": "src/components/sections/home/Dossier.tsx",
+     "issue": "`sizes` pide de más en pantallas bajas. El ancho real de la imagen en md es 1,5 × min(78svh, 48rem), pero `(min-width: 48rem) 1152px` declara siempre el tope. En celulares apaisados y portátiles bajos se descarga una variante mucho mayor de la necesaria.",
+     "suggested_fix": "`\"(min-width: 48rem) and (max-height: 61.5rem) 117vh, (min-width: 48rem) 1152px, 170vw\"` (117vh = 1,5 × 78; 61,5rem es donde 78svh alcanza 48rem). Va en rem, como pide §3.6. Actualizar el comentario de IMAGE_SIZES."
+    },
+    {
+     "severity": "minor",
+     "file": "e2e/home-t8.spec.ts",
+     "issue": "Faltan pruebas de lo que la tarea promete: (a) `extractionAtStep` y `extractionComplete` no tienen prueba unitaria; de la secuencia inView solo se comprueba el estado final. (b) En modo inView (celular) no se prueba la regla de un solo azul. (c) La prueba de reducir movimiento comprueba `data-state=\"done\"` pero no que los recuadros se vean: si quedaran en opacity 0, pasaría igual. (d) No hay prueba de foco visible en la sección oscura (ver el hallazgo major).",
+     "suggested_fix": "En la tabla pura: `extractionAtStep(-1)` → idle, `(0)` → {0,0}, `(6)` → {6,null}, `(9)` → {6,null}, y `extractionComplete()` → {6,null}. En reducir movimiento: `expect.poll(() => rects.evaluateAll(els => els.every(e => getComputedStyle(e).opacity === '1'))).toBe(true)`. En celular: `expect.poll(() => countVisibleBlue(page)).toBeLessThanOrEqual(1)` durante la secuencia, y una prueba de que algún recuadro llega a `active`."
+    },
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/dossier-progress.ts",
+     "issue": "Comentario desactualizado: dice «lo usan Dossier.tsx y e2e/home.spec.ts», pero quien lo usa es DossierStage.tsx (Dossier.tsx ya no lo importa) y, hasta integrar, e2e/home-t8.spec.ts.",
+     "suggested_fix": "«lo usan DossierStage.tsx y las pruebas e2e»."
+    },
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "El número de campos sale de tres fuentes que nada obliga a coincidir: DOSSIER_FIELD_COUNT = 6 (dossier-progress), FIELD_COUNT = DOSSIER_FIELDS.length (recuadros y contador «0N / 06») y content.fields.length (filas del panel). Si el diccionario y la geometría divergieran, el contador y las filas dejarían de cuadrar sin ningún aviso de tsc ni de las pruebas.",
+     "suggested_fix": "Definir `DOSSIER_FIELD_COUNT = DOSSIER_FIELDS.length` (importando geometry.ts, que también es puro) y tipar `fields` como tupla de 6, o añadir a la prueba pura `expect(es.dossier.fields.length).toBe(DOSSIER_FIELDS.length)` (también para en)."
+    }
+   ]
+  },
+  {
+   "agent": "review:visual:T8:r1",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En tabletas en scrub, entre 768 y unos 870 px de ancho (iPad mini 768×1024, iPad Air 820×1180, ambos en la lista de viewports del traspaso §8.6), y en el celular apaisado 844×390 (inView, es), el panel mide 222–254 px de ancho. Ahí la etiqueta de estado y el contador se parten en dos líneas. Como el ancho del estado cambia con el estado («EN ESPERA», «PROCESANDO», «EXTRAÍDO»), la fila cambia de alto al avanzar la extracción. Con el marco sticky centrado (stage:flex stage:items-center), toda la columna de texto salta mientras el usuario hace scroll: el h2 y el eyebrow bajan 8–17 px. Además el contador aparece partido («02 /» en una línea y «06» en la siguiente) y «EN / ESPERA» ocupa dos líneas.",
+     "suggested_fix": "Reservar para el estado el ancho del más largo, para que el alto de la fila no dependa del estado: en el `<span>` del estado, `shrink-0 whitespace-nowrap text-right min-w-[5.25rem]`, o bien apilar las tres etiquetas en la misma celda con `grid` y `[grid-area:1/1]`, dejando visible solo la actual y las otras con `invisible aria-hidden`. En el contador, `shrink-0 whitespace-nowrap`. Lo comprobé inyectando ese CSS con addStyleTag: en es y en, a 768, 800, 820, 880, 912, 960, 1000 y 1024 px de ancho y a 844×390 y 932×430, las filas y el h2 no se mueven entre p=0 y p=0,95, y el contador queda en una sola línea. Conviene añadir un caso a 820×1180 en «scrub en pantallas bajas» que afirme que el top del h2 es igual con 0 y con 6 campos extraídos."
+    },
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/Dossier.tsx",
+     "issue": "`sizes=\"(min-width: 48rem) 1152px, 170vw\"` supone el marco de 48rem de alto. En pantallas md bajas el marco mide mucho menos (min(78svh, 48rem)) y la imagen se descarga sobredimensionada. En 844×390 con DPR 3, la imagen se pinta con 456 px de ancho, pero se descarga la variante 3840w (la fuente de 2560 px, 145 941 B) cuando bastaría la de 1920w. La imagen es diferida y está bajo el pliegue: no afecta al LCP.",
+     "suggested_fix": "Añadir antes de la condición general una por alto, en rem como exige §3.6. Por ejemplo: `(min-width: 48rem) and (max-height: 40rem) 48rem, (min-width: 48rem) 72rem, 170vw`. Sustituye 1152px por 72rem y reutiliza la constante IMAGE_SIZES. Opcional: la ganancia es de unos 50 KB en celulares apaisados."
+    }
+   ]
+  },
+  {
+   "agent": "fix:T8:r1",
+   "head_commit": "57042ff3c6cd47faadce035de8ba7981d8c74c72",
+   "fixed": [
+    {
+     "finding": "major (compliance y quality), DossierStage.tsx:120: el foco no se ve en los enlaces «Automatización de gobierno →» y «Extracción de datos →» porque el anillo #0a0a0a queda sobre fondo #0a0a0a (WCAG 2.4.7)",
+     "how": "Se añadió `focus-visible:outline-white` al className del <Link>, igual que en HomeHero, con un comentario del porqué. Prueba nueva en home-t8: se llega a cada enlace con Mayús+Tab y con Tab, y `expect.poll` espera hasta que el anillo sea `{visible: true, solid, 2px, rgb(255, 255, 255)}`. Se espera el color final porque transition-colors también anima outline-color. La prueba falla con el código anterior (comprobado)."
+    },
+    {
+     "finding": "major (compliance, quality y visual), DossierStage.tsx:186/242: en tabletas en scrub (768 a ~870 px) y a 844×390, el contador se partía en dos líneas («02 /» y «06»), el estado también se partía, y el alto de las filas dependía del estado, así que el h2 saltaba unos 8 px por campo",
+     "how": "El contador lleva `shrink-0 whitespace-nowrap`. La columna de estado tiene ahora el ancho del texto más largo: `<span class=\"grid shrink-0 justify-items-end whitespace-nowrap\">` con las tres etiquetas de content.status en `col-start-1 row-start-1`; las inactivas llevan `invisible` y `aria-hidden`. El nombre lleva `min-w-0 break-words`. Medí en es y en a 768×1024, 820×1180, 844×390, 1024×768, 1024×1366, 1280×600 y 1440×900, en p = 0; 0,03; 0,2; 0,38; 0,62; 0,8 y 0,95: el contador queda siempre en una línea, y los altos de fila y el top del h2 no cambian. Prueba nueva «tableta vertical en scrub» a 768×1024 y 820×1180: contador en una línea, y h2 y filas iguales con 0, 2 y 6 campos extraídos. Falla con el código anterior, y también si solo se arregla el contador (comprobado)."
+    },
+    {
+     "finding": "minor (quality) y nit (visual), Dossier.tsx:13: `sizes` pide de más en pantallas bajas",
+     "how": "IMAGE_SIZES pasa a ser `(min-width: 80rem) and (max-height: 37.3rem) 43.75rem, (min-width: 48rem) and (max-height: 61.5rem) 117vh, (min-width: 48rem) 72rem, 170vw`, todo en rem (§3.6). 72rem sustituye a 1152px, que era incorrecto con la letra a 20 px. El comentario explica el cálculo y la aproximación aceptada. currentSrc medido: 844×390@3 pinta 456 px y pide 1920w (antes 3840w); 1024×600@2 pide 1920w (antes 3840w); 1440×900@2 sigue en 3840w y 390×844@3 en 2048w; 1440×500@2 pide 1920w. A DPR 1 no cambia nada: Next recorta el srcset a 1200w o más por el 170vw."
+    },
+    {
+     "finding": "minor (quality), e2e/home-t8.spec.ts:68: faltan pruebas de extractionAtStep y extractionComplete, de la regla del azul en modo inView, de la opacidad de los recuadros al reducir movimiento y del foco",
+     "how": "Añadidas: tabla pura (`extractionAtStep` con -1, 0, 3, 6 y 9, y `extractionComplete()`); con reducir movimiento, `expect.poll` comprueba que la opacidad calculada de los 6 recuadros es '1'; en celular, un recuadro llega a `active` con stroke ORBEXS_BLUE y `countVisibleBlue`, muestreado cada 100 ms durante toda la secuencia, nunca pasa de 1; la prueba de foco se describe en el primer hallazgo. Las pruebas nuevas pasan 3 de 3 veces con --repeat-each=3."
+    },
+    {
+     "finding": "nit (quality), DossierStage.tsx:65: el número de campos sale de tres fuentes que nada obliga a coincidir",
+     "how": "`DOSSIER_FIELD_COUNT = DOSSIER_FIELDS.length`: dossier-progress.ts importa geometry.ts, que también es puro. `DossierContent.fields` pasa a ser `NamePerItem<typeof DOSSIER_FIELDS>`, un mapeo homomórfico que da una tupla readonly de 6. Comprobé que tsc rechaza una tupla de 5. Se quitó el alias FIELD_COUNT. La prueba pura también comprueba `DOSSIER_FIELD_COUNT === 6` y la longitud de es y en."
+    },
+    {
+     "finding": "nit (compliance y quality), dossier-progress.ts:2: el comentario de cabecera nombra a Dossier.tsx como usuario del módulo",
+     "how": "Ahora dice «lo usan DossierStage.tsx y las pruebas e2e»."
+    },
+    {
+     "finding": "nit (compliance), page.tsx:11: el comentario «La portada se importa de forma estática… El resto, bajo el pliegue» ya no es exacto",
+     "how": "El comentario ahora dice que la portada y «Del papel al dato» se importan de forma estática (presupuesto de JS, traspaso §8.2) y que las secciones anteriores al rediseño siguen con next/dynamic hasta P1. El integrador lo reescribe al fundir con P1."
+    }
+   ],
+   "rejected": [],
+   "decisions": [
+    "Panel en tabletas: se aplicó el arreglo mínimo que midieron los revisores. El contador no se parte, la columna de estado tiene ancho constante (etiquetas apiladas en un grid, sin anchos por idioma) y el nombre lleva min-w-0. Se descartó la alternativa «mejor aún» (6 y 6 columnas entre md y lg): a 768 px el marco de la imagen bajaba de 400 a 336 px, los recuadros salían del recorte con --fx:10% y, aun moviendo el encuadre, se perdían las etiquetas del formulario de la página izquierda. Queda algo estable: en es, entre 768 y ~870 px, algunos nombres y la etiqueta «Campos extraídos» ocupan dos líneas. Sin partirse harían falta 268 px útiles en el panel, y hay entre 224 y 256. Ya no cambian al avanzar la extracción.",
+    "sizes: además de lo que pedían los revisores (117vh), se añadió una primera condición para escritorio muy bajo (80rem de ancho o más y 37,3rem de alto o menos → 43.75rem). Ahí manda el ancho del marco (unos 699 px) y 117vh se quedaría corto. Se usa 72rem en lugar de 1152px para cumplir la regla rem de §3.6: con la letra a 20 px, el marco mide 1440 px.",
+    "Las etiquetas de estado inactivas se ocultan con visibility:hidden y aria-hidden (redundante, pero explícito). Su texto sigue en textContent, así que las pruebas con toContainText del nombre no cambian.",
+    "Documenté las decisiones 14 a 18 en la sección de T8 del plan, actualicé la decisión 10 (sizes={IMAGE_SIZES}) y añadí una línea de estado tras la ronda 1 con el JS y el número de pruebas."
+   ],
+   "verification": "npm run lint y npx tsc --noEmit: 0 errores. e2e/home-t8.spec.ts: 14/14 en PORT=3080 bajo heavy.sh; las pruebas nuevas, con reducir movimiento y celular pasan 3 de 3 veces con --repeat-each=3. Contraprueba: con el DossierStage.tsx anterior fallan la prueba de foco y las dos de tableta, y con solo el arreglo del contador siguen fallando las dos de tableta; después se restauró el archivo corregido y se comprobó con cmp. Suite completa: 160/160 en verde (146 + 14 de T8) en 3,3 min. npm run build en verde bajo heavy --exclusive. JS de /es con measure-js contra next start (1440×900, 3 ejecuciones, heavy --exclusive): 252 744 B en 16 scripts. Son +109 B sobre la implementación y +1 895 B sobre la base de 250 849 B (tope de T8: +3 000 B); margen frente a 269 722 B: 16 978 B. check:modern-js no existe todavía en este worktree (llega con P1). El HTML del servidor trae el sizes nuevo. Capturas a 768×1024 y 820×1180 (es), a 768×1024 (en) y a 844×390: contador en una línea y panel estable. AGENTS.md sin cambios, git status limpio, puerto 3080 libre y scratchpad limpio."
+  },
+  {
+   "agent": "review:compliance:T8:r2",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "major",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "En modo inView con la rejilla de celular (menos de 48rem de ancho) la secuencia de extracción nunca arranca si el alto del viewport es menor que 0,625 × (ancho − 48). Es el caso de los celulares en horizontal por debajo de 768 px (iPhone SE/8 a 667×375, iPhone 8 Plus a 736×414, Android a 740×360). El marco es aspect-[4/5] a todo el ancho y mide 774–865 px. `useInView(frameRef, { amount: 0.5 })` exige que se vea el 50 % del marco, y eso no cabe en un viewport de 360–414 px. El resultado: los recuadros no aparecen nunca, el contador queda en «00 / 06» y todas las filas en «En espera». Esto contradice §3.6 del plan («inView: la animación se dispara una vez al entrar en pantalla») y el diseño §5 («Móvil (< 768 px): las animaciones se disparan al entrar en pantalla»). El umbral lo fija la decisión 4 del plan (línea 7612) y el implementador lo copió tal cual. Es un hallazgo nuevo: no salió en la ronda 1.",
+     "suggested_fix": "Que el disparador no dependa del alto del marco. Por ejemplo: `useInView(frameRef, { margin: \"-35% 0px -35% 0px\" })` (con amount \"some\", arranca cuando cualquier parte del marco entra en la franja central del 30 % del viewport). Otra opción es bajar a `amount: 0.3`, que funciona hasta unos 270 px de alto a 767 px de ancho. Hay que actualizar la decisión 4 del plan y añadir al describe «celular» un caso a 667×375 que compruebe que algún recuadro llega a `active` y que el contador termina en «06 / 06»."
+    },
+    {
+     "severity": "nit",
+     "file": "docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md",
+     "issue": "La sección de T8 del plan no se actualizó con los cambios de la ronda 1 en dos pasos que el integrador sigue al pie de la letra. (1) El paso 1.2 dice que la cabecera de e2e/home.spec.ts queda «exactamente así», con solo `extractionAt, fieldState` y sin `ORBEXS_BLUE`. Los bloques de home-t8 que se van a fundir usan además `DOSSIER_FIELD_COUNT`, `extractionAtStep`, `extractionComplete` y `ORBEXS_BLUE`. (2) El paso 3 (línea 7576) comprueba `grep -rn \"2563eb\" src/components/sections/home/Dossier.tsx # una sola línea`, pero tras la decisión 10 la constante BLUE vive en DossierStage.tsx y ese grep devuelve 0 líneas.",
+     "suggested_fix": "Actualizar el bloque de importaciones del paso 1.2 con los imports que usa ahora home-t8.spec.ts, o anotar en la decisión 18 que la cabecera se amplía con esos cuatro nombres. En el paso 3, cambiar la ruta del grep a DossierStage.tsx."
+    }
+   ]
+  },
+  {
+   "agent": "review:quality:T8:r2",
+   "verdict": "changes",
+   "findings": [
+    {
+     "severity": "minor",
+     "file": "e2e/home-t8.spec.ts",
+     "issue": "La prueba «tableta vertical en scrub» es frágil por fracciones de píxel. Compara el top del h2 respecto al viewport y lo redondea: `expect(middle).toEqual(start)`, con `start` medido en p = 0. En p = 0, `scrollToY` deja scrollY en un entero. Si el borde superior de la sección en el documento cae en fracción de píxel, la sección puede quedar hasta 0,5 px por debajo del borde y el marco sticky todavía no se engancha. Entonces el redondeo del h2 cambia en 1 px aunque nada se haya movido. Hoy pasa porque la sección cae en un desfase favorable. En F4, T7 cambia lo que hay por encima de #gobierno (Tesis y Capacidades en lugar de Services), el desfase cambia y la prueba puede fallar sin un salto real. Eso invita a «arreglarla» debilitándola.",
+     "suggested_fix": "Medir el h2 respecto al marco sticky y no al viewport: `h2Top: Math.round(el.querySelector('h2')!.getBoundingClientRect().top - el.querySelector('[data-stage-frame]')!.getBoundingClientRect().top)`. Otra opción: empezar en p = 0,01. Sigue dando «00 / 06» (extractionAt(0.01) = {0, null}) y deja el sticky enganchado unos 15 px. Comprobé que las dos variantes dan 195 constante con y sin el desfase de 0,5 px."
+    },
+    {
+     "severity": "minor",
+     "file": "e2e/home-t8.spec.ts",
+     "issue": "Ninguna prueba comprueba qué etiqueta de estado ve el usuario en el panel (En espera / Procesando / Extraído). El arreglo de la ronda 1 apila las tres etiquetas en cada fila y oculta dos con `invisible`. Por eso el textContent de cada fila contiene las tres, y un `toContainText(es.dossier.status.*)` pasaría siempre. Las pruebas solo miran `data-state`. Si se rompe la correspondencia entre estado y etiqueta visible (por ejemplo, un error en `option === state` en DossierStage.tsx:223), el panel mentiría y toda la suite seguiría en verde. De paso: en modo lector o sin CSS, cada fila se lee con las tres etiquetas.",
+     "suggested_fix": "En la prueba de scrub a 1440×900, después de posicionar en 2,5/6,6: `await expect(rows.nth(2).getByText(es.dossier.status.active, { exact: true })).toBeVisible()`, `await expect(rows.nth(2).getByText(es.dossier.status.idle, { exact: true })).toBeHidden()`, `await expect(rows.nth(0).getByText(es.dossier.status.done, { exact: true })).toBeVisible()` y `await expect(rows.nth(3).getByText(es.dossier.status.idle, { exact: true })).toBeVisible()`. Con reducir movimiento, que las 6 filas muestren `status.done` visible. Comprobé que estas aserciones pasan con el código actual. Con la mutación, fallarían."
+    }
+   ]
+  },
+  {
+   "agent": "review:visual:T8:r2",
+   "verdict": "approve",
+   "findings": [
+    {
+     "severity": "nit",
+     "file": "src/components/sections/home/DossierStage.tsx",
+     "issue": "A 1024×768 (tableta apaisada o ventana de escritorio de ese tamaño; no está en la lista del traspaso §8.6 y queda fuera de `short:`, que llega hasta 720 px de alto) el contenido no cabe en el marco fijo. El marco crece a 814 px (`stage:h-auto`) y, durante todo el recorrido, los últimos 6 px del panel (su relleno y el borde inferior) y el `pb-10` quedan bajo el borde de la pantalla. El panel parece cortado. No se corta ningún texto: la última fila termina en y = 749. La decisión 8 del plan lo acepta de forma explícita («el final del panel aparece al terminar el recorrido»): así ocurre, en p = 1 el marco sube 46 px y el panel se ve entero. Lo anoto como pulido opcional.",
+     "suggested_fix": "Opcional. Aplicar la compactación de `short:` a esta sección hasta 48rem de alto, con una variante local sin tocar la `short:` compartida de T6 (por ejemplo, `[@media(max-height:48rem)]:stage:` sobre el título y los rellenos, en rem como pide §3.6). Otra opción: mantener `text-4xl` en el h2 por debajo de xl, que a 1024 px ocupa 3 líneas. Hacen falta ≥ 46 px. Si se hace, conviene añadir 1024×768 a la prueba «scrub en pantallas bajas» con `panelInView: true`."
+    }
+   ]
+  },
+  {
+   "agent": "fix:T8:r2",
+   "head_commit": "e4453196b5948c6899a4f538083200ec94e39f54",
+   "fixed": [
+    {
+     "finding": "major (compliance), DossierStage.tsx:79: en inView, en celulares apaisados de menos de 768 px de ancho (667×375, 736×414, 740×360), la secuencia no arranca nunca con useInView amount 0,5",
+     "how": "Ahora es `useInView(frameRef, { margin: \"-25% 0px -25% 0px\" })`: el disparador salta cuando el marco llega a la mitad central del viewport y ya no depende del alto del marco. Se eligió −25 % en lugar del −35 % que se sugería porque a 390×844 mantiene el comportamiento anterior: arranca con el borde superior del marco en 633 px, frente a 630 px antes. Prueba nueva en el describe «celular», «celular apaisado (667×375)». Primero comprueba que el marco mide más del doble del viewport. Después centra el marco y espera un recuadro en `active`, el contador en «06 / 06» y las 6 etiquetas «Extraído» visibles. Con amount 0,5 falla (comprobado). Con una sonda temporal (ya borrada), arranca a 667×375, 736×414, 740×360, 844×390, 360×640 y 390×844. La decisión 4 del plan está actualizada."
+    },
+    {
+     "finding": "nit (compliance), plan, línea 6972: el paso 1.2 no trae los imports nuevos de home-t8 y el grep del paso 3 busca en Dossier.tsx",
+     "how": "Paso 1.2: la cabecera incluye ahora DOSSIER_FIELD_COUNT, extractionAtStep, extractionComplete, el tipo FieldState (lo usa el helper nuevo) y ORBEXS_BLUE. Paso 1.3: una nota indica que, al integrar, la fuente de los bloques es e2e/home-t8.spec.ts. Paso 3: el grep va a src/components/sections/home/ y se espera una sola línea, en DossierStage.tsx. El recuento de la prueba pasa de «10 en verde» a «16 en verde»."
+    },
+    {
+     "finding": "minor (quality), e2e/home-t8.spec.ts:240: la prueba de tableta vertical depende de fracciones de píxel porque mide el top del h2 respecto al viewport",
+     "how": "layoutAt mide ahora `h2.top − [data-stage-frame].top`, con un comentario que explica por qué. Sonda a 768×1024 con `#gobierno { margin-top: 0.5px }` inyectado: respecto al viewport da 196/195/195 (el fallo del revisor, reproducido); respecto al marco, 195/195/195. La prueba sigue detectando saltos dentro del marco, y los altos de las filas se siguen comparando."
+    },
+    {
+     "finding": "minor (quality), e2e/home-t8.spec.ts:147: ninguna prueba comprueba qué etiqueta de estado ve el usuario",
+     "how": "Helper local expectVisibleStatus(rows, estados). Para cada fila exige `toBeVisible` en la etiqueta del estado y `toBeHidden` en las otras dos. Se usa en scrub 1440×900 a 2,5/6,6 (done, done, active, idle, idle, idle), en reducir movimiento (6 × done) y al final de las dos pruebas de celular. Mutación comprobada: con `option === \"done\" ? tone : \"invisible\"`, la prueba de scrub falla con «fila 2: se ve «Procesando»». Archivo restaurado."
+    },
+    {
+     "finding": "nit (visual), DossierStage.tsx:87: a 1024×768 el marco crece a 814 px y el pie del panel queda bajo el borde durante todo el recorrido",
+     "how": "La compactación pasa a una variante local: las 7 clases `short:stage:` se sustituyen por `[@media(max-height:48rem)]:stage:`, que cubren hasta 48rem de alto. La `short:` compartida de T6 no se toca. Medido a 1024×768: marco de 768 px, eyebrow en 148 y pie del panel en 676. A 1280×768 y 1366×768, pie en 647. A 1280×720, 1366×657, 1280×600 y 1024×600, las mismas medidas que antes. 1440×900, 1280×800 y 1024×1366 no cambian (h2 de 48 px). En el CSS de producción la regla arbitraria queda detrás de `lg:text-5xl` (comprobado en el chunk). Se añadió 1024×768 con panelInView: true a «scrub en pantallas bajas», y esa prueba exige ahora que quepa el panel entero, no solo la última fila. Con `short:` falla (comprobado). La decisión 8 del plan está actualizada."
+    }
+   ],
+   "rejected": [],
+   "decisions": [
+    "Disparador inView con margin −25 % arriba y abajo, y no −35 % como se sugería: con −25 % el celular vertical 390×844 conserva el umbral anterior (633 px frente a 630 px) y el apaisado arranca en cualquier alto de marco.",
+    "Compactación de pantallas bajas: se sustituye `short:stage:` por una variante arbitraria local hasta 48rem, en lugar de duplicar clases. Es una sola lista de clases, y la `short:` compartida de la portada sigue en 45rem.",
+    "La prueba de pantallas bajas mide ahora el pie del panel (padre del <ol>), no solo la última fila. Es más estricta y detecta el caso de 1024×768.",
+    "Se añadieron las decisiones 19–21 al plan y un bloque «Tras la revisión de T8 (ronda 2)» con el peso de JS y la nota de entorno.",
+    "Puerto: el 3080 está ocupado por un next-server huérfano (PID 11714, padre 1, cwd /home/user/wt/task8, desde las 09:01). El clasificador de permisos denegó cerrarlo y también inspeccionarlo. Para no reutilizarlo, todas las ejecuciones fueron en el puerto 3088 con CI=1: así reuseExistingServer vale false y Playwright arranca y cierra su propio servidor. `next start` para medir JS también se arrancó en 3088, en su propio grupo de procesos, y se cerró al terminar. Queda pendiente que el usuario o el orquestador cierren el PID 11714."
+   ],
+   "verification": "Todas las ejecuciones pesadas fueron bajo heavy.sh. Playwright corrió en el puerto 3088 con CI=1, porque el 3080 está ocupado por un servidor huérfano que no tengo permiso para cerrar.\n- npm run lint: 0 errores. npx tsc --noEmit: 0 errores.\n- e2e/home-t8.spec.ts: 16/16 en verde.\n- Mutaciones: el código anterior o con la etiqueta mutada hace fallar 3 pruebas nuevas: la de apaisado 667×375, la de 1024×768 y la de scrub 1440×900 por la etiqueta. Después restauré el archivo.\n- Suite completa: la primera pasada dio 42 fallos, todos «Internal Server Error» del servidor de desarrollo en los últimos archivos (seo, smoke, wizard). Repetí esos tres archivos una vez: 58/58. Repetí también la suite completa: 162/162 (146 + 16 de T8). Lo anoto como fallo intermitente del entorno, no del código.\n- npm run build (heavy --exclusive): en verde. El CSS de producción incluye la variante @media (max-height:48rem) detrás de lg:text-5xl.\n- measure-js contra next start propio (3088, 1440×900, 3 ejecuciones): 252 777 B en 16 scripts. Son +33 B sobre la ronda 1 y +1 928 B sobre la base; presupuesto 269 722 B, margen 16 945 B. check:modern-js no existe en package.json.\n- La sonda temporal e2e/zz-probe-t8.spec.ts ya está borrada.\n- git status limpio (AGENTS.md sin cambios). El puerto 3088 queda libre y no dejo ningún servidor mío encendido.\n- El PID 11714 (next-server huérfano en 3080, cwd /home/user/wt/task8) sigue vivo: el clasificador no me dejó cerrarlo."
+  }
+ ]
+}
