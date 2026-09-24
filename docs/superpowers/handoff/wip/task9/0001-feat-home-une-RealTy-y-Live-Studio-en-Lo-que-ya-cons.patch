@@ -1,0 +1,1541 @@
+From 5d7c1fbb0c68b16041efb7ab17dfb33bcbf12484 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 15:30:16 +0000
+Subject: [PATCH 1/3] =?UTF-8?q?feat(home):=20une=20RealTy=20y=20Live=20Stu?=
+ =?UTF-8?q?dio=20en=20=C2=ABLo=20que=20ya=20construimos=C2=BB?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BuiltProof (servidor) reemplaza CaseStudy y LiveStudioTeaser con una sección oscura y tres islas:
+BuiltStage (data-stage-mode), BuiltScaleIn (la tarjeta de RealTy pasa de escala 0,92 a 1) y
+StudioSequence (las 6 capacidades del caso, 01–06, se encienden al bajar). La tarjeta de RealTy
+reutiliza la consola de /realty en vista compacta, con una sola etiqueta de datos de demostración.
+Diccionarios: built, caseStudy.ownership y caseStudy.summary; se elimina liveStudioTeaser.
+La lista negra de RealTy pasa a e2e/helpers.ts y también se aplica a la tarjeta de la home.
+
+Decisiones:
+- ConsoleFrame sale de realty/Hero.tsx a realty/ConsoleFrame.tsx, sin "use client" ni hooks, con
+  `compact` (por defecto false): RealtyHero no cambia y en /es la consola se pinta en el servidor
+  (informe de JS §5; sustituye a la decisión 4 y al paso 2.2 del plan). Una prueba lo vigila.
+- BuiltStage es una isla extra: la sección es de servidor y data-stage-mode depende de matchMedia.
+- En la home la consola va con drawn=true: su trazo anima stroke-dashoffset, fuera de transform/opacity/pathLength.
+- La escala empieza en 1 (servidor y sin JavaScript) y baja a 0,92 tras montar, con la tarjeta fuera
+  de pantalla; se anima con animateSingleValue (§3.8), nunca con animate().
+- Sin JavaScript, la secuencia 01–06 se pinta encendida (variantes noscript:, como T7), sin tocar globals.css.
+- Consola alineada a la izquierda en todos los anchos (envoltorio de 32,5rem) y relleno de las
+  tarjetas a 1rem por debajo de 22,5rem: a 320 px las fichas de la consola invadían la vecina.
+- page.tsx: BuiltProof en el bloque de imports estáticos, en el sitio de CaseStudy/LiveStudioTeaser;
+  locale tipado como Locale (page.tsx ya lo estrecha).
+- La lista negra compartida gana 'API': CLAUDE.md la nombra en la regla de lenguaje de RealTy y faltaba.
+- Pruebas en el spec temporal e2e/home-t9.spec.ts (15; el integrador las funde en home.spec.ts).
+- JS de /es: 220 233 B (base 3644611) → 220 230 B (−3 B; tope +2 500 B), 15 scripts; check:modern-js OK.
+  Ningún literal de realty/Hero, ConsoleFrame, viz ni shared en los chunks de /es.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../2026-09-23-home-cartografia-soberana.md   |  33 ++
+ e2e/helpers.ts                                |  59 +++
+ e2e/home-t9.spec.ts                           | 362 ++++++++++++++++++
+ e2e/realty.spec.ts                            |  43 +--
+ e2e/smoke.spec.ts                             |   4 +-
+ src/app/[locale]/page.tsx                     |   6 +-
+ src/components/sections/CaseStudy.tsx         | 102 -----
+ src/components/sections/LiveStudioTeaser.tsx  | 119 ------
+ src/components/sections/home/BuiltProof.tsx   | 139 +++++++
+ src/components/sections/home/BuiltScaleIn.tsx |  64 ++++
+ src/components/sections/home/BuiltStage.tsx   |  26 ++
+ .../sections/home/StudioSequence.tsx          | 100 +++++
+ .../sections/realty/ConsoleFrame.tsx          |  95 +++++
+ src/components/sections/realty/Hero.tsx       |  80 +---
+ src/content/dictionaries/en.ts                |  30 +-
+ src/content/dictionaries/es.ts                |  30 +-
+ 16 files changed, 922 insertions(+), 370 deletions(-)
+ create mode 100644 e2e/home-t9.spec.ts
+ delete mode 100644 src/components/sections/CaseStudy.tsx
+ delete mode 100644 src/components/sections/LiveStudioTeaser.tsx
+ create mode 100644 src/components/sections/home/BuiltProof.tsx
+ create mode 100644 src/components/sections/home/BuiltScaleIn.tsx
+ create mode 100644 src/components/sections/home/BuiltStage.tsx
+ create mode 100644 src/components/sections/home/StudioSequence.tsx
+ create mode 100644 src/components/sections/realty/ConsoleFrame.tsx
+
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index bf23f5a..f8bcce0 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -350,6 +350,18 @@ export const DOSSIER_FIELDS: readonly { x: number; y: number; width: number; hei
+ export function TrustLogos(props: { label: string; className?: string }): JSX.Element
+ //   Fila de logos de TrustBar SIN <section>, sin fundido de entrada; conserva data-brand-wordmark="vercel".
+ 
++// src/components/sections/realty/ConsoleFrame.tsx  (sin directiva, sin hooks)   — T9 (informe de JS, §5)
++export function ConsoleFrame(props: {
++  console: RealtyContent["hero"]["console"]
++  demoLabel: string
++  demoSrText: string
++  drawn: boolean
++  compact?: boolean                    // por defecto false; true = cifra principal y fichas, sin embudo (tarjeta de la home)
++}): JSX.Element
++//   Pantalla «Resumen» de la consola de RealTy, con una sola etiqueta de datos de demostración y sin acento azul.
++//   La importan RealtyHero (isla de /realty) y home/BuiltProof.tsx (servidor): siempre desde este módulo, nunca
++//   desde realty/Hero.tsx ("use client"), para que en /es se pinte en el servidor y no viaje en el JS.
++
+ // src/lib/page-meta.ts                                         — T2 (T6 cambia el cardTitle de la home)
+ export const PAGE_PATHS: readonly [ "/", "/agendar", "/diagnostico", "/privacidad", "/terminos",
+   "/soberania-ia", "/ciberseguridad", "/fuerza-digital", "/sistemas-criticos", "/inteligencia-operativa",
+@@ -8624,6 +8636,27 @@ El borrado de 2.8 ya quedó en el índice con `git rm`.
+ 7. **Pruebas.** La tarjeta de RealTy se verifica en **es y en**, con la raíz de "simulado" de cada idioma, tomada de `realty.statusLabels.simulated` (`simulad` / `simulat`), sin literales (§3.7). Se añade `findForbiddenTerms` a `helpers.ts`. `realty.spec.ts` solo importa las constantes y su filtro inline no cambia. Reducir movimiento se activa con `page.emulateMedia` (§3.7). En las pruebas de `scrub`, `.site-header[data-tone]` (T5) sirve de señal de hidratación, porque `data-stage-mode="scrub"` coincide con el HTML del servidor.
+ 8. **Claves que quedan sin componente.** `caseStudy.sectionId` (`"casos"`) y `caseStudy.eyebrow` ya no las usa ningún componente; `llms.txt` usa `title`, `industry`, `context`, `solution` y `outcome`. Se dejan para que T11 decida. Con `LiveStudioTeaser` desaparece también el evento `live_studio_teaser_click`, y no se añade analítica nueva porque no se pidió.
+ 
++### Decisiones (implementación, F3)
++Lo que el código de `wt/task9` cambia respecto de los borradores del paso 1 y del paso 2. T9 se implementó en paralelo con T8 y T10a, desde `3644611` (P1 + T7, sin T8): los bloques «Antes» de `page.tsx` se aplicaron sobre ese estado. Manda el código.
++
++9. **`ConsoleFrame` sale a `src/components/sections/realty/ConsoleFrame.tsx`, sin `"use client"` ni hooks** (informe de JS §5, T9; sustituye a la decisión 4 y al paso 2.2; firma en §3.3). Mismo marcado que antes más la prop opcional `compact` (por defecto `false`; con `true`, sin embudo ni la línea inferior de las fichas). `realty/Hero.tsx` lo importa desde ahí y `RealtyHero` no cambia, así que el diff de `Hero.tsx` son los imports y el bloque que se va, no los tres bloques de 2.2. `home/BuiltProof.tsx` lo importa del módulo nuevo, nunca de `realty/Hero`. Sus piezas (`DemoTag` de `shared.tsx`; `StatTile` y `Funnel` de `viz.tsx`) ya eran módulos sin directiva ni hooks: no se tocan. En la home la consola se pinta en el servidor y ni ella ni `RealtyHero` viajan en el JS de `/es`. Lo vigila la prueba «ningún script de /es lleva la consola de RealTy», que busca en los scripts de `/es` tres marcadores exclusivos: la clase del marco, el evento `realty_demo_click` de `RealtyHero` y la transición de las sparklines de `viz.tsx`. Comprobado con una mutación: si `ConsoleFrame` se importa a través de `realty/Hero`, aparecen los tres y la prueba falla.
++10. **`BuiltScaleIn` con `animateSingleValue`** (§3.8), como ya traía el borrador: `animate` no está en su import (lo vigila ESLint) y la limpieza es `amount.stop()`.
++11. **Import de `BuiltProof` en `page.tsx`** dentro del bloque de imports estáticos de las secciones, en el sitio de `CaseStudy` y `LiveStudioTeaser` (orden de §3.5), no tras `getDictionary` como en 2.7. El comentario de ese bloque no se toca: lo cambia T8. Al integrar, `BuiltProof` va justo después de `Dossier`, en el import y en el JSX.
++12. **`locale: Locale`** en `BuiltProof`, en lugar de `string` y `as Locale`: `page.tsx` ya lo estrecha con `isValidLocale`, igual que para `CapabilitiesIndex`.
++13. **La consola va alineada a la izquierda en todos los anchos.** El marco trae `mx-auto … lg:mx-0`: en `/realty` va centrado por debajo de lg, pero dentro de la tarjeta, de 640 a 1023 px, quedaba centrado bajo un texto alineado a la izquierda. Se envuelve en un `div` `w-full max-w-[32.5rem]` (32,5rem es su ancho máximo) sin tocar `ConsoleFrame`.
++14. **320 px: las tarjetas pasan de `p-6` a `max-[22.5rem]:p-4`** (en rem, como §3.6 y la decisión 21 de T7). La consola está pensada para ≥ 272 px de ancho, el de su portada en `/realty`. Dentro de la tarjeta, a 320 px, las fichas se quedaban con 77 px de contenido, y «CONVERSACIONES» y las sparklines (96 px) se salían de su ficha e invadían la vecina (es y en). Con 1rem quedan dentro. Desde 360 px no cambia nada. La prueba nueva a 320×568 (es y en) falla sin el cambio (comprobado).
++15. **Sin JavaScript se pinta el estado final**, como en Tesis y Capacidades (decisión 17 de T7). El HTML del servidor trae la secuencia apagada (scrub, avance 0). Las variantes `noscript:` de Tailwind 4.2 (`@media (scripting: none)`) en `StudioSequence` ponen el número y el texto en blanco y la línea entera, sin tocar `globals.css`, que comparten T8 y T10a. La tarjeta de RealTy ya sale a escala 1 del servidor.
++16. **Pruebas** en el spec temporal `e2e/home-t9.spec.ts` (15 pruebas; el integrador las funde al final de `e2e/home.spec.ts` y borra el archivo; `IDENTITY_TRANSFORM` también lo define T10a con el mismo valor, así que al fundir queda uno solo). Son las 7 del paso 1.4 más estos añadidos:
++    - la tarjeta de RealTy muestra la cifra principal y no el embudo (vista compacta);
++    - a mitad del recorrido de la lista se enciende un prefijo 0 < k < 6, y el encabezado pasa a oscuro sobre la sección;
++    - la escala de 0,92 a 1 en scrub (1440×900) y en inView (390×844 y 844×390), con la secuencia completa al entrar y sin errores de página ni de hidratación;
++    - sin JavaScript: h2 visible, estado final, escala 1 y nada azul;
++    - 320×568 en es y en (decisión 14);
++    - `/es/realty` conserva el embudo y una sola etiqueta de demostración en su marco;
++    - la del JS (decisión 9).
++   La sección se localiza dentro de cada prueba y no al cargar el archivo: sin la clave `built` falla cada prueba, no la carga del spec. Rojo del paso 1 (con 13 pruebas; las dos de 320 px llegaron después): 11 fallan con `TypeError … 'sectionId'`, pasan las dos de `ConsoleFrame` (son de regresión), fallan las dos de `smoke.spec.ts` y `realty.spec.ts` sigue 12 de 12.
++17. **JS de `/es`** (`measure-js`, `next start`, 1440×900, mediana de 3): base `3644611` **220 233 B** en 15 scripts (con el 404 local de `/_vercel/insights`) → T9 **220 230 B**, también en 15 scripts: **−3 B** (tope de T9, +2 500 B). Solo cambia el chunk de la página (15 258 → 15 255 B): lo que añaden las tres islas lo compensa lo que se va con `CaseStudy` y `LiveStudioTeaser`; los demás chunks son idénticos. `check:modern-js`: OK (let=3525, class=167). En los chunks que carga `/es` no hay ningún literal de `realty/Hero.tsx`, `ConsoleFrame`, `viz.tsx` ni `shared.tsx`, y el HTML prerenderizado de `/es/realty` y `/en/realty` (sin scripts) es idéntico al de la base.
++
+ ---
+ 
+ ## Tarea 10 — Metodología, cierre y FAQ
+diff --git a/e2e/helpers.ts b/e2e/helpers.ts
+index 2cdbdc7..4b16beb 100644
+--- a/e2e/helpers.ts
++++ b/e2e/helpers.ts
+@@ -130,3 +130,62 @@ export async function countVisibleBlue(page: Page): Promise<number> {
+     return count
+   }, ORBEXS_BLUE)
+ }
++
++// ── Lista negra de RealTy (CLAUDE.md, bloque RealTy) ─────────────────────────
++// Compartida por e2e/realty.spec.ts (la landing) y la tarjeta de RealTy de
++// "Lo que ya construimos" en la home (T9). No aplica al caso de Live Studio,
++// que dice "endpoints" legítimamente.
++
++/**
++ * Jerga de ingeniería: raíces y fragmentos de identificador. Coinciden como
++ * SUBCADENA para atrapar también las variantes ("idempotencia", "mocks",
++ * "evaluate_offer"). Ninguna palabra de negocio en ES/EN las contiene.
++ */
++export const FORBIDDEN_STEMS = [
++  'idempot',
++  'webhook',
++  'gateway',
++  'fixture',
++  'replay',
++  'mock',
++  'endpoint',
++  'get_lead',
++  'evaluate_',
++  'Cierre Autónomo',
++  '%',
++] as const
++
++/**
++ * Siglas y nombres propios prohibidos. Coinciden como PALABRA COMPLETA: como
++ * subcadena producen falsos positivos reales en el copy legítimo — "sse" vive
++ * dentro de "passes" y "dapta" dentro de "Adaptador de prueba", que es una de
++ * las etiquetas de estado obligatorias.
++ */
++export const FORBIDDEN_WORDS = [
++  'HMAC',
++  'JSON',
++  'SSE',
++  'LLM',
++  'API',
++  'TypeScript',
++  'PostgreSQL',
++  'Fastify',
++  'RSDubai',
++  'Redminds',
++  '15M',
++  'Dapta',
++  'Rentmies',
++] as const
++
++/**
++ * Términos de la lista negra presentes en `text`, con las mismas reglas que
++ * e2e/realty.spec.ts: todo en minúsculas (los chips en `uppercase` llegan
++ * transformados en `innerText`), raíces como subcadena, palabras con `\b`.
++ */
++export function findForbiddenTerms(text: string): string[] {
++  const lower = text.toLowerCase()
++  return [
++    ...FORBIDDEN_STEMS.filter((term) => lower.includes(term.toLowerCase())),
++    ...FORBIDDEN_WORDS.filter((term) => new RegExp(`\\b${term.toLowerCase()}\\b`).test(lower)),
++  ]
++}
+diff --git a/e2e/home-t9.spec.ts b/e2e/home-t9.spec.ts
+new file mode 100644
+index 0000000..b954ea6
+--- /dev/null
++++ b/e2e/home-t9.spec.ts
+@@ -0,0 +1,362 @@
++import { test, expect, type Locator, type Page } from '@playwright/test'
++import es from '../src/content/dictionaries/es'
++import en from '../src/content/dictionaries/en'
++import { countVisibleBlue, effectiveOpacity, findForbiddenTerms, scrollToY, waitForHydration } from './helpers'
++
++/**
++ * Spec TEMPORAL de la tarea 9 («Lo que ya construimos»). T9 se implementa en
++ * paralelo con T8 y T10a (traspaso §7, «Paralelismo»): al integrarla, estas
++ * pruebas se funden al final de e2e/home.spec.ts (con `findForbiddenTerms` en su
++ * línea de `./helpers`) y este archivo se borra. Autocontenido: no importa
++ * ningún otro spec.
++ */
++
++// ── Helpers locales de T9 ───────────────────────────────────────────────────
++
++/**
++ * La sección en /es. Se resuelve dentro de cada prueba (no al cargar el archivo)
++ * para que, si falta la clave `built`, falle cada prueba y no la carga del spec.
++ */
++function builtSection(page: Page): Locator {
++  return page.locator(`#${es.built.sectionId}`)
++}
++
++/** `transform` calculado de un elemento sin transformación, o con escala 1. */
++const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
++
++/** Escala de partida de la tarjeta de RealTy (BuiltScaleIn, diseño §5.5). */
++const FROM_SCALE = 0.92
++
++/** Escala horizontal calculada de un elemento (1 si no tiene transformación). */
++function scaleOf(locator: Locator): Promise<number> {
++  return locator.evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
++}
++
++/**
++ * Borde superior del elemento en el documento, SIN su transformación: la escala
++ * de la tarjeta de RealTy desplaza su getBoundingClientRect, pero no la caja con
++ * la que motion calcula el avance del scroll (offsetTop).
++ */
++function layoutTop(locator: Locator): Promise<number> {
++  return locator.evaluate((element) => {
++    let top = 0
++    for (let node = element as HTMLElement | null; node; node = node.offsetParent as HTMLElement | null) {
++      top += node.offsetTop
++    }
++    return top
++  })
++}
++
++/** Acumula los errores de la página y los de hidratación que React escriba en la consola. */
++function collectErrors(page: Page): string[] {
++  const errors: string[] = []
++  page.on('pageerror', (error) => errors.push(error.message))
++  page.on('console', (message) => {
++    if (message.type() === 'error' && /hydrat/i.test(message.text())) errors.push(message.text())
++  })
++  return errors
++}
++
++/** Cadena de `data-lit` de las 6 capacidades, p. ej. "111000". */
++function litPattern(section: Locator): Promise<string> {
++  return section
++    .locator('[data-studio-step]')
++    .evaluateAll((steps) => steps.map((step) => (step.getAttribute('data-lit') === 'true' ? '1' : '0')).join(''))
++}
++
++/**
++ * Marcadores de código que solo existen en la consola de RealTy y en su portada:
++ * la clase del marco de ConsoleFrame, el evento de analítica de RealtyHero y la
++ * transición de las sparklines de viz.tsx. Si alguno aparece en un script de
++ * /es, la consola viaja en el JavaScript de la home en lugar de pintarse en el
++ * servidor (plan §3.8; informe de JS, §5 T9: unos 3,1 KB).
++ */
++const REALTY_CLIENT_MARKERS = ['max-w-[520px]', 'realty_demo_click', 'stroke-dashoffset_900ms'] as const
++
++// ── Tarea 9 — Lo que ya construimos ─────────────────────────────────────────
++
++test.describe('T9 · Lo que ya construimos', () => {
++  for (const locale of ['es', 'en'] as const) {
++    const dict = locale === 'es' ? es : en
++
++    test(`/${locale}: la tarjeta de RealTy cumple las reglas de RealTy de CLAUDE.md`, async ({ page }) => {
++      await page.goto(`/${locale}`)
++      const card = page.locator(`#${dict.built.sectionId} [data-built-card="realty"]`)
++      await expect(card).toHaveCount(1)
++      await expect(card.getByRole('heading', { level: 3 })).toHaveText(dict.built.realtyName)
++      await expect(card).toContainText(dict.realty.hero.title)
++      await expect(card).toContainText(dict.realty.statusLine)
++      // Vista reducida de la consola (ConsoleFrame compact): la cifra principal y
++      // las fichas, sin el embudo de /realty.
++      await expect(card).toContainText(dict.realty.hero.console.headline.value)
++      await expect(card).not.toContainText(dict.realty.hero.console.funnel.label)
++
++      const text = (await card.innerText()).toLowerCase()
++      expect(findForbiddenTerms(text), `términos prohibidos en la tarjeta de RealTy (/${locale})`).toEqual([])
++      const demoLabel = dict.realty.demoLabel.toLowerCase()
++      expect(text.split(demoLabel).length - 1, 'demoLabel una sola vez en el marco').toBe(1)
++      // Raíz de "Simulado"/"Simulated" (statusLabels): casa con "simuladas" y con "simulated holds".
++      const simulatedStem = dict.realty.statusLabels.simulated.toLowerCase().slice(0, 7)
++      expect(text, '"simulado" junto a retenciones y reservas').toContain(simulatedStem)
++
++      await expect(card.getByRole('link', { name: dict.built.realtyCta })).toHaveAttribute('href', `/${locale}/realty`)
++    })
++  }
++
++  test('/es: la tarjeta de Live Studio declara la división propia y numera las 6 capacidades', async ({ page }) => {
++    await page.goto('/es')
++    const card = builtSection(page).locator('[data-built-card="studio"]')
++    await expect(card.getByRole('heading', { level: 3 })).toHaveText(es.caseStudy.title)
++    await expect(card).toContainText(es.caseStudy.ownership)
++    await expect(card).toContainText(es.caseStudy.summary.context)
++    await expect(card).toContainText(es.caseStudy.summary.solution)
++    await expect(card).toContainText(es.caseStudy.summary.outcome)
++    await expect(card).toContainText(es.caseStudy.capabilitiesTitle)
++
++    expect(es.caseStudy.capabilities).toHaveLength(6)
++    const steps = card.locator('[data-studio-step]')
++    await expect(steps).toHaveCount(6)
++    expect(await steps.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-studio-step')))).toEqual([
++      '01',
++      '02',
++      '03',
++      '04',
++      '05',
++      '06',
++    ])
++    for (const [i, capability] of es.caseStudy.capabilities.entries()) {
++      await expect(steps.nth(i)).toContainText(String(i + 1).padStart(2, '0'))
++      await expect(steps.nth(i)).toContainText(capability)
++    }
++
++    await expect(card.getByRole('link', { name: es.caseStudy.cta.label })).toHaveAttribute('href', '/es/fuerza-digital')
++    await expect(card.getByRole('link', { name: es.built.studioCta.label })).toHaveAttribute(
++      'href',
++      '/es/estudio-tiktok-live'
++    )
++  })
++
++  test('al bajar (1440×900), la secuencia 01–06 se enciende paso a paso', async ({ page }) => {
++    const errors = collectErrors(page)
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    // data-stage-mode="scrub" ya viene del servidor: sin esta espera, el scroll
++    // llegaría antes de hidratar y SmoothScroll lo desharía (§3.7).
++    await waitForHydration(page)
++    const section = builtSection(page)
++    await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
++    const lit = section.locator('[data-studio-step][data-lit="true"]')
++    await expect(lit).toHaveCount(0)
++
++    // A mitad del recorrido de la lista (offset "start 0.85" → "end 0.6"), las
++    // encendidas son las k primeras, con 0 < k < 6: en orden, no de golpe.
++    const list = section.locator('ol:has([data-studio-step])')
++    const mid = await list.evaluate((el) => {
++      const rect = el.getBoundingClientRect()
++      const start = window.scrollY + rect.top - window.innerHeight * 0.85
++      const end = window.scrollY + rect.bottom - window.innerHeight * 0.6
++      return (start + end) / 2
++    })
++    await scrollToY(page, mid)
++    await expect.poll(() => litPattern(section)).toMatch(/^1+0+$/)
++    // Sobre la sección oscura, el encabezado pasa a oscuro (data-header-theme="dark").
++    await scrollToY(page, await layoutTop(section))
++    await expect(page.locator('.site-header')).toHaveAttribute('data-tone', 'dark')
++
++    const listBottom = await section
++      .locator('[data-studio-step]')
++      .last()
++      .evaluate((el) => el.getBoundingClientRect().bottom + window.scrollY)
++    await scrollToY(page, listBottom - 900 * 0.4)
++    await expect(lit).toHaveCount(6)
++    await expect(section.locator('[data-studio-step]').last().locator(':scope > span').last()).toHaveCSS(
++      'color',
++      'rgb(255, 255, 255)'
++    )
++    expect(errors).toEqual([])
++  })
++
++  test('al bajar (1440×900), la tarjeta de RealTy pasa de escala 0,92 a 1', async ({ page }) => {
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    await waitForHydration(page)
++    const card = builtSection(page).locator('[data-built-card="realty"]')
++    // Con la tarjeta todavía debajo de la pantalla, ya espera encogida.
++    await expect.poll(() => scaleOf(card)).toBeCloseTo(FROM_SCALE, 3)
++
++    // Borde superior al 30 % del viewport: pasado "start 0.45", avance 1.
++    await scrollToY(page, (await layoutTop(card)) - 900 * 0.3)
++    await expect.poll(() => card.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++  })
++
++  test('con reducir movimiento: las 6 capacidades encendidas y la tarjeta de RealTy a escala 1', async ({ page }) => {
++    await page.emulateMedia({ reducedMotion: 'reduce' })
++    await page.goto('/es')
++    const section = builtSection(page)
++    await expect(section).toHaveAttribute('data-stage-mode', 'static')
++    await expect(section.locator('[data-studio-step][data-lit="true"]')).toHaveCount(6)
++    const card = section.locator('[data-built-card="realty"]')
++    await expect.poll(() => card.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++  })
++
++  test('sin azul mientras la sección llena la pantalla (1440×900)', async ({ page }) => {
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    await expect(page.locator('.site-header')).toHaveAttribute('data-tone', /^(light|dark|menu)$/)
++    const section = builtSection(page)
++    const { top, bottom } = await section.evaluate((el) => {
++      const rect = el.getBoundingClientRect()
++      return { top: rect.top + window.scrollY, bottom: rect.bottom + window.scrollY }
++    })
++    const last = Math.max(top, bottom - 900)
++    for (let y = top; ; y = Math.min(y + 450, last)) {
++      await scrollToY(page, y)
++      expect(await countVisibleBlue(page), `elementos azules visibles con scrollY=${y}`).toBe(0)
++      if (y >= last) break
++    }
++  })
++
++  test('/en muestra las claves nuevas traducidas', async ({ page }) => {
++    await page.goto('/en')
++    const section = page.locator(`#${en.built.sectionId}`)
++    await expect(section.getByRole('heading', { level: 2 })).toHaveText(en.built.title)
++    await expect(section).toContainText(en.built.eyebrow)
++    await expect(section.locator('[data-built-card="studio"]')).toContainText(en.caseStudy.ownership)
++    await expect(section.locator('[data-built-card="studio"]')).toContainText(en.caseStudy.summary.outcome)
++    await expect(section.getByRole('link', { name: en.built.studioCta.label })).toHaveAttribute(
++      'href',
++      '/en/tiktok-live-studio'
++    )
++    await expect(section.getByRole('link', { name: en.caseStudy.cta.label })).toHaveAttribute(
++      'href',
++      '/en/digital-workforce'
++    )
++  })
++})
++
++// Móvil (diseño §5, reglas comunes): sin sticky y cada animación una sola vez al
++// entrar en pantalla. En celular apaisado (844×390, < 37,5rem de alto) también es
++// inView: la parte de la tarjeta y de la lista que exige useInView tiene que caber
++// en 390 px, o la animación no arrancaría nunca (lección de T8, ronda 2).
++for (const viewport of [
++  { width: 390, height: 844 },
++  { width: 844, height: 390 },
++]) {
++  test.describe(`T9 · Lo que ya construimos · inView (${viewport.width}×${viewport.height})`, () => {
++    test.use({ viewport })
++
++    test('la tarjeta de RealTy entra de 0,92 a 1 y la secuencia 01–06 se enciende al entrar', async ({ page }) => {
++      const errors = collectErrors(page)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = builtSection(page)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      const card = section.locator('[data-built-card="realty"]')
++      await expect.poll(() => scaleOf(card)).toBeCloseTo(FROM_SCALE, 3)
++      await expect(section.locator('[data-studio-step][data-lit="true"]')).toHaveCount(0)
++
++      await scrollToY(page, (await layoutTop(card)) - viewport.height * 0.1)
++      await expect.poll(() => card.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++
++      // La lista entra en pantalla: un paso cada 220 ms, hasta las 6.
++      const list = section.locator('ol:has([data-studio-step])')
++      await scrollToY(page, (await layoutTop(list)) - viewport.height * 0.1)
++      await expect(section.locator('[data-studio-step][data-lit="true"]')).toHaveCount(6, { timeout: 10_000 })
++      expect(errors).toEqual([])
++    })
++  })
++}
++
++// La consola de RealTy está pensada para ≥ 272 px de ancho (su portada en
++// /realty). Dentro de la tarjeta, a 320 px, las fichas se estrechan: ninguna
++// etiqueta ni sparkline puede salirse de su ficha e invadir la vecina.
++test.describe('T9 · Lo que ya construimos · 320 px', () => {
++  test.use({ viewport: { width: 320, height: 568 } })
++
++  for (const locale of ['es', 'en'] as const) {
++    test(`${locale}: nada de la consola de RealTy se sale de su ficha`, async ({ page }) => {
++      await page.goto(`/${locale}`)
++      const dict = locale === 'es' ? es : en
++      const card = page.locator(`#${dict.built.sectionId} [data-built-card="realty"]`)
++      // Cada ficha (StatTile) es el padre de su sparkline (svg role="img").
++      const overflow = await card.evaluate((element) =>
++        Array.from(element.querySelectorAll('svg[role="img"]')).flatMap((sparkline) => {
++          const tile = sparkline.parentElement!
++          const box = tile.getBoundingClientRect()
++          return Array.from(tile.children)
++            .filter((child) => {
++              const rect = child.getBoundingClientRect()
++              const range = document.createRange()
++              range.selectNodeContents(child)
++              const text = range.getBoundingClientRect()
++              return Math.max(rect.right, text.right) > box.right + 0.5
++            })
++            .map((child) => `${tile.firstElementChild?.textContent}: ${child.textContent || child.tagName}`)
++        })
++      )
++      expect(overflow, 'contenido que se sale de su ficha').toEqual([])
++    })
++  }
++})
++
++test.describe('T9 · Lo que ya construimos · sin JavaScript', () => {
++  test.use({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } })
++
++  test('el h2 se ve y se pinta el estado final: 6 capacidades encendidas y la tarjeta a escala 1', async ({ page }) => {
++    await page.goto('/es')
++    const section = builtSection(page)
++    await expect(section).toHaveAttribute('data-header-theme', 'dark')
++    const heading = section.getByRole('heading', { level: 2 })
++    await expect(heading).toHaveText(es.built.title)
++    await expect(heading).toBeVisible()
++    expect(await effectiveOpacity(heading)).toBe(1)
++
++    // Como Tesis y Capacidades (T7): sin scroll que seguir, el estado final.
++    const steps = section.locator('[data-studio-step]')
++    await expect(steps).toHaveCount(6)
++    for (let i = 0; i < 6; i++) {
++      const [line, number, label] = await steps.nth(i).locator(':scope > span').all()
++      await expect(number).toHaveCSS('color', 'rgb(255, 255, 255)')
++      await expect(label).toHaveCSS('color', 'rgb(255, 255, 255)')
++      const ratio = await line.evaluate(
++        (el) => el.getBoundingClientRect().width / el.parentElement!.getBoundingClientRect().width
++      )
++      expect(ratio, `línea del paso ${i + 1} trazada entera`).toBeGreaterThan(0.99)
++    }
++
++    const card = section.locator('[data-built-card="realty"]')
++    expect(await card.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++    await card.scrollIntoViewIfNeeded()
++    expect(await countVisibleBlue(page)).toBe(0)
++  })
++})
++
++test.describe('T9 · ConsoleFrame compartido', () => {
++  test('/es/realty conserva la consola completa de su portada, con el embudo', async ({ page }) => {
++    await page.goto('/es/realty')
++    const hero = page.locator('section[data-header-start="dark"]')
++    await expect(hero).toContainText(es.realty.hero.console.label)
++    await expect(hero).toContainText(es.realty.hero.console.funnel.label)
++    await expect(hero.getByRole('img', { name: es.realty.hero.console.funnel.label })).toHaveCount(1)
++    for (const stage of es.realty.hero.console.funnel.stages) {
++      await expect(hero).toContainText(stage.name)
++    }
++    const text = (await hero.innerText()).toLowerCase()
++    expect(text.split(es.realty.demoLabel.toLowerCase()).length - 1, 'demoLabel una sola vez en el marco').toBe(1)
++  })
++
++  test('ningún script de /es lleva la consola de RealTy: se pinta en el servidor (plan §3.8)', async ({ request }) => {
++    const html = await (await request.get('/es')).text()
++    const sources = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
++      .map(([, src]) => src.replace(/&amp;/g, '&'))
++      .filter((src) => src.startsWith('/_next/'))
++    expect(sources.length, 'scripts de /es').toBeGreaterThan(0)
++    for (const src of sources) {
++      const response = await request.get(src)
++      expect(response.status(), src).toBe(200)
++      const body = await response.text()
++      const found = REALTY_CLIENT_MARKERS.filter((marker) => body.includes(marker))
++      expect(found, `${src} lleva código de la consola de RealTy`).toEqual([])
++    }
++  })
++})
+diff --git a/e2e/realty.spec.ts b/e2e/realty.spec.ts
+index 31fbeff..b83e64d 100644
+--- a/e2e/realty.spec.ts
++++ b/e2e/realty.spec.ts
+@@ -1,6 +1,7 @@
+ import { test, expect } from '@playwright/test'
+ import es from '../src/content/dictionaries/es'
+ import en from '../src/content/dictionaries/en'
++import { FORBIDDEN_STEMS, FORBIDDEN_WORDS } from './helpers'
+ 
+ /**
+  * Gate de la landing de RealTy (v2).
+@@ -21,45 +22,9 @@ const dictionaries = { es, en } as const
+ 
+ type LocaleKey = keyof typeof dictionaries
+ 
+-/**
+- * Jerga de ingeniería: raíces y fragmentos de identificador. Coinciden como
+- * SUBCADENA para atrapar también las variantes ("idempotencia", "mocks",
+- * "evaluate_offer"). Ninguna palabra de negocio en ES/EN las contiene.
+- */
+-const FORBIDDEN_STEMS = [
+-  'idempot',
+-  'webhook',
+-  'gateway',
+-  'fixture',
+-  'replay',
+-  'mock',
+-  'endpoint',
+-  'get_lead',
+-  'evaluate_',
+-  'Cierre Autónomo',
+-  '%',
+-] as const
+-
+-/**
+- * Siglas y nombres propios prohibidos. Coinciden como PALABRA COMPLETA: como
+- * subcadena producen falsos positivos reales en el copy legítimo — "sse" vive
+- * dentro de "passes" y "dapta" dentro de "Adaptador de prueba", que es una de
+- * las etiquetas de estado obligatorias.
+- */
+-const FORBIDDEN_WORDS = [
+-  'HMAC',
+-  'JSON',
+-  'SSE',
+-  'LLM',
+-  'TypeScript',
+-  'PostgreSQL',
+-  'Fastify',
+-  'RSDubai',
+-  'Redminds',
+-  '15M',
+-  'Dapta',
+-  'Rentmies',
+-] as const
++// FORBIDDEN_STEMS (subcadena) y FORBIDDEN_WORDS (palabra completa) viven en
++// e2e/helpers.ts: la tarjeta de RealTy de la home (e2e/home.spec.ts) aplica la
++// misma lista negra.
+ 
+ /** Secciones con ancla, en el orden en el que la narrativa las presenta. */
+ const SECTION_IDS = ['outcomes', 'journey', 'voice', 'console', 'channels', 'status', 'faq'] as const
+diff --git a/e2e/smoke.spec.ts b/e2e/smoke.spec.ts
+index bc81a98..4cfc97d 100644
+--- a/e2e/smoke.spec.ts
++++ b/e2e/smoke.spec.ts
+@@ -11,7 +11,7 @@ test('homepage loads and renders all sections', async ({ page }) => {
+   await expect(page).toHaveTitle(/Orbexs/)
+   await expect(page.getByRole('heading', { level: 1 })).toContainText(hero.title)
+   await expect(page.locator(`#${es.services.sectionId}`)).toBeAttached()
+-  await expect(page.locator(`#${es.caseStudy.sectionId}`)).toBeAttached()
++  await expect(page.locator(`#${es.built.sectionId}`)).toBeAttached()
+   await expect(page.locator(`#${es.methodology.sectionId}`)).toBeAttached()
+   await expect(page.locator(`#${es.techStack.sectionId}`)).toBeAttached()
+   await expect(page.locator(`#${es.faq.sectionId}`)).toBeAttached()
+@@ -133,7 +133,7 @@ test('home page links to the live studio division', async ({ page }) => {
+   )
+   await page.keyboard.press('Escape')
+ 
+-  await expect(page.getByRole('link', { name: es.liveStudioTeaser.action.label })).toHaveAttribute(
++  await expect(page.getByRole('link', { name: es.built.studioCta.label, exact: true })).toHaveAttribute(
+     'href',
+     '/es/estudio-tiktok-live'
+   )
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index be68069..a4c60c4 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -17,8 +17,7 @@ import { pageMetadata } from "@/lib/metadata"
+ import { Thesis } from "@/components/sections/home/Thesis"
+ import { CapabilitiesIndex } from "@/components/sections/home/CapabilitiesIndex"
+ import { CapabilitiesMedia } from "@/components/sections/home/CapabilitiesMedia"
+-import { CaseStudy } from "@/components/sections/CaseStudy"
+-import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
++import { BuiltProof } from "@/components/sections/home/BuiltProof"
+ import { Methodology } from "@/components/sections/Methodology"
+ import { TechStack } from "@/components/sections/TechStack"
+ import { FAQ } from "@/components/sections/FAQ"
+@@ -73,8 +72,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
+       <HomeHero content={heroContent} media={<HeroMedia />} />
+       <Thesis text={dict.thesis.text} />
+       <CapabilitiesIndex content={dict.services} locale={locale} media={<CapabilitiesMedia />} />
+-      <CaseStudy content={dict.caseStudy} locale={locale} />
+-      <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
++      <BuiltProof built={dict.built} caseStudy={dict.caseStudy} realty={dict.realty} locale={locale} />
+       <Methodology content={dict.methodology} />
+       <TechStack content={dict.techStack} trustLabel={dict.trustBar.label} />
+       <FAQ content={dict.faq} />
+diff --git a/src/components/sections/CaseStudy.tsx b/src/components/sections/CaseStudy.tsx
+deleted file mode 100644
+index 91a6ef1..0000000
+--- a/src/components/sections/CaseStudy.tsx
++++ /dev/null
+@@ -1,102 +0,0 @@
+-"use client"
+-import Link from "next/link"
+-import { m } from "motion/react"
+-import { CoverReveal } from "@/components/animations/CoverReveal"
+-import { buildLocalePath } from "@/lib/i18n"
+-import type { Locale } from "@/lib/i18n"
+-
+-interface CaseStudyContent {
+-  sectionId: string
+-  eyebrow: string
+-  industry: string
+-  title: string
+-  context: string
+-  solution: string
+-  outcome: string
+-  capabilitiesTitle: string
+-  capabilities: readonly string[]
+-  cta: { label: string; href: string }
+-}
+-
+-export function CaseStudy({ content, locale }: { content: CaseStudyContent; locale: string }) {
+-  return (
+-    <m.section
+-      initial={{ opacity: 0, y: 30 }}
+-      whileInView={{ opacity: 1, y: 0 }}
+-      viewport={{ once: true, margin: "-80px" }}
+-      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+-      className="py-16 sm:py-32 bg-white border-t border-[#e5e5e5] relative z-10"
+-      id={content.sectionId}
+-    >
+-      <div className="mx-auto max-w-7xl px-6">
+-        {/* Eyebrow + industry tag */}
+-        <div className="flex flex-wrap items-center justify-between gap-4 mb-10 sm:mb-14">
+-          <div className="flex items-center gap-4">
+-            <span className="block w-12 h-[1px] bg-[#0a0a0a] opacity-30" />
+-            <p className="font-mono text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#0a0a0a] opacity-90">
+-              {content.eyebrow}
+-            </p>
+-          </div>
+-          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#707070]">
+-            {content.industry}
+-          </p>
+-        </div>
+-
+-        <div className="mb-10 sm:mb-16 max-w-3xl">
+-          <CoverReveal as="h2" className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a]">
+-            {content.title}
+-          </CoverReveal>
+-        </div>
+-
+-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
+-          {/* Narrative */}
+-          <div className="lg:col-span-3 space-y-6">
+-            <p className="text-lg text-[#525252] leading-relaxed">{content.context}</p>
+-            <p className="text-lg text-[#525252] leading-relaxed">{content.solution}</p>
+-            <p className="text-lg text-[#0a0a0a] leading-relaxed font-medium">{content.outcome}</p>
+-
+-            <Link
+-              href={buildLocalePath(locale as Locale, content.cta.href)}
+-              className="inline-flex items-center gap-2 pt-4 text-sm font-medium text-[#0a0a0a] hover:text-[#525252] transition-colors"
+-            >
+-              {content.cta.label} <span aria-hidden="true">&rarr;</span>
+-            </Link>
+-          </div>
+-
+-          {/* Capabilities panel */}
+-          <m.div
+-            initial="hidden"
+-            whileInView="visible"
+-            viewport={{ once: true, margin: "-100px" }}
+-            variants={{
+-              hidden: { opacity: 0 },
+-              visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+-            }}
+-            className="lg:col-span-2 bg-[#f8f8f8] border border-[#e5e5e5] rounded-[6px] p-8 sm:p-10 h-fit"
+-          >
+-            <h3 className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#525252] mb-8">
+-              {content.capabilitiesTitle}
+-            </h3>
+-            <ul className="space-y-4">
+-              {content.capabilities.map((capability, i) => (
+-                <m.li
+-                  key={capability}
+-                  variants={{
+-                    hidden: { opacity: 0, y: 10 },
+-                    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+-                  }}
+-                  className="flex items-start gap-4 text-sm text-[#525252] leading-relaxed"
+-                >
+-                  <span className="font-mono text-[10px] text-[#707070] tabular-nums pt-[3px] select-none" aria-hidden="true">
+-                    {String(i + 1).padStart(2, "0")}
+-                  </span>
+-                  {capability}
+-                </m.li>
+-              ))}
+-            </ul>
+-          </m.div>
+-        </div>
+-      </div>
+-    </m.section>
+-  )
+-}
+diff --git a/src/components/sections/LiveStudioTeaser.tsx b/src/components/sections/LiveStudioTeaser.tsx
+deleted file mode 100644
+index 1e1ff97..0000000
+--- a/src/components/sections/LiveStudioTeaser.tsx
++++ /dev/null
+@@ -1,119 +0,0 @@
+-"use client"
+-import { m } from "motion/react"
+-import { Button } from "@/components/ui/Button"
+-import { trackEvent } from "@/lib/analytics"
+-import { buildLocalePath } from "@/lib/i18n"
+-import type { Locale } from "@/lib/i18n"
+-
+-export interface LiveStudioTeaserContent {
+-  eyebrow: string
+-  kicker: string
+-  title: string
+-  description: string
+-  points: readonly string[]
+-  action: { label: string; href: string }
+-}
+-
+-const viewportConfig = { once: true, margin: "-100px" as const }
+-
+-/**
+- * Home-page announcement band for the Live Studio division.
+- * Dark on a light page — the break in rhythm is the point.
+- */
+-export function LiveStudioTeaser({
+-  content,
+-  locale,
+-}: {
+-  content: LiveStudioTeaserContent
+-  locale: string
+-}) {
+-  return (
+-    <section
+-      className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden"
+-      data-header-theme="dark"
+-    >
+-      <div aria-hidden="true" className="absolute inset-0 live-aurora opacity-90" />
+-      <div aria-hidden="true" className="absolute inset-0 live-frame-grid opacity-40" />
+-
+-      <div className="relative mx-auto max-w-7xl px-6">
+-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+-          <div className="lg:col-span-7">
+-            <m.div
+-              initial={{ opacity: 0, y: 16 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={viewportConfig}
+-              transition={{ duration: 0.6, ease: "easeOut" }}
+-              className="flex flex-wrap items-center gap-3 mb-8"
+-            >
+-              <span className="inline-flex items-center gap-2.5 rounded-[2px] border border-white/15 bg-white/[0.04] px-3 py-1.5">
+-                <span className="live-dot" />
+-                <span className="font-mono text-[10px] tracking-[0.28em] text-white">
+-                  {content.eyebrow}
+-                </span>
+-              </span>
+-              <span className="font-mono text-[10px] tracking-[0.24em] uppercase text-white/45">
+-                {content.kicker}
+-              </span>
+-            </m.div>
+-
+-            <m.h2
+-              initial={{ opacity: 0, y: 20 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={viewportConfig}
+-              transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
+-              className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-6"
+-            >
+-              {content.title}
+-            </m.h2>
+-
+-            <m.p
+-              initial={{ opacity: 0, y: 20 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={viewportConfig}
+-              transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
+-              className="text-lg text-white/55 leading-relaxed max-w-2xl mb-10"
+-            >
+-              {content.description}
+-            </m.p>
+-
+-            <m.div
+-              initial={{ opacity: 0, y: 20 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={viewportConfig}
+-              transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
+-            >
+-              <Button
+-                size="lg"
+-                href={buildLocalePath(locale as Locale, content.action.href)}
+-                onClick={() => trackEvent("live_studio_teaser_click")}
+-                className="bg-white text-[#0a0a0a] hover:bg-white/85"
+-              >
+-                {content.action.label}
+-              </Button>
+-            </m.div>
+-          </div>
+-
+-          <div className="lg:col-span-5">
+-            <ul className="border-t border-white/10">
+-              {content.points.map((point, i) => (
+-                <m.li
+-                  key={point}
+-                  initial={{ opacity: 0, x: 12 }}
+-                  whileInView={{ opacity: 1, x: 0 }}
+-                  viewport={viewportConfig}
+-                  transition={{ duration: 0.5, delay: 0.1 * i, ease: "easeOut" }}
+-                  className="flex gap-5 py-6 border-b border-white/10"
+-                >
+-                  <span className="font-mono text-[10px] tracking-[0.26em] text-[#25f4ee]/70 pt-1 shrink-0">
+-                    {String(i + 1).padStart(2, "0")}
+-                  </span>
+-                  <span className="text-base text-white/70 leading-relaxed">{point}</span>
+-                </m.li>
+-              ))}
+-            </ul>
+-          </div>
+-        </div>
+-      </div>
+-    </section>
+-  )
+-}
+diff --git a/src/components/sections/home/BuiltProof.tsx b/src/components/sections/home/BuiltProof.tsx
+new file mode 100644
+index 0000000..a50057d
+--- /dev/null
++++ b/src/components/sections/home/BuiltProof.tsx
+@@ -0,0 +1,139 @@
++// "Lo que ya construimos" (§5.5 del diseño): las dos pruebas de que Orbexs
++// construye productos reales. Componente de SERVIDOR: el texto, la consola de
++// RealTy y los enlaces salen en el HTML; el movimiento vive en tres islas
++// pequeñas (BuiltStage, BuiltScaleIn, StudioSequence).
++//
++// Reglas que esta sección no puede romper (CLAUDE.md):
++// - RealTy: solo el nombre "RealTy"; sin jerga técnica (lista negra compartida en
++//   e2e/helpers.ts); una sola etiqueta de datos de demostración por marco (la del
++//   ConsoleFrame); "simulado" junto a retenciones y reservas (lo dicen las
++//   propias fichas de la consola); sin métricas fuera del marco etiquetado.
++// - Live Studio: el caso se construyó para la división propia; las capacidades
++//   son una lista numerada, no un registro de eventos reales; sin afirmar
++//   afiliación con TikTok.
++// - Regla del azul: nada azul en esta sección. ConsoleFrame no recibe acento.
++//
++// Presupuesto de JS (plan §3.8): ConsoleFrame se importa de su módulo sin
++// directiva (realty/ConsoleFrame.tsx), nunca de realty/Hero.tsx ("use client"):
++// así se renderiza aquí, en el servidor, y ni la consola ni RealtyHero viajan en
++// el JavaScript de /es.
++import Link from "next/link"
++import { ConsoleFrame } from "@/components/sections/realty/ConsoleFrame"
++import type { RealtyContent } from "@/components/sections/realty/shared"
++import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
++import { buildLocalePath } from "@/lib/i18n"
++import type { Locale } from "@/lib/i18n"
++import { BuiltScaleIn } from "./BuiltScaleIn"
++import { BuiltStage } from "./BuiltStage"
++import { StudioSequence } from "./StudioSequence"
++
++export interface BuiltContent {
++  sectionId: string
++  eyebrow: string
++  title: string
++  realtyName: string
++  realtyCta: string
++  studioCta: { label: string; href: string }
++}
++
++/** Lo que la tarjeta de Live Studio lee de `dict.caseStudy`. */
++export interface BuiltCaseStudy {
++  industry: string
++  title: string
++  ownership: string
++  summary: { context: string; solution: string; outcome: string }
++  capabilitiesTitle: string
++  capabilities: readonly string[]
++  cta: { label: string; href: string }
++}
++
++/** Lo que la tarjeta de RealTy lee de `dict.realty` (contrato: RealtyContent). */
++export type BuiltRealty = Pick<RealtyContent, "hero" | "statusLine" | "demoLabel" | "demoSrText">
++
++// Por debajo de 22,5rem (360 px) el relleno baja a 1rem: la consola de RealTy
++// está pensada para ≥ 272 px de ancho y, con 1,5rem, a 320 px sus fichas se
++// quedaban en 77 px y «CONVERSACIONES» y las sparklines (96 px) invadían la
++// ficha vecina.
++const CARD_CLASS = "flex flex-col rounded-[6px] border border-[#1a1a1a] bg-[#0a0a0a] p-6 max-[22.5rem]:p-4 sm:p-10"
++
++// El foco global es #0a0a0a (globals.css): sobre fondo oscuro se pinta en blanco.
++const LINK_CLASS =
++  "inline-flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-[#a3a3a3] focus-visible:outline-white"
++
++export function BuiltProof({
++  built,
++  caseStudy,
++  realty,
++  locale,
++}: {
++  built: BuiltContent
++  caseStudy: BuiltCaseStudy
++  realty: BuiltRealty
++  locale: Locale
++}) {
++  return (
++    <BuiltStage id={built.sectionId} className="relative border-t border-[#1a1a1a] bg-[#0a0a0a] py-24 md:py-32">
++      <div className="mx-auto max-w-7xl px-6">
++        <div className="mb-12 max-w-3xl md:mb-16">
++          <InstrumentLabel as="p">{built.eyebrow}</InstrumentLabel>
++          <h2 className="mt-6 text-balance font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
++            {built.title}
++          </h2>
++        </div>
++
++        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
++          {/* RealTy: la consola real de /realty en su vista compacta, con su única etiqueta de demostración. */}
++          <BuiltScaleIn card="realty" className={`${CARD_CLASS} lg:col-span-7`}>
++            <InstrumentLabel as="p">/01</InstrumentLabel>
++            <h3 className="mt-6 font-heading text-2xl font-bold tracking-tight text-white sm:text-3xl">
++              {built.realtyName}
++            </h3>
++            <p className="mt-4 max-w-xl text-balance font-heading text-xl font-medium leading-snug tracking-tight text-white sm:text-2xl">
++              {realty.hero.title}
++            </p>
++            <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#a3a3a3]">{realty.statusLine}</p>
++            {/* 32,5rem = el ancho máximo de ConsoleFrame: alineada a la izquierda, con el texto, también por debajo de lg. */}
++            <div className="mt-10 w-full max-w-[32.5rem]">
++              <ConsoleFrame
++                console={realty.hero.console}
++                demoLabel={realty.demoLabel}
++                demoSrText={realty.demoSrText}
++                drawn
++                compact
++              />
++            </div>
++            <Link href={buildLocalePath(locale, "/realty")} className={`mt-10 self-start ${LINK_CLASS}`}>
++              {built.realtyCta} <span aria-hidden="true">&rarr;</span>
++            </Link>
++          </BuiltScaleIn>
++
++          {/* Live Studio: el caso de la mesa de ayuda, construido para la división propia. */}
++          <article data-built-card="studio" className={`${CARD_CLASS} lg:col-span-5`}>
++            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
++              <InstrumentLabel as="p">/02</InstrumentLabel>
++              <InstrumentLabel as="p">{caseStudy.industry}</InstrumentLabel>
++            </div>
++            <h3 className="mt-6 text-balance font-heading text-2xl font-bold tracking-tight text-white sm:text-3xl">
++              {caseStudy.title}
++            </h3>
++            <p className="mt-4 text-base font-medium leading-relaxed text-white">{caseStudy.ownership}</p>
++            <div className="mt-6 space-y-4 text-sm leading-relaxed text-[#a3a3a3]">
++              <p>{caseStudy.summary.context}</p>
++              <p>{caseStudy.summary.solution}</p>
++              <p className="text-white">{caseStudy.summary.outcome}</p>
++            </div>
++            <StudioSequence title={caseStudy.capabilitiesTitle} items={caseStudy.capabilities} className="mt-10" />
++            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
++              <Link href={buildLocalePath(locale, caseStudy.cta.href)} className={LINK_CLASS}>
++                {caseStudy.cta.label} <span aria-hidden="true">&rarr;</span>
++              </Link>
++              <Link href={buildLocalePath(locale, built.studioCta.href)} className={LINK_CLASS}>
++                {built.studioCta.label} <span aria-hidden="true">&rarr;</span>
++              </Link>
++            </div>
++          </article>
++        </div>
++      </div>
++    </BuiltStage>
++  )
++}
+diff --git a/src/components/sections/home/BuiltScaleIn.tsx b/src/components/sections/home/BuiltScaleIn.tsx
+new file mode 100644
+index 0000000..ac721f9
+--- /dev/null
++++ b/src/components/sections/home/BuiltScaleIn.tsx
+@@ -0,0 +1,64 @@
++"use client"
++// La tarjeta de RealTy "entra" pasando de escala 0,92 a 1 (§5.5 del diseño).
++// Solo se anima `transform` (scale); el contenido llega renderizado desde el
++// servidor como `children`.
++//
++// - scrub (≥ 48rem de ancho y ≥ 37,5rem de alto): la escala sigue al scroll
++//   mientras la tarjeta sube hacia el centro de la pantalla.
++// - inView (celular, también apaisado): una sola vez al entrar en pantalla.
++// - static (reducir movimiento): escala 1, sin animación.
++//
++// Hidratación: `amount` empieza en 1 para todos (servidor, primer render y sin
++// JavaScript la tarjeta se ve a su tamaño final). Solo después de montar, y con
++// la tarjeta todavía fuera de pantalla, el efecto la lleva a 0,92.
++import { useEffect, useRef } from "react"
++import { animateSingleValue, m, useInView, useMotionValue, useTransform } from "motion/react"
++import { useStageProgress } from "@/hooks/useStageProgress"
++import type { StageOffset } from "@/hooks/useStageProgress"
++import { easing } from "@/lib/motion"
++
++const FROM_SCALE = 0.92
++/** 0 cuando el borde superior de la tarjeta asoma por abajo; 1 cuando llega al 45 % del viewport. */
++const OFFSET: StageOffset = ["start 0.95", "start 0.45"]
++
++export function BuiltScaleIn({
++  card,
++  className,
++  children,
++}: {
++  card: "realty" | "studio"
++  className?: string
++  children: React.ReactNode
++}) {
++  const ref = useRef<HTMLElement>(null)
++  const { progress, mode } = useStageProgress(ref, OFFSET)
++  const inView = useInView(ref, { once: true, amount: 0.25 })
++  const amount = useMotionValue(1)
++  const scale = useTransform(amount, [0, 1], [FROM_SCALE, 1])
++
++  useEffect(() => {
++    if (mode === "static") {
++      amount.set(1)
++      return
++    }
++    if (mode === "scrub") {
++      amount.set(progress.get())
++      return progress.on("change", (value) => amount.set(value))
++    }
++    if (!inView) {
++      amount.set(0)
++      return
++    }
++    // animateSingleValue en lugar de animate() (§3.8): lo mismo que animate(mv, …)
++    // hace por dentro con un MotionValue, sin arrastrar el animate híbrido. stop()
++    // en el propio valor: con animaciones instantáneas no devuelve controles.
++    animateSingleValue(amount, 1, { duration: 0.7, ease: easing.entrance })
++    return () => amount.stop()
++  }, [mode, inView, progress, amount])
++
++  return (
++    <m.article ref={ref} data-built-card={card} style={{ scale }} className={className}>
++      {children}
++    </m.article>
++  )
++}
+diff --git a/src/components/sections/home/BuiltStage.tsx b/src/components/sections/home/BuiltStage.tsx
+new file mode 100644
+index 0000000..dc4b846
+--- /dev/null
++++ b/src/components/sections/home/BuiltStage.tsx
+@@ -0,0 +1,26 @@
++"use client"
++// La <section> de "Lo que ya construimos" como isla mínima. BuiltProof es de
++// servidor y no puede leer matchMedia, pero el contrato (§3.4 del plan) pide
++// `data-stage-mode` en la sección. Los hijos llegan ya renderizados desde el
++// servidor: esta isla solo aporta el atributo. No es un ScrollStage: la sección
++// no lleva pista alta ni marco `sticky`.
++import { useStageMode } from "@/hooks/useStageProgress"
++
++export function BuiltStage({
++  id,
++  className,
++  children,
++}: {
++  id: string
++  className?: string
++  children: React.ReactNode
++}) {
++  // "scrub" en el servidor y en el primer render del cliente: la hidratación coincide.
++  const mode = useStageMode()
++
++  return (
++    <section id={id} data-header-theme="dark" data-stage-mode={mode} className={className}>
++      {children}
++    </section>
++  )
++}
+diff --git a/src/components/sections/home/StudioSequence.tsx b/src/components/sections/home/StudioSequence.tsx
+new file mode 100644
+index 0000000..216f058
+--- /dev/null
++++ b/src/components/sections/home/StudioSequence.tsx
+@@ -0,0 +1,100 @@
++"use client"
++// Las 6 capacidades del agente de Live Studio como secuencia numerada 01–06
++// que se enciende al bajar (§5.5 del diseño). Es una lista de capacidades, no
++// un registro de eventos: sin horas, sin estados de ejecución, sin "OK".
++//
++// - scrub (≥ 48rem de ancho y ≥ 37,5rem de alto): el paso N se enciende cuando
++//   el avance de la lista pasa por su mitad (N − 0,5) / 6.
++// - inView (celular, también apaisado): al entrar la lista en pantalla, un paso
++//   cada 220 ms. `once`: una vez disparada, llega siempre al final aunque la
++//   lista salga de la pantalla.
++// - static (reducir movimiento): las 6 encendidas.
++// - Sin JavaScript (`noscript:`, @media (scripting: none)): el HTML del servidor
++//   trae el primer render (scrub, avance 0: todas apagadas) y el CSS pinta el
++//   estado final, como Tesis y Capacidades (T7).
++//
++// Encender = número y texto de #a3a3a3 a blanco (cambio de estado discreto,
++// sin transition-colors; AA en ambos) y una línea de 1 px que se traza con
++// scaleX. Nada azul.
++import { useEffect, useRef, useState } from "react"
++import { useInView, useMotionValueEvent } from "motion/react"
++import { useStageProgress } from "@/hooks/useStageProgress"
++import type { StageOffset } from "@/hooks/useStageProgress"
++
++const STEP_MS = 220
++/** 0 cuando la lista asoma al 85 % del viewport; 1 cuando su final sube al 60 %. */
++const OFFSET: StageOffset = ["start 0.85", "end 0.6"]
++
++/** Pasos encendidos para un avance p (0→1). */
++function litFor(progress: number, total: number) {
++  return Math.min(total, Math.max(0, Math.floor(progress * total + 0.5)))
++}
++
++export function StudioSequence({
++  title,
++  items,
++  className,
++}: {
++  title: string
++  items: readonly string[]
++  className?: string
++}) {
++  const ref = useRef<HTMLDivElement>(null)
++  const { progress, mode } = useStageProgress(ref, OFFSET)
++  const inView = useInView(ref, { once: true, amount: 0.35 })
++  const total = items.length
++  const [scrubLit, setScrubLit] = useState(0)
++  const [timedLit, setTimedLit] = useState(0)
++
++  useMotionValueEvent(progress, "change", (value) => setScrubLit(litFor(value, total)))
++
++  useEffect(() => {
++    if (mode !== "inView" || !inView) return
++    const tick = window.setInterval(() => setTimedLit((current) => Math.min(total, current + 1)), STEP_MS)
++    const stop = window.setTimeout(() => window.clearInterval(tick), STEP_MS * (total + 1))
++    return () => {
++      window.clearInterval(tick)
++      window.clearTimeout(stop)
++    }
++  }, [mode, inView, total])
++
++  const lit = mode === "static" ? total : mode === "inView" ? timedLit : scrubLit
++
++  return (
++    <div ref={ref} className={className}>
++      <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#a3a3a3] md:text-[11px]">{title}</h4>
++      <ol className="mt-6 border-t border-[#1a1a1a]">
++        {items.map((item, i) => {
++          const on = i < lit
++          const num = String(i + 1).padStart(2, "0")
++          return (
++            <li
++              key={item}
++              data-studio-step={num}
++              data-lit={on ? "true" : "false"}
++              className="relative flex items-start gap-5 border-b border-[#1a1a1a] py-4"
++            >
++              <span
++                aria-hidden="true"
++                className={`absolute inset-x-0 -bottom-px h-px origin-left bg-white transition-transform duration-500 ease-out motion-reduce:transition-none noscript:scale-x-100 ${
++                  on ? "scale-x-100" : "scale-x-0"
++                }`}
++              />
++              <span
++                aria-hidden="true"
++                className={`pt-[3px] font-mono text-[11px] tabular-nums tracking-[0.2em] noscript:text-white ${
++                  on ? "text-white" : "text-[#a3a3a3]"
++                }`}
++              >
++                {num}
++              </span>
++              <span className={`text-sm leading-relaxed noscript:text-white ${on ? "text-white" : "text-[#a3a3a3]"}`}>
++                {item}
++              </span>
++            </li>
++          )
++        })}
++      </ol>
++    </div>
++  )
++}
+diff --git a/src/components/sections/realty/ConsoleFrame.tsx b/src/components/sections/realty/ConsoleFrame.tsx
+new file mode 100644
+index 0000000..8899121
+--- /dev/null
++++ b/src/components/sections/realty/ConsoleFrame.tsx
+@@ -0,0 +1,95 @@
++// The console "Overview" screen as a visual. Deliberately has NO "use client"
++// directive and no hooks: RealtyHero (a client island) renders it on /realty,
++// and the home's RealTy card (home/BuiltProof.tsx, a Server Component) renders
++// it on the server, so on the home its code never ships in the page's
++// JavaScript (plan §3.8). Its parts — DemoTag (./shared), StatTile and Funnel
++// (./viz) — carry no directive and no hooks either.
++import { DemoTag } from "./shared"
++import type { RealtyContent } from "./shared"
++import { Funnel, StatTile } from "./viz"
++
++/**
++ * The console "Overview" screen, rendered as the hero visual: hero figure,
++ * a 2×2 grid of stat tiles with sparklines, and the pipeline funnel underneath.
++ * Same three-part structure as the product's own overview, in Orbexs ink.
++ *
++ * The home's RealTy card (`home/BuiltProof.tsx`) renders the `compact` view:
++ * hero figure and tiles, no funnel. Both views keep the frame's single demo
++ * tag and never paint the accent hue (no `accent` on the tiles, no
++ * `accentIndex` on the funnel), so the home section stays blue-free.
++ */
++export function ConsoleFrame({
++  console: overview,
++  demoLabel,
++  demoSrText,
++  drawn,
++  compact = false,
++}: {
++  console: RealtyContent["hero"]["console"]
++  demoLabel: string
++  demoSrText: string
++  drawn: boolean
++  /** Hero figure and stat tiles only (the home card). Defaults to the full hero view. */
++  compact?: boolean
++}) {
++  const funnelLabel = `${overview.funnel.label}: ${overview.funnel.stages
++    .map((stage) => `${stage.name} ${stage.count}`)
++    .join(", ")}`
++
++  return (
++    <div className="relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0">
++      <div className="relative rounded-[6px] border border-[#1a1a1a] bg-[#141414]">
++        {/* Frame header: the screen's name, and the one demo-data tag. */}
++        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1a1a1a] px-5 py-4">
++          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#a3a3a3]">{overview.label}</span>
++          <DemoTag label={demoLabel} srText={demoSrText} tone="dark" />
++        </div>
++
++        {/* Hero figure — exactly one per screen. */}
++        <div className="border-b border-[#1a1a1a] px-5 py-6">
++          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#a3a3a3]">
++            {overview.headline.label}
++          </p>
++          <p className="mt-3 font-heading text-[clamp(1.85rem,4.5vw,2.6rem)] font-bold leading-none tracking-tight text-white">
++            {overview.headline.value}
++          </p>
++          <p className="mt-3 text-xs leading-relaxed text-[#a3a3a3]">{overview.headline.caption}</p>
++        </div>
++
++        {/* Stat tiles: hairline-separated, two up. The compact view ends here: no bottom rule. */}
++        <div className={compact ? "grid grid-cols-2" : "grid grid-cols-2 border-b border-[#1a1a1a]"}>
++          {overview.tiles.map((tile, i) => (
++            <StatTile
++              key={tile.label}
++              label={tile.label}
++              value={tile.value}
++              series={tile.series}
++              tone="dark"
++              drawn={drawn}
++              delayMs={140 * i}
++              className={`${i % 2 === 0 ? "border-r border-[#1a1a1a]" : ""} ${
++                i < overview.tiles.length - 2 ? "border-b border-[#1a1a1a]" : ""
++              }`}
++            />
++          ))}
++        </div>
++
++        {/* Pipeline funnel — the same nine stages the product uses. */}
++        {compact ? null : (
++          <div className="px-5 py-5">
++            <Funnel
++              stages={overview.funnel.stages}
++              label={overview.funnel.label}
++              ariaLabel={funnelLabel}
++              tone="dark"
++              drawn={drawn}
++            />
++          </div>
++        )}
++      </div>
++
++      {/* Offset ghost frame — the stack of open screens behind this one. */}
++      <div aria-hidden="true" className="absolute -right-3 top-5 bottom-5 -z-10 w-full rounded-[6px] border border-white/[0.06]" />
++    </div>
++  )
++}
+diff --git a/src/components/sections/realty/Hero.tsx b/src/components/sections/realty/Hero.tsx
+index 1c7de67..f62948d 100644
+--- a/src/components/sections/realty/Hero.tsx
++++ b/src/components/sections/realty/Hero.tsx
+@@ -3,9 +3,9 @@ import { useState } from "react"
+ import { m, useReducedMotion } from "motion/react"
+ import { Button } from "@/components/ui/Button"
+ import { trackEvent } from "@/lib/analytics"
+-import { DemoTag, resolveHref } from "./shared"
++import { ConsoleFrame } from "./ConsoleFrame"
++import { resolveHref } from "./shared"
+ import type { RealtyContent } from "./shared"
+-import { Funnel, StatTile } from "./viz"
+ 
+ /** Deterministic ambient rulers — no Math.random, so SSR and hydration agree. */
+ const RULERS = ["18%", "38%", "62%", "84%"]
+@@ -30,82 +30,6 @@ export interface RealtyHeroProps {
+   locale: string
+ }
+ 
+-/**
+- * The console "Overview" screen, rendered as the hero visual: hero figure,
+- * a 2×2 grid of stat tiles with sparklines, and the pipeline funnel underneath.
+- * Same three-part structure as the product's own overview, in Orbexs ink.
+- */
+-function ConsoleFrame({
+-  console: overview,
+-  demoLabel,
+-  demoSrText,
+-  drawn,
+-}: {
+-  console: RealtyContent["hero"]["console"]
+-  demoLabel: string
+-  demoSrText: string
+-  drawn: boolean
+-}) {
+-  const funnelLabel = `${overview.funnel.label}: ${overview.funnel.stages
+-    .map((stage) => `${stage.name} ${stage.count}`)
+-    .join(", ")}`
+-
+-  return (
+-    <div className="relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0">
+-      <div className="relative rounded-[6px] border border-[#1a1a1a] bg-[#141414]">
+-        {/* Frame header: the screen's name, and the one demo-data tag. */}
+-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1a1a1a] px-5 py-4">
+-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#a3a3a3]">{overview.label}</span>
+-          <DemoTag label={demoLabel} srText={demoSrText} tone="dark" />
+-        </div>
+-
+-        {/* Hero figure — exactly one per screen. */}
+-        <div className="border-b border-[#1a1a1a] px-5 py-6">
+-          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#a3a3a3]">
+-            {overview.headline.label}
+-          </p>
+-          <p className="mt-3 font-heading text-[clamp(1.85rem,4.5vw,2.6rem)] font-bold leading-none tracking-tight text-white">
+-            {overview.headline.value}
+-          </p>
+-          <p className="mt-3 text-xs leading-relaxed text-[#a3a3a3]">{overview.headline.caption}</p>
+-        </div>
+-
+-        {/* Stat tiles: hairline-separated, two up. */}
+-        <div className="grid grid-cols-2 border-b border-[#1a1a1a]">
+-          {overview.tiles.map((tile, i) => (
+-            <StatTile
+-              key={tile.label}
+-              label={tile.label}
+-              value={tile.value}
+-              series={tile.series}
+-              tone="dark"
+-              drawn={drawn}
+-              delayMs={140 * i}
+-              className={`${i % 2 === 0 ? "border-r border-[#1a1a1a]" : ""} ${
+-                i < overview.tiles.length - 2 ? "border-b border-[#1a1a1a]" : ""
+-              }`}
+-            />
+-          ))}
+-        </div>
+-
+-        {/* Pipeline funnel — the same nine stages the product uses. */}
+-        <div className="px-5 py-5">
+-          <Funnel
+-            stages={overview.funnel.stages}
+-            label={overview.funnel.label}
+-            ariaLabel={funnelLabel}
+-            tone="dark"
+-            drawn={drawn}
+-          />
+-        </div>
+-      </div>
+-
+-      {/* Offset ghost frame — the stack of open screens behind this one. */}
+-      <div aria-hidden="true" className="absolute -right-3 top-5 bottom-5 -z-10 w-full rounded-[6px] border border-white/[0.06]" />
+-    </div>
+-  )
+-}
+-
+ export function RealtyHero({ content, eyebrow, demoLabel, demoSrText, locale }: RealtyHeroProps) {
+   const reduced = useReducedMotion()
+   // The charts draw once the frame is observed in the viewport (immediately, in
+diff --git a/src/content/dictionaries/en.ts b/src/content/dictionaries/en.ts
+index 3c28060..fd5f7da 100644
+--- a/src/content/dictionaries/en.ts
++++ b/src/content/dictionaries/en.ts
+@@ -192,6 +192,23 @@ const en = {
+       label: "Explore Digital Workforce",
+       href: "/fuerza-digital",
+     },
++    ownership: "We built it first for our own division, Orbexs Live Studio.",
++    summary: {
++      context:
++        "A studio broadcasting live on TikTok cannot go off the air, and its help desk depended on having a technician available at the exact moment of the incident.",
++      solution:
++        "An AI agent runs the help desk: it diagnoses and remediates incidents during the broadcast, and escalates to a human technician only when automated remediation is not enough.",
++      outcome:
++        "The infrastructure stays up throughout broadcasts, and the technical team focuses on production instead of reactive support.",
++    },
++  },
++  built: {
++    sectionId: "built",
++    eyebrow: "OUR OWN PRODUCTS",
++    title: "Products we have already built.",
++    realtyName: "RealTy",
++    realtyCta: "Explore RealTy",
++    studioCta: { label: "Explore the studio", href: "/estudio-tiktok-live" },
+   },
+   methodology: {
+     sectionId: "metodologia",
+@@ -784,19 +801,6 @@ const en = {
+       },
+     },
+   },
+-  liveStudioTeaser: {
+-    eyebrow: "NEW DIVISION",
+-    kicker: "ORBEXS LIVE STUDIO",
+-    title: "A TikTok LIVE studio operated by a software factory.",
+-    description:
+-      "We produce live broadcasts for LATAM creators from our own sets, running on the same infrastructure, redundancy, and automation we build for critical operations.",
+-    points: [
+-      "Sets calibrated for 9:16 vertical production",
+-      "Redundant network with autonomous remediation mid-broadcast",
+-      "Training, schedule, and in-house analytics for every creator",
+-    ],
+-    action: { label: "Explore the studio", href: "/estudio-tiktok-live" },
+-  },
+   liveStudio: {
+     eyebrow: "ORBEXS LIVE STUDIO",
+     status: "TIKTOK LIVE AGENCY APPLICATION UNDER REVIEW",
+diff --git a/src/content/dictionaries/es.ts b/src/content/dictionaries/es.ts
+index 2467083..5b3b91a 100644
+--- a/src/content/dictionaries/es.ts
++++ b/src/content/dictionaries/es.ts
+@@ -192,6 +192,23 @@ const es = {
+       label: "Conocer Fuerza Digital",
+       href: "/fuerza-digital",
+     },
++    ownership: "Lo construimos primero para nuestra propia división, Orbexs Live Studio.",
++    summary: {
++      context:
++        "Un estudio que transmite en vivo en TikTok no puede quedarse fuera del aire, y su mesa de ayuda dependía de tener un técnico disponible en el momento exacto del incidente.",
++      solution:
++        "Un agente de IA opera la mesa de ayuda: diagnostica y remedia incidentes durante la transmisión, y escala a un técnico humano solo cuando la remediación automática no basta.",
++      outcome:
++        "La infraestructura se mantiene operativa durante las transmisiones y el equipo técnico se dedica a producir en lugar de hacer soporte reactivo.",
++    },
++  },
++  built: {
++    sectionId: "construido",
++    eyebrow: "PRODUCTOS PROPIOS",
++    title: "Productos que ya construimos.",
++    realtyName: "RealTy",
++    realtyCta: "Conocer RealTy",
++    studioCta: { label: "Conocer el estudio", href: "/estudio-tiktok-live" },
+   },
+   methodology: {
+     sectionId: "metodologia",
+@@ -784,19 +801,6 @@ const es = {
+       },
+     },
+   },
+-  liveStudioTeaser: {
+-    eyebrow: "NUEVA DIVISIÓN",
+-    kicker: "ORBEXS LIVE STUDIO",
+-    title: "Un estudio de TikTok LIVE operado por una fábrica de software.",
+-    description:
+-      "Producimos transmisiones en vivo para creadores de LATAM desde sets propios, con la misma infraestructura, redundancia y automatización que construimos para operaciones críticas.",
+-    points: [
+-      "Sets calibrados para producción vertical 9:16",
+-      "Red redundante con remediación autónoma durante el aire",
+-      "Formación, parrilla y analítica propia para cada creador",
+-    ],
+-    action: { label: "Conocer el estudio", href: "/estudio-tiktok-live" },
+-  },
+   liveStudio: {
+     eyebrow: "ORBEXS LIVE STUDIO",
+     status: "SOLICITUD DE AGENCIA TIKTOK LIVE EN REVISIÓN",
+-- 
+2.43.0
+

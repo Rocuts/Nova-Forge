@@ -1,0 +1,703 @@
+From f727120bb40e51e633d8f975ad960955bcc0759c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 17:56:11 +0000
+Subject: [PATCH 2/3] =?UTF-8?q?fix(home):=20completa=20la=20secuencia=2001?=
+ =?UTF-8?q?=E2=80=9306=20a=20cualquier=20alto=20y=20afina=20=C2=ABLo=20que?=
+ =?UTF-8?q?=20ya=20construimos=C2=BB?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Corrector de la ronda 1 de T9 (lentes de cumplimiento, calidad y visual). En scrub, cada capacidad
+se enciende por la posición de su fila: la secuencia avanza mientras la lista entra y está completa
+en cuanto se ven los enlaces de la tarjeta, también a 1920×1080 y 2560×1440. En celular, el
+intervalo se para al llegar a 6 y ya no se corta con un plazo fijo. La vista compacta de la consola
+no se centra y alinea las cifras de sus fichas; la tarjeta de RealTy escala desde su esquina, y en
+lg las dos tarjetas van mitad y mitad.
+
+Decisiones:
+- Secuencia por posición (fila entera y 2rem sobre el borde inferior; los enlaces van 2,5rem por
+  debajo de la lista), no con los offsets propuestos: con ["start 0.9", "end 0.9"], a 2560×1440 solo
+  se completaba al final de la sección, según la medida de la propia revisión.
+- inView: recuento en una ref y clearInterval al llegar a 6, como Tesis y Capacidades; callback
+  memorizado para useMotionValueEvent.
+- origin-top-left en lugar de origin-top: la tarjeta conserva también el borde izquierdo del título.
+- Columnas 6/6 en lg y 7/5 desde xl: a 1024 px la diferencia de alto entre tarjetas baja de ~400 a
+  ~195 px. Sin items-stretch: el hueco pasaría dentro de la tarjeta de RealTy.
+- ConsoleFrame compact: sin mx-auto (sustituye al envoltorio de 32,5rem, que con letra de 20 px medía
+  650 px) y con la cifra al pie de cada ficha. Solo con compact: el HTML de /realty no cambia.
+- h2 en text-4xl en celular; text-balance en el h4 de las capacidades y text-pretty en cada paso.
+- e2e/realty.spec.ts usa findForbiddenTerms: la lista negra se filtra en un solo sitio.
+- 12 pruebas nuevas en e2e/home-t9.spec.ts (27 en total), todas en rojo con el código anterior salvo
+  las dos de `once`, que son de regresión.
+- JS de /es: 220 230 B (implementación) → 220 321 B (+91 B; +88 B sobre la base 3644611, tope +2 500 B),
+  15 scripts; solo cambia el chunk de la página. check:modern-js OK; HTML de /realty idéntico.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../2026-09-23-home-cartografia-soberana.md   |  23 +-
+ e2e/helpers.ts                                |   7 +-
+ e2e/home-t9.spec.ts                           | 197 +++++++++++++++++-
+ e2e/realty.spec.ts                            |  17 +-
+ src/components/sections/home/BuiltProof.tsx   |  15 +-
+ src/components/sections/home/BuiltScaleIn.tsx |  12 +-
+ .../sections/home/StudioSequence.tsx          | 102 ++++++---
+ .../sections/realty/ConsoleFrame.tsx          |  29 ++-
+ 8 files changed, 337 insertions(+), 65 deletions(-)
+
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index f8bcce0..8d565a3 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -356,7 +356,7 @@ export function ConsoleFrame(props: {
+   demoLabel: string
+   demoSrText: string
+   drawn: boolean
+-  compact?: boolean                    // por defecto false; true = cifra principal y fichas, sin embudo (tarjeta de la home)
++  compact?: boolean                    // por defecto false; true = cifra principal y fichas, sin embudo, alineada al inicio (sin centrar) y con la cifra al pie de cada ficha (tarjeta de la home)
+ }): JSX.Element
+ //   Pantalla «Resumen» de la consola de RealTy, con una sola etiqueta de datos de demostración y sin acento azul.
+ //   La importan RealtyHero (isla de /realty) y home/BuiltProof.tsx (servidor): siempre desde este módulo, nunca
+@@ -8643,7 +8643,7 @@ Lo que el código de `wt/task9` cambia respecto de los borradores del paso 1 y d
+ 10. **`BuiltScaleIn` con `animateSingleValue`** (§3.8), como ya traía el borrador: `animate` no está en su import (lo vigila ESLint) y la limpieza es `amount.stop()`.
+ 11. **Import de `BuiltProof` en `page.tsx`** dentro del bloque de imports estáticos de las secciones, en el sitio de `CaseStudy` y `LiveStudioTeaser` (orden de §3.5), no tras `getDictionary` como en 2.7. El comentario de ese bloque no se toca: lo cambia T8. Al integrar, `BuiltProof` va justo después de `Dossier`, en el import y en el JSX.
+ 12. **`locale: Locale`** en `BuiltProof`, en lugar de `string` y `as Locale`: `page.tsx` ya lo estrecha con `isValidLocale`, igual que para `CapabilitiesIndex`.
+-13. **La consola va alineada a la izquierda en todos los anchos.** El marco trae `mx-auto … lg:mx-0`: en `/realty` va centrado por debajo de lg, pero dentro de la tarjeta, de 640 a 1023 px, quedaba centrado bajo un texto alineado a la izquierda. Se envuelve en un `div` `w-full max-w-[32.5rem]` (32,5rem es su ancho máximo) sin tocar `ConsoleFrame`.
++13. **La consola va alineada a la izquierda en todos los anchos.** El marco trae `mx-auto … lg:mx-0`: en `/realty` va centrado por debajo de lg, pero dentro de la tarjeta, de 640 a 1023 px, quedaba centrado bajo un texto alineado a la izquierda. Se envuelve en un `div` `w-full max-w-[32.5rem]` (32,5rem es su ancho máximo) sin tocar `ConsoleFrame`. *Sustituida por la decisión 22 (corrector, ronda 1).*
+ 14. **320 px: las tarjetas pasan de `p-6` a `max-[22.5rem]:p-4`** (en rem, como §3.6 y la decisión 21 de T7). La consola está pensada para ≥ 272 px de ancho, el de su portada en `/realty`. Dentro de la tarjeta, a 320 px, las fichas se quedaban con 77 px de contenido, y «CONVERSACIONES» y las sparklines (96 px) se salían de su ficha e invadían la vecina (es y en). Con 1rem quedan dentro. Desde 360 px no cambia nada. La prueba nueva a 320×568 (es y en) falla sin el cambio (comprobado).
+ 15. **Sin JavaScript se pinta el estado final**, como en Tesis y Capacidades (decisión 17 de T7). El HTML del servidor trae la secuencia apagada (scrub, avance 0). Las variantes `noscript:` de Tailwind 4.2 (`@media (scripting: none)`) en `StudioSequence` ponen el número y el texto en blanco y la línea entera, sin tocar `globals.css`, que comparten T8 y T10a. La tarjeta de RealTy ya sale a escala 1 del servidor.
+ 16. **Pruebas** en el spec temporal `e2e/home-t9.spec.ts` (15 pruebas; el integrador las funde al final de `e2e/home.spec.ts` y borra el archivo; `IDENTITY_TRANSFORM` también lo define T10a con el mismo valor, así que al fundir queda uno solo). Son las 7 del paso 1.4 más estos añadidos:
+@@ -8657,6 +8657,25 @@ Lo que el código de `wt/task9` cambia respecto de los borradores del paso 1 y d
+    La sección se localiza dentro de cada prueba y no al cargar el archivo: sin la clave `built` falla cada prueba, no la carga del spec. Rojo del paso 1 (con 13 pruebas; las dos de 320 px llegaron después): 11 fallan con `TypeError … 'sectionId'`, pasan las dos de `ConsoleFrame` (son de regresión), fallan las dos de `smoke.spec.ts` y `realty.spec.ts` sigue 12 de 12.
+ 17. **JS de `/es`** (`measure-js`, `next start`, 1440×900, mediana de 3): base `3644611` **220 233 B** en 15 scripts (con el 404 local de `/_vercel/insights`) → T9 **220 230 B**, también en 15 scripts: **−3 B** (tope de T9, +2 500 B). Solo cambia el chunk de la página (15 258 → 15 255 B): lo que añaden las tres islas lo compensa lo que se va con `CaseStudy` y `LiveStudioTeaser`; los demás chunks son idénticos. `check:modern-js`: OK (let=3525, class=167). En los chunks que carga `/es` no hay ningún literal de `realty/Hero.tsx`, `ConsoleFrame`, `viz.tsx` ni `shared.tsx`, y el HTML prerenderizado de `/es/realty` y `/en/realty` (sin scripts) es idéntico al de la base.
+ 
++### Decisiones (corrector, ronda 1)
++Hallazgos de la revisión con tres lentes (cumplimiento, calidad y visual) y cómo se resolvieron. Manda el código.
++
++18. **En `scrub`, cada paso de la secuencia 01–06 se enciende por la posición de su fila** (sustituye al avance del paso 2.5, `["start 0.85", "end 0.6"]`). Un paso se enciende cuando su fila ya entró entera y su borde inferior sube 2rem sobre el borde inferior del viewport. Es el mismo criterio de posición que el índice de Capacidades (T7): la secuencia avanza mientras la lista entra y está completa cuando la lista entera está a la vista. Con el avance, el final de la lista tenía que subir al 60 % del alto. Detrás vienen unos 230 px (los enlaces, el relleno de la tarjeta y el de la sección), así que en pantallas altas la sección terminaba antes: con su final en el borde inferior, 111110 a 1440×900, 111100 a 1920×1080 y 111000 a 2560×1440. Los pasos grises se leían como capacidades «apagadas». Los enlaces de la tarjeta van 2,5rem (`mt-10`) por debajo de la lista, más que la línea de encendido (2rem). Por eso, en cuanto se ven, las 6 están encendidas, a cualquier alto de pantalla. Medido: 111111 con los enlaces pegados al borde inferior a 1366×768, 1440×900, 1920×1080, 2560×1440, 2560×1080, 820×1180 y 1024×1366, y 110000 con la lista a media entrada. El avance del scroll queda solo como aviso para recalcular (`["start end", "end start"]`, como `SECTION_OFFSET` de Capacidades), y también se recalcula con `resize`. Se descartan los dos offsets que proponía la revisión (`["start 0.9", "end 0.9"]` y `["start 0.9", "end 0.85"]`). Según la medida de la propia revisión, con el primero a 2560×1440 las 6 solo se completaban al llegar al final de la sección, no con los enlaces ya a la vista. Con la posición, el resultado ya no depende del alto de la pantalla.
++19. **En `inView`, el intervalo se para al llegar a 6** (el patrón de `Thesis.tsx` y `CapabilitiesIndex.tsx`, con el recuento en una ref). Se quita el `setTimeout` de 1 540 ms que cortaba el intervalo. Con ese plazo, una tarea larga (900 ms de hilo bloqueado) dejaba la lista en 111100, y los temporizadores suspendidos (pestaña en segundo plano; `clock.fastForward` en la prueba) la dejaban en 110000. Como `useInView` es `once`, nada la reanudaba. `useMotionValueEvent` recibe ahora un callback memorizado con `useCallback`, como en Tesis.
++20. **La tarjeta de RealTy escala desde su esquina superior izquierda** (`origin-top-left` en `BuiltScaleIn`). Desde el centro, durante la entrada sus bordes se desviaban 19 px del borde superior de la tarjeta de Live Studio y 17 px del borde izquierdo del título, a escala 0,953, y se leía como un desajuste. La revisión proponía `origin-top`, que solo alinea el borde superior. Con la esquina fija, la tarjeta se queda en la retícula por los dos lados, tanto en dos columnas como apilada.
++21. **Columnas 6/6 en lg y 7/5 desde xl.** A 1024 px, con 7/5, la columna de Live Studio medía 393 px y su tarjeta quedaba unos 400 px más alta que la de RealTy, con una franja negra debajo de esta. Con mitad y mitad, la diferencia baja a unos 195 px a 1024 y 110 px a 1279, parecida a la de 7/5 en xl (unos 197 px a 1440). En xl se conserva 7/5: la consola mantiene su ancho máximo de 520 px y la tarjeta de RealTy, su protagonismo. No se estiran las tarjetas (`items-stretch` con el enlace en `mt-auto`), porque el hueco pasaría a estar dentro de la tarjeta de RealTy, entre la consola y su enlace.
++22. **La vista compacta de `ConsoleFrame` no se centra** (sustituye a la decisión 13). La 13 envolvía la consola en un `div` de `max-w-[32.5rem]`, pero con la letra del navegador a 20 px, 32,5rem son 650 px. El marco seguía en 520 px y volvía a centrarse, 65 px a la derecha del texto de la tarjeta, por debajo de lg (1 280 px con esa letra). Ahora el marco solo lleva `mx-auto … lg:mx-0` en la vista completa, la de `/realty`, cuyo HTML no cambia. En la compacta va al inicio, y `BuiltProof` ya no repite el ancho.
++23. **En la vista compacta, la cifra de cada ficha va al pie.** En celular, «OPORTUNIDADES ABIERTAS» ocupa dos líneas y «CONVERSACIONES» una, y las cifras 12 y 38 quedaban 11 px desalineadas dentro de la misma fila. Ahora cada ficha es una columna flex y su etiqueta ocupa el alto que sobra (`[&>:first-child]:grow`), así que la cifra y la sparkline quedan a la altura de las de la vecina. Solo se aplica con `compact`, y la clase se añade sin espacio final: la vista completa y el HTML de `/realty` no cambian. La revisión pedía no tocar `/realty` en T9.
++24. **Tipografía.** `text-balance` en el título de las capacidades (h4) y `text-pretty` en el texto de cada paso, para evitar las viudas «AUTÓNOMA» y «críticos» entre 1366 y 1920 px. En celular el h2 empieza ahora en `text-4xl` (36 px, antes 30 px), como los h2 de Capacidades y de Del papel al dato. Los tamaños de escritorio de los h2 de la home se revisan juntos en T10b/T11.
++25. **`e2e/realty.spec.ts` usa `findForbiddenTerms`** en lugar de su filtro en línea, y se aparta así del paso 1.2. La regla de la lista negra vive en un solo sitio (`e2e/helpers.ts`) y el comportamiento no cambia: 12 de 12.
++26. **Doce pruebas nuevas** en `e2e/home-t9.spec.ts`, que pasa a 27. Con el código de la implementación (comprobado) fallan las diez que no son de `once` y también la de la escala a 1440×900, que ahora mira los bordes; las dos de `once` pasan, porque son de regresión:
++    - scrub a 1366×768, 1920×1080, 2560×1440, 1024×1366 y 820×1180: nada encendido con la lista debajo de la pantalla; un prefijo 0 < k < 6 con la lista a media entrada; 6 de 6 con los enlaces de la tarjeta pegados al borde inferior y con el final de la sección en el borde inferior; y de nuevo a medias al volver a subir (es scrub, no «una sola vez»);
++    - a 1440×900, la prueba de mitad de recorrido pone ahora la lista a media entrada, y la de la escala comprueba que la tarjeta encogida conserva el borde superior de la de Live Studio y el borde izquierdo del título;
++    - inView, a 390×844 y 844×390: si la lista sale de la pantalla tras el primer paso, igual llega a 6 (`once`); con los temporizadores suspendidos (`page.clock.install`, `fastForward(10 000)` y `runFor(2 000)`), termina;
++    - 390×844: con 900 ms de hilo principal bloqueado tras el primer paso, termina; las cifras de cada fila de fichas quedan a la misma altura (es y en);
++    - letra del navegador a 20 px (CDP `Page.setFontSizes`), a 820 y 1 000 px con reducir movimiento: la consola queda alineada con el h3 de la tarjeta.
++27. **JS de `/es`** tras la ronda 1 (`measure-js`, `next start`, 1440×900, mediana de 3): **220 321 B** en 15 scripts. Son +91 B sobre la implementación (220 230 B) y +88 B sobre la base `3644611` (220 233 B), con un tope para T9 de +2 500 B. Solo cambia el chunk de la página (15 255 → 15 346 B), por la medida por posición de `StudioSequence`. `check:modern-js`: OK (let=3529, class=167). En los chunks de `/es` sigue sin haber código de la consola de RealTy. El HTML prerenderizado de `/es/realty` y `/en/realty`, sin scripts ni recursos estáticos, es idéntico al del build de la implementación.
++
+ ---
+ 
+ ## Tarea 10 — Metodología, cierre y FAQ
+diff --git a/e2e/helpers.ts b/e2e/helpers.ts
+index 4b16beb..8429594 100644
+--- a/e2e/helpers.ts
++++ b/e2e/helpers.ts
+@@ -178,9 +178,10 @@ export const FORBIDDEN_WORDS = [
+ ] as const
+ 
+ /**
+- * Términos de la lista negra presentes en `text`, con las mismas reglas que
+- * e2e/realty.spec.ts: todo en minúsculas (los chips en `uppercase` llegan
+- * transformados en `innerText`), raíces como subcadena, palabras con `\b`.
++ * Términos de la lista negra presentes en `text`. Es el único filtro: lo usan
++ * e2e/realty.spec.ts y la tarjeta de RealTy de la home. Todo en minúsculas (los
++ * chips en `uppercase` llegan transformados en `innerText`), raíces como
++ * subcadena, palabras con `\b`.
+  */
+ export function findForbiddenTerms(text: string): string[] {
+   const lower = text.toLowerCase()
+diff --git a/e2e/home-t9.spec.ts b/e2e/home-t9.spec.ts
+index b954ea6..3ba0c70 100644
+--- a/e2e/home-t9.spec.ts
++++ b/e2e/home-t9.spec.ts
+@@ -64,6 +64,23 @@ function litPattern(section: Locator): Promise<string> {
+     .evaluateAll((steps) => steps.map((step) => (step.getAttribute('data-lit') === 'true' ? '1' : '0')).join(''))
+ }
+ 
++/**
++ * scrollY que deja en el borde inferior del viewport el punto de `locator` a
++ * `fraction` de su alto (1: su borde inferior; 0,5: su mitad; 0: su borde superior).
++ */
++function bottomAtViewportBottom(locator: Locator, fraction = 1): Promise<number> {
++  return locator.evaluate((element, f) => {
++    const rect = element.getBoundingClientRect()
++    return window.scrollY + rect.top + rect.height * f - window.innerHeight
++  }, fraction)
++}
++
++/** Lleva la lista de capacidades cerca del borde superior y espera a que se encienda el primer paso. */
++async function startSequence(page: Page, section: Locator, viewportHeight: number): Promise<void> {
++  await scrollToY(page, (await layoutTop(section.locator('ol:has([data-studio-step])'))) - viewportHeight * 0.1)
++  await expect.poll(() => litPattern(section)).toMatch(/^1/)
++}
++
+ /**
+  * Marcadores de código que solo existen en la consola de RealTy y en su portada:
+  * la clase del marco de ConsoleFrame, el evento de analítica de RealtyHero y la
+@@ -148,16 +165,10 @@ test.describe('T9 · Lo que ya construimos', () => {
+     const lit = section.locator('[data-studio-step][data-lit="true"]')
+     await expect(lit).toHaveCount(0)
+ 
+-    // A mitad del recorrido de la lista (offset "start 0.85" → "end 0.6"), las
+-    // encendidas son las k primeras, con 0 < k < 6: en orden, no de golpe.
++    // Con la lista a media entrada (su mitad en el borde inferior del viewport),
++    // las encendidas son las k primeras, con 0 < k < 6: en orden, no de golpe.
+     const list = section.locator('ol:has([data-studio-step])')
+-    const mid = await list.evaluate((el) => {
+-      const rect = el.getBoundingClientRect()
+-      const start = window.scrollY + rect.top - window.innerHeight * 0.85
+-      const end = window.scrollY + rect.bottom - window.innerHeight * 0.6
+-      return (start + end) / 2
+-    })
+-    await scrollToY(page, mid)
++    await scrollToY(page, await bottomAtViewportBottom(list, 0.5))
+     await expect.poll(() => litPattern(section)).toMatch(/^1+0+$/)
+     // Sobre la sección oscura, el encabezado pasa a oscuro (data-header-theme="dark").
+     await scrollToY(page, await layoutTop(section))
+@@ -180,10 +191,26 @@ test.describe('T9 · Lo que ya construimos', () => {
+     await page.setViewportSize({ width: 1440, height: 900 })
+     await page.goto('/es')
+     await waitForHydration(page)
+-    const card = builtSection(page).locator('[data-built-card="realty"]')
++    const section = builtSection(page)
++    const card = section.locator('[data-built-card="realty"]')
+     // Con la tarjeta todavía debajo de la pantalla, ya espera encogida.
+     await expect.poll(() => scaleOf(card)).toBeCloseTo(FROM_SCALE, 3)
+ 
++    // Encoge desde su esquina superior izquierda: conserva el borde superior de la
++    // tarjeta de Live Studio y el izquierdo del título (desde el centro, los dos se
++    // desviaban y la entrada se leía como un desajuste).
++    const edges = await section.evaluate((element) => {
++      const box = (selector: string) => element.querySelector(selector)!.getBoundingClientRect()
++      return {
++        realtyTop: box('[data-built-card="realty"]').top,
++        studioTop: box('[data-built-card="studio"]').top,
++        realtyLeft: box('[data-built-card="realty"]').left,
++        titleLeft: box('h2').left,
++      }
++    })
++    expect(Math.abs(edges.realtyTop - edges.studioTop), 'borde superior de las dos tarjetas').toBeLessThan(1)
++    expect(Math.abs(edges.realtyLeft - edges.titleLeft), 'borde izquierdo de la tarjeta y del título').toBeLessThan(1)
++
+     // Borde superior al 30 % del viewport: pasado "start 0.45", avance 1.
+     await scrollToY(page, (await layoutTop(card)) - 900 * 0.3)
+     await expect.poll(() => card.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
+@@ -234,6 +261,53 @@ test.describe('T9 · Lo que ya construimos', () => {
+   })
+ })
+ 
++// Pantallas en modo scrub (las de la lente visual, traspaso §8.6; 1440×900 ya lo
++// cubre la prueba de arriba): la secuencia avanza mientras la lista entra y está
++// completa en cuanto se ven los enlaces de la tarjeta, también en las altas. Con
++// el avance ligado al recorrido de la lista («start 0.85» → «end 0.6»), a
++// 2560×1440 se quedaba en 111000 con la tarjeta entera y el final de la sección a
++// la vista: los pasos grises se leían como capacidades apagadas.
++for (const viewport of [
++  { width: 1366, height: 768 },
++  { width: 1920, height: 1080 },
++  { width: 2560, height: 1440 },
++  { width: 1024, height: 1366 },
++  { width: 820, height: 1180 },
++]) {
++  test.describe(`T9 · Lo que ya construimos · scrub (${viewport.width}×${viewport.height})`, () => {
++    test.use({ viewport })
++
++    test('la secuencia avanza al entrar la lista y está completa con los enlaces de la tarjeta a la vista', async ({
++      page,
++    }) => {
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = builtSection(page)
++      await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
++      const studio = section.locator('[data-built-card="studio"]')
++      const list = studio.locator('ol:has([data-studio-step])')
++      // El bloque de los dos enlaces del pie de la tarjeta.
++      const links = studio.getByRole('link', { name: es.built.studioCta.label }).locator('..')
++
++      // La lista aún debajo de la pantalla: nada encendido.
++      await scrollToY(page, (await bottomAtViewportBottom(list, 0)) - 100)
++      await expect.poll(() => litPattern(section)).toBe('000000')
++      // A media entrada: las k primeras, 0 < k < 6.
++      await scrollToY(page, await bottomAtViewportBottom(list, 0.5))
++      await expect.poll(() => litPattern(section)).toMatch(/^1+0+$/)
++      // Los enlaces enteros a la vista, pegados al borde inferior: las 6.
++      await scrollToY(page, await bottomAtViewportBottom(links))
++      await expect.poll(() => litPattern(section)).toBe('111111')
++      // El final de la sección en el borde inferior: siguen las 6.
++      await scrollToY(page, await bottomAtViewportBottom(section))
++      await expect.poll(() => litPattern(section)).toBe('111111')
++      // Es scrub, no «una sola vez»: al volver a subir, la lista vuelve a medias.
++      await scrollToY(page, await bottomAtViewportBottom(list, 0.5))
++      await expect.poll(() => litPattern(section)).toMatch(/^1+0+$/)
++    })
++  })
++}
++
+ // Móvil (diseño §5, reglas comunes): sin sticky y cada animación una sola vez al
+ // entrar en pantalla. En celular apaisado (844×390, < 37,5rem de alto) también es
+ // inView: la parte de la tarjeta y de la lista que exige useInView tiene que caber
+@@ -264,9 +338,112 @@ for (const viewport of [
+       await expect(section.locator('[data-studio-step][data-lit="true"]')).toHaveCount(6, { timeout: 10_000 })
+       expect(errors).toEqual([])
+     })
++
++    // `once` (el mayor de T8): una vez disparada, la secuencia termina aunque la
++    // lista salga de la pantalla antes de llegar a 6.
++    test('si la lista sale de la pantalla a media secuencia, llega igual a las 6', async ({ page }) => {
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = builtSection(page)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      await startSequence(page, section, viewport.height)
++      await scrollToY(page, 0)
++      await expect.poll(() => litPattern(section)).toBe('111111')
++    })
++
++    // El intervalo se para al llegar a 6, no con un plazo fijo: con el plazo, los
++    // temporizadores suspendidos (pestaña en segundo plano, tapa cerrada) lo
++    // agotaban y la lista se quedaba en 110000 para siempre.
++    test('si los temporizadores se suspenden a media secuencia, termina al reanudarse', async ({ page }) => {
++      await page.clock.install()
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = builtSection(page)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      await startSequence(page, section, viewport.height)
++      // Como cerrar la tapa y abrirla 10 s después: cada temporizador vencido se
++      // dispara una sola vez; luego el reloj sigue su curso.
++      await page.clock.fastForward(10_000)
++      await page.clock.runFor(2_000)
++      await expect.poll(() => litPattern(section)).toBe('111111')
++    })
+   })
+ }
+ 
++// Una tarea larga en el hilo principal a media secuencia (un celular lento): con
++// el plazo fijo, 900 ms bloqueados dejaban la lista en 111100 para siempre.
++test.describe('T9 · Lo que ya construimos · inView con una tarea larga (390×844)', () => {
++  test.use({ viewport: { width: 390, height: 844 } })
++
++  test('900 ms de hilo principal bloqueado a media secuencia no la dejan a medias', async ({ page }) => {
++    await page.goto('/es')
++    await waitForHydration(page)
++    const section = builtSection(page)
++    await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++    await startSequence(page, section, 844)
++    await page.evaluate(() => {
++      const end = performance.now() + 900
++      while (performance.now() < end) {
++        // bucle ocupado: nada más corre en la página mientras tanto
++      }
++    })
++    await expect.poll(() => litPattern(section)).toBe('111111')
++  })
++})
++
++// En celular, las etiquetas de las fichas se parten de forma desigual
++// («OPORTUNIDADES ABIERTAS» en dos líneas, «CONVERSACIONES» en una): en la vista
++// compacta, la cifra y la sparkline van al pie de la ficha y quedan alineadas
++// con las de su vecina.
++test.describe('T9 · Lo que ya construimos · fichas de la consola (390×844)', () => {
++  test.use({ viewport: { width: 390, height: 844 } })
++
++  test('las cifras de cada fila de fichas quedan a la misma altura (es y en)', async ({ page }) => {
++    for (const locale of ['es', 'en'] as const) {
++      const dict = locale === 'es' ? es : en
++      await page.goto(`/${locale}`)
++      const card = page.locator(`#${dict.built.sectionId} [data-built-card="realty"]`)
++      // Cada ficha (StatTile) es el padre de su sparkline; su 2.º hijo es la cifra.
++      const tops = await card.evaluate((element) =>
++        Array.from(element.querySelectorAll('svg[role="img"]')).map(
++          (svg) => svg.parentElement!.children[1].getBoundingClientRect().top
++        )
++      )
++      expect(tops, `${locale}: cuatro fichas`).toHaveLength(4)
++      for (const [a, b] of [
++        [0, 1],
++        [2, 3],
++      ]) {
++        expect(Math.abs(tops[a] - tops[b]), `${locale}: cifras de las fichas ${a + 1} y ${b + 1}`).toBeLessThan(0.5)
++      }
++    }
++  })
++})
++
++// Con la letra del navegador a 20 px, lg (64rem) empieza en 1280 px: por debajo,
++// el marco de la consola lleva mx-auto en /realty. En la tarjeta no puede
++// centrarse: su borde izquierdo es el del texto, en cualquier unidad.
++test.describe('T9 · Lo que ya construimos · letra del navegador a 20 px', () => {
++  test.use({ contextOptions: { reducedMotion: 'reduce' } })
++
++  test('la consola compacta queda alineada con el texto de la tarjeta de RealTy', async ({ page }) => {
++    const cdp = await page.context().newCDPSession(page)
++    await cdp.send('Page.setFontSizes', { fontSizes: { standard: 20 } })
++    for (const width of [820, 1000]) {
++      await page.setViewportSize({ width, height: 900 })
++      await page.goto('/es')
++      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('20px')
++      const card = builtSection(page).locator('[data-built-card="realty"]')
++      await expect(card.locator('.isolate')).toHaveCount(1)
++      const { heading, frame } = await card.evaluate((element) => ({
++        heading: element.querySelector('h3')!.getBoundingClientRect().left,
++        frame: element.querySelector('.isolate')!.getBoundingClientRect().left,
++      }))
++      expect(Math.abs(frame - heading), `${width} px: borde izquierdo de la consola y del h3`).toBeLessThan(1)
++    }
++  })
++})
++
+ // La consola de RealTy está pensada para ≥ 272 px de ancho (su portada en
+ // /realty). Dentro de la tarjeta, a 320 px, las fichas se estrechan: ninguna
+ // etiqueta ni sparkline puede salirse de su ficha e invadir la vecina.
+diff --git a/e2e/realty.spec.ts b/e2e/realty.spec.ts
+index b83e64d..bcb233d 100644
+--- a/e2e/realty.spec.ts
++++ b/e2e/realty.spec.ts
+@@ -1,7 +1,7 @@
+ import { test, expect } from '@playwright/test'
+ import es from '../src/content/dictionaries/es'
+ import en from '../src/content/dictionaries/en'
+-import { FORBIDDEN_STEMS, FORBIDDEN_WORDS } from './helpers'
++import { findForbiddenTerms } from './helpers'
+ 
+ /**
+  * Gate de la landing de RealTy (v2).
+@@ -22,9 +22,9 @@ const dictionaries = { es, en } as const
+ 
+ type LocaleKey = keyof typeof dictionaries
+ 
+-// FORBIDDEN_STEMS (subcadena) y FORBIDDEN_WORDS (palabra completa) viven en
+-// e2e/helpers.ts: la tarjeta de RealTy de la home (e2e/home.spec.ts) aplica la
+-// misma lista negra.
++// La lista negra (FORBIDDEN_STEMS como subcadena, FORBIDDEN_WORDS como palabra
++// completa) y su filtro, findForbiddenTerms, viven en e2e/helpers.ts: la tarjeta
++// de RealTy de la home (e2e/home.spec.ts) aplica la misma regla, escrita una vez.
+ 
+ /** Secciones con ancla, en el orden en el que la narrativa las presenta. */
+ const SECTION_IDS = ['outcomes', 'journey', 'voice', 'console', 'channels', 'status', 'faq'] as const
+@@ -56,14 +56,7 @@ for (const locale of ['es', 'en'] as LocaleKey[]) {
+ 
+     test('no engineering jargon or forbidden names in the visible copy', async ({ page }) => {
+       const text = (await page.locator('main').innerText()).toLowerCase()
+-
+-      const found = [
+-        ...FORBIDDEN_STEMS.filter((term) => text.includes(term.toLowerCase())),
+-        ...FORBIDDEN_WORDS.filter((term) =>
+-          new RegExp(`\\b${term.toLowerCase()}\\b`).test(text)
+-        ),
+-      ]
+-      expect(found, `términos prohibidos en /${locale}/realty`).toEqual([])
++      expect(findForbiddenTerms(text), `términos prohibidos en /${locale}/realty`).toEqual([])
+     })
+ 
+     test('sections appear in narrative order', async ({ page }) => {
+diff --git a/src/components/sections/home/BuiltProof.tsx b/src/components/sections/home/BuiltProof.tsx
+index a50057d..05741f0 100644
+--- a/src/components/sections/home/BuiltProof.tsx
++++ b/src/components/sections/home/BuiltProof.tsx
+@@ -76,14 +76,17 @@ export function BuiltProof({
+       <div className="mx-auto max-w-7xl px-6">
+         <div className="mb-12 max-w-3xl md:mb-16">
+           <InstrumentLabel as="p">{built.eyebrow}</InstrumentLabel>
+-          <h2 className="mt-6 text-balance font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
++          {/* text-4xl en celular, como los h2 de Capacidades y de Del papel al dato. */}
++          <h2 className="mt-6 text-balance font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+             {built.title}
+           </h2>
+         </div>
+ 
++        {/* Mitad y mitad en lg, 7/5 desde xl: con 7/5 a 1024 px la columna de Live Studio
++            medía 393 px y su tarjeta quedaba ~400 px más alta que la de RealTy. */}
+         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+           {/* RealTy: la consola real de /realty en su vista compacta, con su única etiqueta de demostración. */}
+-          <BuiltScaleIn card="realty" className={`${CARD_CLASS} lg:col-span-7`}>
++          <BuiltScaleIn card="realty" className={`${CARD_CLASS} lg:col-span-6 xl:col-span-7`}>
+             <InstrumentLabel as="p">/01</InstrumentLabel>
+             <h3 className="mt-6 font-heading text-2xl font-bold tracking-tight text-white sm:text-3xl">
+               {built.realtyName}
+@@ -92,8 +95,8 @@ export function BuiltProof({
+               {realty.hero.title}
+             </p>
+             <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#a3a3a3]">{realty.statusLine}</p>
+-            {/* 32,5rem = el ancho máximo de ConsoleFrame: alineada a la izquierda, con el texto, también por debajo de lg. */}
+-            <div className="mt-10 w-full max-w-[32.5rem]">
++            {/* La vista compacta no se centra: queda alineada con el texto de la tarjeta en todos los anchos. */}
++            <div className="mt-10">
+               <ConsoleFrame
+                 console={realty.hero.console}
+                 demoLabel={realty.demoLabel}
+@@ -108,7 +111,7 @@ export function BuiltProof({
+           </BuiltScaleIn>
+ 
+           {/* Live Studio: el caso de la mesa de ayuda, construido para la división propia. */}
+-          <article data-built-card="studio" className={`${CARD_CLASS} lg:col-span-5`}>
++          <article data-built-card="studio" className={`${CARD_CLASS} lg:col-span-6 xl:col-span-5`}>
+             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+               <InstrumentLabel as="p">/02</InstrumentLabel>
+               <InstrumentLabel as="p">{caseStudy.industry}</InstrumentLabel>
+@@ -123,6 +126,8 @@ export function BuiltProof({
+               <p className="text-white">{caseStudy.summary.outcome}</p>
+             </div>
+             <StudioSequence title={caseStudy.capabilitiesTitle} items={caseStudy.capabilities} className="mt-10" />
++            {/* mt-10 (2,5rem) > la línea de encendido de StudioSequence (2rem): en cuanto asoman
++                estos enlaces, las 6 capacidades están encendidas. */}
+             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
+               <Link href={buildLocalePath(locale, caseStudy.cta.href)} className={LINK_CLASS}>
+                 {caseStudy.cta.label} <span aria-hidden="true">&rarr;</span>
+diff --git a/src/components/sections/home/BuiltScaleIn.tsx b/src/components/sections/home/BuiltScaleIn.tsx
+index ac721f9..5a67a1c 100644
+--- a/src/components/sections/home/BuiltScaleIn.tsx
++++ b/src/components/sections/home/BuiltScaleIn.tsx
+@@ -8,6 +8,11 @@
+ // - inView (celular, también apaisado): una sola vez al entrar en pantalla.
+ // - static (reducir movimiento): escala 1, sin animación.
+ //
++// Origen arriba a la izquierda: durante la entrada, la esquina de la tarjeta se
++// queda en la retícula (borde superior con el de la tarjeta de Live Studio,
++// borde izquierdo con el del título). Desde el centro, a escala 0,953 los dos
++// bordes se desviaban 19 y 17 px y la entrada se leía como un desajuste.
++//
+ // Hidratación: `amount` empieza en 1 para todos (servidor, primer render y sin
+ // JavaScript la tarjeta se ve a su tamaño final). Solo después de montar, y con
+ // la tarjeta todavía fuera de pantalla, el efecto la lleva a 0,92.
+@@ -57,7 +62,12 @@ export function BuiltScaleIn({
+   }, [mode, inView, progress, amount])
+ 
+   return (
+-    <m.article ref={ref} data-built-card={card} style={{ scale }} className={className}>
++    <m.article
++      ref={ref}
++      data-built-card={card}
++      style={{ scale }}
++      className={className ? `origin-top-left ${className}` : "origin-top-left"}
++    >
+       {children}
+     </m.article>
+   )
+diff --git a/src/components/sections/home/StudioSequence.tsx b/src/components/sections/home/StudioSequence.tsx
+index 216f058..a24bb02 100644
+--- a/src/components/sections/home/StudioSequence.tsx
++++ b/src/components/sections/home/StudioSequence.tsx
+@@ -3,31 +3,57 @@
+ // que se enciende al bajar (§5.5 del diseño). Es una lista de capacidades, no
+ // un registro de eventos: sin horas, sin estados de ejecución, sin "OK".
+ //
+-// - scrub (≥ 48rem de ancho y ≥ 37,5rem de alto): el paso N se enciende cuando
+-//   el avance de la lista pasa por su mitad (N − 0,5) / 6.
++// - scrub (≥ 48rem de ancho y ≥ 37,5rem de alto): cada paso se enciende por la
++//   POSICIÓN de su fila, como el índice de Capacidades (T7): cuando la fila ya
++//   entró entera y su borde inferior sube 2rem sobre el borde inferior del
++//   viewport. La secuencia avanza mientras la lista entra y termina con la lista
++//   entera a la vista, a cualquier alto de pantalla: los enlaces de la tarjeta
++//   van 2,5rem (mt-10) por debajo, así que en cuanto asoman las 6 están
++//   encendidas. Con un avance ligado al recorrido de la lista (["start 0.85",
++//   "end 0.6"]), su final tenía que subir al 60 % del alto y en pantallas altas
++//   la sección terminaba antes: 111000 a 2560×1440 con la tarjeta entera a la
++//   vista, y los pasos grises se leían como capacidades «apagadas».
+ // - inView (celular, también apaisado): al entrar la lista en pantalla, un paso
+ //   cada 220 ms. `once`: una vez disparada, llega siempre al final aunque la
+-//   lista salga de la pantalla.
++//   lista salga de la pantalla. El intervalo se para al llegar a 6, como en Tesis
++//   y Capacidades, nunca con un plazo fijo: una tarea larga o una pestaña en
++//   segundo plano lo agotaban antes de tiempo y la lista se quedaba a medias.
+ // - static (reducir movimiento): las 6 encendidas.
+ // - Sin JavaScript (`noscript:`, @media (scripting: none)): el HTML del servidor
+-//   trae el primer render (scrub, avance 0: todas apagadas) y el CSS pinta el
+-//   estado final, como Tesis y Capacidades (T7).
++//   trae el primer render (scrub, nada encendido) y el CSS pinta el estado
++//   final, como Tesis y Capacidades (T7).
+ //
+ // Encender = número y texto de #a3a3a3 a blanco (cambio de estado discreto,
+ // sin transition-colors; AA en ambos) y una línea de 1 px que se traza con
+ // scaleX. Nada azul.
+-import { useEffect, useRef, useState } from "react"
++import { useCallback, useEffect, useRef, useState } from "react"
+ import { useInView, useMotionValueEvent } from "motion/react"
+ import { useStageProgress } from "@/hooks/useStageProgress"
+ import type { StageOffset } from "@/hooks/useStageProgress"
+ 
+ const STEP_MS = 220
+-/** 0 cuando la lista asoma al 85 % del viewport; 1 cuando su final sube al 60 %. */
+-const OFFSET: StageOffset = ["start 0.85", "end 0.6"]
++// Avance de la lista mientras toca el viewport (entra por abajo → sale por
++// arriba). Solo sirve de aviso de scroll, como en Capacidades: una fila cambia
++// de estado al cruzar la línea de encendido, que está dentro del viewport, así
++// que la lista está en pantalla cada vez que el recuento puede cambiar (y, al
++// saltar lejos, el avance se fija en 0 o en 1 y avisa una última vez).
++const LIST_OFFSET: StageOffset = ["start end", "end start"]
++// Línea de encendido: 2rem sobre el borde inferior del viewport. Menos que el
++// hueco de 2,5rem (mt-10 en BuiltProof) entre la lista y los enlaces de la tarjeta.
++const LIT_LINE_REM = 2
+ 
+-/** Pasos encendidos para un avance p (0→1). */
+-function litFor(progress: number, total: number) {
+-  return Math.min(total, Math.max(0, Math.floor(progress * total + 0.5)))
++/**
++ * Pasos encendidos: las primeras filas cuyo borde inferior ya subió hasta
++ * `line`. Van en orden, así que el resultado es siempre un prefijo: se deja de
++ * leer en la primera que aún no llegó.
++ */
++function litAbove(rows: readonly HTMLElement[], line: number): number {
++  let lit = 0
++  for (const row of rows) {
++    if (row.getBoundingClientRect().bottom > line) break
++    lit += 1
++  }
++  return lit
+ }
+ 
+ export function StudioSequence({
+@@ -40,30 +66,52 @@ export function StudioSequence({
+   className?: string
+ }) {
+   const ref = useRef<HTMLDivElement>(null)
+-  const { progress, mode } = useStageProgress(ref, OFFSET)
+-  const inView = useInView(ref, { once: true, amount: 0.35 })
++  const listRef = useRef<HTMLOListElement>(null)
++  const { progress, mode } = useStageProgress(ref, LIST_OFFSET)
+   const total = items.length
+-  const [scrubLit, setScrubLit] = useState(0)
+-  const [timedLit, setTimedLit] = useState(0)
+ 
+-  useMotionValueEvent(progress, "change", (value) => setScrubLit(litFor(value, total)))
++  // scrub: se recalcula con cada avance del scroll y con cada cambio de tamaño
++  // de ventana. Las filas se buscan una vez al entrar en scrub (la lista no cambia).
++  const [scrubLit, setScrubLit] = useState(0)
++  const rowsRef = useRef<HTMLElement[]>([])
++  const measure = useCallback(() => {
++    if (mode !== "scrub" || rowsRef.current.length === 0) return
++    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
++    setScrubLit(litAbove(rowsRef.current, window.innerHeight - LIT_LINE_REM * rem))
++  }, [mode])
++  useMotionValueEvent(progress, "change", measure)
++  useEffect(() => {
++    if (mode !== "scrub") return
++    rowsRef.current = Array.from(listRef.current?.querySelectorAll<HTMLElement>("[data-studio-step]") ?? [])
++    queueMicrotask(measure)
++    window.addEventListener("resize", measure)
++    return () => window.removeEventListener("resize", measure)
++  }, [mode, measure])
+ 
++  // inView: al entrar la lista en pantalla, una sola vez, paso a paso hasta el
++  // total. El recuento vive en una ref: si el efecto se limpia y vuelve a correr
++  // (cambio de modo), sigue donde iba y nunca vuelve a empezar.
++  const inView = useInView(ref, { once: true, amount: 0.35 })
++  const [timedLit, setTimedLit] = useState(0)
++  const timedRef = useRef(0)
+   useEffect(() => {
+-    if (mode !== "inView" || !inView) return
+-    const tick = window.setInterval(() => setTimedLit((current) => Math.min(total, current + 1)), STEP_MS)
+-    const stop = window.setTimeout(() => window.clearInterval(tick), STEP_MS * (total + 1))
+-    return () => {
+-      window.clearInterval(tick)
+-      window.clearTimeout(stop)
+-    }
++    if (mode !== "inView" || !inView || timedRef.current >= total) return
++    const tick = window.setInterval(() => {
++      timedRef.current = Math.min(total, timedRef.current + 1)
++      setTimedLit(timedRef.current)
++      if (timedRef.current >= total) window.clearInterval(tick)
++    }, STEP_MS)
++    return () => window.clearInterval(tick)
+   }, [mode, inView, total])
+ 
+   const lit = mode === "static" ? total : mode === "inView" ? timedLit : scrubLit
+ 
+   return (
+     <div ref={ref} className={className}>
+-      <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#a3a3a3] md:text-[11px]">{title}</h4>
+-      <ol className="mt-6 border-t border-[#1a1a1a]">
++      <h4 className="text-balance font-mono text-[10px] uppercase tracking-[0.3em] text-[#a3a3a3] md:text-[11px]">
++        {title}
++      </h4>
++      <ol ref={listRef} className="mt-6 border-t border-[#1a1a1a]">
+         {items.map((item, i) => {
+           const on = i < lit
+           const num = String(i + 1).padStart(2, "0")
+@@ -88,7 +136,9 @@ export function StudioSequence({
+               >
+                 {num}
+               </span>
+-              <span className={`text-sm leading-relaxed noscript:text-white ${on ? "text-white" : "text-[#a3a3a3]"}`}>
++              <span
++                className={`text-pretty text-sm leading-relaxed noscript:text-white ${on ? "text-white" : "text-[#a3a3a3]"}`}
++              >
+                 {item}
+               </span>
+             </li>
+diff --git a/src/components/sections/realty/ConsoleFrame.tsx b/src/components/sections/realty/ConsoleFrame.tsx
+index 8899121..fa0d664 100644
+--- a/src/components/sections/realty/ConsoleFrame.tsx
++++ b/src/components/sections/realty/ConsoleFrame.tsx
+@@ -8,15 +8,26 @@ import { DemoTag } from "./shared"
+ import type { RealtyContent } from "./shared"
+ import { Funnel, StatTile } from "./viz"
+ 
++// Compact view only: each tile becomes a column whose first child (the label)
++// takes the spare height, so the value and its sparkline sit at the foot of
++// the tile. Tiles in a row share its height, so on a narrow card a label that
++// wraps to two lines ("OPORTUNIDADES ABIERTAS") no longer drops its value below
++// its neighbour's. Appended with its own leading space, so the full view's class
++// string (and /realty's HTML) stays exactly as it was.
++const COMPACT_TILE_CLASS = " flex flex-col [&>:first-child]:grow"
++
+ /**
+  * The console "Overview" screen, rendered as the hero visual: hero figure,
+  * a 2×2 grid of stat tiles with sparklines, and the pipeline funnel underneath.
+  * Same three-part structure as the product's own overview, in Orbexs ink.
+  *
+  * The home's RealTy card (`home/BuiltProof.tsx`) renders the `compact` view:
+- * hero figure and tiles, no funnel. Both views keep the frame's single demo
+- * tag and never paint the accent hue (no `accent` on the tiles, no
+- * `accentIndex` on the funnel), so the home section stays blue-free.
++ * hero figure and tiles, no funnel, aligned to the start of its container at
++ * every width (the full view centres itself below lg, which suits /realty's
++ * hero but not a left-aligned card), with each tile's value at the foot of the
++ * tile. Both views keep the frame's single demo tag and never paint the accent
++ * hue (no `accent` on the tiles, no `accentIndex` on the funnel), so the home
++ * section stays blue-free.
+  */
+ export function ConsoleFrame({
+   console: overview,
+@@ -29,7 +40,7 @@ export function ConsoleFrame({
+   demoLabel: string
+   demoSrText: string
+   drawn: boolean
+-  /** Hero figure and stat tiles only (the home card). Defaults to the full hero view. */
++  /** Hero figure and stat tiles only, start-aligned (the home card). Defaults to the full hero view. */
+   compact?: boolean
+ }) {
+   const funnelLabel = `${overview.funnel.label}: ${overview.funnel.stages
+@@ -37,7 +48,13 @@ export function ConsoleFrame({
+     .join(", ")}`
+ 
+   return (
+-    <div className="relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0">
++    <div
++      className={
++        compact
++          ? "relative isolate w-full max-w-[520px] select-none"
++          : "relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0"
++      }
++    >
+       <div className="relative rounded-[6px] border border-[#1a1a1a] bg-[#141414]">
+         {/* Frame header: the screen's name, and the one demo-data tag. */}
+         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1a1a1a] px-5 py-4">
+@@ -69,7 +86,7 @@ export function ConsoleFrame({
+               delayMs={140 * i}
+               className={`${i % 2 === 0 ? "border-r border-[#1a1a1a]" : ""} ${
+                 i < overview.tiles.length - 2 ? "border-b border-[#1a1a1a]" : ""
+-              }`}
++              }${compact ? COMPACT_TILE_CLASS : ""}`}
+             />
+           ))}
+         </div>
+-- 
+2.43.0
+

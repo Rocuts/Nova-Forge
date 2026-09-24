@@ -1,0 +1,422 @@
+From 28e52879da40951e8763a20fed6deb6333a3dfed Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 20:12:17 +0000
+Subject: [PATCH 3/3] =?UTF-8?q?fix(home):=20cada=20fase=20de=20metodolog?=
+ =?UTF-8?q?=C3=ADa=20se=20activa=20al=20llegar=20la=20l=C3=ADnea=20y=20el?=
+ =?UTF-8?q?=20cierre=20no=20rasteriza=20en=20scrub?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Ronda 2 de la revisión de T10a (cumplimiento, calidad y visual). La capa del paralaje del
+cierre gana capa propia del compositor en scrub: sin ella, cada fotograma de scroll volvía a
+rasterizar el relieve entero. Cada fase de Metodología pasa a negro cuando la punta de la línea
+llega a su punto, medido en el layout, y no con umbrales fijos que en escritorio llegaban tarde
+y en celular se adelantaban. La prueba de la variante compartida espera a hidratar, y el plan y
+el skill ya no invitan a copiar el disparo antiguo ni a poner el expediente a sangre.
+
+Decisiones:
+- Cierre: stage:will-change-transform en la capa (PARALLAX_LAYER), como SCALED_LAYER de la
+  portada; solo en scrub. Medido a 1440×900 contra next start: 1 459–1 485 ms de raster en 91
+  fotogramas sin la capa, 6–12 ms con ella; el desplazamiento no cambia.
+- Metodología: measureStops mide el centro de cada punto como fracción de la línea visible (la
+  orientación la decide CSS), al montar y con ResizeObserver; una fase se activa al llegar la
+  línea a ese centro. Descartado bajar REACH: por el hueco entre columnas la fase 05 se
+  activaría 16 px antes de tiempo.
+- Pruebas: 4 nuevas (umbral en scrub a 1440×900 y 1024×768, ninguna fase adelantada en celular
+  a 360×740 y 390×844), will-change en las de paralaje y waitForHydration en la de la variante
+  compartida. Antes de los arreglos fallaban 5; las cuatro de Metodología también con el
+  componente anterior restaurado de forma temporal.
+- Plan: nota «borrador superado» en 2.1 y decisiones 26–30. Skill: el expediente es un bloque
+  enmarcado (rounded-[6px]), no a sangre.
+- JS de /es: 220 370 B (+175 B), check:modern-js OK; spec temporal 37/37; e2e completo
+  207/208 con la máquina cargada: falló la comparación de capturas de T6 que ya había fallado
+  una vez en la entrega; repetida una vez, pasó.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .claude/skills/orbexs-design-system/layout.md |   7 +-
+ .../2026-09-23-home-cartografia-soberana.md   |  16 ++-
+ e2e/home-t10.spec.ts                          | 121 +++++++++++++++++-
+ src/components/sections/CTA.tsx               |  18 ++-
+ .../sections/home/MethodologyLine.tsx         |  61 +++++++--
+ 5 files changed, 203 insertions(+), 20 deletions(-)
+
+diff --git a/.claude/skills/orbexs-design-system/layout.md b/.claude/skills/orbexs-design-system/layout.md
+index 0020c76..0880d4a 100644
+--- a/.claude/skills/orbexs-design-system/layout.md
++++ b/.claude/skills/orbexs-design-system/layout.md
+@@ -88,15 +88,16 @@ The homepage follows this order (home redesign, plan §3.5 of
+ `docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md`, the source of truth):
+ 
+ ```
+-1. Hero (#inicio)           → dark (#0a0a0a) over the relief image, data-header-start="dark"
++1. Hero (#inicio)           → dark (#0a0a0a) over the full-bleed relief image, data-header-start="dark"
+ 2. Thesis                   → white
+ 3. Capabilities             → white (index + plate)
+-4. From paper to data       → dark (#0a0a0a) over the case-file image
++4. From paper to data       → dark (#0a0a0a); the case-file image is a framed block (rounded-[6px]),
++                              not full-bleed: right of the text on desktop, between text and panel on mobile
+ 5. What we already built    → dark (#0a0a0a), border-t (#1a1a1a)
+ 6. Methodology              → white, border-t (#e5e5e5)
+ 7. TechStack                → light gray (#f8f8f8), border-t (#e5e5e5)
+ 8. FAQ                      → white, border-t (#e5e5e5)
+-9. CTA (closing)            → dark (#0a0a0a) over the lower relief
++9. CTA (closing)            → dark (#0a0a0a) over the full-bleed lower relief
+ ```
+ 
+ Pattern: the story sets the tone, and two adjacent sections may share a background
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index 18cc555..5375087 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -8662,7 +8662,7 @@ cd /home/user/wt/task10
+ | Crear (F3) | `src/components/sections/CTAMedia.tsx`: servidor, el relieve del cierre como slot (decisión 10) |
+ | Modificar (F3) | `src/app/globals.css` (decisión 11) y `eslint.config.mjs` (decisión 10) |
+ | Crear (F3, temporal) | `e2e/home-t10.spec.ts`: las pruebas de T10a; el integrador lo funde en `e2e/home.spec.ts` (decisión 9) |
+-| Modificar (revisión, ronda 1) | `.claude/skills/orbexs-design-system/{components,layout,motion}.md`: acordeón, duraciones de la FAQ y orden de la home (decisión 24) |
++| Modificar (revisión, rondas 1 y 2) | `.claude/skills/orbexs-design-system/{components,layout,motion}.md`: acordeón, duraciones de la FAQ y orden de la home (decisión 24); expediente como bloque enmarcado en `layout.md` (decisión 29) |
+ 
+ ### Paso 1 — Prueba primero
+ 
+@@ -8867,6 +8867,9 @@ PORT=3100 npx playwright test e2e/home.spec.ts -g "T10 ·" --reporter=line
+ ### Paso 2 — Implementación
+ 
+ **2.1 `src/components/sections/home/MethodologyLine.tsx`** (nuevo):
++
++> **Borrador superado (revisión de T10a).** Manda el código de `wt/task10`. El disparo de inView es `IN_VIEW_TRIGGER = { once: true, margin: "0px 0px -30% 0px" }` (decisión 17), no `amount: 0.3`. Cada fase se activa cuando la punta de la línea llega al centro de su punto, medido en el layout (`measureStops`, decisión 27), no con `i / total + REACH`. Lo que §3.8 da por corregido en este bloque es solo lo de P1 (`animateSingleValue`). No copies este bloque.
++
+ ```tsx
+ "use client"
+ // Metodología (§5.6 del diseño): una línea de 1 px se traza de izquierda a
+@@ -9428,6 +9431,17 @@ Tres lentes (cumplimiento, calidad, visual), 16 hallazgos: 1 mayor, 7 menores y
+ 
+ **Estado tras la ronda 1 de la revisión (decisiones 17–25):** JS de `/es` (mismo método) 220 195 B en 15 scripts: +34 B sobre la entrega de T10a (`IN_VIEW_TRIGGER`, `parallaxShift` y los dos atributos de la FAQ) y −38 B sobre la base del worktree; margen de 49 527 B hasta 269 722. `npm run build` en verde, con `check:modern-js` OK (let=3516, class=167). Spec temporal 33/33; e2e completo 204/204 en verde (171 + 33), sin repeticiones; lint y `tsc` en verde.
+ 
++### Decisiones (revisión de T10a, ronda 2)
++Tres lentes, 6 hallazgos: 2 menores (el mismo, visto por las lentes de calidad y visual) y 4 detalles. Todos corregidos. Manda el código de `wt/task10`.
++
++26. **Capa propia para el paralaje del cierre (menor).** motion escribe el `transform` de la capa del relieve (`[data-cta-media]`) en cada fotograma de scroll. Sin capa propia del compositor, Chromium volvía a pintar y rasterizar el relieve entero en cada uno. Es el caso que la revisión de T6 ya resolvió en la portada (decisión 13 de T6, `SCALED_LAYER`). `PARALLAX_LAYER` en `CTA.tsx` lleva `stage:will-change-transform`: solo en scrub, que es cuando hay paralaje. En celular (inView) y con reducir movimiento (static) la capa no se mueve y no se reserva memoria de GPU. Medido tras el arreglo contra `next start` (build de producción), a 1440×900: se recorre el cierre del 90 % al 10 % del viewport en 91 pasos de 8 px, con la imagen precalentada, dos pasadas. Con la capa: 0 eventos Paint y 6–12 ms de RasterTask (96–108 tareas). Con `will-change: auto` inyectado: 160 Paint (17–20 ms) y 1 459–1 485 ms de raster (≈ 1 925 tareas), ≈ 16 ms de raster por fotograma sin raster por GPU. Las dos lentes midieron lo mismo (1 474–1 580 ms frente a 29–43 ms). El desplazamiento final coincide en los dos casos (`matrix(1, 0, 0, 1, 0, 3.749)`), así que no cambia lo que se ve. Solo cambia el suavizado del texto del cierre, de subpíxel a escala de grises: es el mismo intercambio que ya se aceptó en la portada. Pruebas: la de paralaje en escritorio exige `will-change: transform`, y las de celular y reducir movimiento, `auto`.
++27. **Cada fase se activa cuando la línea llega a su punto (detalle; sustituye a la decisión 2 en lo que dice del umbral).** Los umbrales `i / total + 0,04` suponían los puntos en `i / 5` del trazo. En horizontal, la separación entre columnas (`gap-6`) los aleja: a 1440 px, el punto de la fase 05 empieza 19 px más allá del 80 %. La línea pasaba 29–50 px por debajo de un punto todavía gris antes de activar la fase (11–18 px de scroll por fase a 1440×900; si el visitante se detenía ahí, se quedaba así), cuando el diseño (§5.6) pide que cada fase pase a negro «cuando la línea la alcanza». En vertical, cada punto está donde lo deja el texto de las fases anteriores: a 360×740, las fases 04 y 05 se activaban 6 y 22 px antes de que llegara la línea. Ahora `measureStops` mide en el layout el centro de cada punto como fracción del largo de la línea que se ve. La orientación la decide CSS: la horizontal si se muestra (`offsetWidth` > 0) y, si no, la vertical. Se mide al montar y con un `ResizeObserver` sobre la pista, que cambia con el ancho, la letra y la fuente. Una fase se activa cuando la línea llega a ese centro. El recorrido del avance (80 % → 30 %), los 1,6 s de inView y la prueba intermedia (3 de 5 a mitad de camino) no cambian. El HTML del servidor y el primer render tampoco: las fases salen inactivas y se mide tras montar. Descartada la salida mínima (bajar `REACH` a ≈ 0,005): por la separación entre columnas, la fase 05 se activaría 16 px antes de que llegara la línea. Pruebas nuevas: en scrub (1440×900 y 1024×768), con la punta de la línea unos 8 px antes y después del centro de cada punto, la fase está en gris y en negro. En celular (360×740 y 390×844), fotograma a fotograma durante el trazo, ninguna fase activa tiene su punto más de 1 px por delante de la punta.
++28. **La prueba de la variante compartida espera a hidratar (detalle).** «el relieve del cierre reutiliza la descarga de la portada» se desplazaba con `scrollIntoViewIfNeeded()` nada más cargar. Lo único que afirmaba antes, el `currentSrc` de la portada (carga eager), ya se cumple con el HTML del servidor, y el montaje de `SmoothScroll` podía deshacer el desplazamiento antes de que la carga perezosa viera el cierre (§3.7). Ahora espera `waitForHydration`. Nunca daba un falso positivo; como mucho, un fallo intermitente.
++29. **Plan y skill (detalles).** El bloque 2.1 lleva ahora la nota «borrador superado» que ya tenían 2.2 y 2.3: el disparo es el de la decisión 17, el umbral el de la 27, y lo que §3.8 da por corregido en ese bloque es solo lo de P1. En `layout.md` del skill, «Del papel al dato» decía «over the case-file image», la misma fórmula que la portada y el cierre, cuyas imágenes cubren la sección. Un agente podía poner el expediente a sangre. Ahora dice que es un bloque enmarcado (`rounded-[6px]`), a la derecha del texto en escritorio y entre el texto y el panel en celular (traspaso §4, plan T8 paso 2, `DossierStage.tsx` de `wt/task8`). La portada y el cierre dicen «full-bleed».
++30. **Pruebas de la ronda 2** (el spec temporal pasa de 33 a 37 pruebas). Antes de los arreglos fallaban 5: las cuatro de la decisión 27 (confirmado además devolviendo `MethodologyLine.tsx` a su versión anterior en una mutación temporal, revertida: a 360×740 salen adelantadas las fases 04 y 05, 5 y 21 px, y a 390×844 la 05) y la de paralaje en escritorio (`will-change` en `auto`). La de la decisión 28 pasaba y sigue pasando.
++
++**Estado tras la ronda 2 de la revisión (decisiones 26–30):** JS de `/es` (mismo método) 220 370 B en 15 scripts: +175 B sobre la ronda 1 (`measureStops` y su `ResizeObserver`, y la clase de la capa) y +137 B sobre la base del worktree; margen de 49 352 B hasta 269 722 (tope de T10: +3 000 B). `npm run build` en verde, con `check:modern-js` OK (let=3520, class=167). Spec temporal 37/37. e2e completo: 207/208 en la primera pasada, con la máquina cargada (el workflow de T8 corría a la vez). Falló «portada · scrub en tableta vertical grande» («la ruta cruza «índice /01»», avance 0,7), la misma comparación de capturas de T6 que ya falló una vez en la entrega de T10a. Repetida una vez, pasó. lint y `tsc` en verde.
++
+ ---
+ 
+ ## Tarea 11 — Limpieza, documentación y verificación final
+diff --git a/e2e/home-t10.spec.ts b/e2e/home-t10.spec.ts
+index b44c4e9..b965755 100644
+--- a/e2e/home-t10.spec.ts
++++ b/e2e/home-t10.spec.ts
+@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
+ import es from '../src/content/dictionaries/es'
+ import en from '../src/content/dictionaries/en'
+ import { buildLocalePath } from '../src/lib/i18n'
+-import { effectiveOpacity, scrollToY, waitForHydration } from './helpers'
++import { effectiveOpacity, scrollToY, waitForFrames, waitForHydration } from './helpers'
+ 
+ /**
+  * Tarea 10a — Metodología, cierre y FAQ (spec temporal de la fase F3).
+@@ -211,6 +211,64 @@ test.describe('T10 · Metodología', () => {
+     await expect(active).toHaveCount(PHASES)
+   })
+ 
++  // Revisión de T10a (ronda 2): §5.6 pide que cada fase pase a negro «cuando la línea la
++  // alcanza». Con umbrales en i / total + 0,04, la línea pasaba 29–50 px por debajo de un
++  // punto todavía gris: la separación entre columnas aleja los puntos de i / total.
++  for (const viewport of [
++    { width: 1440, height: 900 },
++    { width: 1024, height: 768 },
++  ]) {
++    test(`al bajar (${viewport.width}×${viewport.height}), cada fase se activa cuando la punta de la línea llega a su punto`, async ({
++      page,
++    }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = page.locator(`#${es.methodology.sectionId}`)
++      await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
++      const line = section.locator('[data-method-line="horizontal"]')
++      const active = section.locator('[data-method-phase][data-active="true"]')
++
++      // En reposo: borde superior de la pista en el documento, su ancho y el centro del
++      // punto de cada fase, medido desde el borde izquierdo de la pista.
++      const track = await line.evaluate((el) => {
++        const box = el.parentElement!.getBoundingClientRect()
++        const dots = Array.from(el.parentElement!.querySelectorAll('[data-method-phase]'), (phase) => {
++          const dot = phase.firstElementChild!.getBoundingClientRect()
++          return dot.left + dot.width / 2 - box.left
++        })
++        return { top: box.top + window.scrollY, width: box.width, dots }
++      })
++      expect(track.dots).toHaveLength(PHASES)
++      // Avance 0 con la pista al 80 % del viewport y 1 al 30 % (OFFSET de MethodologyLine).
++      // En scrub la línea es el avance: su punta está en avance × ancho de la pista.
++      const scrollForTip = (tip: number) => track.top - viewport.height * (0.8 - (0.5 * tip) / track.width)
++      const tip = () =>
++        line.evaluate((el) => {
++          const transform = getComputedStyle(el).transform
++          const scale = transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).a
++          return scale * el.parentElement!.getBoundingClientRect().width
++        })
++      // Lleva la punta a `target` y devuelve dónde quedó, ya con la línea al día. El scroll
++      // va en px enteros y cada px de scroll mueve la punta 2,5–2,7 px: queda a unos pocos px.
++      const tipAt = async (target: number) => {
++        await scrollToY(page, scrollForTip(target))
++        await expect.poll(async () => Math.abs((await tip()) - target)).toBeLessThanOrEqual(5)
++        return tip()
++      }
++
++      for (const [i, center] of track.dots.entries()) {
++        // Unos 8 px antes del centro del punto, la fase sigue en gris…
++        expect(await tipAt(Math.max(0, center - 8)), `punta antes del punto de la fase ${i + 1}`).toBeLessThan(center)
++        await waitForFrames(page, 2)
++        expect(await active.count(), `fases activas con la línea justo antes del punto de la fase ${i + 1}`).toBe(i)
++        // …y unos 8 px después ya está en negro.
++        expect(await tipAt(center + 8), `punta después del punto de la fase ${i + 1}`).toBeGreaterThan(center)
++        await expect(active, `fases activas con la línea justo después del punto de la fase ${i + 1}`).toHaveCount(i + 1)
++      }
++    })
++  }
++
+   test('en móvil (390×844) la línea es vertical y se completa al entrar en pantalla', async ({ page }) => {
+     await page.setViewportSize({ width: 390, height: 844 })
+     await page.goto('/es')
+@@ -228,6 +286,57 @@ test.describe('T10 · Metodología', () => {
+     await expect.poll(() => vertical.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
+   })
+ 
++  // Revisión de T10a (ronda 2): en vertical, cada punto está donde lo deja el texto de las
++  // fases anteriores, no en i / total. Con i / total + 0,04, las fases 04 y 05 se
++  // activaban antes de que llegara la línea (a 360×740, 6 y 22 px antes).
++  for (const viewport of [
++    { width: 360, height: 740 },
++    { width: 390, height: 844 },
++  ]) {
++    test(`en celular (${viewport.width}×${viewport.height}), ninguna fase se activa antes de que la línea llegue a su punto`, async ({
++      page,
++    }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = page.locator(`#${es.methodology.sectionId}`)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      const active = section.locator('[data-method-phase][data-active="true"]')
++      await expect(active).toHaveCount(0)
++      const vertical = section.locator('[data-method-line="vertical"]')
++      const trackTop = await vertical.evaluate((line) => line.parentElement!.getBoundingClientRect().top + window.scrollY)
++
++      // Se dispara la línea (borde superior de la pista a media pantalla) y se sigue
++      // fotograma a fotograma hasta el final del trazo. data-active llega con el render de
++      // React, después del fotograma que mueve la línea, así que una fase activa con el
++      // centro de su punto más de 1 px por debajo de la punta es una fase adelantada.
++      const early = await vertical.evaluate(async (line, top) => {
++        const track = line.parentElement!
++        const phases = Array.from(track.querySelectorAll('[data-method-phase]'))
++        const found = new Map<number, string>()
++        window.scrollTo({ top, behavior: 'instant' })
++        const deadline = performance.now() + 6000
++        while (performance.now() < deadline) {
++          await new Promise((resolve) => requestAnimationFrame(resolve))
++          const box = track.getBoundingClientRect()
++          const transform = getComputedStyle(line).transform
++          const tip = (transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).d) * box.height
++          phases.forEach((phase, i) => {
++            const dot = phase.firstElementChild!.getBoundingClientRect()
++            const center = dot.top + dot.height / 2 - box.top
++            if (phase.getAttribute('data-active') === 'true' && center > tip + 1 && !found.has(i)) {
++              found.set(i, `fase ${i + 1}: punto a ${center.toFixed(1)} px, línea a ${tip.toFixed(1)} px`)
++            }
++          })
++          if (tip >= box.height && phases.every((phase) => phase.getAttribute('data-active') === 'true')) break
++        }
++        return Array.from(found.values())
++      }, trackTop - viewport.height * 0.5)
++      expect(early, 'fases activas antes de que la línea llegue a su punto').toEqual([])
++      await expect(active).toHaveCount(PHASES)
++    })
++  }
++
+   // Revisión de T10a (ronda 1): con `amount: 0.3`, una pista más alta que 1 / 0,3
+   // pantallas nunca llegaba a verse en un 30 % y la línea no arrancaba. Pasa con el
+   // zoom del navegador al 400 % (WCAG 1.4.10: 1280×1024 → 320×256; 1440×900 → 360×225)
+@@ -470,6 +579,10 @@ test.describe('T10 · Cierre', () => {
+     const closing = page.locator('section:has([data-cta-media])')
+     await expect(closing).toHaveAttribute('data-stage-mode', 'scrub')
+     await expect(closing).toHaveAttribute('data-header-theme', 'dark')
++    // Revisión de T10a (ronda 2): en scrub la capa que se desplaza tiene capa propia del
++    // compositor, como las que escalan en la portada. Sin ella, cada fotograma del
++    // paralaje volvía a rasterizar el relieve entero.
++    await expect(page.locator('[data-cta-media]')).toHaveCSS('will-change', 'transform')
+ 
+     // Sección entrando por abajo y ya centrada: la capa se mueve respecto de la
+     // sección (0,3 px por px de scroll, acotado) y nunca deja ver su borde.
+@@ -528,6 +641,8 @@ test.describe('T10 · Cierre', () => {
+       await page.goto('/es')
+       const closing = page.locator('section:has([data-cta-media])')
+       await expect(closing).toHaveAttribute('data-stage-mode', mode)
++      // Sin paralaje, sin capa propia: no se reserva memoria de GPU (revisión de T10a, ronda 2).
++      await expect(page.locator('[data-cta-media]')).toHaveCSS('will-change', 'auto')
+       for (const at of [0.9, 0.3]) {
+         await scrollToY(page, await scrollYFor(page, 'section:has([data-cta-media])', at))
+         await expect(page.locator('[data-cta-media]')).toHaveCSS('transform', 'none')
+@@ -597,6 +712,10 @@ for (const viewport of [
+ 
+     test('el relieve del cierre reutiliza la descarga de la portada', async ({ page }) => {
+       await page.goto('/es')
++      // La imagen de la portada es eager y ya tiene currentSrc con el HTML del servidor:
++      // sin esta espera, el montaje de SmoothScroll podría deshacer el desplazamiento de
++      // abajo antes de que la carga perezosa vea el cierre (§3.7).
++      await waitForHydration(page)
+       const hero = page.locator('#inicio img').first()
+       const closing = page.locator('[data-cta-media] img')
+       await expect.poll(() => hero.evaluate((img: HTMLImageElement) => img.currentSrc)).not.toBe('')
+diff --git a/src/components/sections/CTA.tsx b/src/components/sections/CTA.tsx
+index 4eb665c..2cae960 100644
+--- a/src/components/sections/CTA.tsx
++++ b/src/components/sections/CTA.tsx
+@@ -22,6 +22,17 @@ const OFFSET: StageOffset = ["start end", "end start"]
+ const PARALLAX = 0.3
+ /** Margen de la capa por debajo de la sección (-bottom-[20%]): cota del desplazamiento en ambos sentidos. */
+ const OVERSCAN = 0.2
++/**
++ * Capa que se desplaza (1,7 × el alto de la sección; ver «Encuadre inferior»).
++ * En scrub tiene capa propia del compositor, como las capas que escalan en la
++ * portada (SCALED_LAYER de HomeHero): sin ella, motion escribe el transform en
++ * cada fotograma de scroll y Chromium volvía a rasterizar el relieve entero
++ * (revisión de T10a, ronda 2, recorriendo el cierre a 1440×900 contra
++ * `next start`: ≈ 1,5 s de raster en 91 fotogramas sin capa propia, frente a
++ * 6–43 ms con ella; el hilo principal apenas cambia). Solo en scrub: en celular
++ * y con reducir movimiento la capa no se mueve y no se reserva memoria de GPU.
++ */
++const PARALLAX_LAYER = "absolute inset-x-0 -bottom-[20%] -top-[50%] -z-10 stage:will-change-transform"
+ 
+ /**
+  * Desplazamiento de la capa: 0,3× el scroll con la sección centrada y una
+@@ -102,12 +113,7 @@ export function CTA({
+       data-stage-mode={mode}
+       className="relative isolate overflow-hidden bg-[#0a0a0a] py-24 sm:py-40"
+     >
+-      <m.div
+-        aria-hidden="true"
+-        data-cta-media=""
+-        style={{ y }}
+-        className="absolute inset-x-0 -bottom-[20%] -top-[50%] -z-10"
+-      >
++      <m.div aria-hidden="true" data-cta-media="" style={{ y }} className={PARALLAX_LAYER}>
+         <FocalCover className="[--fy:100%]">{media}</FocalCover>
+       </m.div>
+       <div
+diff --git a/src/components/sections/home/MethodologyLine.tsx b/src/components/sections/home/MethodologyLine.tsx
+index 8e537e4..92833c2 100644
+--- a/src/components/sections/home/MethodologyLine.tsx
++++ b/src/components/sections/home/MethodologyLine.tsx
+@@ -24,8 +24,6 @@ interface MethodologyContent {
+ 
+ /** 0 cuando la fila de fases asoma al 80 % del viewport; 1 cuando su borde superior llega al 30 %. */
+ const OFFSET: StageOffset = ["start 0.8", "start 0.3"]
+-/** Cuánto debe pasar la línea más allá del nodo de una fase para activarla (fracción del trazo). */
+-const REACH = 0.04
+ /** Modo inView (celular): la línea se traza una vez, en 1,6 s, al entrar en pantalla. */
+ const INVIEW_DURATION = 1.6
+ /**
+@@ -39,19 +37,41 @@ const INVIEW_DURATION = 1.6
+  */
+ const IN_VIEW_TRIGGER: UseInViewOptions = { once: true, margin: "0px 0px -30% 0px" }
+ 
+-/** Fases alcanzadas por una línea trazada hasta `line` (0→1): el nodo de la fase i está en i / total. */
+-function phasesReached(line: number, total: number) {
++/**
++ * Dónde toca la línea el punto de cada fase: el centro del punto, como fracción
++ * del largo de la línea que se ve (0→1). Se mide en el layout y no se supone en
++ * i / total: en horizontal, la separación entre columnas aleja los puntos de
++ * i / total (a 1440 px, el de la fase 05 empieza 19 px más allá del 80 %), y en
++ * vertical cada punto está donde lo deja el texto de las fases anteriores. Con
++ * umbrales fijos (i / total + 0,04) la línea pasaba 29–50 px por debajo de un
++ * punto todavía gris en escritorio, y en celular había fases que se activaban
++ * antes de que llegara. `null` si la pista no tiene tamaño.
++ */
++function measureStops(track: HTMLElement, horizontalLine: HTMLElement): number[] | null {
++  // La línea horizontal solo se ve desde md (`hidden md:block`): la orientación la decide CSS.
++  const horizontal = horizontalLine.offsetWidth > 0
++  const box = track.getBoundingClientRect()
++  const length = horizontal ? box.width : box.height
++  if (length <= 0) return null
++  return Array.from(track.querySelectorAll("[data-method-phase] > span:first-child"), (dot) => {
++    const rect = dot.getBoundingClientRect()
++    const center = horizontal ? rect.left + rect.width / 2 - box.left : rect.top + rect.height / 2 - box.top
++    return center / length
++  })
++}
++
++/** Fases alcanzadas por una línea trazada hasta `line` (0→1): las que tienen el punto a su alcance. */
++function phasesReached(line: number, stops: readonly number[]) {
+   let count = 0
+-  for (let i = 0; i < total; i += 1) {
+-    if (line >= i / total + REACH) count = i + 1
+-  }
++  while (count < stops.length && line >= stops[count]) count += 1
+   return count
+ }
+ 
+ /**
+  * Metodología (diseño §5.6): una línea de 1 px se traza de izquierda a derecha
+  * al bajar, y cada fase pasa de gris (#737373, AA sobre blanco) a negro cuando
+- * la línea la alcanza.
++ * la línea la alcanza: cuando su punta llega al centro del punto de la fase,
++ * medido en el layout (measureStops).
+  *
+  * - scrub (≥ 48rem × 37,5rem): la línea horizontal (scaleX, origen a la
+  *   izquierda) sigue al scroll mientras la fila de fases sube del 80 % al 30 %
+@@ -70,13 +90,35 @@ function phasesReached(line: number, total: number) {
+  */
+ export function MethodologyLine({ content }: { content: MethodologyContent }) {
+   const trackRef = useRef<HTMLDivElement>(null)
++  const horizontalRef = useRef<HTMLSpanElement>(null)
+   const { progress, mode } = useStageProgress(trackRef, OFFSET)
+   const inView = useInView(trackRef, IN_VIEW_TRIGGER)
+   const line = useMotionValue(0)
+   const total = content.steps.length
+   const [reached, setReached] = useState(0)
++  // Posición de cada punto a lo largo de la línea (measureStops). Vacía hasta montar:
++  // el servidor y el primer render pintan las fases inactivas, sin medir nada.
++  const stops = useRef<readonly number[]>([])
+ 
+-  useMotionValueEvent(line, "change", (value) => setReached(phasesReached(value, total)))
++  useMotionValueEvent(line, "change", (value) => setReached(phasesReached(value, stops.current)))
++
++  // Se mide al montar y cada vez que la pista cambia de tamaño: cambia con el ancho
++  // (columnas o una sola columna, cortes de línea), con la letra y con la fuente.
++  useEffect(() => {
++    const track = trackRef.current
++    const horizontalLine = horizontalRef.current
++    if (!track || !horizontalLine) return
++    const measure = () => {
++      const next = measureStops(track, horizontalLine)
++      if (!next) return
++      stops.current = next
++      setReached(phasesReached(line.get(), next))
++    }
++    measure()
++    const observer = new ResizeObserver(measure)
++    observer.observe(track)
++    return () => observer.disconnect()
++  }, [line])
+ 
+   useEffect(() => {
+     if (mode === "static") {
+@@ -122,6 +164,7 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
+           />
+           {/* Línea trazada: una por orientación, movidas por el mismo valor; CSS muestra la que corresponde. */}
+           <m.span
++            ref={horizontalRef}
+             aria-hidden="true"
+             data-method-line="horizontal"
+             style={{ scaleX: line }}
+-- 
+2.43.0
+

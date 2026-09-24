@@ -1,0 +1,1304 @@
+From cf8bb3c21778d80d4c1ef965ab586799fb98e0f3 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 15:54:47 +0000
+Subject: [PATCH 1/3] =?UTF-8?q?feat(home):=20metodolog=C3=ADa=20con=20l?=
+ =?UTF-8?q?=C3=ADnea,=20cierre=20sobre=20el=20relieve=20y=20FAQ=20accesibl?=
+ =?UTF-8?q?e?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+MethodologyLine reemplaza a Methodology: una línea de 1 px se traza con el scroll (vertical y al
+entrar en pantalla en celular) y cada fase pasa de #737373 a #0a0a0a cuando la línea la alcanza.
+El cierre muestra la zona inferior del relieve con desplazamiento lento (0,3×, solo en escritorio);
+la imagen llega como slot del servidor (CTAMedia) y el título es un h2 visible sin JavaScript, sin
+ScrambleText. La FAQ pasa a fondo blanco con h3 > button y sin animar alturas; el JSON-LD FAQPage
+no cambia. Tecnologías: h2 sin RevealText y data-header-theme. JS de /es: 220 233 → 220 161 B.
+
+Decisiones:
+- T10a en paralelo (F3): pruebas en el spec temporal e2e/home-t10.spec.ts; los tres describe de la
+  home completa quedan para T10b y el orden final de page.tsx lo escribe el integrador.
+- Relieve del cierre como slot: CTAMedia.tsx (servidor) con coverPlaceholder; CTA.tsx y FAQ.tsx
+  entran en el bloque de motion de ESLint.
+- Sin JavaScript, estado final como en T6 y T7: Metodología con la línea completa y las fases
+  activas, y las filas de Tecnologías visibles (data-tech-row), en @media (scripting: none).
+- sizes del cierre por tramos medidos (max(100vw, 111rem), 102rem, 85rem): cubre el marco sin
+  pedir de más y en escritorio reutiliza la variante de la portada (el 140vw del plan no).
+- «Imagen ilustrativa» alineada con la rejilla (max-w-7xl), como en la portada.
+- «+» de la FAQ en #737373: es el indicador del estado (WCAG 1.4.11, 3:1).
+- Dos líneas data-method-line="horizontal|vertical"; paralaje acotado al margen de la capa.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../2026-09-23-home-cartografia-soberana.md   |  29 +-
+ e2e/home-t10.spec.ts                          | 370 ++++++++++++++++++
+ eslint.config.mjs                             |   5 +-
+ src/app/[locale]/page.tsx                     |   9 +-
+ src/app/globals.css                           |  29 ++
+ src/components/sections/CTA.tsx               | 134 +++++--
+ src/components/sections/CTAMedia.tsx          |  51 +++
+ src/components/sections/FAQ.tsx               | 127 +++---
+ src/components/sections/Methodology.tsx       | 110 ------
+ src/components/sections/TechStack.tsx         |  10 +-
+ .../sections/home/MethodologyLine.tsx         | 156 ++++++++
+ 11 files changed, 821 insertions(+), 209 deletions(-)
+ create mode 100644 e2e/home-t10.spec.ts
+ create mode 100644 src/components/sections/CTAMedia.tsx
+ delete mode 100644 src/components/sections/Methodology.tsx
+ create mode 100644 src/components/sections/home/MethodologyLine.tsx
+
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index bf23f5a..7ca5f7d 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -404,7 +404,9 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
+ | `data-built-card` | tarjeta de RealTy y de Live Studio | `realty` \| `studio` |
+ | `data-studio-step`, `data-lit` | cada capacidad `01`–`06` del caso | `true` \| `false` |
+ | `data-method-phase`, `data-active` | cada fase de Metodología | `true` \| `false` |
+-| `data-method-line` | línea de Metodología | — |
++| `data-method-line` | línea de Metodología (una por orientación; T10, decisión 1) | `horizontal` \| `vertical` |
++| `data-cta-media` | capa de imagen del cierre, la que se desplaza (T10, F3) | — |
++| `data-tech-row` | cada fila de categorías de Tecnologías (T10, F3: estado final sin JavaScript) | — |
+ | `data-brand-wordmark` | wordmark de Vercel (exento de contraste, ya excluido en axe) | `vercel` |
+ 
+ ### 3.5 Orden y tema de las secciones de la home (resultado de T10)
+@@ -418,7 +420,7 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
+ | 6 | Metodología | `metodologia` / `metodologia` | claro | `home/MethodologyLine.tsx` |
+ | 7 | Tecnologías | `tecnologias` / `technologies` | `#f8f8f8` | `TechStack.tsx` (+ `TrustLogos`) |
+ | 8 | Preguntas frecuentes | `faq` / `faq` | `bg-white` | `FAQ.tsx` (`h3 > button`) |
+-| 9 | Cierre | — | oscuro, relieve inferior | `CTA.tsx` |
++| 9 | Cierre | — | oscuro, relieve inferior | `CTA.tsx` (+ `CTAMedia.tsx`, relieve como slot) |
+ 
+ `src/app/[locale]/page.tsx` conserva el JSON-LD `FAQPage` generado desde `dict.faq.items` y su `generateMetadata` pasa a `pageMetadata(locale, "/")` (T2).
+ 
+@@ -8632,7 +8634,7 @@ El borrado de 2.8 ya quedó en el índice con `git rm`.
+ 
+ **Depende de:** T9 integrada en `redesign/home`. También T6, por `FocalCover`, `coverPlaceholder` (`src/lib/image-placeholder.ts`), `InstrumentLabel`, `useStageProgress`, `src/assets/images/relieve.jpg`, `hero.imageLabel` y `countVisibleBlue`.
+ 
+-**Archivos compartidos:** `src/app/[locale]/page.tsx`, `e2e/home.spec.ts`, `src/components/sections/TechStack.tsx` (ver 2.5). `src/app/globals.css` figura en la tabla §2 para T10, pero **esta tarea no lo necesita** y no lo toca.
++**Archivos compartidos:** `src/app/[locale]/page.tsx`, `e2e/home.spec.ts`, `src/components/sections/TechStack.tsx` (ver 2.5). `src/app/globals.css` figura en la tabla §2 para T10. *F3:* lo toca para el estado final sin JavaScript (decisión 11), además de `eslint.config.mjs` (decisión 10).
+ 
+ **Worktree y puerto:** `/home/user/wt/task10`, rama `wt/task10`, **`PORT=3100`**.
+ ```bash
+@@ -8655,6 +8657,9 @@ cd /home/user/wt/task10
+ | Modificar | `src/components/sections/TechStack.tsx`: los dos bloques de 2.5 (`h2` sin `RevealText` y `data-header-theme`) |
+ | Modificar | `e2e/home.spec.ts` |
+ | Borrar | `src/components/sections/Methodology.tsx` |
++| Crear (F3) | `src/components/sections/CTAMedia.tsx`: servidor, el relieve del cierre como slot (decisión 10) |
++| Modificar (F3) | `src/app/globals.css` (decisión 11) y `eslint.config.mjs` (decisión 10) |
++| Crear (F3, temporal) | `e2e/home-t10.spec.ts`: las pruebas de T10a; el integrador lo funde en `e2e/home.spec.ts` (decisión 9) |
+ 
+ ### Paso 1 — Prueba primero
+ 
+@@ -9023,6 +9028,8 @@ export function MethodologyLine({ content }: { content: MethodologyContent }) {
+ **2.2 `src/components/sections/CTA.tsx`** (reescrito completo):
+ 
+ > **P1 (§3.8): el bloque es anterior al presupuesto de JS.** El `<Image>` del relieve, su import, `next/image` y `coverPlaceholder` salen de la isla: los renderiza un Server Component (la sección de servidor, `page.tsx` o un módulo sin directiva, como `home/hero-media.tsx`) y llegan a `CTA` como prop `media: React.ReactNode`, que la isla pinta dentro de su `FocalCover` (informe §5, T10). Añade `CTA.tsx` y `FAQ.tsx` a los `files` del bloque de motion de `eslint.config.mjs`.
++>
++> **Borrador superado (F3).** Manda el código de `wt/task10`: `CTAMedia.tsx` y la prop `media` (decisión 10), el `sizes` por tramos (decisión 12) y la etiqueta alineada con la rejilla (decisión 13). No copies este bloque.
+ 
+ ```tsx
+ "use client"
+@@ -9152,6 +9159,8 @@ export function CTA({ content, imageLabel }: { content: CTAContent; imageLabel:
+ ```
+ 
+ **2.3 `src/components/sections/FAQ.tsx`** (reescrito completo):
++> *F3:* el «+» va en `#737373`, no en `#a3a3a3` (decisión 14). Manda el código.
++
+ ```tsx
+ "use client"
+ // Preguntas frecuentes (§5.8 del diseño). Cambios respecto de la versión anterior:
+@@ -9387,6 +9396,20 @@ EOF
+ 7. **Estados iniciales y sin JavaScript.** Las fases de Metodología salen del servidor inactivas (`#737373`, AA) con la línea en `scaleX(0)`. Sin JavaScript se leen, pero no se ven activas. El color de fases, puntos y textos cambia de forma discreta, sin `transition-colors` (diseño §5, contrato §3.6); solo la línea interpola (`scaleX`/`scaleY`). Todos los `h2` de la home son visibles desde el servidor: la prueba sin JavaScript los recorre todos con `effectiveOpacity` y comprueba que ninguno esconde palabras con `translateY(100%)` (el patrón de `RevealText`, que la opacidad no detecta).
+ 8. **Pruebas globales.** La regla del azul recorre toda la home en pasos de ½ pantalla, en 1440×900 y 390×844, con y sin reducir movimiento. Antes espera `.site-header[data-tone]` (hidratación) y el modo esperado en `#metodologia`. La misma prueba recoge errores de hidratación en consola. La prueba de orden usa los `sectionId` del diccionario, porque el `id="inicio"` de la portada no es una clave del contrato. `MethodologyLine` se importa de forma estática: según la guía de *lazy loading* de Next 16, `dynamic()` desde un Server Component no divide en trozos los Client Components.
+ 
++### Decisiones (implementación, F3)
++Lo que el código de `wt/task10` (T10a) cambia respecto de 2.1–2.6 y del paso 1. Manda el código.
++
++9. **Ejecución en paralelo (F3, T10a).** Worktree desde `3644611` (P1 y T7 integradas), a la vez que T8 y T9. En `page.tsx`, `MethodologyLine` sustituye a `Methodology` en su sitio (import y JSX) y `CTA` recibe `imageLabel` y `media`. Aún faltan `Dossier` y `BuiltProof`: el orden final del contrato (§3.5) lo escribe el integrador. Las pruebas van en el spec temporal `e2e/home-t10.spec.ts` (autocontenido, sin importar otro spec; el integrador lo funde al final de `e2e/home.spec.ts`). Los tres `describe` que necesitan la home entera («todos los h2 de la home se ven sin JavaScript», «T10 · Orden de la home» y «T10 · Regla del azul en toda la home») pasan a T10b. En el paso 3, donde dice `e2e/home.spec.ts -g "T10 ·"`, en F3 es `e2e/home-t10.spec.ts`.
++10. **Relieve del cierre como slot (presupuesto de JS §5, T10; §3.8).** `src/components/sections/CTAMedia.tsx` (sin directiva) importa `relieve` y renderiza `<Image>` con `fill`, el `sizes` de la decisión 12, `placeholder={coverPlaceholder(relieve)}`, `className="object-cover"` y carga perezosa. `page.tsx` lo pasa a `CTA` como `media`, y la isla lo pinta dentro de su `FocalCover`. `CTA.tsx` ya no importa `next/image`, la imagen ni `coverPlaceholder`. Va junto a `CTA.tsx`, no en `home/`, porque la sección vive ahí. `CTA.tsx` y `FAQ.tsx` entran en el bloque de motion de `eslint.config.mjs` (`no-restricted-imports`), como pedía §3.8.
++11. **Sin JavaScript se pinta el estado final** (sustituye a la decisión 7 en lo que dice de Metodología sin JavaScript). Como la portada (T6) y Tesis y Capacidades (decisión 17 de T7), un bloque `@media (scripting: none)` en `globals.css` deja la línea completa y las cinco fases en `#0a0a0a` (título) y `#525252` (texto), con el punto negro: el mismo estado que con reducir movimiento. Con fases grises y la línea sin trazar, sin scroll que seguir, la sección parecía «sin empezar». En el mismo bloque, las filas de Tecnologías (`CategoryRow`, que entra con `whileInView` desde `opacity: 0` y sin JavaScript no entraba nunca) se muestran quietas, con el atributo nuevo `data-tech-row`. Lleva `!important`: motion escribe escala, opacidad y desplazamiento en el atributo `style`. Con JavaScript no cambia nada.
++12. **`sizes` del relieve del cierre por tramos (medido).** El marco 3:2 mide max(100vw, 2,55 × H), con H el alto de la sección (la capa mide 1,7 × H). En rem, H es casi constante por tramo, en es y en en: 43,46rem desde md, 39,76rem en sm y 25,7–33,3rem por debajo (33,27rem a 320 px). `sizes` = `(min-width: 111rem) 100vw, (min-width: 48rem) 111rem, (min-width: 40rem) 102rem, 85rem`, que es max(100vw, 111rem) sin `max()`. Medido con una imagen de prueba con srcset denso en 20 viewports y 2 idiomas: desde 640 px de ancho la ranura queda entre 1,000 y 1,006 × el marco; en celulares, entre 1,002 y 1,13 (1,30 a 600 px, donde con DPR ≥ 2 se elige igualmente la variante de 3840 px). El `(min-width: 48rem) 140vw, 520vw` de 2.2 pedía el 60–80 % del marco entre 768 y 1024 px de ancho (imagen borrosa) y un 14–40 % de más desde 1440 px. Además, en escritorio apaisado (≥ 3:2, desde unos 1200 px de ancho) el navegador elige para el cierre la misma variante que para la portada (1920 o 3840 px) y reutiliza su descarga. Con `140vw` pedía otra de 2048 px a 1440×900. Si cambia el copy del cierre, la prueba «el sizes cubre el marco sin pedir de más» lo detecta.
++13. **«Imagen ilustrativa» alineada con la rejilla.** Va en `absolute inset-x-0 bottom-6 mx-auto max-w-7xl px-6`, no en `absolute bottom-6 left-6`: abajo a la izquierda, como la capa de instrumento de la portada. Con `left-6` quedaba pegada al borde de la ventana: a 2560 px, a 24 px del borde y a más de 600 px del contenido.
++14. **Indicador «+» de la FAQ en `#737373`** (antes `#a3a3a3`, 2,5:1 sobre blanco). Es la señal visual del estado (gira a «×» al abrir): WCAG 1.4.11 pide 3:1, y `#737373` da 4,7:1. Sigue con `aria-hidden`: el estado lo lleva `aria-expanded`.
++15. **Contraste del cierre, medido.** Con el texto oculto (color transparente) y sin encabezado, se tomó el píxel más claro bajo cada texto gris `#a3a3a3` (la segunda línea del título, la descripción y la etiqueta) en 9 viewports (de 320×568 a 2560×1440, y 844×390) y 3 posiciones (entrando, centrada y al final de la página). El más claro es `rgb(39, 39, 39)`: el peor contraste es 5,92:1 (390×844, descripción), por encima del AA (4,5:1). La cuenta de la decisión 5 (≈ 5,2:1) era una cota conservadora.
++16. **Pruebas de T10a** (spec temporal `e2e/home-t10.spec.ts`, 21 pruebas). Del paso 1: FAQ; las 3 de Metodología; y «el título del cierre sale del servidor y se ve». Las de Metodología esperan `waitForHydration` antes de desplazarse y comprueban además que las fases activas son las primeras y los colores activo e inactivo. Añadidas: FAQ con teclado (Enter abre y Espacio cierra; `aria-controls` y `aria-labelledby` apuntan a ids reales en los dos estados). Sin JavaScript: los h2 de Metodología, Tecnologías y FAQ se ven, la metodología pinta su estado final y las filas de Tecnologías se ven (decisión 11). La imagen del cierre está en el HTML, perezosa, decorativa y sin `fetchpriority`. Paralaje: en escritorio se mueve, acotado a ±20 % del alto, y la capa siempre cubre la sección; en celular y con reducir movimiento, quieto. Inglés. `sizes` que cubre el marco sin pasarse más de un 10 % en 7 viewports (decisión 12). Misma variante que la portada a 1440×900 y 1920×1080. Antes de implementar fallaban las 12 primeras (las del paso 1 y las primeras añadidas). Las 9 del `sizes` se añadieron después: según la sonda de medida (el mismo cálculo), con el `sizes` del plan fallarían todas.
++
++**Estado al cierre (T10a, F3, en paralelo, sin T8 ni T9):** JS de `/es` (`next start`, 1440×900, mediana de 3, `measure-js.mjs`): base del worktree (`3644611`: P1 y T7) 220 233 B en 15 scripts → con T10a 220 161 B en 15 scripts: **−72 B** (tope +3 000 B; margen de 49 561 B hasta 269 722). El chunk de las islas de la home crece 598 B (MethodologyLine y los nuevos CTA y FAQ en lugar de Methodology y los antiguos), y el de los efectos de texto baja de 2 301 a 1 616 B: RevealText y ScrambleText salen de `/es` (queda CoverReveal, que solo usa CaseStudy y retira T9). AnimatePresence sigue en `/es` por el Header. `npm run build` en verde, con `check:modern-js` OK (let=3516, class=167). e2e completo 192/192 en verde (171 + 21 de T10a), lint y `tsc` en verde. En una pasada de `home.spec.ts` + `smoke.spec.ts` con la máquina cargada (otras dos ejecuciones a la vez), «portada · scrub en tableta vertical grande» falló una vez («la ruta cruza «índice /01»», una comparación de capturas); repetida una vez, pasó, y la suite completa pasó entera. `ScrambleText` sigue en uso (`ScheduleForm.tsx`): no es código muerto para T11.
++
+ ---
+ 
+ ## Tarea 11 — Limpieza, documentación y verificación final
+diff --git a/e2e/home-t10.spec.ts b/e2e/home-t10.spec.ts
+new file mode 100644
+index 0000000..4a98454
+--- /dev/null
++++ b/e2e/home-t10.spec.ts
+@@ -0,0 +1,370 @@
++import { test, expect, type Page } from '@playwright/test'
++import es from '../src/content/dictionaries/es'
++import en from '../src/content/dictionaries/en'
++import { buildLocalePath } from '../src/lib/i18n'
++import { effectiveOpacity, scrollToY, waitForHydration } from './helpers'
++
++/**
++ * Tarea 10a — Metodología, cierre y FAQ (spec temporal de la fase F3).
++ *
++ * El integrador lo funde al final de `e2e/home.spec.ts` (prefijo «T10 ·») y lo
++ * borra. Autocontenido: no importa ningún otro spec; los helpers compartidos
++ * vienen de `./helpers`. Las tres pruebas de la home completa (todos los h2 sin
++ * JavaScript, orden de las secciones y regla del azul en todo el scroll) son de
++ * T10b y no están aquí.
++ */
++
++/** Transformación calculada que equivale a la identidad (escala 1, sin desplazar). */
++const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
++
++/** Desplazamiento vertical (translateY) de la capa de imagen del cierre, en px. */
++function closingLayerShift(page: Page): Promise<number> {
++  return page
++    .locator('[data-cta-media]')
++    .evaluate((layer) => {
++      const transform = getComputedStyle(layer).transform
++      return transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).f
++    })
++}
++
++/** Posición de scroll que deja el borde superior de `selector` en la fracción `at` del viewport. */
++function scrollYFor(page: Page, selector: string, at: number): Promise<number> {
++  return page
++    .locator(selector)
++    .first()
++    .evaluate((el, fraction) => el.getBoundingClientRect().top + window.scrollY - window.innerHeight * fraction, at)
++}
++
++// ── Preguntas frecuentes ────────────────────────────────────────────────
++
++test.describe('T10 · Preguntas frecuentes', () => {
++  test('cada pregunta es h3 > button[aria-expanded] y el JSON-LD FAQPage las tiene todas', async ({ page }) => {
++    await page.goto('/es')
++    const faq = page.locator(`#${es.faq.sectionId}`)
++    const buttons = faq.locator('h3 > button[aria-expanded]')
++    await expect(buttons).toHaveCount(es.faq.items.length)
++    await expect(faq.locator('button h3')).toHaveCount(0)
++    for (const [i, item] of es.faq.items.entries()) {
++      await expect(buttons.nth(i)).toContainText(item.question)
++      await expect(buttons.nth(i)).toHaveAttribute('aria-expanded', 'false')
++    }
++
++    // El estado viaja en aria-expanded y la respuesta aparece. Se reintenta el
++    // clic por si llega antes de hidratar (el HTML del servidor no tiene handler).
++    const first = buttons.first()
++    await expect(async () => {
++      if ((await first.getAttribute('aria-expanded')) !== 'true') await first.click()
++      await expect(first).toHaveAttribute('aria-expanded', 'true', { timeout: 1000 })
++    }).toPass()
++    await expect(faq.getByText(es.faq.items[0].answer)).toBeVisible()
++
++    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
++    const faqPages = blocks
++      .flatMap((block) => {
++        const parsed = JSON.parse(block)
++        return Array.isArray(parsed) ? parsed : [parsed]
++      })
++      .filter((entry) => entry['@type'] === 'FAQPage')
++    expect(faqPages).toHaveLength(1)
++    expect(faqPages[0].mainEntity).toHaveLength(es.faq.items.length)
++  })
++
++  test('con teclado: Enter abre y Espacio cierra; aria-controls apunta siempre a su panel', async ({ page }) => {
++    await page.goto('/es')
++    await waitForHydration(page)
++    const faq = page.locator(`#${es.faq.sectionId}`)
++    await expect(faq).toHaveAttribute('data-header-theme', 'light')
++    const buttons = faq.locator('h3 > button')
++
++    // Las respuestas están en el HTML en ambos estados (paneles con `hidden`):
++    // aria-controls nunca apunta a un id inexistente.
++    for (let i = 0; i < es.faq.items.length; i++) {
++      const panelId = await buttons.nth(i).getAttribute('aria-controls')
++      expect(panelId, `aria-controls de la pregunta ${i + 1}`).toBeTruthy()
++      const panel = page.locator(`[id="${panelId}"]`)
++      await expect(panel).toHaveCount(1)
++      await expect(panel).toBeHidden()
++      await expect(panel).toHaveAttribute('aria-labelledby', (await buttons.nth(i).getAttribute('id'))!)
++    }
++
++    const second = buttons.nth(1)
++    const panel = page.locator(`[id="${await second.getAttribute('aria-controls')}"]`)
++    await second.focus()
++    await page.keyboard.press('Enter')
++    await expect(second).toHaveAttribute('aria-expanded', 'true')
++    await expect(panel).toBeVisible()
++    await expect(panel).toContainText(es.faq.items[1].answer)
++    await page.keyboard.press('Space')
++    await expect(second).toHaveAttribute('aria-expanded', 'false')
++    await expect(panel).toBeHidden()
++  })
++})
++
++// ── Metodología ─────────────────────────────────────────────────────────
++
++test.describe('T10 · Metodología', () => {
++  test('con reducir movimiento: las 5 fases activas y la línea completa', async ({ page }) => {
++    await page.emulateMedia({ reducedMotion: 'reduce' })
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    const section = page.locator(`#${es.methodology.sectionId}`)
++    await expect(section).toHaveAttribute('data-stage-mode', 'static')
++    await expect(section.locator('[data-method-phase]')).toHaveCount(es.methodology.steps.length)
++    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(5)
++    const line = section.locator('[data-method-line="horizontal"]')
++    await expect.poll(() => line.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++  })
++
++  test('al bajar (1440×900), la línea alcanza unas fases y no otras', async ({ page }) => {
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    // data-stage-mode="scrub" ya viene del servidor: sin esta espera, el scroll
++    // llegaría antes de hidratar y SmoothScroll lo desharía (§3.7).
++    await waitForHydration(page)
++    const section = page.locator(`#${es.methodology.sectionId}`)
++    await expect(section).toHaveAttribute('data-stage-mode', 'scrub')
++    const active = section.locator('[data-method-phase][data-active="true"]')
++    await expect(active).toHaveCount(0)
++
++    // La fila de fases al 55 % del viewport → avance 0,5 → la línea a mitad de camino.
++    const lineTop = await section
++      .locator('[data-method-line="horizontal"]')
++      .evaluate((el) => el.getBoundingClientRect().top + window.scrollY)
++    await scrollToY(page, lineTop - 900 * 0.55)
++    await expect.poll(() => active.count()).toBeGreaterThan(0)
++    expect(await active.count()).toBeLessThan(5)
++    // Las activas son las primeras: la línea avanza de izquierda a derecha.
++    await expect
++      .poll(() =>
++        section
++          .locator('[data-method-phase]')
++          .evaluateAll((phases) => phases.map((phase) => (phase.getAttribute('data-active') === 'true' ? '1' : '0')).join(''))
++      )
++      .toMatch(/^1+0+$/)
++    // Fase inactiva en #737373 (AA sobre blanco) y activa en #0a0a0a: cambio de estado discreto.
++    await expect(section.locator('[data-method-phase][data-active="true"] h3').first()).toHaveCSS('color', 'rgb(10, 10, 10)')
++    await expect(section.locator('[data-method-phase][data-active="false"] h3').first()).toHaveCSS('color', 'rgb(115, 115, 115)')
++
++    // La fila al 20 % → avance 1 → todas activas.
++    await scrollToY(page, lineTop - 900 * 0.2)
++    await expect(active).toHaveCount(5)
++  })
++
++  test('en móvil (390×844) la línea es vertical y se completa al entrar en pantalla', async ({ page }) => {
++    await page.setViewportSize({ width: 390, height: 844 })
++    await page.goto('/es')
++    const section = page.locator(`#${es.methodology.sectionId}`)
++    await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++    await expect(section.locator('[data-method-line="horizontal"]')).toBeHidden()
++    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(0)
++    const trackTop = await section
++      .locator('[data-method-phase]')
++      .first()
++      .evaluate((el) => el.getBoundingClientRect().top + window.scrollY)
++    await scrollToY(page, trackTop - 844 * 0.2)
++    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(5)
++    const vertical = section.locator('[data-method-line="vertical"]')
++    await expect.poll(() => vertical.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++  })
++})
++
++// ── Sin JavaScript ──────────────────────────────────────────────────────
++
++test.describe('T10 · Cierre sin JavaScript', () => {
++  test.use({ javaScriptEnabled: false })
++
++  test('el título del cierre sale del servidor y se ve', async ({ page }) => {
++    await page.goto('/es')
++    const heading = page.getByRole('heading', { level: 2, name: es.cta.lead })
++    await expect(heading).toHaveCount(1)
++    await expect(heading).toContainText(es.cta.lead)
++    await expect(heading).toContainText(es.cta.highlight)
++    expect(await effectiveOpacity(heading)).toBe(1)
++
++    const closing = page.locator('main section').last()
++    await expect(closing).toContainText(es.hero.imageLabel)
++    await expect(closing.getByRole('link', { name: es.cta.action.label })).toHaveAttribute('href', '/es/agendar')
++  })
++})
++
++test.describe('T10 · Metodología, Tecnologías y FAQ sin JavaScript', () => {
++  test.use({ javaScriptEnabled: false })
++
++  test('sus h2 y las filas de Tecnologías se ven desde el servidor, y la metodología pinta su estado final', async ({ page }) => {
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    for (const { sectionId, title } of [es.methodology, es.techStack, es.faq]) {
++      const section = page.locator(`#${sectionId}`)
++      await expect(section).toHaveAttribute('data-header-theme', 'light')
++      const heading = section.getByRole('heading', { level: 2 })
++      await expect(heading).toHaveText(title)
++      expect(await effectiveOpacity(heading), `h2 de #${sectionId}`).toBe(1)
++      // RevealText baja cada palabra con translateY(100%) dentro de overflow-hidden:
++      // la opacidad sigue en 1 pero el texto no se ve hasta hidratar.
++      await expect(heading.locator('[style*="translateY(100%)"]')).toHaveCount(0)
++    }
++
++    // Como la portada y Tesis y Capacidades: sin scroll que seguir, el estado final.
++    const section = page.locator(`#${es.methodology.sectionId}`)
++    const phases = section.locator('[data-method-phase]')
++    await expect(phases).toHaveCount(es.methodology.steps.length)
++    for (let i = 0; i < es.methodology.steps.length; i++) {
++      await expect(phases.nth(i).locator('h3')).toHaveCSS('color', 'rgb(10, 10, 10)')
++    }
++    await expect(section.locator('[data-method-line="horizontal"]')).toHaveCSS('transform', 'none')
++
++    // Las filas de Tecnologías (whileInView desde opacity 0) se ven quietas.
++    const rows = page.locator(`#${es.techStack.sectionId} [data-tech-row]`)
++    await expect(rows).toHaveCount(es.techStack.categories.length)
++    for (let i = 0; i < es.techStack.categories.length; i++) {
++      expect(await effectiveOpacity(rows.nth(i)), `fila ${i + 1} de Tecnologías`).toBe(1)
++      await expect(rows.nth(i)).toHaveCSS('transform', 'none')
++    }
++  })
++})
++
++// ── Cierre ──────────────────────────────────────────────────────────────
++
++test.describe('T10 · Cierre', () => {
++  test('la imagen llega como slot del servidor: perezosa, decorativa y sin prioridad', async ({ request }) => {
++    const html = await (await request.get('/es')).text()
++    const closing = html.slice(html.lastIndexOf('data-cta-media'))
++    const img = closing.match(/<img[^>]*>/)?.[0]
++    expect(img, 'la imagen del relieve está en el HTML del cierre').toBeDefined()
++    expect(img).toContain('alt=""')
++    expect(img).toContain('loading="lazy"')
++    expect(img).not.toMatch(/fetchpriority/i)
++  })
++
++  test('en escritorio (1440×900) el relieve se desplaza despacio y siempre cubre la sección', async ({ page }) => {
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    await waitForHydration(page)
++    const closing = page.locator('section:has([data-cta-media])')
++    await expect(closing).toHaveAttribute('data-stage-mode', 'scrub')
++    await expect(closing).toHaveAttribute('data-header-theme', 'dark')
++
++    // Sección entrando por abajo y ya centrada: la capa se mueve respecto de la
++    // sección (0,3 px por px de scroll, acotado) y nunca deja ver su borde.
++    const geometry = async () =>
++      closing.evaluate((section) => {
++        const layer = section.querySelector('[data-cta-media]')!.getBoundingClientRect()
++        const box = section.getBoundingClientRect()
++        return { layerTop: layer.top, layerBottom: layer.bottom, top: box.top, bottom: box.bottom, height: box.height }
++      })
++    const entering = await scrollYFor(page, 'section:has([data-cta-media])', 0.85)
++    await scrollToY(page, entering)
++    await expect.poll(() => closingLayerShift(page)).toBeLessThan(-1)
++    const early = await closingLayerShift(page)
++    const earlyBox = await geometry()
++
++    const centered = await closing.evaluate((section) => {
++      const box = section.getBoundingClientRect()
++      return box.top + window.scrollY - (window.innerHeight - box.height) / 2
++    })
++    await scrollToY(page, centered)
++    await expect.poll(() => closingLayerShift(page)).toBeGreaterThan(early + 1)
++    const middle = await closingLayerShift(page)
++    const middleBox = await geometry()
++
++    // Centrada: desplazamiento ≈ 0. Entrando: hacia arriba y como mucho el margen de la capa (20 % del alto).
++    expect(Math.abs(middle)).toBeLessThanOrEqual(2)
++    expect(Math.abs(early)).toBeLessThanOrEqual(earlyBox.height * 0.2 + 0.5)
++    for (const box of [earlyBox, middleBox]) {
++      expect(box.layerTop).toBeLessThanOrEqual(box.top)
++      expect(box.layerBottom).toBeGreaterThanOrEqual(box.bottom - 0.5)
++    }
++  })
++
++  for (const { name, viewport, reducedMotion, mode } of [
++    { name: 'celular (390×844)', viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference', mode: 'inView' },
++    { name: 'reducir movimiento (1440×900)', viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce', mode: 'static' },
++  ] as const) {
++    test(`${name}: el relieve no se mueve`, async ({ page }) => {
++      await page.setViewportSize(viewport)
++      await page.emulateMedia({ reducedMotion })
++      await page.goto('/es')
++      const closing = page.locator('section:has([data-cta-media])')
++      await expect(closing).toHaveAttribute('data-stage-mode', mode)
++      for (const at of [0.9, 0.3]) {
++        await scrollToY(page, await scrollYFor(page, 'section:has([data-cta-media])', at))
++        await expect(page.locator('[data-cta-media]')).toHaveCSS('transform', 'none')
++      }
++    })
++  }
++
++  test('/en: título, etiqueta de la imagen y enlace traducidos', async ({ page }) => {
++    await page.goto('/en')
++    const closing = page.locator('main section').last()
++    await expect(closing.getByRole('heading', { level: 2 })).toHaveText(`${en.cta.lead} ${en.cta.highlight}`)
++    await expect(closing).toContainText(en.hero.imageLabel)
++    await expect(closing.getByRole('link', { name: en.cta.action.label })).toHaveAttribute(
++      'href',
++      buildLocalePath('en', '/agendar')
++    )
++    await expect(page.locator(`#${en.methodology.sectionId}`).getByRole('heading', { level: 2 })).toHaveText(
++      en.methodology.title
++    )
++  })
++})
++
++// El `sizes` del relieve del cierre es una cota ajustada del marco 3:2 que se pinta
++// (FocalCover sobre una capa de 1,7 × el alto de la sección). Mismo método que la
++// lámina de T7: una imagen de prueba con el mismo `sizes` y un srcset denso revela
++// la ranura que calcula el navegador; tiene que cubrir el marco y no pasarlo en más
++// de un 10 % (entre 768 y 1024 px de ancho el «140vw» del plan pedía el 60–80 %).
++for (const viewport of [
++  { width: 1920, height: 1080 },
++  { width: 1440, height: 900 },
++  { width: 1024, height: 768 },
++  { width: 768, height: 1024 },
++  { width: 640, height: 800 },
++  { width: 390, height: 844 },
++  { width: 320, height: 568 },
++]) {
++  test.describe(`T10 · Cierre · tamaño de la imagen (${viewport.width}×${viewport.height})`, () => {
++    test.use({ viewport })
++
++    test('el sizes cubre el marco sin pedir de más', async ({ page }) => {
++      await page.route('**/__sizes-probe/**', (route) => route.fulfill({ status: 204 }))
++      await page.goto('/es')
++      const { frame, slot } = await page.locator('[data-cta-media] img').evaluate(async (img) => {
++        const frameWidth = img.closest('.focal-cover')!.getBoundingClientRect().width
++        const probe = new Image()
++        probe.sizes = img.getAttribute('sizes') ?? ''
++        const candidates: string[] = []
++        for (let width = 100; width <= 4000; width += 1) candidates.push(`/__sizes-probe/${width}.png ${width}w`)
++        probe.srcset = candidates.join(', ')
++        for (let i = 0; i < 100 && !probe.currentSrc; i++) await new Promise((resolve) => setTimeout(resolve, 20))
++        return { frame: frameWidth, slot: Number(/__sizes-probe\/(\d+)/.exec(probe.currentSrc)?.[1]) }
++      })
++      expect(slot).toBeGreaterThanOrEqual(Math.floor(frame))
++      expect(slot).toBeLessThanOrEqual(frame * 1.1)
++    })
++  })
++}
++
++// En escritorio apaisado el cierre pide la misma variante del relieve que la portada:
++// el navegador reutiliza la descarga y la imagen del cierre no cuesta bytes.
++for (const viewport of [
++  { width: 1920, height: 1080 },
++  { width: 1440, height: 900 },
++]) {
++  test.describe(`T10 · Cierre · misma variante que la portada (${viewport.width}×${viewport.height})`, () => {
++    test.use({ viewport })
++
++    test('el relieve del cierre reutiliza la descarga de la portada', async ({ page }) => {
++      await page.goto('/es')
++      const hero = page.locator('#inicio img').first()
++      const closing = page.locator('[data-cta-media] img')
++      await expect.poll(() => hero.evaluate((img: HTMLImageElement) => img.currentSrc)).not.toBe('')
++      await closing.scrollIntoViewIfNeeded()
++      await expect.poll(() => closing.evaluate((img: HTMLImageElement) => img.currentSrc)).not.toBe('')
++      const [heroSrc, closingSrc] = await Promise.all([
++        hero.evaluate((img: HTMLImageElement) => img.currentSrc),
++        closing.evaluate((img: HTMLImageElement) => img.currentSrc),
++      ])
++      expect(closingSrc).toBe(heroSrc)
++    })
++  })
++}
+diff --git a/eslint.config.mjs b/eslint.config.mjs
+index cddace1..81d1242 100644
+--- a/eslint.config.mjs
++++ b/eslint.config.mjs
+@@ -5,7 +5,8 @@ import nextTs from "eslint-config-next/typescript";
+ // Presupuesto de JS de la home (plan §3.8): lo que cada isla importa de motion
+ // viaja en el JS de /es. Solo el subconjunto medido (m, useStageProgress o
+ // useScroll, useTransform, useMotionValue, useMotionValueEvent, useInView,
+-// animateSingleValue y tipos). T10 añade CTA.tsx y FAQ.tsx a `files` al reescribirlos.
++// animateSingleValue y tipos). Incluye CTA.tsx y FAQ.tsx, secciones de la home fuera
++// de home/ (T10 las reescribió como islas).
+ const HOME_MOTION_MESSAGE =
+   "Plan §3.8 (presupuesto de JS): en las islas de la home, solo m, useStageProgress o useScroll, useTransform, useMotionValue, useMotionValueEvent, useInView y animateSingleValue. m.* en lugar de motion.*; animateSingleValue(valor, 1, opciones) con `return () => valor.stop()` en lugar de animate().";
+ 
+@@ -13,7 +14,7 @@ const eslintConfig = defineConfig([
+   ...nextVitals,
+   ...nextTs,
+   {
+-    files: ["src/components/sections/home/**"],
++    files: ["src/components/sections/home/**", "src/components/sections/CTA.tsx", "src/components/sections/FAQ.tsx"],
+     rules: {
+       "no-restricted-imports": ["error", {
+         paths: [
+diff --git a/src/app/[locale]/page.tsx b/src/app/[locale]/page.tsx
+index be68069..7d1a3d1 100644
+--- a/src/app/[locale]/page.tsx
++++ b/src/app/[locale]/page.tsx
+@@ -13,16 +13,17 @@ import { pageMetadata } from "@/lib/metadata"
+ // (node_modules/next/dist/docs/01-app/02-guides/lazy-loading.md) y solo añade su
+ // runtime (React.lazy, PreloadChunks, BailoutToCSR). La imagen de la lámina de
+ // Capacidades se renderiza en el servidor (CapabilitiesMedia) y llega a la isla
+-// como slot, igual que la de la portada (HeroMedia).
++// como slot, igual que la de la portada (HeroMedia) y la del cierre (CTAMedia).
+ import { Thesis } from "@/components/sections/home/Thesis"
+ import { CapabilitiesIndex } from "@/components/sections/home/CapabilitiesIndex"
+ import { CapabilitiesMedia } from "@/components/sections/home/CapabilitiesMedia"
+ import { CaseStudy } from "@/components/sections/CaseStudy"
+ import { LiveStudioTeaser } from "@/components/sections/LiveStudioTeaser"
+-import { Methodology } from "@/components/sections/Methodology"
++import { MethodologyLine } from "@/components/sections/home/MethodologyLine"
+ import { TechStack } from "@/components/sections/TechStack"
+ import { FAQ } from "@/components/sections/FAQ"
+ import { CTA } from "@/components/sections/CTA"
++import { CTAMedia } from "@/components/sections/CTAMedia"
+ 
+ export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+   const { locale } = await params
+@@ -75,10 +76,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
+       <CapabilitiesIndex content={dict.services} locale={locale} media={<CapabilitiesMedia />} />
+       <CaseStudy content={dict.caseStudy} locale={locale} />
+       <LiveStudioTeaser content={dict.liveStudioTeaser} locale={locale} />
+-      <Methodology content={dict.methodology} />
++      <MethodologyLine content={dict.methodology} />
+       <TechStack content={dict.techStack} trustLabel={dict.trustBar.label} />
+       <FAQ content={dict.faq} />
+-      <CTA content={ctaContent} />
++      <CTA content={ctaContent} imageLabel={dict.hero.imageLabel} media={<CTAMedia />} />
+     </>
+   )
+ }
+diff --git a/src/app/globals.css b/src/app/globals.css
+index 42cf543..e84c402 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -436,6 +436,35 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
+   }
+ }
+ 
++/* ── Metodología y Tecnologías (home) ────────────────────────────────
++   Sin JavaScript: el HTML del servidor trae el primer render (scrub, avance
++   0): línea sin trazar y las cinco fases en gris (#737373). Como en la
++   portada y en Tesis y Capacidades, se pinta el estado final, el mismo que
++   con reducir movimiento: línea completa y fases en #0a0a0a (título), #525252
++   (texto) y punto negro. Las filas de Tecnologías entran con whileInView
++   desde opacity 0 y sin JavaScript no entrarían nunca: se muestran quietas.
++   Llevan !important porque motion escribe su escala, su opacidad y su
++   desplazamiento en el atributo style (en SVG basta con ganar a los atributos
++   de presentación; aquí no). */
++@media (scripting: none) {
++  [data-method-line] {
++    transform: none !important;
++  }
++  [data-tech-row] {
++    opacity: 1 !important;
++    transform: none !important;
++  }
++  [data-method-phase] > span:first-child {
++    background-color: #0a0a0a;
++  }
++  [data-method-phase] > h3 {
++    color: #0a0a0a;
++  }
++  [data-method-phase] > h3 + p {
++    color: #525252;
++  }
++}
++
+ /* ── Orbexs Live Studio ──────────────────────────────────────────────
+    Broadcast-signal treatments. Scoped to the Live Studio surfaces; the
+    spectral cyan/magenta pair reads as a live feed without ever being
+diff --git a/src/components/sections/CTA.tsx b/src/components/sections/CTA.tsx
+index 7a256a5..8856d68 100644
+--- a/src/components/sections/CTA.tsx
++++ b/src/components/sections/CTA.tsx
+@@ -1,7 +1,12 @@
+ "use client"
+-import { m } from "motion/react"
++
++import { useEffect, useRef } from "react"
++import { m, useMotionValue, useTransform } from "motion/react"
+ import { Button } from "@/components/ui/Button"
+-import { ScrambleText } from "@/components/ui/ScrambleText"
++import { FocalCover } from "@/components/ui/FocalCover"
++import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
++import { useStageProgress } from "@/hooks/useStageProgress"
++import type { StageOffset } from "@/hooks/useStageProgress"
+ import { trackEvent } from "@/lib/analytics"
+ 
+ interface CTAContent {
+@@ -11,40 +16,117 @@ interface CTAContent {
+   action: { label: string; href: string; analyticsEvent: string }
+ }
+ 
+-export function CTA({ content: ctaSection }: { content: CTAContent }) {
++/** Paso completo de la sección: 0 = su borde superior toca el inferior del viewport; 1 = su borde inferior sale por arriba. */
++const OFFSET: StageOffset = ["start end", "end start"]
++/** La imagen se desplaza, respecto de la sección, 0,3 px por cada px de scroll. */
++const PARALLAX = 0.3
++/** Margen de la capa por debajo de la sección (-bottom-[20%]): tope del desplazamiento en ambos sentidos. */
++const OVERSCAN = 0.2
++
++/**
++ * Cierre (diseño §5.9): el relieve en su zona inferior, con desplazamiento lento
++ * (0,3× el scroll), detrás de «Hablemos de su próximo sistema.».
++ *
++ * - `media` es la imagen del relieve ya renderizada en el servidor (CTAMedia):
++ *   la isla no importa `next/image`, la imagen ni `coverPlaceholder`, así que ni
++ *   su código ni su vista previa viajan en este JavaScript (plan §3.8). Se pinta
++ *   dentro de FocalCover, en la capa que se desplaza.
++ * - El título es un <h2> con el texto real desde el servidor, sin efecto de
++ *   texto codificado y sin ningún ancestro con opacity 0 (se ve sin JavaScript).
++ * - Contraste AA: un degradado #0a0a0a (sólido arriba y abajo, 80 % en el
++ *   centro) cubre la imagen; ver CTAMedia para la medida sobre el relieve.
++ * - Paralaje: solo translateY de la capa de imagen, y solo en modo "scrub". En
++ *   "inView" (celular: animaciones al entrar, no ligadas al scroll) y "static"
++ *   (reducir movimiento) la capa no se mueve.
++ * - Encuadre inferior: la capa sobresale 50 % por arriba y 20 % por abajo de la
++ *   sección (1,7 × su alto); FocalCover la cubre anclado abajo ([--fy:100%]),
++ *   así que la ventana de la sección muestra aprox. el 30–90 % inferior de la
++ *   imagen. El 20 % de abajo es el margen del paralaje (OVERSCAN).
++ */
++export function CTA({
++  content,
++  imageLabel,
++  media,
++}: {
++  content: CTAContent
++  imageLabel: string
++  media: React.ReactNode
++}) {
++  const sectionRef = useRef<HTMLElement>(null)
++  const { progress, mode } = useStageProgress(sectionRef, OFFSET)
++  // travel = PARALLAX × (alto del viewport + alto de la sección): el recorrido
++  // del scroll entre progress 0 y 1, escalado. limit = OVERSCAN × alto de la
++  // sección. Ambos valen 0 fuera de "scrub" y en el servidor, así que y = 0.
++  // Viven en MotionValues: medir no provoca renders de React.
++  const travel = useMotionValue(0)
++  const limit = useMotionValue(0)
++  const y = useTransform([progress, travel, limit], ([p, t, l]: number[]) =>
++    l === 0 ? 0 : Math.min(l, Math.max(-l, (p - 0.5) * t)),
++  )
++
++  useEffect(() => {
++    const section = sectionRef.current
++    if (!section || mode !== "scrub") {
++      travel.set(0)
++      limit.set(0)
++      return
++    }
++    const measure = () => {
++      travel.set(PARALLAX * (window.innerHeight + section.offsetHeight))
++      limit.set(OVERSCAN * section.offsetHeight)
++    }
++    measure()
++    const observer = new ResizeObserver(measure)
++    observer.observe(section)
++    window.addEventListener("resize", measure)
++    return () => {
++      observer.disconnect()
++      window.removeEventListener("resize", measure)
++    }
++  }, [mode, travel, limit])
++
+   return (
+-    <section className="py-16 sm:py-32 bg-[#0a0a0a] relative z-10 overflow-hidden" data-header-theme="dark">
++    <section
++      ref={sectionRef}
++      data-header-theme="dark"
++      data-stage-mode={mode}
++      className="relative isolate overflow-hidden bg-[#0a0a0a] py-24 sm:py-40"
++    >
+       <m.div
+-        initial={{ opacity: 0, y: 20 }}
+-        whileInView={{ opacity: 1, y: 0 }}
+-        viewport={{ once: true, margin: "-100px" }}
+-        transition={{ duration: 0.6, ease: "easeOut" }}
+-        className="mx-auto max-w-5xl px-6 text-center"
++        aria-hidden="true"
++        data-cta-media=""
++        style={{ y }}
++        className="absolute inset-x-0 -bottom-[20%] -top-[50%] -z-10"
+       >
+-        <div className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.1]">
+-          <ScrambleText as="span" className="inline text-white" duration={1400} delay={0.15}>
+-            {ctaSection.lead}
+-          </ScrambleText>
+-          <br className="hidden md:block" />
+-          <ScrambleText as="span" className="text-[#a3a3a3]" duration={1600} delay={0.4}>
+-            {ctaSection.highlight}
+-          </ScrambleText>
+-        </div>
+-
+-        <p className="text-lg md:text-xl text-[#a3a3a3] mb-8 sm:mb-14 max-w-2xl mx-auto leading-relaxed">
+-          {ctaSection.description}
++        <FocalCover className="[--fy:100%]">{media}</FocalCover>
++      </m.div>
++      <div
++        aria-hidden="true"
++        className="absolute inset-0 -z-10 bg-linear-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-[#0a0a0a]"
++      />
++
++      <div className="relative mx-auto max-w-5xl px-6 text-center">
++        <h2 className="mb-10 font-heading text-3xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-7xl">
++          {content.lead} <span className="text-[#a3a3a3] md:block">{content.highlight}</span>
++        </h2>
++
++        <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-[#a3a3a3] sm:mb-14 md:text-xl">
++          {content.description}
+         </p>
+ 
+         <Button
+           size="lg"
+           variant="primary"
+-          href={ctaSection.action.href}
+-          onClick={() => trackEvent(ctaSection.action.analyticsEvent)}
+-          className="bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] border-white"
++          href={content.action.href}
++          onClick={() => trackEvent(content.action.analyticsEvent)}
++          className="border-white bg-white text-[#0a0a0a] hover:bg-[#e5e5e5] focus-visible:ring-white focus-visible:ring-offset-[#0a0a0a]"
+         >
+-          {ctaSection.action.label}
++          {content.action.label}
+         </Button>
+-      </m.div>
++      </div>
++
++      {/* Abajo a la izquierda, alineada con la rejilla de la página (max-w-7xl), como en la portada. */}
++      <InstrumentLabel className="absolute inset-x-0 bottom-6 mx-auto max-w-7xl px-6">{imageLabel}</InstrumentLabel>
+     </section>
+   )
+ }
+diff --git a/src/components/sections/CTAMedia.tsx b/src/components/sections/CTAMedia.tsx
+new file mode 100644
+index 0000000..1399685
+--- /dev/null
++++ b/src/components/sections/CTAMedia.tsx
+@@ -0,0 +1,51 @@
++import Image from "next/image"
++import relieve from "@/assets/images/relieve.jpg"
++import { coverPlaceholder } from "@/lib/image-placeholder"
++
++// Ancho del marco 3:2 de FocalCover en el cierre: la capa mide el ancho de la
++// sección (100vw) y 1,7 × su alto H (sobresale 50 % arriba y 20 % abajo), así
++// que el marco mide max(100vw, 1,5 × 1,7 × H) = max(100vw, 2,55 × H). H depende
++// del texto, pero en rem es casi constante por tramo (medido en es y en):
++// - desde md (48rem): 43,46rem en todos los anchos (h2 en dos líneas) → 111rem;
++//   max(100vw, 111rem) sin max(): 100vw desde 111rem de ancho y 111rem por debajo;
++// - sm (40–48rem): 39,76rem → 102rem;
++// - por debajo de sm: 25,7–33,3rem según las líneas del h2 y del párrafo; la
++//   cota es la del más estrecho (320 px, 33,27rem) → 85rem.
++// En escritorio apaisado (≥ 3:2, desde ~1200 px de ancho) el navegador elige la
++// misma variante que para la portada (1920 o 3840 px) y reutiliza su descarga;
++// con «140vw» pedía otra de 2048 px a 1440×900, y entre 768 y 1024 px de ancho
++// se quedaba en el 60–80 % del marco. Si cambia el copy del cierre, lo vigila la
++// prueba «el sizes cubre el marco sin pedir de más» (e2e).
++const CLOSING_SIZES = [
++  "(min-width: 111rem) 100vw",
++  "(min-width: 48rem) 111rem",
++  "(min-width: 40rem) 102rem",
++  "85rem",
++].join(", ")
++
++/**
++ * Relieve del cierre (diseño §5.9), renderizado en el servidor y pasado a CTA
++ * como slot (`media`): así ni `next/image` ni la vista previa del import
++ * estático viajan en el JavaScript de la isla (plan §3.8). Sin directiva y sin
++ * hooks: no lo importes desde un módulo "use client", o la imagen volvería al JS
++ * del cliente. Carga perezosa (la de `next/image` por defecto): está al final de
++ * la página. Vista previa con `coverPlaceholder`, nunca `placeholder="blur"`
++ * (decisión 12 de T6). Decorativa (`alt=""`): el título y el texto del cierre
++ * llevan el contenido.
++ *
++ * Contraste: el degradado de CTA (#0a0a0a sólido arriba y abajo, 80 % en el
++ * centro) deja pasar como mucho el 20 % de la imagen. Peor píxel de la zona que
++ * asoma: 200/255 → 0,2 × 200 + 0,8 × 10 ≈ 48, y #a3a3a3 queda en ≈ 5,2:1.
++ */
++export function CTAMedia() {
++  return (
++    <Image
++      src={relieve}
++      alt=""
++      fill
++      sizes={CLOSING_SIZES}
++      placeholder={coverPlaceholder(relieve)}
++      className="object-cover"
++    />
++  )
++}
+diff --git a/src/components/sections/FAQ.tsx b/src/components/sections/FAQ.tsx
+index a6150ec..1c29a32 100644
+--- a/src/components/sections/FAQ.tsx
++++ b/src/components/sections/FAQ.tsx
+@@ -1,84 +1,95 @@
+ "use client"
++
+ import { useState } from "react"
+-import { m, AnimatePresence } from "motion/react"
+-import { RevealText } from "@/components/ui/RevealText"
++import { m } from "motion/react"
++import { easing } from "@/lib/motion"
++
++// Preguntas frecuentes (diseño §5.8). Cambios respecto de la versión anterior:
++// - El botón va DENTRO del encabezado (h3 > button), como pide el patrón de
++//   acordeón de WAI-ARIA; antes era button > h3, que anula el rol de encabezado.
++// - El panel existe siempre en el DOM (oculto con `hidden`): `aria-controls`
++//   apunta a un id real en ambos estados y la respuesta está en el HTML.
++// - Sin animación de altura ni AnimatePresence (diseño §11, plan §3.8): el panel
++//   aparece con opacidad y un desplazamiento corto; el «+» gira (transform).
++// - Fondo blanco (antes #f8f8f8) para no encadenar dos secciones grises tras
++//   Tecnologías; el <h2> se ve desde el servidor (sin RevealText ni una
++//   sección que entre desde opacity 0).
++// El JSON-LD FAQPage lo genera src/app/[locale]/page.tsx desde dict.faq.items.
++
++interface FAQContent {
++  sectionId: string
++  title: string
++  subtitle: string
++  items: readonly { question: string; answer: string }[]
++}
+ 
+-function FAQItem({ question, answer, index, isFirst }: { question: string; answer: string; index: number; isFirst?: boolean }) {
++function FAQItem({ question, answer, index }: { question: string; answer: string; index: number }) {
+   const [isOpen, setIsOpen] = useState(false)
++  const buttonId = `faq-question-${index}`
+   const panelId = `faq-panel-${index}`
+ 
+   return (
+-    <div className={`border-b border-[#d4d4d4]${isFirst ? " border-t" : ""}`}>
+-      <button
+-        onClick={() => setIsOpen(!isOpen)}
+-        aria-expanded={isOpen}
+-        aria-controls={panelId}
+-        className="py-6 w-full flex items-center justify-between text-left cursor-pointer"
+-      >
+-        <h3 className="text-base font-medium text-[#0a0a0a] pr-8">{question}</h3>
+-        <m.span
+-          animate={{ rotate: isOpen ? 45 : 0 }}
+-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+-          className="text-[#a3a3a3] text-xl shrink-0"
++    <div className="border-b border-[#d4d4d4] first:border-t">
++      <h3 className="text-base font-medium text-[#0a0a0a]">
++        <button
++          type="button"
++          id={buttonId}
++          onClick={() => setIsOpen((open) => !open)}
++          aria-expanded={isOpen}
++          aria-controls={panelId}
++          className="flex w-full cursor-pointer items-center justify-between gap-8 py-6 text-left"
+         >
+-          +
+-        </m.span>
+-      </button>
+-      <AnimatePresence initial={false}>
+-        {isOpen && (
+-          <m.div
+-            id={panelId}
+-            initial={{ height: 0, opacity: 0 }}
+-            animate={{ height: "auto", opacity: 1 }}
+-            exit={{ height: 0, opacity: 0 }}
+-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+-            className="overflow-hidden"
++          <span>{question}</span>
++          {/* Indicador del estado (se gira a «×»): #737373 da 4,7:1 sobre blanco (WCAG 1.4.11 pide 3:1). */}
++          <m.span
++            aria-hidden="true"
++            initial={false}
++            animate={{ rotate: isOpen ? 45 : 0 }}
++            transition={{ duration: 0.3, ease: easing.entrance }}
++            className="shrink-0 text-xl text-[#737373]"
+           >
+-            <p className="pb-6 text-[#525252] text-base leading-relaxed">{answer}</p>
+-          </m.div>
+-        )}
+-      </AnimatePresence>
++            +
++          </m.span>
++        </button>
++      </h3>
++      <m.div
++        id={panelId}
++        role="region"
++        aria-labelledby={buttonId}
++        hidden={!isOpen}
++        initial={false}
++        animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
++        transition={{ duration: 0.3, ease: easing.entrance }}
++      >
++        <p className="pb-6 text-base leading-relaxed text-[#525252]">{answer}</p>
++      </m.div>
+     </div>
+   )
+ }
+ 
+-interface FAQContent {
+-  sectionId: string
+-  title: string
+-  subtitle: string
+-  items: readonly { question: string; answer: string }[]
+-}
+-
+-export function FAQ({ content: faqSection }: { content: FAQContent }) {
++export function FAQ({ content }: { content: FAQContent }) {
+   return (
+-    <m.section
+-      initial={{ opacity: 0, y: 30 }}
+-      whileInView={{ opacity: 1, y: 0 }}
+-      viewport={{ once: true, margin: "-80px" }}
+-      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+-      className="py-16 sm:py-32 bg-[#f8f8f8] border-t border-[#e5e5e5] relative z-10"
+-      id={faqSection.sectionId}
++    <section
++      id={content.sectionId}
++      data-header-theme="light"
++      className="relative border-t border-[#e5e5e5] bg-white py-16 sm:py-32"
+     >
+       <div className="mx-auto max-w-7xl px-6">
+-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-16">
+-          {/* Left — Title */}
++        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 lg:gap-16">
+           <div className="lg:col-span-2">
+-            <RevealText as="h2" className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-6">
+-              {faqSection.title}
+-            </RevealText>
+-            <p className="text-lg text-[#525252] leading-relaxed">
+-              {faqSection.subtitle}
+-            </p>
++            <h2 className="mb-6 font-heading text-3xl font-bold tracking-tight text-[#0a0a0a] sm:text-5xl md:text-6xl">
++              {content.title}
++            </h2>
++            <p className="text-lg leading-relaxed text-[#525252]">{content.subtitle}</p>
+           </div>
+ 
+-          {/* Right — Accordion */}
+           <div className="lg:col-span-3">
+-            {faqSection.items.map((faq, index) => (
+-              <FAQItem key={faq.question} question={faq.question} answer={faq.answer} index={index} isFirst={index === 0} />
++            {content.items.map((item, index) => (
++              <FAQItem key={item.question} question={item.question} answer={item.answer} index={index} />
+             ))}
+           </div>
+         </div>
+       </div>
+-    </m.section>
++    </section>
+   )
+ }
+diff --git a/src/components/sections/Methodology.tsx b/src/components/sections/Methodology.tsx
+deleted file mode 100644
+index b486443..0000000
+--- a/src/components/sections/Methodology.tsx
++++ /dev/null
+@@ -1,110 +0,0 @@
+-"use client"
+-import { useEffect, useRef } from "react"
+-import { m } from "motion/react"
+-import { CoverReveal } from "@/components/animations/CoverReveal"
+-
+-interface MethodologyStep {
+-  num: string
+-  title: string
+-  desc: string
+-}
+-
+-interface MethodologyContent {
+-  sectionId: string
+-  title: string
+-  phaseLabel: string
+-  description: string
+-  steps: readonly MethodologyStep[]
+-}
+-
+-export function Methodology({ content: methodologySection }: { content: MethodologyContent }) {
+-  const lineRef = useRef<HTMLDivElement>(null)
+-  const lineParentRef = useRef<HTMLDivElement>(null)
+-
+-  // Observe the PARENT container (has real height) to trigger the 1px line
+-  useEffect(() => {
+-    const parent = lineParentRef.current
+-    const line = lineRef.current
+-    if (!parent || !line) return
+-    const observer = new IntersectionObserver(
+-      ([entry]) => {
+-        if (entry.isIntersecting) {
+-          line.style.transition = "transform 1s cubic-bezier(0.22, 1, 0.36, 1)"
+-          line.style.transform = "scaleX(1)"
+-          observer.disconnect()
+-        }
+-      },
+-      { threshold: 0.3 }
+-    )
+-    observer.observe(parent)
+-    return () => observer.disconnect()
+-  }, [])
+-
+-  return (
+-    <m.section
+-      initial={{ opacity: 0, y: 30 }}
+-      whileInView={{ opacity: 1, y: 0 }}
+-      viewport={{ once: true, margin: "-80px" }}
+-      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+-      className="py-16 sm:py-32 bg-white border-t border-[#e5e5e5] relative z-10"
+-      id={methodologySection.sectionId}
+-    >
+-      <div className="mx-auto max-w-7xl px-6">
+-        <div className="mb-10 sm:mb-20 max-w-3xl">
+-          <CoverReveal as="h2" className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0a0a0a]">
+-            {methodologySection.title}
+-          </CoverReveal>
+-          <p className="text-[#525252] text-lg md:text-xl leading-relaxed">
+-            {methodologySection.description}
+-          </p>
+-        </div>
+-
+-        <div ref={lineParentRef} className="relative">
+-          {/* Horizontal connector line — animated when parent enters viewport */}
+-          <div
+-            ref={lineRef}
+-            className="hidden md:block absolute top-0 left-0 right-0 h-[1px] bg-[#e5e5e5] origin-left"
+-            style={{ transform: "scaleX(0)" }}
+-          />
+-
+-          <m.div
+-            className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6"
+-            initial="hidden"
+-            whileInView="visible"
+-            viewport={{ once: true, margin: "-100px" }}
+-            variants={{
+-              hidden: { opacity: 0 },
+-              visible: {
+-                opacity: 1,
+-                transition: { staggerChildren: 0.1 },
+-              },
+-            }}
+-          >
+-            {methodologySection.steps.map((step, i) => (
+-              <m.div
+-                key={step.num}
+-                variants={{
+-                  hidden: { opacity: 0, y: 16 },
+-                  visible: {
+-                    opacity: 1,
+-                    y: 0,
+-                    transition: { duration: 0.5, delay: i * 0.1, ease: "easeOut" },
+-                  },
+-                }}
+-                className="pt-6 md:pt-0"
+-              >
+-                {/* Node dot on the line */}
+-                <div className="hidden md:block w-2 h-2 rounded-full bg-[#0a0a0a] -mt-1 mb-8" />
+-                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#707070] mb-3 tabular-nums">
+-                  {methodologySection.phaseLabel} {step.num}
+-                </p>
+-                <h3 className="text-lg font-semibold text-[#0a0a0a] mb-3 tracking-tight">{step.title}</h3>
+-                <p className="text-sm text-[#525252] leading-relaxed">{step.desc}</p>
+-              </m.div>
+-            ))}
+-          </m.div>
+-        </div>
+-      </div>
+-    </m.section>
+-  )
+-}
+diff --git a/src/components/sections/TechStack.tsx b/src/components/sections/TechStack.tsx
+index 4831314..823f4f6 100644
+--- a/src/components/sections/TechStack.tsx
++++ b/src/components/sections/TechStack.tsx
+@@ -1,7 +1,6 @@
+ "use client"
+ 
+ import { m } from "motion/react"
+-import { RevealText } from "@/components/ui/RevealText"
+ import { TrustLogos } from "@/components/ui/TrustLogos"
+ 
+ interface TechStackContent {
+@@ -23,6 +22,7 @@ function CategoryRow({
+ }) {
+   return (
+     <m.div
++      data-tech-row=""
+       initial={{ opacity: 0, y: 16 }}
+       whileInView={{ opacity: 1, y: 0 }}
+       viewport={{ once: true, margin: "-60px" }}
+@@ -56,15 +56,13 @@ export function TechStack({ content, trustLabel }: { content: TechStackContent;
+   return (
+     <section
+       id={content.sectionId}
++      data-header-theme="light"
+       className="py-16 sm:py-32 bg-[#f8f8f8] border-t border-[#e5e5e5]"
+     >
+       <div className="mx-auto max-w-7xl px-6">
+-        <RevealText
+-          as="h2"
+-          className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-10 sm:mb-16"
+-        >
++        <h2 className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#0a0a0a] mb-10 sm:mb-16">
+           {content.title}
+-        </RevealText>
++        </h2>
+ 
+         {/* "Construimos con": tecnologías que usamos, no alianzas (CLAUDE.md). Antes era TrustBar bajo la portada. */}
+         <TrustLogos label={trustLabel} className="mb-10 sm:mb-12" />
+diff --git a/src/components/sections/home/MethodologyLine.tsx b/src/components/sections/home/MethodologyLine.tsx
+new file mode 100644
+index 0000000..f0e323e
+--- /dev/null
++++ b/src/components/sections/home/MethodologyLine.tsx
+@@ -0,0 +1,156 @@
++"use client"
++
++import { useEffect, useRef, useState } from "react"
++import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent } from "motion/react"
++import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
++import { useStageProgress } from "@/hooks/useStageProgress"
++import type { StageOffset } from "@/hooks/useStageProgress"
++import { easing } from "@/lib/motion"
++
++interface MethodologyStep {
++  num: string
++  title: string
++  desc: string
++}
++
++interface MethodologyContent {
++  sectionId: string
++  title: string
++  phaseLabel: string
++  description: string
++  steps: readonly MethodologyStep[]
++}
++
++/** 0 cuando la fila de fases asoma al 80 % del viewport; 1 cuando su borde superior llega al 30 %. */
++const OFFSET: StageOffset = ["start 0.8", "start 0.3"]
++/** Cuánto debe pasar la línea más allá del nodo de una fase para activarla (fracción del trazo). */
++const REACH = 0.04
++/** Modo inView (celular): la línea se traza una vez, en 1,6 s, al entrar en pantalla. */
++const INVIEW_DURATION = 1.6
++
++/** Fases alcanzadas por una línea trazada hasta `line` (0→1): el nodo de la fase i está en i / total. */
++function phasesReached(line: number, total: number) {
++  let count = 0
++  for (let i = 0; i < total; i += 1) {
++    if (line >= i / total + REACH) count = i + 1
++  }
++  return count
++}
++
++/**
++ * Metodología (diseño §5.6): una línea de 1 px se traza de izquierda a derecha
++ * al bajar, y cada fase pasa de gris (#737373, AA sobre blanco) a negro cuando
++ * la línea la alcanza.
++ *
++ * - scrub (≥ 48rem × 37,5rem): la línea horizontal (scaleX, origen a la
++ *   izquierda) sigue al scroll mientras la fila de fases sube del 80 % al 30 %
++ *   del viewport. Sin sticky: el propio desplazamiento de la fila es el recorrido.
++ * - inView (celular, celular apaisado): la línea se traza una sola vez al entrar
++ *   en pantalla. Por debajo de md es vertical (scaleY, origen arriba).
++ * - static (reducir movimiento): línea completa y las 5 fases activas.
++ *
++ * Solo se anima `transform`; el color de fases, puntos y textos es un cambio de
++ * estado discreto, sin transición. Hidratación: `line` empieza en 0 y el modo en
++ * "scrub" para todos, así que el HTML del servidor y el primer render coinciden
++ * (fases inactivas, línea sin trazar). Sin JavaScript, globals.css
++ * (`@media (scripting: none)`) pinta el estado final, como en la portada y en
++ * Tesis y Capacidades.
++ */
++export function MethodologyLine({ content }: { content: MethodologyContent }) {
++  const trackRef = useRef<HTMLDivElement>(null)
++  const { progress, mode } = useStageProgress(trackRef, OFFSET)
++  const inView = useInView(trackRef, { once: true, amount: 0.3 })
++  const line = useMotionValue(0)
++  const total = content.steps.length
++  const [reached, setReached] = useState(0)
++
++  useMotionValueEvent(line, "change", (value) => setReached(phasesReached(value, total)))
++
++  useEffect(() => {
++    if (mode === "static") {
++      line.set(1)
++      return
++    }
++    if (mode === "scrub") {
++      line.set(progress.get())
++      return progress.on("change", (value) => line.set(value))
++    }
++    if (!inView) {
++      line.set(0)
++      return
++    }
++    // animateSingleValue en lugar de animate() (plan §3.8); stop() en el propio
++    // valor: con animaciones instantáneas animateSingleValue no devuelve controles.
++    animateSingleValue(line, 1, { duration: INVIEW_DURATION, ease: easing.entrance })
++    return () => line.stop()
++  }, [mode, inView, progress, line])
++
++  const active = mode === "static" ? total : reached
++
++  return (
++    <section
++      id={content.sectionId}
++      data-header-theme="light"
++      data-stage-mode={mode}
++      className="relative border-t border-[#e5e5e5] bg-white py-16 sm:py-32"
++    >
++      <div className="mx-auto max-w-7xl px-6">
++        <div className="mb-12 max-w-3xl sm:mb-20">
++          <h2 className="mb-8 font-heading text-3xl font-bold tracking-tight text-[#0a0a0a] sm:text-5xl md:text-7xl">
++            {content.title}
++          </h2>
++          <p className="text-lg leading-relaxed text-[#525252] md:text-xl">{content.description}</p>
++        </div>
++
++        <div ref={trackRef} className="relative">
++          {/* Carril fijo: vertical en celular, horizontal desde md. */}
++          <span
++            aria-hidden="true"
++            className="absolute bottom-0 left-[3px] top-0 w-px bg-[#e5e5e5] md:bottom-auto md:left-0 md:right-0 md:h-px md:w-auto"
++          />
++          {/* Línea trazada: una por orientación, movidas por el mismo valor; CSS muestra la que corresponde. */}
++          <m.span
++            aria-hidden="true"
++            data-method-line="horizontal"
++            style={{ scaleX: line }}
++            className="absolute inset-x-0 top-0 hidden h-px origin-left bg-[#0a0a0a] md:block"
++          />
++          <m.span
++            aria-hidden="true"
++            data-method-line="vertical"
++            style={{ scaleY: line }}
++            className="absolute bottom-0 left-[3px] top-0 w-px origin-top bg-[#0a0a0a] md:hidden"
++          />
++
++          <ol className="grid grid-cols-1 gap-10 md:grid-cols-5 md:gap-6">
++            {content.steps.map((step, i) => {
++              const on = i < active
++              return (
++                <li
++                  key={step.num}
++                  data-method-phase={step.num}
++                  data-active={on ? "true" : "false"}
++                  className="relative pl-8 md:pl-0 md:pt-10"
++                >
++                  <span
++                    aria-hidden="true"
++                    className={`absolute left-0 top-1 h-[7px] w-[7px] rounded-full md:-top-[3px] ${
++                      on ? "bg-[#0a0a0a]" : "bg-[#d4d4d4]"
++                    }`}
++                  />
++                  <InstrumentLabel tone="light" as="p" className="mb-3 tabular-nums">
++                    {content.phaseLabel} {step.num}
++                  </InstrumentLabel>
++                  <h3 className={`mb-3 text-lg font-semibold tracking-tight ${on ? "text-[#0a0a0a]" : "text-[#737373]"}`}>
++                    {step.title}
++                  </h3>
++                  <p className={`text-sm leading-relaxed ${on ? "text-[#525252]" : "text-[#737373]"}`}>{step.desc}</p>
++                </li>
++              )
++            })}
++          </ol>
++        </div>
++      </div>
++    </section>
++  )
++}
+-- 
+2.43.0
+

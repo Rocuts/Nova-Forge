@@ -1,0 +1,284 @@
+{
+ "impl": {
+  "status": "done",
+  "base_commit": "3644611ce8cbf23e1d599b6e0fd35eb8eb88d66e",
+  "head_commit": "5d7c1fbb0c68b16041efb7ab17dfb33bcbf12484",
+  "verification": "npm run lint: 0 errores. npx tsc --noEmit: sin salida. Spec de la tarea: e2e/home-t9.spec.ts (15 pruebas), más smoke.spec.ts y realty.spec.ts: 35/35, con realty 12/12. Suite completa con PORT=3090 bajo heavy.sh: en la 1.ª pasada, 185/186. Falló una prueba de T6 ajena a T9: «portada · scrub en tableta vertical grande (revisión de T6, ronda 2) › la ruta no cruza el índice…», con el mensaje «la ruta cruza «Desplazar» (avance 0.7)». Compara dos capturas mientras T8 y T10a corrían e2e al mismo tiempo. Repetida sola una vez, pasa: es intermitente, queda anotado. La 2.ª pasada, sobre el commit final 5d7c1fb, dio 186/186 (2,9 min). Build con heavy.sh --exclusive npm run build: OK, y el postbuild check:modern-js dio OK (let=3525, class=167). JS de /es (measure-js, next start, 1440×900, mediana de 3, --budget 269722): base 3644611 = 220 233 B en 15 scripts, contando el 404 local de /_vercel/insights; T9 = 220 230 B en 15 scripts. Delta: −3 B (tope +2 500 B; margen de 49 492 B hasta 269 722 B). Solo cambió el chunk de la página (15 258 → 15 255 B); los demás son idénticos. Busqué en los 15 chunks que carga /es literales exclusivos de realty/Hero.tsx, ConsoleFrame, viz y shared (realty_demo_click, clamp(2.25rem,4.6vw,4rem), max-w-[520px], -right-3 top-5 bottom-5, stroke-dashoffset_900ms, border-dotted, RealtyHero, ConsoleFrame): 0 coincidencias. El HTML prerenderizado de /es/realty y /en/realty, sin scripts ni links, es idéntico al de un build de la base. Greps del paso 3: nada de liveStudioTeaser, LiveStudioTeaser ni sections/CaseStudy en src/ ni e2e/; nada de 2563eb ni accent en Built*.tsx ni StudioSequence.tsx; nada de RSDubai, Redminds, Cierre Autónomo ni Realty.ia en sections/home; llms.txt intacto. En el HTML del servidor, la tarjeta de RealTy sale con style=\"transform:none\" y los pasos con data-lit=\"false\". El CSS trae @media (scripting:none) con .noscript\\:text-white y .noscript\\:scale-x-100. Revisión visual con capturas de next dev (bajo heavy) a 1440×900, 1366×768, 1024×768, 768×1024, 390×844, 360×740, 320×568, 844×390 y 1920×1080, con y sin reducir movimiento: sin scroll horizontal y nada azul. Estado final: git status limpio (AGENTS.md sin cambios), puerto 3090 libre, ningún servidor mío encendido y worktree temporal /home/user/wt/task9-base eliminado.",
+  "decisions": [
+   "ConsoleFrame sale a /home/user/wt/task9/src/components/sections/realty/ConsoleFrame.tsx, sin \"use client\" ni hooks. Conserva el mismo marcado y añade la prop opcional `compact`, por defecto false; con true no lleva embudo ni la línea inferior de las fichas. realty/Hero.tsx lo importa desde ahí y RealtyHero no cambia. home/BuiltProof.tsx lo importa del módulo nuevo, nunca de realty/Hero. viz.tsx y shared.tsx ya eran módulos sin directiva ni hooks, así que no hubo que tocarlos.",
+   "BuiltStage es una isla mínima (la <section> con id, data-header-theme=\"dark\" y data-stage-mode) porque BuiltProof es de servidor. No es un ScrollStage: la sección no lleva pista alta ni sticky.",
+   "BuiltScaleIn usa animateSingleValue(amount, 1, { duration: 0.7, ease: easing.entrance }) con `return () => amount.stop()`; `animate` no está en el import. La escala vale 1 en el servidor, en el primer render y sin JS. En scrub sigue al scroll (offset [\"start 0.95\",\"start 0.45\"]). En inView se anima una vez (useInView once, amount 0,25). En static vale 1.",
+   "StudioSequence funciona así: en scrub, el paso N se enciende al pasar el avance por (N−0,5)/6; en inView, un paso cada 220 ms con once, que llega siempre al final; en static, los 6 encendidos. El color cambia de forma discreta y solo se anima la línea (scaleX). Sin JavaScript se pinta el estado final, como T7, con las variantes noscript: de Tailwind 4.2 (@media (scripting: none)), sin tocar globals.css, que comparten T8 y T10a.",
+   "En la home, ConsoleFrame va con drawn=true y compact: su trazo anima stroke-dashoffset, que queda fuera de las propiedades permitidas, y la vista reducida conserva su única etiqueta demoLabel. «Simulado» queda junto a retenciones y reservas porque lo dicen las propias fichas.",
+   "La consola va alineada a la izquierda en todos los anchos, dentro de un div `w-full max-w-[32.5rem]`. El marco trae `mx-auto` y entre 640 y 1023 px quedaba centrado bajo texto alineado a la izquierda.",
+   "Las tarjetas bajan a `max-[22.5rem]:p-4`. A 320 px, con p-6, las fichas de la consola se quedaban en 77 px y «CONVERSACIONES» y las sparklines (96 px) invadían la ficha vecina, en es y en. Desde 360 px no cambia nada. Hay una prueba nueva a 320×568 que falla sin el cambio.",
+   "En page.tsx, BuiltProof se importa dentro del bloque de imports estáticos, en el sitio de CaseStudy/LiveStudioTeaser (esas dos líneas se borran), y en el JSX va tras CapabilitiesIndex (§3.5). No toqué el comentario de cabecera del bloque porque lo cambia T8. El JSON-LD FAQPage queda intacto.",
+   "BuiltProof recibe `locale: Locale` en lugar de string con cast: page.tsx ya lo estrecha con isValidLocale, igual que para CapabilitiesIndex.",
+   "La lista negra de RealTy pasa al final de e2e/helpers.ts (FORBIDDEN_STEMS, FORBIDDEN_WORDS con 'API' añadido, findForbiddenTerms). realty.spec.ts importa las constantes y su filtro inline no cambia. smoke.spec.ts recibe solo los 2 cambios del plan.",
+   "Spec temporal autocontenido en /home/user/wt/task9/e2e/home-t9.spec.ts, con 15 pruebas: las 7 del plan más vista compacta sin embudo; prefijo encendido a mitad del recorrido y encabezado oscuro; escala 0,92→1 en scrub y en inView a 390×844 y 844×390, sin errores de página ni de hidratación; sin JavaScript; 320 px en es y en; /es/realty conserva el embudo; y ningún script de /es lleva la consola. La sección se localiza dentro de cada prueba para que, sin la clave, falle cada prueba y no la carga del archivo.",
+   "En el plan documenté la firma de ConsoleFrame en §3.3 («— T9») y añadí «Decisiones (implementación, F3)», puntos 9–17, al final de la sección de T9, con las cifras de JS. No toqué la sección de T8 ni §3.6.",
+   "Las claves sin componente (caseStudy.sectionId y eyebrow) se quedan para que T11 decida: llms.txt sigue usando title, industry, context, solution y outcome. Con LiveStudioTeaser desaparece el evento live_studio_teaser_click; no se añadió analítica nueva."
+  ],
+  "deviations": [
+   "El paso 2.2 y la decisión 4 del plan quedan sustituidos por la extracción obligatoria de ConsoleFrame a realty/ConsoleFrame.tsx (instrucciones de la tarea e informe de JS §5). Por eso el diff de realty/Hero.tsx son los imports y el bloque movido, no «los 3 bloques de 2.2», y ese grep del paso 3 ya no aplica tal cual.",
+   "Las pruebas van en el spec temporal e2e/home-t9.spec.ts y no en e2e/home.spec.ts, cuya cabecera no toqué (regla de esta fase). El integrador las funde: hay que añadir findForbiddenTerms a la línea de ./helpers y dejar un solo IDENTITY_TRANSFORM, que T10a define con el mismo valor.",
+   "page.tsx no tiene Dossier porque T8 no está integrada, así que BuiltProof queda tras CapabilitiesIndex; al integrar va justo después de Dossier. El import de BuiltProof va en el bloque de imports estáticos de las secciones, no tras getDictionary como en 2.7.",
+   "Añadidos que el plan no preveía, cada uno con su porqué en el plan (decisiones 13–16): envoltorio de 32,5rem para la consola, relleno de 1rem por debajo de 22,5rem, estado final sin JS con noscript:, locale tipado como Locale y 8 pruebas más de las 7 del plan.",
+   "El paso 1 se ejecutó con el spec temporal. El primer intento, con la constante de la sección a nivel de módulo, rompía la carga de todo el archivo en lugar de hacer fallar cada prueba; lo cambié a una función perezosa y el rojo coincidió con el esperado."
+  ],
+  "red_test_evidence": "tsc dio 18 errores TS2339 antes de implementar. En e2e/home-t9.spec.ts: 10 por 'built', 2 por 'ownership' y 4 por 'summary'; en e2e/smoke.spec.ts, 2 por 'built'. Es lo esperado: las claves nuevas aún no existían en los diccionarios. Playwright (PORT=3090, home-t9 + smoke + realty; el spec tenía entonces 13 pruebas): 13 fallidas y 22 pasadas. Las 11 pruebas de T9 que dependen de la sección fallaron con «TypeError: Cannot read properties of undefined (reading 'sectionId')», porque es.built y en.built no existían: las 7 del plan más escala en scrub, inView a 390×844 y 844×390, y sin JavaScript. En smoke fallaron las 2 previstas, por el mismo motivo: 'homepage loads and renders all sections' (reading 'sectionId') y 'home page links to the live studio division' (reading 'studioCta'). realty.spec.ts siguió 12/12: mover la lista negra con 'API' añadido no cambia su resultado. Las 2 pruebas de ConsoleFrame ya pasaban porque son de regresión. Las 2 pruebas de 320 px llegaron después y las comprobé en rojo por mutación: sin max-[22.5rem]:p-4 fallan en es y en porque las sparklines y «Conversaciones» se salen de su ficha. La prueba de JS también la comprobé por mutación: al importar ConsoleFrame a través de realty/Hero (\"use client\"), el chunk de /es trae max-w-[520px], realty_demo_click y stroke-dashoffset_900ms, y la prueba falla.",
+  "notes": "Archivos nuevos (todos en /home/user/wt/task9):\n- src/components/sections/home/BuiltProof.tsx (servidor)\n- src/components/sections/home/BuiltStage.tsx\n- src/components/sections/home/BuiltScaleIn.tsx\n- src/components/sections/home/StudioSequence.tsx\n- src/components/sections/realty/ConsoleFrame.tsx\n- e2e/home-t9.spec.ts (temporal)\n\nModificados: realty/Hero.tsx, es.ts, en.ts, [locale]/page.tsx, e2e/helpers.ts, e2e/realty.spec.ts, e2e/smoke.spec.ts y el plan. Borrados: CaseStudy.tsx y LiveStudioTeaser.tsx. Son 16 archivos, +922/−370, en 1 commit.\n\nPara el integrador: simulé la fusión con wt/task8 con `git merge-tree` (solo lectura) y hay conflicto en dos archivos:\n- e2e/helpers.ts: los dos añaden al final; se conservan los dos bloques, settledTopOffset de T8 y FORBIDDEN_* de T9.\n- src/app/[locale]/page.tsx: los dos insertan tras CapabilitiesIndex; el orden final es HomeHero, Thesis, CapabilitiesIndex, Dossier, BuiltProof, Methodology…, en el import y en el JSX.\nLos diccionarios y el plan se fusionan solos.\n\nAl fundir el spec en home.spec.ts, los helpers locales de T9 son builtSection, IDENTITY_TRANSFORM (duplicado con T10a, mismo valor), FROM_SCALE, scaleOf, layoutTop, collectErrors, litPattern y REALTY_CLIENT_MARKERS.\n\nIncidencias del entorno:\n- El scratchpad es compartido. El agente de T10a escribió a la vez un scratchpad/build-measure.sh con el mismo nombre que el mío. Mi medida de la base corrió con su versión, pero con mis argumentos (worktree temporal de la base y puerto 3090). El resultado, 220 233 B, coincide con la cifra de T7. Después usé scratchpad/t9/. Conviene un subdirectorio por tarea.\n- El build exclusivo esperó unos 13 minutos a que se liberara el turno del `next dev -p 3080` de T8.\n- La prueba de T6 «tableta vertical grande» es sensible a la carga de CPU: compara capturas justo después del scroll.\n\nLa base de la medida de JS salió de un worktree separado en 3644611, porque el build de Next comprueba los tipos de e2e/ y las pruebas en rojo lo habrían roto."
+ },
+ "history": [
+  {
+   "round": 1,
+   "verdicts": [
+    "changes",
+    "changes",
+    "approve"
+   ],
+   "findings": [
+    {
+     "lens": "compliance",
+     "severity": "major",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "En modo scrub, la secuencia 01–06 no termina de encenderse mientras la tarjeta de Live Studio se ve entera, en cualquier viewport de más de unos 800 px de alto. Los últimos pasos siguen grises (#a3a3a3) incluso con la tarjeta y sus enlaces a la vista, o con el final de la sección en el borde inferior de la pantalla. Solo se encienden cuando ya asoma la sección siguiente. Se lee como una secuencia atascada, o como capacidades «apagadas», el mismo síntoma que dio el fallo mayor de T8. El diseño §5.5 pide una secuencia que se enciende al bajar mientras se lee. La prueba del plan solo comprueba 1440×900, con el final de la lista al 60 % de la pantalla.",
+     "suggested_fix": "Bajar el ancla final para que la secuencia termine con la lista en pantalla, por ejemplo OFFSET = [\"start 0.9\", \"end 0.9\"]: cada paso se enciende cuando su fila cruza el 90 % del alto. Lo probé en el worktree de revisión: 6/6 con los enlaces a la vista en 1366×768, 1440×900, 1920×1080 y 820×1180, y 6/6 al llegar al final de la sección en 2560×1440. Otra opción es encender cada paso por la posición de su fila, como CapabilitiesIndex en T7. Añadir una prueba a 1920×1080 y 2560×1440 que exija 6/6 cuando el final de la sección llega al borde inferior (o cuando se ven los enlaces). Ajustar la fórmula de la prueba de mitad de recorrido y anotar la decisión, que se aparta del paso 2.5 del plan."
+    },
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": "src/components/sections/home/BuiltProof.tsx",
+     "issue": "La alineación a la izquierda de la consola (decisión 13 de T9) solo funciona con 1rem = 16 px. El envoltorio mide max-w-[32.5rem], pero el marco de ConsoleFrame mide max-w-[520px] y lleva mx-auto por debajo de lg. El html no fija font-size, así que con la letra del navegador a 20 px el envoltorio mide 650 px y la consola queda centrada, 65 px a la derecha del texto de la tarjeta, entre 640 y 1023 px de ancho. Es justo el desfase que la decisión 13 quería evitar.",
+     "suggested_fix": "Usar max-w-[520px] en el envoltorio, la misma unidad que el marco. Otra opción: que ConsoleFrame no centre en la vista compacta (siempre lg:mx-0 o mx-0 con compact), sin tocar /realty."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "En modo inView, la secuencia 01–06 se corta con un plazo fijo (setTimeout de STEP_MS × (total + 1) = 1 540 ms), no al llegar al paso 6. Si el hilo principal se bloquea unos 1,3 s o más, o si los temporizadores se suspenden durante la secuencia, el plazo vence antes del paso 6 y se borra el intervalo. Como useInView lleva `once: true`, nada la vuelve a arrancar: la lista se queda encendida a medias hasta recargar y parece un registro de eventos interrumpido, justo lo que el diseño §5.5 quiere evitar. Bajar deprisa NO la congela: el mayor de T8 no se repite. Es otro camino al mismo síntoma, con un disparador poco frecuente: un celular lento con una tarea larga, o la app pasada a segundo plano (por ejemplo en iOS) durante los 1,3 s de la secuencia.",
+     "suggested_fix": "Quitar el setTimeout `stop` y seguir el patrón de Thesis.tsx:41-50 y CapabilitiesIndex.tsx:105-115. Contador en `const timedRef = useRef(0)` y guarda `if (mode !== \"inView\" || !inView || timedRef.current >= total) return`. En cada tic: `timedRef.current = Math.min(timedRef.current + 1, total); setTimedLit(timedRef.current); if (timedRef.current >= total) window.clearInterval(tick)`. La limpieza queda solo en clearInterval. Añadir dos pruebas de regresión a e2e/home-t9.spec.ts, en 390×844 y 844×390: (a) bajar a la lista, esperar el primer paso, salir antes de que termine y exigir 6 encendidas; hoy ninguna prueba cubre el `once`, que era el mayor de T8. (b) page.clock.install() antes de goto, esperar el primer paso, clock.fastForward(10_000) y clock.runFor(2_000), y exigir 6 encendidas; esta falla con el código actual."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "src/components/sections/home/BuiltProof.tsx",
+     "issue": "El envoltorio de la consola intenta igualar el ancho del marco con `max-w-[32.5rem]` (rem). Pero la raíz de ConsoleFrame usa `max-w-[520px]` (px) y `mx-auto` por debajo de lg, así que los dos anchos solo coinciden con la letra por defecto de 16 px. Con la letra del navegador a 20 px («Grande» en Chrome), el envoltorio mide 650 px, el marco sigue en 520 px y vuelve a quedar centrado, sangrado respecto del texto de la tarjeta. Reaparece justo lo que la decisión 13 quería arreglar.",
+     "suggested_fix": "Lo mínimo: usar la misma unidad que el marco, `max-w-[520px]` en el envoltorio, con un comentario que remita a ConsoleFrame. Mejor: quitar el número duplicado haciendo que ConsoleFrame no centre en la vista compacta (en su raíz, `compact ? \"relative isolate w-full max-w-[520px] select-none\" : \"relative isolate mx-auto w-full max-w-[520px] select-none lg:mx-0\"`) y que BuiltProof solo ponga el margen superior. /realty no cambia (compact=false)."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "El callback de useMotionValueEvent está escrito en línea, así que se suscribe de nuevo al MotionValue en cada render: en motion 12.35.2, useInsertionEffect incluye `callback` en sus dependencias. El vecino Thesis.tsx:35 lo memoriza con useCallback.",
+     "suggested_fix": "`const onProgress = useCallback((value: number) => setScrubLit(litFor(value, total)), [total])` y `useMotionValueEvent(progress, \"change\", onProgress)`, igual que Thesis."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "e2e/realty.spec.ts",
+     "issue": "realty.spec.ts sigue con su propio filtro en línea (raíces como subcadena y palabras con \\b), idéntico a findForbiddenTerms de e2e/helpers.ts. Hay dos implementaciones de la misma regla de la lista negra que pueden desalinearse. El paso 1.2 del plan pidió conservar el filtro en línea; no es un error del implementador.",
+     "suggested_fix": "Sustituir el bloque por `expect(findForbiddenTerms(text), \\`términos prohibidos en /${locale}/realty\\`).toEqual([])` (ahora o en T11), para que la regla viva en un solo sitio."
+    },
+    {
+     "lens": "visual",
+     "severity": "minor",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "En celular (modo inView), la secuencia 01–06 puede quedarse congelada para siempre. El intervalo se corta con un plazo fijo (setTimeout de STEP_MS·(total+1) = 1 540 ms) en lugar de pararse al llegar a 6. Eso deja solo 220 ms de holgura para el retraso acumulado de los ticks. Si el hilo principal se bloquea unos ≥450 ms mientras corre la secuencia, el plazo vence antes del 6.º paso. Como useInView es `once`, la secuencia no se reanuda nunca. Además se aparta del patrón de T7: Thesis.tsx:44-48 y CapabilitiesIndex.tsx:108-114 paran el intervalo al llegar al total.",
+     "suggested_fix": "Quitar el setTimeout y parar el intervalo al llegar al total con un ref, como en Thesis.tsx: `const timedRef = useRef(0)`. En el efecto: `if (mode !== \"inView\" || !inView || timedRef.current >= total) return`. En cada tick: `timedRef.current = Math.min(total, timedRef.current + 1); setTimedLit(timedRef.current); if (timedRef.current >= total) window.clearInterval(tick)`. La limpieza queda solo en `clearInterval`. Añadir a e2e/home-t9.spec.ts una prueba a 390×844 que, tras el primer paso, bloquee el hilo 900 ms (bucle ocupado en page.evaluate) y exija 6 encendidas con expect.poll: hoy falla y con el arreglo pasa."
+    },
+    {
+     "lens": "visual",
+     "severity": "minor",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "En pantallas altas (modo scrub), la secuencia 01–06 queda a medias aunque toda la tarjeta de Live Studio esté a la vista, y solo se completa cuando la sección ya empieza a salir. Con OFFSET [\"start 0.85\", \"end 0.6\"], el 06 se enciende cuando el final de la lista sube al ~60–65 % del alto del viewport. En pantallas altas eso solo ocurre cuando ya asoma la sección siguiente. Mientras el visitante lee la tarjeta, las capacidades atenuadas en gris pueden leerse como «no disponibles».",
+     "suggested_fix": "Adelantar el recorrido, p. ej. `const OFFSET: StageOffset = [\"start 0.9\", \"end 0.85\"]`, y actualizar su comentario. Ajustar también el cálculo de `mid` en e2e/home-t9.spec.ts:151-157, que usa 0.85 y 0.6 fijos. Confirmar con capturas a 1440×900 y 2560×1440 que, con la tarjeta entera en pantalla, están las 6 encendidas."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/home/BuiltScaleIn.tsx",
+     "issue": "La escala 0,92→1 se hace desde el centro. Durante la entrada (scrub), los bordes superior e izquierdo de la tarjeta de RealTy se desalinean de la tarjeta de Live Studio y del título de la sección. Se lee más como un desajuste que como una entrada.",
+     "suggested_fix": "Fijar el origen arriba, p. ej. `style={{ scale, transformOrigin: \"50% 0%\" }}` o la clase `origin-top`: los bordes superiores de las dos tarjetas quedan alineados durante toda la entrada."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/home/BuiltProof.tsx",
+     "issue": "Con `items-start` y el reparto 7/5 desde lg, la columna de Live Studio es estrecha (≈393 px a 1024) y su tarjeta queda mucho más alta que la de RealTy. Debajo de RealTy queda una franja negra vacía.",
+     "suggested_fix": "Opcional. Dos opciones: repartir en dos columnas solo desde `xl:` (a 1024 las tarjetas se apilan, como a 820), o usar `lg:items-stretch` con el enlace «Conocer RealTy» en `mt-auto` para que las dos tarjetas terminen a la misma altura."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "Viudas tipográficas en la tarjeta de Live Studio en los anchos de escritorio más comunes. El h4 se parte en «LO QUE EL AGENTE EJECUTA DE FORMA / AUTÓNOMA», y el ítem 01 deja «críticos» solo en la segunda línea.",
+     "suggested_fix": "`text-balance` en el h4 y `text-pretty` en el span de texto de cada ítem (línea 91)."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/home/BuiltProof.tsx",
+     "issue": "En celular el h2 mide 30 px (`text-3xl`), mientras que el de Capacidades y el de Del papel al dato (T8) empiezan en 36 px (`text-4xl`). Los títulos de sección cambian de tamaño entre secciones vecinas en celular.",
+     "suggested_fix": "Empezar en `text-4xl` (p. ej. `text-4xl md:text-6xl`, como Capacidades), o mantenerlo y anotarlo como decisión. Conviene cerrarlo en T10b/T11, con la home entera a la vista."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/realty/ConsoleFrame.tsx",
+     "issue": "Heredado, no lo introduce T9. Por debajo de 640 px, las etiquetas de las fichas se parten de forma desigual: «OPORTUNIDADES ABIERTAS» ocupa 2 líneas y «CONVERSACIONES» 1. Las cifras 12 y 38, y sus sparklines, quedan desalineadas 11 px dentro de la misma fila.",
+     "suggested_fix": "No tocarlo en T9: el HTML de /realty debe quedar idéntico. Para la fase 2: reservar dos líneas a la etiqueta (p. ej. `min-h-[2lh]`) o alinear las cifras al pie de la ficha. Si se quiere ya, solo con `compact`."
+    }
+   ],
+   "fix": {
+    "head_commit": "f727120bb40e51e633d8f975ad960955bcc0759c",
+    "fixed": [
+     {
+      "finding": "[major·cumplimiento] StudioSequence.tsx:26: en scrub, con OFFSET [\"start 0.85\", \"end 0.6\"] la secuencia 01–06 no terminaba con la tarjeta de Live Studio a la vista en pantallas de más de ~800 px de alto. Medido en la base: 111110, 111100 y 111000 con el final de la sección en el borde inferior",
+      "how": "En scrub, cada paso se enciende ahora por la POSICIÓN de su fila, como el índice de Capacidades (T7): se enciende cuando la fila ya entró entera y su borde inferior sube 2rem sobre el borde inferior del viewport. Los enlaces de la tarjeta van 2,5rem (mt-10) por debajo de la lista, así que en cuanto se ven, las 6 están encendidas a cualquier alto. useScroll queda solo como aviso ([\"start end\",\"end start\"]) y además se recalcula con resize. Medido contra next start: 111111 con los enlaces pegados al borde inferior en 1366×768, 1440×900, 1920×1080, 2560×1440, 2560×1080, 820×1180 y 1024×1366, y 110000 con la lista a media entrada. Se añade una prueba por viewport (1366×768, 1920×1080, 2560×1440, 1024×1366, 820×1180): 000000 con la lista debajo de la pantalla, un prefijo 0<k<6 a media entrada, 111111 con los enlaces visibles y con el final de la sección, y de nuevo a medias al volver a subir. También se ajusta la prueba de mitad de recorrido a 1440×900. Decisión 18 del plan."
+     },
+     {
+      "finding": "[minor·visual] StudioSequence.tsx:26: la misma secuencia quedaba a medias en pantallas altas (se proponía [\"start 0.9\", \"end 0.85\"] y confirmarlo con capturas)",
+      "how": "Lo resuelve el mismo cambio a encendido por posición. En lugar del offset propuesto se eligió la posición, porque no depende del alto de la pantalla. Capturas en scrub contra next start: scratchpad/c9r1/shots/seq-{1440x900,2560x1440,…}-{mid,links,end}.png. Con los enlaces o el final de la sección a la vista están las 6, y a media entrada la lista sigue a medias."
+     },
+     {
+      "finding": "[minor·calidad] StudioSequence.tsx:54: en inView, el setTimeout de 1 540 ms cortaba la secuencia. Con los temporizadores suspendidos o con una tarea larga se quedaba a medias para siempre (useInView once)",
+      "how": "Se quita el setTimeout y se sigue el patrón de Thesis/CapabilitiesIndex: recuento en timedRef, guarda `timedRef.current >= total` y clearInterval al llegar a 6. Pruebas nuevas a 390×844 y 844×390. (a) La lista sale de la pantalla tras el primer paso y aun así llega a 6 (regresión de `once`). (b) Con page.clock.install, fastForward(10 000) y runFor(2 000): con el código anterior da 110000, ahora 111111."
+     },
+     {
+      "finding": "[minor·visual] StudioSequence.tsx:54: la misma congelación con una tarea larga de ≥ 450 ms (la revisión midió 111100 con 900 ms)",
+      "how": "Lo resuelve el mismo cambio. Prueba nueva a 390×844: tras el primer paso, un bucle ocupado de 900 ms en page.evaluate y expect.poll hasta 111111. Con el código anterior da 111100."
+     },
+     {
+      "finding": "[nit·cumplimiento] BuiltProof.tsx:96: el envoltorio max-w-[32.5rem] frente al max-w-[520px] del marco: con la letra a 20 px, la consola volvía a centrarse (65 px de desfase)",
+      "how": "En la vista compacta, ConsoleFrame ya no se centra: la raíz es 'relative isolate w-full max-w-[520px] select-none' con compact y conserva 'mx-auto … lg:mx-0' solo en la vista completa. BuiltProof deja solo `mt-10`, así que el número ya no está duplicado. Medido con CDP Page.setFontSizes a 20 px: desfase 0 a 700, 820, 1000, 1023 y 1440 px. Prueba nueva a 820 y 1000 px con reducir movimiento. Decisión 22 (sustituye a la 13)."
+     },
+     {
+      "finding": "[minor·calidad] BuiltProof.tsx:96: el mismo desfase rem/px del envoltorio de la consola",
+      "how": "Se aplica la opción «mejor» que proponía la revisión: ConsoleFrame no centra la vista compacta y BuiltProof solo pone el margen superior. /realty no cambia: su HTML prerenderizado, sin scripts ni recursos estáticos, es idéntico al del build de la implementación en es y en."
+     },
+     {
+      "finding": "[nit·calidad] StudioSequence.tsx:49: el callback de useMotionValueEvent iba en línea y se suscribía de nuevo en cada render",
+      "how": "El callback pasa a `measure`, memorizado con useCallback([mode]) y entregado a useMotionValueEvent, igual que en Thesis/CapabilitiesIndex."
+     },
+     {
+      "finding": "[nit·calidad] e2e/realty.spec.ts:60: el filtro de la lista negra estaba duplicado en línea, igual que findForbiddenTerms",
+      "how": "realty.spec.ts importa y usa findForbiddenTerms. El comportamiento es idéntico: 12/12. El comentario de helpers.ts lo documenta como el único filtro. Decisión 25: se aparta del paso 1.2."
+     },
+     {
+      "finding": "[nit·visual] BuiltScaleIn.tsx:60: al escalar desde el centro, los bordes de la tarjeta de RealTy se desalineaban durante la entrada",
+      "how": "La tarjeta lleva ahora origin-top-left, no origin-top, así que conserva también el borde izquierdo del título. La prueba de escala a 1440×900 comprueba que, encogida a 0,92, el borde superior coincide con el de la tarjeta de Live Studio y el izquierdo con el del h2. Con el código anterior la diferencia era de 33,7 px. Decisión 20."
+     },
+     {
+      "finding": "[nit·visual] BuiltProof.tsx:84: con 7/5 en lg, a 1024 quedaba una franja negra de ~400 px bajo la tarjeta de RealTy",
+      "how": "Columnas 6/6 en lg (lg:col-span-6) y 7/5 desde xl. La diferencia de alto baja de ~400 a ~195 px a 1024 y a ~112 px a 1279; en xl sigue en ~197 px, como antes. Se descarta items-stretch con mt-auto porque el hueco pasaría a estar dentro de la tarjeta de RealTy, entre la consola y su enlace. Decisión 21."
+     },
+     {
+      "finding": "[nit·visual] StudioSequence.tsx:65: viudas «AUTÓNOMA» en el h4 y «críticos» en el ítem 01",
+      "how": "text-balance en el h4 y text-pretty en el texto de cada paso. Comprobado en las capturas de 1440×900 y 2560×1440. Decisión 24."
+     },
+     {
+      "finding": "[nit·visual] BuiltProof.tsx:79: en celular el h2 medía 30 px, y los h2 vecinos 36 px",
+      "how": "El h2 pasa a text-4xl sm:text-5xl md:text-6xl: 36 px a 320 y 390 px, como Capacidades y Del papel al dato. Queda anotado que los tamaños de escritorio de los h2 de la home se revisan juntos en T10b/T11. Decisión 24."
+     },
+     {
+      "finding": "[nit·visual] ConsoleFrame.tsx:60: por debajo de 640 px, las etiquetas de las fichas se partían de forma desigual y las cifras 12 y 38 quedaban 11 px desalineadas (heredado)",
+      "how": "Se corrige solo con compact, como admitía la revisión. En la vista compacta cada ficha lleva ' flex flex-col [&>:first-child]:grow': la etiqueta ocupa el alto que sobra y la cifra y la sparkline van al pie. La clase se añade sin espacio final, así que la vista completa y el HTML de /realty quedan byte a byte iguales. Prueba nueva a 390×844 (es y en): las cifras de cada fila a la misma altura (antes, 11,25 px de diferencia). Decisión 23."
+     }
+    ],
+    "rejected": [],
+    "decisions": [
+     "Corregí los 13 hallazgos y no rechacé ninguno. Tres pares describen el mismo defecto y se resuelven con un solo cambio cada uno: la secuencia en scrub (mayor de cumplimiento y menor visual), el plazo fijo de inView (calidad y visual) y el envoltorio de 32,5rem (nit de cumplimiento y menor de calidad).",
+     "En scrub, la secuencia se enciende por la posición de cada fila y no con un offset nuevo. Un paso se enciende cuando su fila ya entró entera y su borde inferior sube 2rem sobre el borde inferior. Como el hueco hasta los enlaces es de 2,5rem, en cuanto se ven los enlaces las 6 están encendidas, a cualquier alto de pantalla. Según la medida de la propia revisión, con los offsets propuestos a 2560×1440 las 6 solo se encendían al llegar al final de la sección. Se aparta del paso 2.5 del plan; queda anotado como decisión 18.",
+     "Uso origin-top-left y no el origin-top que se proponía: la tarjeta conserva también el borde izquierdo del título, tanto en dos columnas como apilada.",
+     "Para la franja bajo la tarjeta de RealTy (nit opcional) elegí columnas 6/6 en lg y 7/5 desde xl, y no stretch con mt-auto: con stretch, el hueco pasaría a estar dentro de la tarjeta, entre la consola y su enlace.",
+     "El hallazgo heredado de las fichas lo corregí solo en la vista compacta, con una clase que se añade sin espacio final: el HTML de /realty no cambia, y lo comprobé contra el build de la implementación.",
+     "Registré las decisiones 18 a 27 en el plan, en la sección «Decisiones (corrector, ronda 1)», y marqué la 13 como sustituida por la 22. La línea de ConsoleFrame en el contrato §3.3 describe ahora qué hace compact.",
+     "e2e/home-t9.spec.ts pasa de 15 a 27 pruebas. Tardan en total unos 60–90 s más en el contenedor.",
+     "Nota: al principio sobrescribí sin querer un scratchpad/shots.mjs de otro agente de esta sesión; está fuera del repo y no afecta a nada versionado. Mis archivos temporales quedaron en scratchpad/c9r1/."
+    ],
+    "verification": "Todo en /home/user/wt/task9 con PORT=3090 y bajo heavy.sh.\n\n- **Lint y tipos:** `npm run lint` sin errores; `npx tsc --noEmit` sin salida.\n- **Rojo:** con los cambios de src en stash y las pruebas nuevas, home-t9 más realty dieron 11 fallos, cada uno por el motivo esperado: el origen (33,7 px); las 5 de scrub (111100, 111000 y 000000 a media entrada); las 2 de reloj (110000); la tarea larga (111100); las fichas (11,25 px); y la letra de 20 px (65 px). Las 2 de `once` pasaron, porque son de regresión, y realty 12/12 también pasó con findForbiddenTerms.\n- **Verde:** en la primera pasada de home-t9 + realty + smoke, las 27 pruebas de T9 pasaron. Fallaron 15 pruebas de realty y smoke porque el servidor de desarrollo, en frío y con otro workflow corriendo e2e a la vez, devolvió 404 en /es/realty, /en/realty y /estudio-tiktok-live. Entre ellas hay una prueba de smoke de Live Studio que T9 no toca. Las repetí una vez, como pide el protocolo: 27/27, así que el fallo fue intermitente y queda anotado aquí.\n- **Suite completa:** 198/198.\n- **Build** (`heavy.sh --exclusive`): correcto; postbuild y `check:modern-js` OK (let=3529, class=167).\n- **JS de /es** (measure-js, next start, 1440×900, mediana de 3): 220 321 B en 15 scripts. Son +91 B sobre la implementación (220 230 B) y +88 B sobre la base 3644611 (tope de T9: +2 500 B). Solo cambia el chunk de la página: 15 255 → 15 346 B.\n- **Chunks de /es:** ninguno contiene max-w-[520px], realty_demo_click, stroke-dashoffset_900ms, first-child]:grow ni «Consola RealTy».\n- **HTML de /es/realty y /en/realty:** sin scripts ni recursos estáticos, idéntico al build de la implementación.\n- **Medidas contra next start:**\n  - Secuencia: 111111 con los enlaces a la vista y con el final de la sección en 7 viewports de scrub, y 110000 a media entrada.\n  - inView, a 390×844 y 844×390: 111111 con la tarea larga, con el reloj y al salir de la pantalla.\n  - Letra de 16 y de 20 px: desfase 0 entre la consola y el h3 en todos los anchos.\n- **Comprobaciones del paso 3 del plan:** los grep dan 0 resultados (liveStudioTeaser, azul y accent en home/Built* y StudioSequence, nombres prohibidos) y llms.txt está intacto.\n- **Estado final:** AGENTS.md restaurado, git status limpio y ningún servidor encendido (el 3090 está libre)."
+   }
+  },
+  {
+   "round": 2,
+   "verdicts": [
+    "approve",
+    "approve",
+    "approve"
+   ],
+   "findings": [
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": "docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md",
+     "issue": "Algunas partes del plan siguen describiendo la versión inicial de T9: ConsoleFrame exportado desde realty/Hero.tsx y las pruebas en e2e/home.spec.ts. El archivo nuevo src/components/sections/realty/ConsoleFrame.tsx no aparece en las tablas de archivos ni en las comprobaciones del paso 3.",
+     "suggested_fix": "En la tabla «Archivos» de T9, añadir «Crear src/components/sections/realty/ConsoleFrame.tsx (sin directiva)» y «Modificar realty/Hero.tsx: importa ConsoleFrame», e indicar que las pruebas van en el spec temporal e2e/home-t9.spec.ts. Ajustar también las filas de §2 y §4. Añadir src/components/sections/realty/ConsoleFrame.tsx a los dos greps del paso 3. Otra opción es poner una línea en «Decisiones (implementación, F3)» que dé por sustituidos esos párrafos. Puede hacerlo el integrador al fundir T9."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "e2e/helpers.ts",
+     "issue": "findForbiddenTerms busca las siglas de FORBIDDEN_WORDS como palabra completa (\\b…\\b), así que no detecta el plural. «APIs» y «LLMs» pasan el filtro. T9 añadió 'API' a la lista y convirtió esta función en el único filtro de la lista negra de RealTy (realty.spec.ts y la tarjeta de la home). Por eso el control no detecta justo la forma que más usa este sitio. Además, la función no tiene ninguna prueba propia: si se rompiera y devolviera [], los dos controles seguirían en verde sin avisar.",
+     "suggested_fix": "En la línea 190: `new RegExp(`\\\\b${term.toLowerCase()}s?\\\\b`)`. Actualizar el comentario de FORBIDDEN_WORDS: «palabra completa, también en plural». Añadir una prueba mínima del propio filtro, por ejemplo en e2e/realty.spec.ts, que no necesita navegador: `expect(findForbiddenTerms('APIs externas · LLMs · webhook · USD 15M')).toEqual(['webhook', 'API', 'LLM', '15M'])` y `expect(findForbiddenTerms('passes · Adaptador de prueba')).toEqual([])`. Así, un filtro roto no deja pasar en verde los dos controles."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "El número 01–06 se alinea con el texto de cada paso mediante `items-start` más un `pt-[3px]` fijo (línea 133). Ese ajuste solo funciona con la letra de 16 px: el número mide 11 px fijos y el texto usa rem. Con la letra del navegador más grande, el número queda por encima de la línea base del texto. El índice de Capacidades (vecino) resuelve el mismo emparejamiento con `items-baseline`.",
+     "suggested_fix": "En el <li>: `relative flex items-baseline gap-5 …`. En el span del número, quitar `pt-[3px]`. El span de la línea es absoluto y no participa en el flex, así que no cambia."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "src/components/sections/home/StudioSequence.tsx",
+     "issue": "Los números 01–06 llevan aria-hidden porque «el <ol> ya da el orden» (decisión 6 del plan). Pero el preflight de Tailwind pone `list-style: none` en todo `ol`, y VoiceOver en Safari no anuncia como lista una lista sin viñetas. Allí los seis pasos se leerían sin semántica de lista y sin numeración. En Chromium con NVDA no pasa. Solo afecta a T9: Capacidades tampoco lleva role=\"list\", pero no oculta sus números /0N.",
+     "suggested_fix": "Añadir `role=\"list\"` al <ol> de StudioSequence. Así la premisa de la decisión 6 se cumple también en Safari, sin mostrar ni duplicar los números."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/realty/ConsoleFrame.tsx",
+     "issue": "Solo a 320 px, en la tarjeta de RealTy de la home la cifra principal de la consola se parte en dos líneas: «USD» en una y «5.760.000» («5,760,000» en en) en la siguiente. En /es/realty, al mismo ancho, la cifra cabe en una línea. Es solo cosmético y se sigue leyendo. Pasa porque por debajo de 22,5rem la tarjeta baja a p-4, pero la consola conserva su px-5 y el mínimo de 1,85rem (29,6 px) de la cifra, así que la cifra pide unos 207 px y el hueco solo tiene 196.",
+     "suggested_fix": "Es opcional. En la vista compacta, bajar el mínimo de la cifra por debajo de 22,5rem, por ejemplo con max-[22.5rem]:text-[1.7rem] (27,2 px, que ocupa unos 190 px y cabe). La clase se añadiría solo con compact, del mismo modo que COMPACT_TILE_CLASS, para que el HTML de /realty no cambie. La otra opción es aceptar el salto a 320 px y dejarlo anotado como decisión."
+    }
+   ],
+   "fix": {
+    "head_commit": "bbb83c7b994af9473f011e1cc03178ff92b8a4b9",
+    "fixed": [
+     {
+      "finding": "[nit·cumplimiento] Plan: la tabla «Archivos» de T9, §2 (línea 118), §4 (línea 490), el paso 3 (7 passed en e2e/home.spec.ts, «solo los 3 bloques de 2.2», greps sin ConsoleFrame.tsx) y el git add del paso 4 seguían describiendo la versión inicial (ConsoleFrame exportado de realty/Hero.tsx, pruebas en home.spec.ts)",
+      "how": "Plan al día. En §2 se actualizan las filas de realty/Hero.tsx (importa ConsoleFrame de realty/ConsoleFrame.tsx) y de e2e/realty.spec.ts. En §4, la fila 9 crea home/{BuiltProof,BuiltStage,BuiltScaleIn,StudioSequence}.tsx y realty/ConsoleFrame.tsx, y en F3 usa el spec temporal. La tabla «Archivos» añade «Crear ConsoleFrame.tsx», «realty/Hero.tsx solo lo importa» y «Crear (F3) e2e/home-t9.spec.ts». El paso 2.2 lleva una nota de que lo sustituye la decisión 9. En el paso 3: home-t9 31 passed, realty 14 passed, los dos greps incluyen realty/ConsoleFrame.tsx y el diff de Hero.tsx remite a la decisión 9. En el paso 4, el git add incluye ConsoleFrame.tsx y home-t9.spec.ts. El comentario §3.3 de compact recoge la cifra a 1,7rem. El comentario de cabecera de ConsoleFrame.tsx ya no nombra las props accent/accentIndex de viz.tsx y dice lo mismo sin ellas. Sin ese cambio, el grep «2563eb|accent» daba resultados solo por el comentario; ahora sale limpio y solo encontraría un uso real. Ejecutados los 5 comandos del paso 3: sin resultados, y llms.txt intacto. Decisión 32."
+     },
+     {
+      "finding": "[minor·calidad] e2e/helpers.ts:190: findForbiddenTerms usaba \\b…\\b y no detectaba el plural («APIs», «LLMs»), y el filtro no tenía prueba propia",
+      "how": "Expresión `\\b${term}s?\\b` y comentarios de FORBIDDEN_WORDS y findForbiddenTerms actualizados. Dos pruebas nuevas en e2e/realty.spec.ts, sin navegador. (1) Cada raíz en mayúsculas y cada palabra en su forma original y en mayúsculas con plural devuelven exactamente [término]; la frase de ejemplo devuelve ['webhook','LLM','API','15M']. (2) «passes · Adaptador de prueba · capital» y las statusLabels de es y en devuelven []. La primera falla con la expresión anterior (ningún plural detectado) y pasa con la nueva. La segunda es de regresión. Corrección al hallazgo: el orden esperado que proponía la revisión (['webhook','API','LLM','15M']) no es el que devuelve la función, que da las raíces y luego las palabras en el orden de FORBIDDEN_WORDS, donde LLM va antes que API. Comprobado con node: el bloque de ejemplo da exactamente ['webhook','LLM','API','15M']. Las pruebas de jerga de /es/realty, /en/realty y de la tarjeta de la home siguen en verde. Decisión 28."
+     },
+     {
+      "finding": "[nit·calidad] StudioSequence.tsx:123: el número 01–06 se alineaba con items-start + pt-[3px] fijo, lo que solo funciona con letra de 16 px (desfase de 1 px a 16 px y 5 px a 20 px)",
+      "how": "`relative flex items-baseline gap-5 …` en el <li> y fuera el `pt-[3px]` del número (la línea es absoluta y no participa). Prueba nueva en home-t9: línea base de cada span medida con un inline-block vacío de alto 0, a 16 y 20 px de letra (CDP Page.setFontSizes) y a 390 y 1 440 de ancho, con reducir movimiento; exige < 0,5 px. En rojo con el código anterior (1 px a 16 px y 5 px a 20 px) y en verde después. Capturas en el scratchpad (c9r2/shots/pasos-*.png). Decisión 29."
+     },
+     {
+      "finding": "[nit·calidad] StudioSequence.tsx:114: los números son aria-hidden porque «el <ol> da el orden», pero el preflight de Tailwind (list-style: none) hace que VoiceOver en Safari no anuncie la lista",
+      "how": "`role=\"list\"` en el <ol>, con un comentario. La prueba de la tarjeta de Live Studio exige el atributo; falla sin él. No se pudo comprobar con VoiceOver (no hay Safari en el contenedor). lint sin avisos. Decisión 30."
+     },
+     {
+      "finding": "[nit·visual] ConsoleFrame.tsx:70: a 320 px, en la tarjeta de la home, la cifra principal se partía en dos líneas («USD» / «5.760.000»)",
+      "how": "`max-[22.5rem]:text-[1.7rem]` solo con compact (constante COMPACT_HEADLINE_CLASS, añadida como COMPACT_TILE_CLASS). Medido con Geist a 320 px: 206,4 px en un hueco de 196 con 29,6 px de letra; 187,2 px con 27,2 px. Con 1,75rem serían 193,9 px, demasiado justo. Ahora la cifra cabe en una línea a 320 y 340 px (27,2 px); desde 360 px no cambia (29,6 px). /es/realty a 320 px sigue a 29,6 px en una línea. El HTML prerenderizado de /es/realty y /en/realty (sin scripts ni recursos estáticos) es idéntico al build anterior. En la home solo cambian la clase de la cifra y las de la lista. Prueba nueva a 320×568 en es y en (espera document.fonts.ready): en rojo antes (59 px de alto con letra de 29,6 px), en verde después. Decisión 31."
+     }
+    ],
+    "rejected": [],
+    "decisions": [
+     "28 · Lista negra con plural opcional (\\b<término>s?\\b) y prueba propia del filtro en e2e/realty.spec.ts. También atrapa «15ms», que en el copy de RealTy sería una métrica ya prohibida. Se corrige el orden esperado que proponía la revisión: ['webhook','LLM','API','15M'].",
+     "29 · items-baseline sin pt-[3px] en la secuencia 01–06, como en Capacidades: la alineación ya no depende de la letra del navegador.",
+     "30 · role=\"list\" en el <ol> de StudioSequence, para que la premisa de la decisión 6 (número aria-hidden) se cumpla también en VoiceOver/Safari. Capacidades no se toca: no oculta sus números.",
+     "31 · Cifra principal a 1,7rem por debajo de 22,5rem, solo en la vista compacta. Se descarta 1,75rem porque dejaba 2 px de margen. El HTML de /realty no cambia.",
+     "32 · Tablas y órdenes del plan (§2, §4, «Archivos», nota en 2.2, paso 3 y paso 4) al día con las decisiones 9 y 16. El comentario de ConsoleFrame se reescribe sin nombrar accent/accentIndex, para que el grep «2563eb|accent» del paso 3 sirva también en ese archivo.",
+     "33 · JS de /es tras la ronda 2: 220 328 B (+7 B). Se anotan en el plan las pruebas nuevas, las repeticiones y la suite completa (204/204)."
+    ],
+    "verification": "Commit bbb83c7 en wt/task9 (worktree /home/user/wt/task9, PORT=3090). Prueba primero: 7 comprobaciones nuevas o reforzadas; 6 en rojo con el código anterior (la séptima, la de falsos positivos del filtro, es de regresión). npm run lint: 0 errores. npx tsc --noEmit: sin salida. Con heavy.sh y PORT=3090: e2e/home-t9.spec.ts 31/31 y e2e/realty.spec.ts 14/14 (45 passed); las 7 pasan 21/21 con --repeat-each=3; suite completa 204/204 en 3,2 min. Build (heavy --exclusive) en verde, con postbuild check:modern-js OK (let=3529, class=167). measure-js contra next start (1440×900, mediana de 3, las tres ejecuciones iguales): 220 328 B en 15 scripts. Son +7 B sobre la ronda 1 (220 321) y +95 B sobre la base 3644611, con un tope de +2 500 B. Solo cambia el chunk de la página (15 346 → 15 353 B). Ninguno de los 14 chunks de /es lleva código de la consola de RealTy. HTML prerenderizado de /es/realty y /en/realty idéntico al del build anterior. Comandos del paso 3 del plan ejecutados: sin resultados y llms.txt intacto. Capturas de revisión en el scratchpad (c9r2/shots). Estado final: git status limpio, AGENTS.md sin cambios, sin archivos temporales (el spec de sondeo e2e/zz-probe-t9.spec.ts se borró) y puerto 3090 libre, sin servidores encendidos."
+   }
+  }
+ ]
+}

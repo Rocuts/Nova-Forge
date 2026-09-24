@@ -1,0 +1,312 @@
+{
+ "impl": {
+  "status": "done",
+  "base_commit": "3644611ce8cbf23e1d599b6e0fd35eb8eb88d66e",
+  "head_commit": "cf8bb3c21778d80d4c1ef965ab586799fb98e0f3",
+  "verification": "Todo en verde en /home/user/wt/task10 (rama wt/task10), PORT=3100, siempre bajo heavy.sh.\n- npm run lint: 0 errores y 0 avisos. npx tsc --noEmit: sin salida.\n- Spec de la tarea, e2e/home-t10.spec.ts: 21/21 (25–27 s).\n- e2e/a11y.spec.ts -g \"violations on /es$\": 1/1.\n- e2e/home.spec.ts + e2e/smoke.spec.ts: 57/58 en la primera pasada. Falló «portada · scrub en tableta vertical grande», que es de T6: compara dos capturas y la máquina estaba cargada con otras dos ejecuciones a la vez. Repetida una vez, 1/1.\n- Suite completa: 192/192 en 4,6 min (171 de la base + 21 de T10a).\n- heavy.sh --exclusive npm run build: correcto, con postbuild check:modern-js OK (let=3516, class=167).\n- measure-js.mjs (--runs 3 --viewport 1440x900 --budget 269722) contra next start en el puerto 3101, servidor en su propio grupo de procesos y apagado al terminar:\n  - base 3644611, medida en un worktree separado task10-base ya borrado: 220 233 B, 15 scripts;\n  - con T10a: 220 161 B, 15 scripts;\n  - Δ = −72 B (tope +3 000 B), margen de 49 561 B.\n  - Detalle: el chunk de las islas de la home crece 598 B, y el de efectos de texto baja de 2 301 a 1 616 B porque RevealText y ScrambleText salen de /es.\n- Comprobaciones grep del plan:\n  - sin «sections/Methodology\"» ni ScrambleText en page.tsx y CTA.tsx;\n  - el diff de page.tsx contra redesign/home no toca faqJsonLd ni FAQPage (0);\n  - ScrambleText solo queda en ui/ScrambleText.tsx y ScheduleForm.tsx;\n  - ningún #2563eb en los archivos tocados;\n  - las islas no importan next/image ni imágenes.\n- Contraste del cierre medido sobre capturas, con el texto y el encabezado ocultos, en 9 viewports × 3 posiciones: peor caso 5,92:1 para #a3a3a3 (AA 4,5:1).\n- Revisión visual con capturas (1440×900, 390×844, 768×1024, 844×390, 1920×1080, 2560×1440; también sin JS, con reducir movimiento, en inglés y con foco de teclado): línea y fases correctas, relieve sutil detrás del texto, foco visible en la FAQ y en el botón del cierre.\n- git status limpio. AGENTS.md no cambió. Puertos 3100 y 3101 libres. Ningún proceso mío en marcha.",
+  "decisions": [
+   "page.tsx (F3, sin T8 ni T9): MethodologyLine sustituye a Methodology en su mismo sitio (import y JSX). CTA recibe imageLabel={dict.hero.imageLabel} y media={<CTAMedia />}. El orden final del contrato §3.5 lo escribe el integrador. Los imports siguen siendo estáticos (nada de next/dynamic) y el JSON-LD FAQPage no se toca.",
+   "El relieve del cierre llega como slot (plan §3.8, informe §5 T10). Lo renderiza en el servidor src/components/sections/CTAMedia.tsx (sin directiva), con coverPlaceholder(relieve), carga perezosa y alt=\"\". La isla CTA solo recibe media y lo pinta dentro de FocalCover: no importa next/image, la imagen ni image-placeholder. Nunca placeholder=\"blur\".",
+   "CTA.tsx y FAQ.tsx entran en el bloque no-restricted-imports de motion de eslint.config.mjs, como pedía §3.8. Solo usan m, useMotionValue, useTransform y useStageProgress. MethodologyLine usa animateSingleValue(line, 1, …) con `return () => line.stop()`.",
+   "Sin JavaScript se pinta el estado final, como en T6 y en T7 (decisión 17). Un bloque @media (scripting: none) en globals.css deja la línea de Metodología completa y las fases en #0a0a0a/#525252, con el punto negro. Sustituye a la decisión 7 del plan, que las dejaba grises: la sección parecía «sin empezar». En el mismo bloque, las filas de Tecnologías (whileInView desde opacity 0) se muestran quietas gracias al atributo nuevo data-tech-row. Lleva !important porque motion escribe en el atributo style. Con JavaScript no cambia nada.",
+   "El sizes del relieve del cierre va por tramos medidos: (min-width: 111rem) 100vw, (min-width: 48rem) 111rem, (min-width: 40rem) 102rem, 85rem. El marco mide max(100vw, 2,55×H) y H en rem es casi constante por tramo en es y en. La ranura queda entre 1,000 y 1,006× el marco desde 640 px de ancho. En escritorio apaisado reutiliza la misma variante que la portada: mismo currentSrc a 1440×900 y 1920×1080. El 140vw del plan pedía el 60–80 % del marco entre 768 y 1024 px y otra variante de 2048 px a 1440.",
+   "«Imagen ilustrativa» del cierre alineada con la rejilla: absolute inset-x-0 bottom-6 mx-auto max-w-7xl px-6, como la capa de instrumento de la portada. Con left-6, a 2560 px quedaba a 24 px del borde, a más de 600 px del contenido.",
+   "El «+» de la FAQ pasa a #737373 (antes #a3a3a3, 2,5:1 sobre blanco). Es el indicador visual del estado y WCAG 1.4.11 pide 3:1. Sigue con aria-hidden.",
+   "Dos líneas data-method-line, \"horizontal\" (scaleX) y \"vertical\" (scaleY), movidas por el mismo MotionValue (decisión 1 del plan). Atributo nuevo data-cta-media en la capa del paralaje. Los tres atributos quedan anotados en el plan §3.4, y §3.5 añade CTAMedia al cierre.",
+   "Pruebas en el spec temporal autocontenido e2e/home-t10.spec.ts: 21 pruebas. Importa ./helpers y buildLocalePath; nunca otro spec. Las 5 pruebas del paso 1 que son de T10a, más las de teclado de la FAQ, estado sin JavaScript, imagen como slot, paralaje en scrub y quieto en inView y static, inglés, sizes en 7 viewports y la misma variante que la portada. Las de scroll usan waitForHydration.",
+   "Decisiones 9–16 y «Estado al cierre» documentadas en la sección de T10 del plan. Los bloques 2.2 y 2.3 quedan marcados como borrador superado."
+  ],
+  "deviations": [
+   "El plan decía que T10 no toca globals.css. Lo toca para el estado final sin JavaScript de Metodología y de las filas de Tecnologías. Así lo hicieron T6 y T7 (decisión 17), y T7 lo tuvo que corregir como hallazgo mayor en su ronda 1.",
+   "TechStack.tsx: además de los dos bloques del plan (h2 sin RevealText y data-header-theme), lleva data-tech-row en CategoryRow. Sin JavaScript las filas quedaban invisibles con opacity 0.",
+   "CTA: la imagen pasa de dentro de la isla (bloque 2.2 del plan, anterior a P1) a un slot desde CTAMedia.tsx. El sizes deja el «(min-width: 48rem) 140vw, 520vw» del plan por tramos medidos. La etiqueta se alinea con la rejilla en lugar de left-6.",
+   "FAQ: el «+» pasa a #737373 en lugar de #a3a3a3, por el contraste de un indicador de estado (WCAG 1.4.11).",
+   "Las pruebas van en e2e/home-t10.spec.ts y no al final de e2e/home.spec.ts, como pide la fase F3. Se añadieron 16 pruebas propias. Los tres describe de la home completa quedan para T10b."
+  ],
+  "red_test_evidence": "Antes de implementar, con PORT=3100 y heavy.sh, e2e/home-t10.spec.ts dio 12 failed de 12, todos por el motivo esperado:\n- FAQ: toHaveCount(4) recibió 0, porque el marcado era button > h3.\n- FAQ con teclado: data-header-theme vacío, porque la sección antigua es un m.section sin el atributo.\n- Las 3 de Metodología: toHaveAttribute('data-stage-mode') recibió \"\", porque Methodology no tiene el atributo.\n- Cierre sin JS: el h2 con nombre es.cta.lead dio toHaveCount 0; el título era un div con ScrambleText.\n- h2 sin JS: #metodologia sin data-header-theme.\n- Imagen como slot: no existía data-cta-media, así que no había img.\n- Paralaje (3 pruebas) y /en: no existía section:has([data-cta-media]), y la última sección no tenía h2.\nLas 5 pruebas del paso 1 que son de T10a coinciden con el «fallo esperado» del plan: FAQ 0 de 4, data-stage-mode ausente y h2 del cierre ausente.\nLas 9 pruebas de sizes y de «misma variante» se añadieron al ajustar el sizes. La sonda de medida (el mismo cálculo) da, con el sizes del plan, ranuras de 0,607–0,809× el marco a 768 y 1024 px y de 1,137–2,05× en el resto, además de otra variante (2048 px a 1440×900). Fallarían las 9.",
+  "notes": "- **Incidente en el scratchpad compartido.** Los subagentes de esta sesión comparten el mismo scratchpad. Sobrescribí sin querer scratchpad/build-measure.sh, que el implementador de T9 había dejado en cola bajo heavy.sh --exclusive. Lo repuse enseguida con una versión compatible (los mismos argumentos: worktree, puerto y carpeta de salida; escribe build.log, start.log, measure.json y measure.log y lo repite por stdout). Su ejecución terminó bien (mediana 220 233 B en scratchpad/base.run.log). Desde entonces solo usé scratchpad/t10/. Recomendación: una subcarpeta por tarea en el scratchpad.\n- **Para el integrador (F4).**\n  - page.tsx chocará con T9 en líneas contiguas: el import y el JSX de MethodologyLine van junto a CaseStudy/LiveStudioTeaser. El orden final es el de §3.5.\n  - El bloque nuevo de globals.css va justo antes de «Orbexs Live Studio».\n  - Del plan cambian las filas de §3.4 (data-method-line, data-cta-media, data-tech-row) y de §3.5 (cierre), además de la sección de T10.\n  - Al fundir e2e/home-t10.spec.ts en home.spec.ts: sus helpers locales de módulo son IDENTITY_TRANSFORM, closingLayerShift y scrollYFor, e importa buildLocalePath y waitForHydration, que home.spec.ts ya importa. Vigila choques de nombres con los de T8 y T9.\n- **Para T10b.** Añadir «todos los h2 de la home se ven sin JavaScript», «T10 · Orden de la home» y «T10 · Regla del azul en toda la home». La sección de Tecnologías ya tiene fondo #f8f8f8 y la FAQ rgb(255,255,255).\n- **Intermitente anotado.** «portada · scrub en tableta vertical grande» (de T6, compara capturas) falló una vez con carga y pasó al repetirla. La suite completa pasó entera.\n- **Para T11.**\n  - ScrambleText sigue en uso en ScheduleForm: no es código muerto.\n  - CoverReveal solo llega a /es por CaseStudy, que retira T9.\n  - AnimatePresence solo lo usa ya el Header en /es, lo que habilita la acción 10 del informe.\n  - Opcional: TechStack podría ser componente de servidor si se quita el fundido de las filas.\n- **Worktrees.** El worktree auxiliar /home/user/wt/task10-base, creado para medir la base, ya está borrado.\n- **Archivos principales:**\n  - /home/user/wt/task10/src/components/sections/home/MethodologyLine.tsx\n  - /home/user/wt/task10/src/components/sections/CTA.tsx\n  - /home/user/wt/task10/src/components/sections/CTAMedia.tsx\n  - /home/user/wt/task10/src/components/sections/FAQ.tsx\n  - /home/user/wt/task10/src/components/sections/TechStack.tsx\n  - /home/user/wt/task10/src/app/[locale]/page.tsx\n  - /home/user/wt/task10/src/app/globals.css\n  - /home/user/wt/task10/eslint.config.mjs\n  - /home/user/wt/task10/e2e/home-t10.spec.ts\n  - /home/user/wt/task10/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md"
+ },
+ "history": [
+  {
+   "round": 1,
+   "verdicts": [
+    "approve",
+    "changes",
+    "approve"
+   ],
+   "findings": [
+    {
+     "lens": "compliance",
+     "severity": "minor",
+     "file": "src/components/sections/home/MethodologyLine.tsx",
+     "issue": "En modo inView la línea solo arranca con `useInView(trackRef, { once: true, amount: 0.3 })`. Si el carril mide más de 1/0,3 del alto del viewport, la razón de intersección nunca llega a 0,3: la línea no se traza nunca y las cinco fases se quedan en gris. Ocurre con el zoom del navegador al 400 %, el caso de referencia de WCAG 1.4.10 (1280×1024 → 320×256 CSS px; 1440×900 → 360×225). Es la misma clase de fallo que el mayor de T8 (secuencia congelada), pero solo con zoom alto.",
+     "suggested_fix": "Disparar con un umbral que no dependa del alto del carril. Por ejemplo, `useInView(trackRef, { once: true, margin: \"0px 0px -30% 0px\" })` con el amount por defecto (\"some\"): salta cuando el borde superior del carril cruza el 70 % del viewport. Otra opción es observar la primera fase (`li`) en lugar del carril. Añadir una prueba a 320×256 que recorra la sección y exija 5 fases activas y scaleY 1."
+    },
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "`IDENTITY_TRANSFORM` está declarada a nivel de módulo; en el plan (paso 1) iba dentro de `describe('T10 · Metodología')`. El spec temporal de T9, que va en paralelo, declara la misma constante a nivel de módulo. Al fundir los dos specs en `e2e/home.spec.ts`, tsc fallará con «Cannot redeclare block-scoped variable».",
+     "suggested_fix": "Moverla dentro de `test.describe('T10 · Metodología')`, como en el plan, o que el integrador deje una sola declaración (el valor es el mismo)."
+    },
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": ".claude/skills/orbexs-design-system/components.md",
+     "issue": "No es alcance de T10a, queda para T11. El skill del design system sigue prescribiendo el acordeón antiguo: botón sin encabezado y `AnimatePresence` animando `height`. Además, `layout.md` (~línea 96) pone la FAQ en #f8f8f8 y conserva el orden antiguo de la home. T10 los contradice, con el diseño §5.8/§11 y el plan §3.8/§3.5. Otros agentes que sigan el skill reintroducirían `button > h3` y la animación de altura.",
+     "suggested_fix": "Incluirlo en la actualización del skill que hace T11: h3 > button, panel siempre en el DOM con hidden, aria-controls y role=region, sin animar alturas, FAQ en bg-white y orden de secciones de §3.5."
+    },
+    {
+     "lens": "quality",
+     "severity": "major",
+     "file": "src/components/sections/home/MethodologyLine.tsx",
+     "issue": "En celular, la línea de Metodología nunca arranca cuando la pista mide más de 3,33 veces el alto del viewport. El disparo usa `amount: 0.3`, una fracción de la pista y no una posición.",
+     "suggested_fix": "Disparar por posición: `useInView(trackRef, { once: true, margin: \"0px 0px -30% 0px\" })`, con amount \"some\" por defecto. Así salta cuando el borde superior de la pista cruza el 70 % del viewport, mida lo que mida. Añadir una prueba a 320×256 que recorra la sección y espere las 5 fases activas y la línea en la identidad."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "src/components/sections/FAQ.tsx",
+     "issue": "Sin JavaScript no se puede leer ninguna respuesta de la FAQ: los paneles salen con `hidden` y los botones no tienen manejador.",
+     "suggested_fix": "Dentro de `@layer base` en globals.css: `@media (scripting: none) { #faq [role=\"region\"][hidden] { display: block !important } }`, ocultando también el «+» sin JS. Añadir el caso al describe sin JavaScript de home-t10.spec.ts. Si se prefiere no hacerlo, documentar la decisión en el plan."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "src/components/sections/FAQ.tsx",
+     "issue": "Con una respuesta abierta, el anillo de foco de la pregunta tapa el borde superior de la primera línea de la respuesta.",
+     "suggested_fix": "Meter el anillo dentro del botón, que tiene py-6: `focus-visible:outline-offset-[-4px]` en su className. O dar un margen superior al panel (`pt-2` en el <p> de la respuesta)."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "La prueba de paralaje en escritorio no comprueba la velocidad de 0,3× que pide el diseño. Pasa igual con cualquier valor de PARALLAX.",
+     "suggested_fix": "Tomar dos muestras dentro del tramo sin tope (p. ej. centrada −50 y +50 px) y exigir Δdesplazamiento/Δscroll ≈ 0,3 ± 0,02."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "Ninguna prueba de T10 cubre el fallo de T8: que la línea móvil, una vez disparada, termine aunque la pista salga de pantalla.",
+     "suggested_fix": "Añadir una prueba a 390×844 y 667×375: desplazarse hasta que se dispare, saltar a #faq antes de 1,6 s y esperar 5 fases activas y la línea vertical en la identidad."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "El título «la imagen llega como slot del servidor» promete más de lo que la prueba comprueba: no verifica el slot.",
+     "suggested_fix": "Cambiar el título a «la imagen del cierre está en el HTML: perezosa, decorativa y sin prioridad», o citar en un comentario la prueba de P1."
+    },
+    {
+     "lens": "quality",
+     "severity": "nit",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "Las pruebas usan el literal 5 en lugar de la longitud del diccionario.",
+     "suggested_fix": "Usar `es.methodology.steps.length` en las tres líneas."
+    },
+    {
+     "lens": "visual",
+     "severity": "minor",
+     "file": "src/components/sections/FAQ.tsx",
+     "issue": "El contorno de foco del botón de la FAQ pisa la primera línea de la respuesta abierta. La regla global `*:focus-visible` (globals.css:76-80) dibuja un contorno de 2 px separado 4 px del botón, y el panel empieza justo debajo del botón, sin relleno superior. Al abrir con Enter o Espacio el foco se queda en el botón, así que precisamente quien usa teclado ve la línea negra cruzando la parte alta de «IA soberana significa…».",
+     "suggested_fix": "Añadir `focus-visible:outline-offset-0` (o 1 px) al className del botón de FAQItem: el contorno de 2 px en #0a0a0a sigue viéndose sobre blanco y queda por encima del interlineado de la respuesta. La otra opción es dar `pt-2` al <p> del panel. Después, repetir la captura a 1440×900 y 390×844."
+    },
+    {
+     "lens": "visual",
+     "severity": "minor",
+     "file": "src/app/globals.css",
+     "issue": "Sin JavaScript, la FAQ tiene un control que no hace nada. Los cuatro paneles salen con `hidden` (display:none) y los botones no tienen manejador, así que el «+» invita a abrir y no abre nada, y las respuestas, aunque están en el HTML, no se pueden leer. El resto de T10 sí pinta el estado final sin JS (decisión 11: Metodología y filas de Tecnologías). No es una regresión: la FAQ anterior tampoco tenía las respuestas en el DOM.",
+     "suggested_fix": "En el mismo bloque `@media (scripting: none)`: mostrar los paneles (`[role=region][hidden]` de la FAQ → `display:block`, más `opacity:1 !important; transform:none !important`, porque motion escribe opacidad y desplazamiento en el atributo style) y ocultar el indicador «+» (`h3 > button > [aria-hidden]`). Conviene marcar el panel con un atributo nuevo, p. ej. `data-faq-panel`, para no depender del id. Si se prefiere dejar las respuestas cerradas sin JS, anotarlo como decisión en el plan."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/CTAMedia.tsx",
+     "issue": "En celulares con DPR ≤ 2, el relieve del cierre descarga una variante distinta de la de la portada: 168 KB más al llegar al final. En escritorio y con DPR 3 reutiliza la descarga, como busca la decisión 12. La imagen va detrás de un velo del 80 % de #0a0a0a (el píxel más claro bajo el texto es rgb(39,39,39)), así que la variante de 1920 no se distinguiría.",
+     "suggested_fix": "Opcional. Poner delante de «85rem» la misma condición que la banda vertical de la portada, p. ej. `(width < 40rem) and (orientation: portrait) 110vh`, para pedir la misma variante que la portada con DPR 2 y 3. Habría que admitir esa excepción en la prueba «el sizes cubre el marco sin pedir de más» a 390×844 y 320×568. Si no, anotar el coste como aceptado."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/CTA.tsx",
+     "issue": "El paralaje del cierre se acota con un corte seco a ±0,2·H. Fuera del tramo central la capa queda pegada a la sección, y en el límite la velocidad aparente de la imagen salta de 0,7× a 1,0× el scroll con la sección a la vista: es un pequeño tirón.",
+     "suggested_fix": "Opcional. Suavizar el tope, p. ej. `l === 0 ? 0 : l * Math.tanh(((p - 0.5) * t) / l)`: mantiene la pendiente 0,3 en el centro, la velocidad varía de forma continua y nunca pasa de ±l. Las pruebas actuales (≈0 centrada, |y| ≤ 0,2H, la capa siempre cubre) se siguen cumpliendo."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/TechStack.tsx",
+     "issue": "(Preexistente; T10 solo añadió `data-tech-row`.) Con reducir movimiento, las filas de Tecnologías siguen entrando con un fundido escalonado: `MotionConfig reducedMotion=\"user\"` solo quita el desplazamiento. Tras un salto, la tarjeta se ve vacía casi 1 s, y §5 y §3.6 piden estado final estático con reducir movimiento.",
+     "suggested_fix": "Opcional y seguro para la hidratación: `@media (prefers-reduced-motion: reduce) { [data-tech-row] { opacity: 1 !important; transform: none !important; } }` en globals.css, el mismo patrón que el bloque sin JS."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/TechStack.tsx",
+     "issue": "(Preexistente.) A 768 px de ancho, la etiqueta «NUBE E INFRAESTRUCTURA» (tracking 0,25em, `md:col-span-3`) no cabe en su columna y entra 8 px en la de tecnologías.",
+     "suggested_fix": "Opcional: `md:col-span-4 lg:col-span-3` para la etiqueta y `md:col-span-8 lg:col-span-9` para la lista, o `hyphens-auto` en el h3."
+    }
+   ],
+   "fix": {
+    "head_commit": "9cf8fd93b2b91abf35b68bc0a41e421c0c1719a9",
+    "fixed": [
+     {
+      "finding": "[mayor, calidad] + [menor, cumplimiento] MethodologyLine.tsx:62: useInView(trackRef, { once: true, amount: 0.3 }) nunca dispara si la pista mide más de 1/0,3 pantallas (zoom al 400 %: 320×256 y 360×225; letra de 24 px a 568×320). Las fases se quedan en «00000» y la línea en scaleY(0).",
+      "how": "Lo reproduje: 3 pruebas nuevas en rojo, con 0 fases activas tras recorrer la pista. El disparo ahora va por posición: IN_VIEW_TRIGGER: UseInViewOptions = { once: true, margin: \"0px 0px -30% 0px\" }, con amount «some». Salta cuando el borde superior de la pista cruza el 70 % del viewport, mida lo que mida. En 390×844 el punto casi no cambia (antes estaba hacia el 68 %). Prueba nueva: recorre la pista entera en pasos de ¼ de pantalla a 320×256, 360×225 y 568×320 (letra de 24 px con CDP Page.setFontSizes), comprueba la premisa (la pista mide más de 3,3 pantallas) y exige las 5 fases activas y la línea vertical en la identidad."
+     },
+     {
+      "finding": "[nit, cumplimiento] e2e/home-t10.spec.ts:18: IDENTITY_TRANSFORM está a nivel de módulo y choca con la misma constante del spec temporal de T9 al fundirlos («Cannot redeclare»).",
+      "how": "La moví dentro de test.describe('T10 · Metodología'), como en el paso 1 del plan. El describe de la FAQ declara la suya. A nivel de módulo solo quedan closingLayerShift, settledClosingLayerShift y scrollYFor, que no chocan con home.spec.ts ni con los specs de T8 y T9 (lo comprobé)."
+     },
+     {
+      "finding": "[nit, cumplimiento] El skill orbexs-design-system sigue prescribiendo el acordeón antiguo (button sin encabezado, AnimatePresence, altura animada). Además, layout.md pone la FAQ en #f8f8f8 y conserva el orden antiguo de la home.",
+      "how": "Lo actualicé ya, en lugar de esperar a T11, porque ninguna otra rama toca el skill. components.md tiene el patrón de FAQ.tsx: h3 > button, panel siempre en el DOM con hidden, role=region y aria-labelledby, sin altura ni AnimatePresence, «+» en #737373, pt-2 y la regla sin JavaScript. En motion.md cambié las dos filas de la FAQ (0,3 s entrance, nunca altura). layout.md sigue el orden de §3.5 con la FAQ en blanco. El resto del skill (.bg-grid, IntroSequence, ScrambleText, la referencia de movimiento) sigue siendo de T11. Está en la decisión 24 del plan y en la tabla de Archivos de T10."
+     },
+     {
+      "finding": "[menor, calidad] + [menor, visual] FAQ.tsx:59 y globals.css: sin JavaScript, los paneles salen con hidden, los botones no tienen manejador y no se lee ninguna respuesta; el «+» invita a pulsar.",
+      "how": "Añadí data-faq-panel en el panel y data-faq-indicator en el «+», y los registré en §3.4. En globals.css, dentro de @layer base, un bloque @media (scripting: none) aplica [data-faq-panel][hidden] { display:block; opacity:1; transform:none } con !important (motion deja la opacidad y el desplazamiento de cerrado en style), oculta [data-faq-indicator] y quita la mano del cursor. Va en @layer base porque el preflight de Tailwind oculta [hidden] con !important en esa capa; dentro de ella gana por especificidad. Prueba nueva sin JS a 1440×900 y 390×844: las 4 regiones visibles con su respuesta, opacidad 1, transform none y ningún «+» visible. Antes daba 0 regiones. Con JS no cambia nada: la prueba de teclado sigue exigiendo los paneles ocultos al cargar."
+     },
+     {
+      "finding": "[menor, calidad] + [menor, visual] FAQ.tsx:40: el anillo de foco global (2 px a 4 px del botón) pisa la primera línea de la respuesta abierta; el solape medido es de 4 px.",
+      "how": "Añadí pt-2 al párrafo de la respuesta, y el anillo queda 4 px por encima de la primera línea. Descarté outline-offset negativo o 0: el botón no tiene relleno lateral y el anillo cruzaría o tocaría la primera letra de la pregunta. Prueba nueva a 1440×900 y 390×844: con :focus-visible, el borde inferior del anillo (caja del botón + outline-offset + outline-width) debe quedar por encima de la primera línea (Range.getClientRects). Antes fallaba por 4 px. Lo revisé en capturas ampliadas."
+     },
+     {
+      "finding": "[menor, calidad] home-t10.spec.ts:239: la prueba del paralaje de escritorio pasa con cualquier PARALLAX > 0,0015; no mide la velocidad 0,3×.",
+      "how": "La prueba mide ahora la pendiente con la sección centrada ±50 px: Δdesplazamiento/Δscroll = 0,3 ± 0,02, con lecturas asentadas (settledClosingLayerShift). Con una mutación temporal a PARALLAX = 0,05 falla («0.050»); la revertí."
+     },
+     {
+      "finding": "[menor, calidad] home-t10.spec.ts:153: ninguna prueba cubre el fallo de T8 (la línea móvil, una vez disparada, debe terminar aunque la pista salga de pantalla).",
+      "how": "Prueba nueva a 390×844 y 667×375. En el navegador detecta, fotograma a fotograma, el primer scaleY > 0, salta a #faq y exige que el salto llegue a mitad del trazo (escala < 1), que la pista quede fuera de pantalla y que terminen 5 fases activas con la línea en la identidad. Con la mutación temporal once: false fallan las dos (la revertí). A 667×375 también fallaba con amount 0,3."
+     },
+     {
+      "finding": "[nit, calidad] home-t10.spec.ts:229: el título «la imagen llega como slot del servidor» promete más de lo que comprueba.",
+      "how": "La renombré a «la imagen del cierre está en el HTML: perezosa, decorativa y sin prioridad» y añadí un comentario que cita la prueba de P1 de home.spec.ts («ningún script de /es lleva un import estático de imagen»), que es la que garantiza el slot."
+     },
+     {
+      "finding": "[nit, calidad] home-t10.spec.ts:113/150/165: las pruebas usan el literal 5 en lugar de la longitud del diccionario.",
+      "how": "Uso PHASES = es.methodology.steps.length en todos los recuentos de Metodología, incluido el toBeLessThan(5) de la prueba de escritorio, como pide §3.7."
+     },
+     {
+      "finding": "[nit, visual] CTA.tsx:63: el paralaje se acota con un corte seco a ±0,2·H. La capa queda pegada fuera del tramo central y la velocidad aparente salta de 0,7× a 1×.",
+      "how": "Cambié el corte por parallaxShift = l·tanh((p − 0,5)·t/l). La pendiente sigue en 0,3 en el centro (medida: 0,299) y la velocidad varía de forma continua sin llegar nunca a ±l. Se mantienen ≈0 con la sección centrada, |y| ≤ 0,2H y la cobertura de la capa. La prueba de escritorio exige además que la capa siga moviéndose entre el 85 % y el 80 % de entrada: con el tope seco daba 0 y fallaba. Está en la decisión 21, que sustituye el tope de la decisión 3."
+     },
+     {
+      "finding": "[nit, visual] TechStack.tsx:26 (preexistente): con reducir movimiento, las filas entran con un fundido escalonado y la tarjeta se ve vacía casi 1 s tras un salto.",
+      "how": "Añadí @media (prefers-reduced-motion: reduce) { [data-tech-row] { opacity:1 !important; transform:none !important } } en globals.css. Es el mismo patrón que sin JS y es seguro para la hidratación. Prueba nueva: con reducir movimiento, justo después de saltar a la sección, las 7 filas tienen opacidad efectiva 1 y transform none. Antes estaban en 0."
+     },
+     {
+      "finding": "[nit, visual] TechStack.tsx:36 (preexistente): a 768 px, «NUBE E INFRAESTRUCTURA» invade 8 px la columna de las tecnologías.",
+      "how": "La etiqueta ocupa ahora md:col-span-4 lg:col-span-3 y la lista md:col-span-8 lg:col-span-9. Prueba nueva a 768 y 1024 px, en es y en: ninguna etiqueta (Range del h3) pasa del borde izquierdo de su <ul>. Antes: +8 px en «Nube e Infraestructura». Lo revisé en capturas a 768 y 1024."
+     },
+     {
+      "finding": "[nit, visual] CTAMedia.tsx:19: en celulares con DPR ≤ 2, el cierre descarga la variante de 3840 px en lugar de reutilizar la de 1920 de la portada (168 KB más).",
+      "how": "El hallazgo es correcto. Lo resolví con la otra salida que proponía el propio hallazgo: dejarlo documentado como coste aceptado en la decisión 23 del plan, sin tocar el sizes. Para pedir la variante de la portada, la ranura tendría que quedar por debajo del marco (70–77 % de su resolución física), y habría que abandonar, solo en celular vertical, la regla «el sizes cubre el marco» que siguen todas las imágenes de la home y su prueba. La imagen es perezosa, no afecta al LCP y con DPR 3 y en escritorio ya reutiliza la descarga."
+     }
+    ],
+    "rejected": [],
+    "decisions": [
+     "El disparo de Metodología en modo inView va por posición (margin \"0px 0px -30% 0px\", once), no por fracción visible: así funciona con cualquier alto de pista (zoom al 400 %, letra grande) y en 390×844 el punto de disparo casi no cambia.",
+     "La FAQ sin JavaScript se arregla solo con CSS, en @layer base dentro de @media (scripting: none), porque el preflight de Tailwind oculta [hidden] con !important en esa capa. Uso dos atributos nuevos (data-faq-panel y data-faq-indicator) para no depender del id de la sección. Sin script, aria-expanded sigue en «false» con el panel a la vista; no hay forma de cambiarlo, y lo dejo anotado.",
+     "El anillo de foco se resuelve con pt-2 en la respuesta, no tocando outline-offset: la pregunta no tiene relleno lateral y un offset negativo o 0 cruzaría o tocaría su primera letra. El anillo global de 4 px se mantiene igual en todo el sitio.",
+     "El paralaje del cierre pasa del clamp a una saturación con tanh: conserva la pendiente de 0,3 que pide el diseño y evita el tirón al llegar a la cota. Las pruebas existentes siguen siendo válidas y se añaden las de velocidad y ausencia de tope seco.",
+     "El sobrecoste del relieve del cierre en celulares con DPR ≤ 2 (168 KB) queda como coste aceptado (decisión 23), para no romper la regla «el sizes cubre el marco» ni debilitar su prueba.",
+     "El skill orbexs-design-system se actualiza ya (acordeón, duraciones de la FAQ y orden de la home de §3.5) porque ninguna tarea paralela lo toca; el resto del skill queda para T11.",
+     "Todo queda en el plan: decisiones 17–25 en una subsección nueva de T10, filas nuevas en §3.4, una fila en la tabla de Archivos y el estado tras la ronda 1 (JS de /es 220 195 B, +34 B; e2e 204/204)."
+    ],
+    "verification": "Todo en /home/user/wt/task10 con PORT=3100. Playwright siempre bajo heavy.sh y con portfree.sh antes de cada ejecución.\n- `npm run lint` y `npx tsc --noEmit` sin errores.\n- Antes de los arreglos escribí las pruebas nuevas y reforzadas y confirmé el rojo: 11 fallaban por el motivo descrito en los hallazgos (anillo de foco con 4 px de solape; pista alta con 0 fases activas; «la línea arrancó» a 667×375; 0 regiones de FAQ sin JS; filas de Tecnologías con opacidad 0; +8 px a 768; desplazamiento 0 entre el 85 % y el 80 %).\n- Tras los arreglos, `e2e/home-t10.spec.ts`: 33/33.\n- Mutaciones temporales, ya revertidas: once: false hace fallar las dos pruebas «una vez disparada»; PARALLAX = 0,05 hace fallar la de velocidad («0.050»).\n- Suite completa: 204/204 en 3,3 min (171 + 33), sin repeticiones.\n- `heavy.sh --exclusive`: `npm run build` en verde, `check:modern-js` OK (let=3516, class=167).\n- `measure-js.mjs` contra `next start` (1440×900, mediana de 3): 220 195 B en 15 scripts (+34 B sobre la entrega de T10a, margen de 49 527 B hasta 269 722).\n- Revisé capturas de una sonda temporal (ya borrada): anillo de foco a 1440 y 390, FAQ sin JS a 1440 y 390, Tecnologías a 768 y 1024, Metodología a 320×256.\n- Al terminar: AGENTS.md sin cambios, `git status` limpio, puertos 3100 y 3101 libres y ningún proceso de wt/task10 en marcha."
+   }
+  },
+  {
+   "round": 2,
+   "verdicts": [
+    "approve",
+    "approve",
+    "approve"
+   ],
+   "findings": [
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": "docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md",
+     "issue": "El bloque 2.1 del plan (MethodologyLine) conserva `useInView(trackRef, { once: true, amount: 0.3 })`, el disparo que la ronda 1 corrigió como mayor (decisión 17). No lleva la nota «borrador superado / manda el código» que sí tienen 2.2 (línea 9035) y 2.3 (línea 9165). Además, §3.8 presenta este bloque como «ya corregido en el plan».",
+     "suggested_fix": "Añadir bajo «**2.1 `src/components/sections/home/MethodologyLine.tsx`** (nuevo):» una nota como la de 2.2: «> *Revisión de T10a (ronda 1):* el disparo de inView es `IN_VIEW_TRIGGER = { once: true, margin: \"0px 0px -30% 0px\" }` (decisión 17), no `amount: 0.3`. Manda el código.»"
+    },
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": "e2e/home-t10.spec.ts",
+     "issue": "La prueba «el relieve del cierre reutiliza la descarga de la portada» se desplaza con `closing.scrollIntoViewIfNeeded()` nada más cargar la página, sin `waitForHydration`. Lo único que afirma antes, que la imagen de la portada tenga `currentSrc`, ya se cumple con el HTML del servidor, porque esa imagen carga en modo eager. §3.7 exige `waitForHydration` precisamente en ese caso.",
+     "suggested_fix": "`await waitForHydration(page)` justo después de `await page.goto('/es')` en esa prueba."
+    },
+    {
+     "lens": "compliance",
+     "severity": "nit",
+     "file": ".claude/skills/orbexs-design-system/layout.md",
+     "issue": "«4. From paper to data → dark (#0a0a0a) over the case-file image» usa la misma fórmula que la portada y el cierre, cuyas imágenes cubren toda la sección. En «Del papel al dato», en cambio, el expediente es un bloque enmarcado y no el fondo de la sección. Un agente que siga el skill podría ponerlo a sangre.",
+     "suggested_fix": "«4. From paper to data → dark (#0a0a0a); the case-file image sits in a framed block (rounded-[6px]) on the right, above the panel on mobile»."
+    },
+    {
+     "lens": "quality",
+     "severity": "minor",
+     "file": "src/components/sections/CTA.tsx",
+     "issue": "El paralaje mueve con translateY, en cada fotograma de scroll y desde JavaScript, la capa del relieve del cierre (`[data-cta-media]`, el m.div con `style={{ y }}`). Esa capa no tiene capa propia del compositor, así que en scrub Chromium vuelve a rasterizar la imagen entera en cada fotograma: ~1440×1180 px a 1440×900. T6 ya resolvió este mismo caso en la portada con `stage:will-change-transform` (HomeHero.tsx:45-49, SCALED_LAYER; en el plan, la decisión «Capa propia en scrub» de la revisión de T6, que bajó el raster de 964 a 414 ms en 30 fotogramas). El cierre repite el problema: no sigue el patrón del código vecino y el «solo transform» pierde su ventaja de rendimiento.",
+     "suggested_fix": "Añadir `stage:will-change-transform` al className del m.div de la línea 109 (`absolute inset-x-0 -bottom-[20%] -top-[50%] -z-10 stage:will-change-transform`), igual que SCALED_LAYER de HomeHero: solo en scrub, que es cuando hay paralaje, y sin reservar memoria de GPU en celular. Poner un comentario con la medida y una línea en las decisiones de T10 del plan. Opcional, para que no se pierda: en la prueba «en escritorio (1440×900) el relieve se desplaza a 0,3×…», `await expect(page.locator('[data-cta-media]')).toHaveCSS('will-change', 'transform')`, y `'auto'` en la de celular y reducir movimiento."
+    },
+    {
+     "lens": "visual",
+     "severity": "minor",
+     "file": "src/components/sections/CTA.tsx",
+     "issue": "La capa del paralaje del cierre (`[data-cta-media]`, `m.div` con `style={{ y }}`) no tiene capa propia del compositor. motion escribe el `transform` en cada fotograma sin WAAPI, así que Chrome no la promueve y, en scrub, cada fotograma de scroll vuelve a pintar y rasterizar el relieve de toda la sección. Es el mismo fallo que la revisión de T6 corrigió en la portada con `stage:will-change-transform` (plan, decisión 13 de T6; HomeHero.tsx:49, `SCALED_LAYER`); aquí no se aplicó.",
+     "suggested_fix": "Añadir `stage:will-change-transform` al className del `m.div` (CTA.tsx:109), igual que `SCALED_LAYER` en HomeHero.tsx:49. Así solo se promueve en scrub: en celular y con reducir movimiento la capa no se mueve y no se reserva memoria de GPU. Añadir una prueba que exija `getComputedStyle([data-cta-media]).willChange === 'transform'` a 1440×900 y `auto` a 390×844 y con reducir movimiento. Anotarlo como decisión de la ronda 2 en el plan."
+    },
+    {
+     "lens": "visual",
+     "severity": "nit",
+     "file": "src/components/sections/home/MethodologyLine.tsx",
+     "issue": "Los umbrales de activación (`i / total + REACH`, líneas 28 y 46) no coinciden con la posición real de los puntos. En horizontal (scrub), la línea negra llega al punto de una fase y pasa por debajo de él mientras sigue gris durante 29–50 px, antes de que la fase se active. §5.6 dice que cada fase pasa a negro «cuando la línea la alcanza». En vertical (inView), la posición de los puntos depende del alto del texto de cada fase; el comentario de la línea 42 («el nodo de la fase i está en i / total») solo vale en horizontal. A 360×740 las fases 04 y 05 se activan 6 y 22 px antes de que llegue la línea.",
+     "suggested_fix": "Opcional. Medir los puntos una vez (offsetLeft y offsetTop del primer hijo de cada `li` respecto de la pista, al montar y con ResizeObserver) y activar la fase i cuando `line × largo de la pista ≥ posición del punto i + radio`. La alternativa mínima es bajar REACH a ≈0,005 (el radio del punto) en horizontal y corregir el comentario de la línea 42. En los dos casos, anotar la decisión en el plan."
+    }
+   ],
+   "fix": {
+    "head_commit": "28e52879da40951e8763a20fed6deb6333a3dfed",
+    "fixed": [
+     {
+      "finding": "[detalle, cumplimiento] Plan, bloque 2.1 (MethodologyLine, línea 8924): conserva `useInView(trackRef, { once: true, amount: 0.3 })` sin la nota «borrador superado / manda el código» que sí llevan 2.2 y 2.3, y §3.8 lo da por «ya corregido».",
+      "how": "Añadí bajo el encabezado de 2.1 una nota «Borrador superado (revisión de T10a)». Dice que manda el código de wt/task10, que el disparo es `IN_VIEW_TRIGGER = { once: true, margin: \"0px 0px -30% 0px\" }` (decisión 17) y el umbral es `measureStops` (decisión 27), y que lo que §3.8 da por corregido en ese bloque es solo lo de P1 (`animateSingleValue`). No toqué §3.8: el plan de T9 cambia las líneas de alrededor y habría conflicto al integrar."
+     },
+     {
+      "finding": "[detalle, cumplimiento] e2e/home-t10.spec.ts:603: «el relieve del cierre reutiliza la descarga de la portada» se desplaza con `scrollIntoViewIfNeeded()` sin `waitForHydration`, y lo que afirma antes (el currentSrc de la portada, que carga eager) ya se cumple con el HTML del servidor (§3.7).",
+      "how": "Añadí `await waitForHydration(page)` justo después de `page.goto('/es')`, con un comentario del porqué. Las dos variantes (1920×1080 y 1440×900) pasan."
+     },
+     {
+      "finding": "[detalle, cumplimiento] .claude/skills/orbexs-design-system/layout.md:94: «From paper to data → dark (#0a0a0a) over the case-file image» usa la fórmula de la portada y el cierre, cuyas imágenes cubren la sección, aunque el expediente es un bloque enmarcado.",
+      "how": "Comprobé el traspaso §4 (marco `aspect-[4/5] md:aspect-auto md:h-[min(78svh,48rem)]`), el plan de T8 (paso 2) y wt/task8 `DossierStage.tsx:193` (`rounded-[6px]`, a la derecha). La línea 4 dice ahora: bloque enmarcado (rounded-[6px]), no a sangre; a la derecha del texto en escritorio y entre el texto y el panel en celular. La portada y el cierre dicen «full-bleed». Ni T8 ni T9 tocan el skill, así que no hay conflicto."
+     },
+     {
+      "finding": "[menor, calidad] CTA.tsx:109: la capa del paralaje (`[data-cta-media]`) se mueve con translateY en cada fotograma sin capa propia del compositor. En scrub, Chromium vuelve a rasterizar el relieve entero en cada fotograma (medido ≈ 36× más raster). Es lo mismo que T6 resolvió con `stage:will-change-transform`.",
+      "how": "Prueba primero: la de paralaje a 1440×900 exige `will-change: transform`; falló en rojo con «auto». Las de celular (390×844) y reducir movimiento exigen `auto`. Arreglo: constante `PARALLAX_LAYER` con `stage:will-change-transform`, solo en scrub, como SCALED_LAYER de HomeHero, con un comentario que da la medida. Lo medí contra next start (build de producción) a 1440×900, recorriendo el cierre en 91 pasos de 8 px, dos pasadas. Con la capa: 0 Paint y 6–12 ms de RasterTask. Con `will-change: auto` inyectado: 160 Paint (17–20 ms) y 1 459–1 485 ms de raster. El transform final es idéntico en los dos casos (matrix(1, 0, 0, 1, 0, 3.749)). Es la decisión 26 del plan."
+     },
+     {
+      "finding": "[menor, visual] CTA.tsx:109: el mismo hallazgo desde la lente visual (sin capa propia, 166 Paint y ≈ 1 475–1 551 ms de raster frente a ≈ 30 ms; propone también las pruebas de will-change y una decisión en el plan).",
+      "how": "Es el mismo arreglo que el hallazgo anterior (stage:will-change-transform en PARALLAX_LAYER). Las pruebas de will-change son `transform` a 1440×900 y `auto` a 390×844 y con reducir movimiento. En el plan va la decisión 26, que cita la medida de las dos lentes y la mía."
+     },
+     {
+      "finding": "[detalle, visual] MethodologyLine.tsx:42: los umbrales `i / total + REACH` no coinciden con los puntos. En scrub, la línea pasa 29–50 px por debajo de un punto gris antes de activar la fase. En vertical (inView), a 360×740 las fases 04 y 05 se activan 6 y 22 px antes de que llegue la línea. Además, el comentario «el nodo de la fase i está en i / total» solo vale en horizontal.",
+      "how": "Comprobé la geometría: en horizontal, el hueco gap-6 aleja el punto i en 4,8·i px de i/5. Prueba primero, con 4 pruebas nuevas. En scrub, a 1440×900 y 1024×768, con la punta unos 8 px antes y después del centro de cada punto, la fase debe estar gris y luego negra. En celular, a 360×740 y 390×844, se sigue el trazo fotograma a fotograma y ninguna fase activa puede tener su punto más de 1 px por delante de la punta. Las cuatro fallaban. Con el componente anterior restaurado de forma temporal (git stash, revertido), a 360×740 salían adelantadas las fases 04 y 05 (5 y 21 px) y a 390×844 la 05. Arreglo: `measureStops` mide en el layout el centro de cada punto como fracción de la línea que se ve. La orientación la decide CSS: la horizontal si `offsetWidth` > 0. Se mide al montar y con un ResizeObserver sobre la pista, y `phasesReached` usa esas posiciones. Quité REACH y corregí los comentarios. El HTML del servidor y el primer render no cambian. Descarté bajar REACH a ≈ 0,005: por el hueco entre columnas, la fase 05 se activaría 16 px antes. Es la decisión 27 del plan."
+     }
+    ],
+    "rejected": [],
+    "decisions": [
+     "Decisión 26 (cierre): `stage:will-change-transform` en la capa del paralaje (constante PARALLAX_LAYER), igual que SCALED_LAYER de la portada y solo en scrub. En celular y con reducir movimiento la capa no se mueve, así que no se reserva memoria de GPU. Se acepta, como en la portada, que el texto del cierre pase de suavizado subpíxel a escala de grises.",
+     "Decisión 27 (Metodología): cada fase se activa cuando la punta de la línea llega al centro de su punto, medido en el layout con measureStops y ResizeObserver. La orientación la decide CSS: se usa la línea horizontal si se muestra. Esto sustituye el umbral de la decisión 2 (i/total + 0,04). Descarté bajar REACH porque el hueco entre columnas adelantaría la fase 05 16 px.",
+     "Decisión 28: la prueba de la variante compartida del relieve espera a waitForHydration antes de desplazarse (§3.7).",
+     "Decisión 29: la nota «borrador superado» del bloque 2.1 del plan va solo en la sección de T10. No toqué §3.8 porque la rama de T9 cambia líneas vecinas y habría conflicto al integrar. En el skill, layout.md describe el expediente como bloque enmarcado; la portada y el cierre, como full-bleed.",
+     "Decisión 30: el spec temporal pasa de 33 a 37 pruebas. La falla intermitente de la prueba de capturas de T6, con la máquina cargada, se repitió una sola vez y pasó; queda anotada en el «Estado tras la ronda 2» del plan.",
+     "No rechacé ningún hallazgo. Los dos menores sobre will-change son el mismo, visto desde dos lentes, y los resolví con un solo arreglo."
+    ],
+    "verification": "Todo en /home/user/wt/task10 con PORT=3100. Antes de cada ejecución comprobé portfree; Playwright corrió bajo heavy.sh y el build y las medidas bajo heavy.sh --exclusive.\n- `npm run lint` y `npx tsc --noEmit` en verde, también sobre el árbol final.\n- Prueba primero: antes de los arreglos fallaban 5 de las nuevas o cambiadas. Eran las 2 de umbral en scrub, las 2 de celular y la de will-change a 1440×900. Las 4 de Metodología volvieron a fallar al restaurar de forma temporal el MethodologyLine.tsx anterior (git stash / stash pop, revertido).\n- Spec temporal e2e/home-t10.spec.ts: 37/37 (antes 33), dos pasadas, la última sobre el árbol final.\n- e2e completo: 207/208 en la primera pasada, con el workflow de T8 corriendo a la vez. Falló «portada · scrub en tableta vertical grande» («la ruta cruza «índice /01»», avance 0,7), la comparación de capturas de T6 que ya había fallado una vez en la entrega de T10a. La repetí una vez y pasó. Queda anotado en el plan.\n- `npm run build` en verde, con postbuild check:modern-js OK (let=3520 class=167) y `npm run check:modern-js` OK.\n- JS de /es con measure-js.mjs contra next start (1440×900, mediana de 3): 220 370 B en 15 scripts. Son +175 B sobre la ronda 1 y +137 B sobre la base 3644611; margen de 49 352 B hasta 269 722.\n- Sonda de raster CDP contra next start: con la capa, 6–12 ms de RasterTask y 0 Paint; sin ella, 1 459–1 485 ms y 160 Paint.\n- Después de ese build solo cambiaron un comentario de CTA.tsx y los documentos; lint, tsc y el spec pasaron de nuevo sobre el árbol final.\n- `git status` limpio: AGENTS.md revertido, test-results borrado, puerto 3100 libre y ningún proceso de next ni de Playwright del worktree vivo."
+   }
+  }
+ ]
+}

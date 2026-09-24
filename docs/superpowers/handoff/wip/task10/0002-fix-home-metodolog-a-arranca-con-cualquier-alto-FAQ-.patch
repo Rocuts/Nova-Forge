@@ -1,0 +1,860 @@
+From 9cf8fd93b2b91abf35b68bc0a41e421c0c1719a9 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 18:02:23 +0000
+Subject: [PATCH 2/3] =?UTF-8?q?fix(home):=20metodolog=C3=ADa=20arranca=20c?=
+ =?UTF-8?q?on=20cualquier=20alto,=20FAQ=20legible=20sin=20JavaScript=20y?=
+ =?UTF-8?q?=20paralaje=20suave?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Ronda 1 de la revisión de T10a (cumplimiento, calidad y visual). En celular, la línea de
+Metodología no arrancaba si la pista medía más de 3,3 pantallas (zoom al 400 %, letra grande):
+ahora se dispara por posición. Sin JavaScript la FAQ muestra sus respuestas, y el anillo de foco
+ya no pisa la respuesta abierta. El paralaje del cierre satura de forma suave en lugar de cortar
+a ±20 %. Tecnologías: estado final con reducir movimiento y etiquetas que caben a 768 px.
+
+Decisiones:
+- Disparo de Metodología: useInView con margin "0px 0px -30% 0px" (borde superior de la pista
+  al 70 % del viewport) en lugar de amount 0,3, que dependía del alto de la pista.
+- FAQ sin JavaScript: @media (scripting: none) dentro de @layer base, porque el preflight de
+  Tailwind oculta [hidden] con !important en esa capa; atributos data-faq-panel y
+  data-faq-indicator (§3.4). aria-expanded sigue en false sin script.
+- Anillo de foco: pt-2 en la respuesta. Descartados outline-offset negativo o 0: la pregunta
+  no tiene relleno lateral y el anillo la tocaría.
+- Paralaje: y = l·tanh((p − 0,5)·t/l): pendiente 0,3 en el centro, sin tirón en la cota.
+- Tecnologías: @media (prefers-reduced-motion: reduce) deja las filas quietas; la etiqueta
+  ocupa 4 de 12 columnas hasta lg.
+- Relieve del cierre en celular con DPR ≤ 2 (168 KB más): coste aceptado, para no abandonar
+  la regla «el sizes cubre el marco» (decisión 23 del plan).
+- Skill orbexs-design-system: acordeón, duraciones de la FAQ y orden de la home al día; el
+  resto del skill sigue siendo de T11.
+- Pruebas: 12 nuevas (pista alta, «una vez disparada», FAQ sin JavaScript, anillo de foco,
+  Tecnologías) y la del paralaje mide la velocidad 0,3× y la ausencia de tope seco;
+  IDENTITY_TRANSFORM dentro de su describe; recuentos desde el diccionario. Antes de los
+  arreglos fallaban 11; mutaciones temporales (once: false, PARALLAX 0,05) detectadas.
+- JS de /es: 220 195 B (+34 B), check:modern-js OK; e2e completo 204/204.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../skills/orbexs-design-system/components.md |  77 +++--
+ .claude/skills/orbexs-design-system/layout.md |  30 +-
+ .claude/skills/orbexs-design-system/motion.md |   4 +-
+ .../2026-09-23-home-cartografia-soberana.md   |  20 +-
+ e2e/home-t10.spec.ts                          | 272 +++++++++++++++++-
+ src/app/globals.css                           |  47 ++-
+ src/components/sections/CTA.tsx               |  22 +-
+ src/components/sections/FAQ.tsx               |   9 +-
+ src/components/sections/TechStack.tsx         |   5 +-
+ .../sections/home/MethodologyLine.tsx         |  16 +-
+ 10 files changed, 434 insertions(+), 68 deletions(-)
+
+diff --git a/.claude/skills/orbexs-design-system/components.md b/.claude/skills/orbexs-design-system/components.md
+index 0b34fd1..2e16eac 100644
+--- a/.claude/skills/orbexs-design-system/components.md
++++ b/.claude/skills/orbexs-design-system/components.md
+@@ -213,31 +213,68 @@ Bottom divider:
+ 
+ ## Accordion / FAQ
+ 
++Reference implementation: `src/components/sections/FAQ.tsx` (home redesign, T10).
++
+ ```tsx
+-// Container: space-y-0, items separated by borders
+-<div className="border-b border-[#d4d4d4]">
+-  <button className="w-full flex justify-between items-center py-6 text-left">
+-    <span className="text-base font-medium text-[#0a0a0a]">{question}</span>
+-    <span className="text-xl transition-transform duration-300"
+-      style={{ rotate: isOpen ? 45 : 0 }}>
+-      +
+-    </span>
+-  </button>
+-  <AnimatePresence>
+-    {isOpen && (
+-      <motion.div
+-        initial={{ height: 0, opacity: 0 }}
+-        animate={{ height: "auto", opacity: 1 }}
+-        exit={{ height: 0, opacity: 0 }}
+-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
++// WAI-ARIA accordion. The button lives INSIDE the heading (h3 > button), never
++// button > h3 (that strips the heading role). The panel is always in the DOM,
++// hidden with `hidden`: aria-controls points to a real id and the answer is in
++// the server HTML. No height animation (only transform and opacity), no
++// AnimatePresence: the panel fades in with a short y offset and the "+" turns
++// into "×". Items are separated by borders.
++<div className="border-b border-[#d4d4d4] first:border-t">
++  <h3 className="text-base font-medium text-[#0a0a0a]">
++    <button
++      type="button"
++      id={`faq-question-${index}`}
++      aria-expanded={isOpen}
++      aria-controls={`faq-panel-${index}`}
++      onClick={() => setIsOpen((open) => !open)}
++      className="flex w-full cursor-pointer items-center justify-between gap-8 py-6 text-left"
++    >
++      <span>{question}</span>
++      {/* State indicator: #737373 gives 4.7:1 on white (WCAG 1.4.11 asks 3:1) */}
++      <m.span
++        aria-hidden="true"
++        data-faq-indicator=""
++        initial={false}
++        animate={{ rotate: isOpen ? 45 : 0 }}
++        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
++        className="shrink-0 text-xl text-[#737373]"
+       >
+-        <p className="pb-6 text-base text-[#525252] leading-relaxed">{answer}</p>
+-      </motion.div>
+-    )}
+-  </AnimatePresence>
++        +
++      </m.span>
++    </button>
++  </h3>
++  <m.div
++    id={`faq-panel-${index}`}
++    role="region"
++    aria-labelledby={`faq-question-${index}`}
++    data-faq-panel=""
++    hidden={!isOpen}
++    initial={false}
++    animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
++    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
++  >
++    {/* pt-2 keeps the global focus ring (2px at a 4px offset) off the first line:
++        focus stays on the button when the answer opens from the keyboard */}
++    <p className="pb-6 pt-2 text-base leading-relaxed text-[#525252]">{answer}</p>
++  </m.div>
+ </div>
+ ```
+ 
++- Section on white (`bg-white`, `border-t border-[#e5e5e5]`), with a plain `<h2>` that is
++  visible in the server HTML (no RevealText, no ancestor starting at `opacity: 0`).
++- Without JavaScript nothing can open a panel: `globals.css` shows every
++  `[data-faq-panel][hidden]` and hides `[data-faq-indicator]` inside
++  `@media (scripting: none)`, within `@layer base` (Tailwind's preflight hides
++  `[hidden]` with `!important` in that layer, and a layered `!important` beats an
++  unlayered one).
++- Use `m.*` under the app's `LazyMotion` (never `motion.*` or `AnimatePresence` in
++  home islands: JS budget).
++- The `FAQPage` JSON-LD is generated in `page.tsx` from `dict.faq.items`: keep it in
++  sync when the questions change.
++
+ ---
+ 
+ ## Badges / Eyebrows
+diff --git a/.claude/skills/orbexs-design-system/layout.md b/.claude/skills/orbexs-design-system/layout.md
+index 5f2c63b..0020c76 100644
+--- a/.claude/skills/orbexs-design-system/layout.md
++++ b/.claude/skills/orbexs-design-system/layout.md
+@@ -84,22 +84,28 @@ Key points:
+ 
+ ## Section Background Alternation
+ 
+-The homepage follows this rhythm:
++The homepage follows this order (home redesign, plan §3.5 of
++`docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md`, the source of truth):
+ 
+ ```
+-1. Hero          → white (#ffffff)
+-2. TrustBar      → white, with border-t and border-b (#e5e5e5)
+-3. Services      → white, bg-grid pattern
+-4. FlagshipAI    → dark (#0a0a0a)
+-5. Methodology   → white, border-t (#e5e5e5)
+-6. TechStack     → light gray (#f8f8f8), border-t
+-7. FAQ           → light gray (#f8f8f8)
+-8. Metrics       → dark (#0a0a0a), border-t (#1a1a1a)
+-9. CTA           → dark (#0a0a0a)
++1. Hero (#inicio)           → dark (#0a0a0a) over the relief image, data-header-start="dark"
++2. Thesis                   → white
++3. Capabilities             → white (index + plate)
++4. From paper to data       → dark (#0a0a0a) over the case-file image
++5. What we already built    → dark (#0a0a0a), border-t (#1a1a1a)
++6. Methodology              → white, border-t (#e5e5e5)
++7. TechStack                → light gray (#f8f8f8), border-t (#e5e5e5)
++8. FAQ                      → white, border-t (#e5e5e5)
++9. CTA (closing)            → dark (#0a0a0a) over the lower relief
+ ```
+ 
+-Pattern: White → Gray → White → Dark. Never two identical backgrounds adjacent.
+-Section transitions use `border-t` dividers, not gaps or gradients.
++Pattern: the story sets the tone, and two adjacent sections may share a background
++(Thesis → Capabilities; From paper to data → What we already built, with a #1a1a1a
++divider). Never two light-gray sections in a row: that is why the FAQ is white after
++TechStack. Every home section declares `data-header-theme` (`light` | `dark`) for the
++fixed header.
++Dividers are `border-t` lines (#e5e5e5 on light, #1a1a1a on dark), not gaps or
++gradients; Thesis runs straight into Capabilities without one.
+ 
+ ---
+ 
+diff --git a/.claude/skills/orbexs-design-system/motion.md b/.claude/skills/orbexs-design-system/motion.md
+index 59d153a..6197a7c 100644
+--- a/.claude/skills/orbexs-design-system/motion.md
++++ b/.claude/skills/orbexs-design-system/motion.md
+@@ -59,8 +59,8 @@ duration.section = 0.8  // Full section scroll reveals
+ | Text word reveal         | 0.6s      | entrance    |
+ | Text character reveal    | 0.5s      | entrance    |
+ | Section scroll reveal    | 0.8s      | smooth      |
+-| Accordion expand         | 0.4s      | entrance    |
+-| FAQ icon rotation        | 0.3s      | default     |
++| FAQ answer reveal (opacity + 6px y, never height) | 0.3s | entrance |
++| FAQ "+" rotation         | 0.3s      | entrance    |
+ | Animated counter         | 1.5s      | easeOutCubic|
+ | ScrambleText             | 700-1600ms| frame-based |
+ | IntroSequence letters    | 0.5s each | entrance    |
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index 7ca5f7d..18cc555 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -406,7 +406,9 @@ export async function renderPageSocialImage(opts: { locale: string; path: Intern
+ | `data-method-phase`, `data-active` | cada fase de Metodología | `true` \| `false` |
+ | `data-method-line` | línea de Metodología (una por orientación; T10, decisión 1) | `horizontal` \| `vertical` |
+ | `data-cta-media` | capa de imagen del cierre, la que se desplaza (T10, F3) | — |
+-| `data-tech-row` | cada fila de categorías de Tecnologías (T10, F3: estado final sin JavaScript) | — |
++| `data-tech-row` | cada fila de categorías de Tecnologías (T10, F3: estado final sin JavaScript y con reducir movimiento) | — |
++| `data-faq-panel` | panel de cada respuesta de la FAQ (T10, revisión: sin JavaScript se muestra) | — |
++| `data-faq-indicator` | el «+» de cada pregunta de la FAQ (T10, revisión: sin JavaScript se oculta) | — |
+ | `data-brand-wordmark` | wordmark de Vercel (exento de contraste, ya excluido en axe) | `vercel` |
+ 
+ ### 3.5 Orden y tema de las secciones de la home (resultado de T10)
+@@ -8660,6 +8662,7 @@ cd /home/user/wt/task10
+ | Crear (F3) | `src/components/sections/CTAMedia.tsx`: servidor, el relieve del cierre como slot (decisión 10) |
+ | Modificar (F3) | `src/app/globals.css` (decisión 11) y `eslint.config.mjs` (decisión 10) |
+ | Crear (F3, temporal) | `e2e/home-t10.spec.ts`: las pruebas de T10a; el integrador lo funde en `e2e/home.spec.ts` (decisión 9) |
++| Modificar (revisión, ronda 1) | `.claude/skills/orbexs-design-system/{components,layout,motion}.md`: acordeón, duraciones de la FAQ y orden de la home (decisión 24) |
+ 
+ ### Paso 1 — Prueba primero
+ 
+@@ -9408,8 +9411,23 @@ Lo que el código de `wt/task10` (T10a) cambia respecto de 2.1–2.6 y del paso
+ 15. **Contraste del cierre, medido.** Con el texto oculto (color transparente) y sin encabezado, se tomó el píxel más claro bajo cada texto gris `#a3a3a3` (la segunda línea del título, la descripción y la etiqueta) en 9 viewports (de 320×568 a 2560×1440, y 844×390) y 3 posiciones (entrando, centrada y al final de la página). El más claro es `rgb(39, 39, 39)`: el peor contraste es 5,92:1 (390×844, descripción), por encima del AA (4,5:1). La cuenta de la decisión 5 (≈ 5,2:1) era una cota conservadora.
+ 16. **Pruebas de T10a** (spec temporal `e2e/home-t10.spec.ts`, 21 pruebas). Del paso 1: FAQ; las 3 de Metodología; y «el título del cierre sale del servidor y se ve». Las de Metodología esperan `waitForHydration` antes de desplazarse y comprueban además que las fases activas son las primeras y los colores activo e inactivo. Añadidas: FAQ con teclado (Enter abre y Espacio cierra; `aria-controls` y `aria-labelledby` apuntan a ids reales en los dos estados). Sin JavaScript: los h2 de Metodología, Tecnologías y FAQ se ven, la metodología pinta su estado final y las filas de Tecnologías se ven (decisión 11). La imagen del cierre está en el HTML, perezosa, decorativa y sin `fetchpriority`. Paralaje: en escritorio se mueve, acotado a ±20 % del alto, y la capa siempre cubre la sección; en celular y con reducir movimiento, quieto. Inglés. `sizes` que cubre el marco sin pasarse más de un 10 % en 7 viewports (decisión 12). Misma variante que la portada a 1440×900 y 1920×1080. Antes de implementar fallaban las 12 primeras (las del paso 1 y las primeras añadidas). Las 9 del `sizes` se añadieron después: según la sonda de medida (el mismo cálculo), con el `sizes` del plan fallarían todas.
+ 
++### Decisiones (revisión de T10a, ronda 1)
++Tres lentes (cumplimiento, calidad, visual), 16 hallazgos: 1 mayor, 7 menores y 8 detalles (tres repetidos entre lentes). Todos corregidos, salvo el de la decisión 23, que se anota como coste aceptado (la otra salida que proponía el propio hallazgo). Manda el código de `wt/task10`.
++
++17. **Metodología en celular: disparo por posición (mayor).** Con `useInView(pista, { once: true, amount: 0.3 })`, una pista más alta que 1 / 0,3 pantallas nunca llegaba a verse en un 30 % y la línea no arrancaba: con el zoom del navegador al 400 % (WCAG 1.4.10: 320×256 y 360×225, pistas de 976 y 875 px) o con la letra del navegador a 24 px en 568×320 (1 156 px), las cinco fases se quedaban en gris y la línea sin trazar. Ahora `IN_VIEW_TRIGGER = { once: true, margin: "0px 0px -30% 0px" }`, con cualquier fracción visible: salta cuando el borde superior de la pista cruza el 70 % del viewport, mida lo que mida. En un celular normal (390×844) el punto de disparo casi no cambia (antes, hacia el 68 %). Prueba nueva: la pista entera recorrida en pasos de ¼ de pantalla a 320×256, 360×225 y 568×320 con letra de 24 px, con la premisa comprobada (pista de más de 3,3 pantallas); con `amount: 0.3` fallan las tres.
++18. **Una vez disparada, la línea termina.** Prueba nueva a 390×844 y 667×375: en cuanto la línea empieza a trazarse (se detecta en el navegador, fotograma a fotograma), un salto a la FAQ saca la pista de pantalla a mitad del trazo, y la línea termina igual, con las cinco fases activas. Lo garantiza `once`: con `once: false` fallan las dos (mutación temporal, revertida). A 667×375 también fallaba con `amount: 0.3`: con la pista a media pantalla no se veía un 30 % de ella.
++19. **FAQ sin JavaScript.** Los paneles salían con `hidden` y los botones no tienen manejador: ninguna respuesta se leía y el «+» invitaba a pulsar. Un bloque `@media (scripting: none)` dentro de `@layer base` en `globals.css` muestra `[data-faq-panel][hidden]` (con opacidad 1 y sin desplazamiento: motion deja los de «cerrado» en el atributo `style`), oculta `[data-faq-indicator]` y quita la mano del cursor. Va en `@layer base` porque el preflight de Tailwind oculta `[hidden]` con `display: none !important` en esa capa, y un `!important` con capa gana a uno sin capa; dentro de la capa gana por especificidad. Atributos nuevos en §3.4. Sin JavaScript, `aria-expanded` sigue en `false` con el panel a la vista: sin script no se puede cambiar, y el lector de pantalla lee la respuesta justo después de la pregunta. Con JavaScript no cambia nada: la prueba de teclado sigue exigiendo los paneles ocultos al cargar. Prueba nueva sin JavaScript a 1440×900 y 390×844: las cuatro respuestas se ven enteras, con opacidad 1 y sin desplazamiento, y ningún «+».
++20. **El anillo de foco de la FAQ ya no pisa la respuesta abierta.** El anillo global (2 px a 4 px del botón) cortaba el borde superior de la primera línea (4 px de solape), y al abrir con teclado el foco se queda en el botón. `pt-2` en el párrafo de la respuesta: el anillo queda 4 px por encima de la primera línea. Descartados `outline-offset` negativo (el botón no tiene relleno lateral y el anillo cruzaría la primera letra de la pregunta) y `outline-offset: 0` (tocaría el texto por la izquierda). Prueba nueva a 1440×900 y 390×844: borde inferior del anillo (caja del botón + `outline-offset` + `outline-width`) por encima de la primera línea de la respuesta, con el foco visible.
++21. **Paralaje del cierre con saturación suave (sustituye al tope de la decisión 3).** `y = l · tanh((p − 0,5) · t / l)`, con `t` = 0,3 × (alto del viewport + alto de la sección) y `l` = 0,2 × alto de la sección. En el centro la pendiente sigue siendo 0,3 px por px de scroll; hacia los extremos baja de forma continua y nunca alcanza el margen de la capa. Con el `clamp`, la capa quedaba pegada a la sección fuera del tramo central (el 58 % del paso a 1440×900, el 43 % a 2560×1440) y la velocidad aparente de la imagen saltaba de 0,7× a 1× el scroll con la sección a la vista. La prueba de escritorio ahora mide la velocidad: Δ desplazamiento / Δ scroll entre −50 y +50 px de la sección centrada = 0,3 ± 0,02 (antes cualquier `PARALLAX` > 0,0015 la pasaba; con 0,05 ahora falla, mutación temporal revertida). Y exige que la capa siga moviéndose entre el 85 % y el 80 % de entrada (con el tope seco, 0 px).
++22. **Tecnologías con reducir movimiento y a 768 px (preexistentes).** `MotionConfig reducedMotion="user"` solo quita el desplazamiento: las filas entraban con un fundido escalonado y, tras un salto, la tarjeta se veía vacía casi 1 s. Un bloque `@media (prefers-reduced-motion: reduce)` en `globals.css` las deja en su estado final (§3.6), el mismo patrón que sin JavaScript y seguro para la hidratación. A 768 px, «NUBE E INFRAESTRUCTURA» (tracking 0,25em) entraba 8 px en la lista: la etiqueta ocupa 4 de 12 columnas hasta `lg` (`md:col-span-4 lg:col-span-3`; la lista, `md:col-span-8 lg:col-span-9`). Pruebas nuevas: con reducir movimiento, las siete filas con opacidad 1 y sin transformación justo después de saltar a la sección; a 768 y 1024 px, ninguna etiqueta invade la lista, en es y en en.
++23. **Relieve del cierre en celulares con DPR ≤ 2: coste aceptado (complemento de la decisión 12).** A 390×844 y 375×667 con DPR 2, la portada pide la variante de 1920 px (ranura de 110vh) y el cierre, para cubrir su marco (unos 1 240–1 360 px CSS, 2 500–2 700 px físicos), la de 3840 px: 168 KB más al acercarse al final de la página (medido en la revisión). Con DPR 3 y en escritorio reutiliza la descarga de la portada. Pedir la variante de la portada obligaría a una ranura por debajo del marco (70–77 % de su resolución física) y a abandonar, solo en celular vertical, la regla que siguen todas las imágenes de la home: el `sizes` cubre el marco (y su prueba). Se acepta el coste: la imagen es perezosa, no toca el LCP y solo se descarga al acercarse al cierre.
++24. **Skill `orbexs-design-system`.** El acordeón de `components.md` (botón sin encabezado, `AnimatePresence` y altura animada), dos filas de la tabla de duraciones de `motion.md` y el orden de la home de `layout.md` (FAQ en `#f8f8f8`, TrustBar, FlagshipAI, Metrics) contradecían T10 (diseño §5.8 y §11, plan §3.5 y §3.8): un agente que siguiera el skill reintroduciría `button > h3` y la animación de altura. Se actualizan esas tres partes con el patrón de `FAQ.tsx` y el orden de §3.5. El resto del skill (`.bg-grid`, IntroSequence, ScrambleText, la referencia de movimiento y scroll) sigue siendo de T11.
++25. **Pruebas de la ronda 1** (el spec temporal pasa de 21 a 33 pruebas). `IDENTITY_TRANSFORM` vuelve al `describe` de Metodología, como en el paso 1: el spec temporal de T9 declara la misma constante a nivel de módulo y, al fundirlos en `e2e/home.spec.ts`, tsc daría «Cannot redeclare block-scoped variable»; la FAQ declara la suya. Los recuentos de fases salen del diccionario (`es.methodology.steps.length`), no del literal 5 (§3.7). La prueba de la imagen del cierre se llama «la imagen del cierre está en el HTML: perezosa, decorativa y sin prioridad»: que llegue como slot del servidor lo vigila la prueba de P1 de `home.spec.ts` («ningún script de /es lleva un import estático de imagen»), citada en un comentario. Antes de los arreglos fallaban 11 de las nuevas o cambiadas: las dos del anillo de foco, las tres de la pista alta, «una vez disparada» a 667×375, las dos de la FAQ sin JavaScript, las dos de Tecnologías y la del paralaje de escritorio.
++
+ **Estado al cierre (T10a, F3, en paralelo, sin T8 ni T9):** JS de `/es` (`next start`, 1440×900, mediana de 3, `measure-js.mjs`): base del worktree (`3644611`: P1 y T7) 220 233 B en 15 scripts → con T10a 220 161 B en 15 scripts: **−72 B** (tope +3 000 B; margen de 49 561 B hasta 269 722). El chunk de las islas de la home crece 598 B (MethodologyLine y los nuevos CTA y FAQ en lugar de Methodology y los antiguos), y el de los efectos de texto baja de 2 301 a 1 616 B: RevealText y ScrambleText salen de `/es` (queda CoverReveal, que solo usa CaseStudy y retira T9). AnimatePresence sigue en `/es` por el Header. `npm run build` en verde, con `check:modern-js` OK (let=3516, class=167). e2e completo 192/192 en verde (171 + 21 de T10a), lint y `tsc` en verde. En una pasada de `home.spec.ts` + `smoke.spec.ts` con la máquina cargada (otras dos ejecuciones a la vez), «portada · scrub en tableta vertical grande» falló una vez («la ruta cruza «índice /01»», una comparación de capturas); repetida una vez, pasó, y la suite completa pasó entera. `ScrambleText` sigue en uso (`ScheduleForm.tsx`): no es código muerto para T11.
+ 
++**Estado tras la ronda 1 de la revisión (decisiones 17–25):** JS de `/es` (mismo método) 220 195 B en 15 scripts: +34 B sobre la entrega de T10a (`IN_VIEW_TRIGGER`, `parallaxShift` y los dos atributos de la FAQ) y −38 B sobre la base del worktree; margen de 49 527 B hasta 269 722. `npm run build` en verde, con `check:modern-js` OK (let=3516, class=167). Spec temporal 33/33; e2e completo 204/204 en verde (171 + 33), sin repeticiones; lint y `tsc` en verde.
++
+ ---
+ 
+ ## Tarea 11 — Limpieza, documentación y verificación final
+diff --git a/e2e/home-t10.spec.ts b/e2e/home-t10.spec.ts
+index 4a98454..b44c4e9 100644
+--- a/e2e/home-t10.spec.ts
++++ b/e2e/home-t10.spec.ts
+@@ -14,9 +14,6 @@ import { effectiveOpacity, scrollToY, waitForHydration } from './helpers'
+  * T10b y no están aquí.
+  */
+ 
+-/** Transformación calculada que equivale a la identidad (escala 1, sin desplazar). */
+-const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
+-
+ /** Desplazamiento vertical (translateY) de la capa de imagen del cierre, en px. */
+ function closingLayerShift(page: Page): Promise<number> {
+   return page
+@@ -27,6 +24,20 @@ function closingLayerShift(page: Page): Promise<number> {
+     })
+ }
+ 
++/** `closingLayerShift` cuando dos lecturas seguidas coinciden: la capa ya reaccionó al último scroll. */
++async function settledClosingLayerShift(page: Page): Promise<number> {
++  let previous = Number.NaN
++  await expect
++    .poll(async () => {
++      const current = await closingLayerShift(page)
++      const settled = current === previous
++      previous = current
++      return settled
++    })
++    .toBe(true)
++  return previous
++}
++
+ /** Posición de scroll que deja el borde superior de `selector` en la fracción `at` del viewport. */
+ function scrollYFor(page: Page, selector: string, at: number): Promise<number> {
+   return page
+@@ -38,6 +49,9 @@ function scrollYFor(page: Page, selector: string, at: number): Promise<number> {
+ // ── Preguntas frecuentes ────────────────────────────────────────────────
+ 
+ test.describe('T10 · Preguntas frecuentes', () => {
++  /** Transformación calculada que equivale a la identidad (escala 1, sin desplazar). */
++  const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
++
+   test('cada pregunta es h3 > button[aria-expanded] y el JSON-LD FAQPage las tiene todas', async ({ page }) => {
+     await page.goto('/es')
+     const faq = page.locator(`#${es.faq.sectionId}`)
+@@ -98,19 +112,66 @@ test.describe('T10 · Preguntas frecuentes', () => {
+     await expect(second).toHaveAttribute('aria-expanded', 'false')
+     await expect(panel).toBeHidden()
+   })
++
++  // Revisión de T10a (ronda 1): el anillo de foco global (2 px a 4 px del botón) cortaba
++  // la parte alta de la primera línea de la respuesta abierta, y el foco se queda en el
++  // botón al abrir con teclado.
++  for (const viewport of [
++    { width: 1440, height: 900 },
++    { width: 390, height: 844 },
++  ]) {
++    test(`con teclado (${viewport.width}×${viewport.height}), el anillo de foco no pisa la respuesta abierta`, async ({
++      page,
++    }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const first = page.locator(`#${es.faq.sectionId} h3 > button`).first()
++      const panelId = (await first.getAttribute('aria-controls'))!
++      await first.focus()
++      await page.keyboard.press('Enter')
++      await expect(first).toHaveAttribute('aria-expanded', 'true')
++      const panel = page.locator(`[id="${panelId}"]`)
++      await expect(panel).toBeVisible()
++      // El panel entra con 6 px de desplazamiento: se mide ya asentado.
++      await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++
++      const geometry = await first.evaluate((button, id) => {
++        const style = getComputedStyle(button)
++        const answer = document.getElementById(id)!.querySelector('p')!
++        const range = document.createRange()
++        range.selectNodeContents(answer)
++        return {
++          focusVisible: button.matches(':focus-visible'),
++          outline: style.outlineStyle,
++          ringBottom: button.getBoundingClientRect().bottom + parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth),
++          firstLineTop: range.getClientRects()[0].top,
++        }
++      }, panelId)
++      expect(geometry.focusVisible, 'el foco del teclado se ve').toBe(true)
++      expect(geometry.outline).not.toBe('none')
++      expect(geometry.ringBottom, 'borde inferior del anillo frente a la primera línea de la respuesta').toBeLessThanOrEqual(
++        geometry.firstLineTop
++      )
++    })
++  }
+ })
+ 
+ // ── Metodología ─────────────────────────────────────────────────────────
+ 
+ test.describe('T10 · Metodología', () => {
++  /** Transformación calculada que equivale a la identidad (escala 1, sin desplazar). */
++  const IDENTITY_TRANSFORM = /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/
++  const PHASES = es.methodology.steps.length
++
+   test('con reducir movimiento: las 5 fases activas y la línea completa', async ({ page }) => {
+     await page.emulateMedia({ reducedMotion: 'reduce' })
+     await page.setViewportSize({ width: 1440, height: 900 })
+     await page.goto('/es')
+     const section = page.locator(`#${es.methodology.sectionId}`)
+     await expect(section).toHaveAttribute('data-stage-mode', 'static')
+-    await expect(section.locator('[data-method-phase]')).toHaveCount(es.methodology.steps.length)
+-    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(5)
++    await expect(section.locator('[data-method-phase]')).toHaveCount(PHASES)
++    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(PHASES)
+     const line = section.locator('[data-method-line="horizontal"]')
+     await expect.poll(() => line.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
+   })
+@@ -132,7 +193,7 @@ test.describe('T10 · Metodología', () => {
+       .evaluate((el) => el.getBoundingClientRect().top + window.scrollY)
+     await scrollToY(page, lineTop - 900 * 0.55)
+     await expect.poll(() => active.count()).toBeGreaterThan(0)
+-    expect(await active.count()).toBeLessThan(5)
++    expect(await active.count()).toBeLessThan(PHASES)
+     // Las activas son las primeras: la línea avanza de izquierda a derecha.
+     await expect
+       .poll(() =>
+@@ -147,7 +208,7 @@ test.describe('T10 · Metodología', () => {
+ 
+     // La fila al 20 % → avance 1 → todas activas.
+     await scrollToY(page, lineTop - 900 * 0.2)
+-    await expect(active).toHaveCount(5)
++    await expect(active).toHaveCount(PHASES)
+   })
+ 
+   test('en móvil (390×844) la línea es vertical y se completa al entrar en pantalla', async ({ page }) => {
+@@ -162,10 +223,93 @@ test.describe('T10 · Metodología', () => {
+       .first()
+       .evaluate((el) => el.getBoundingClientRect().top + window.scrollY)
+     await scrollToY(page, trackTop - 844 * 0.2)
+-    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(5)
++    await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(PHASES)
+     const vertical = section.locator('[data-method-line="vertical"]')
+     await expect.poll(() => vertical.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
+   })
++
++  // Revisión de T10a (ronda 1): con `amount: 0.3`, una pista más alta que 1 / 0,3
++  // pantallas nunca llegaba a verse en un 30 % y la línea no arrancaba. Pasa con el
++  // zoom del navegador al 400 % (WCAG 1.4.10: 1280×1024 → 320×256; 1440×900 → 360×225)
++  // y con la letra del navegador grande en un celular apaisado.
++  for (const { name, viewport, fontSize } of [
++    { name: 'zoom al 400 % de 1280×1024', viewport: { width: 320, height: 256 }, fontSize: 16 },
++    { name: 'zoom al 400 % de 1440×900', viewport: { width: 360, height: 225 }, fontSize: 16 },
++    { name: 'letra del navegador a 24 px', viewport: { width: 568, height: 320 }, fontSize: 24 },
++  ]) {
++    test(`con la pista más alta que 3,3 pantallas (${name}, ${viewport.width}×${viewport.height}) la línea se traza al recorrerla`, async ({
++      page,
++    }) => {
++      if (fontSize !== 16) {
++        const cdp = await page.context().newCDPSession(page)
++        await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize } })
++      }
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = page.locator(`#${es.methodology.sectionId}`)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      const active = section.locator('[data-method-phase][data-active="true"]')
++      await expect(active).toHaveCount(0)
++      const vertical = section.locator('[data-method-line="vertical"]')
++      const track = await vertical.evaluate((line) => {
++        const box = line.parentElement!.getBoundingClientRect()
++        return { top: box.top + window.scrollY, bottom: box.bottom + window.scrollY, height: box.height }
++      })
++      // Premisa del caso: nunca se ve un 30 % de la pista a la vez.
++      expect(track.height, 'alto de la pista').toBeGreaterThan(viewport.height / 0.3)
++
++      // Se recorre la pista entera, de «asoma por abajo» a «sale por arriba», en pasos de ¼ de pantalla.
++      for (let y = track.top - viewport.height; y <= track.bottom; y += viewport.height / 4) {
++        await scrollToY(page, y)
++      }
++      await expect(active).toHaveCount(PHASES)
++      await expect.poll(() => vertical.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++    })
++  }
++
++  // Revisión de T10a (ronda 1), el fallo de T8: una vez disparada, la línea termina
++  // aunque la pista salga de pantalla a mitad del trazo (como la red de Capacidades, T7).
++  for (const viewport of [
++    { width: 390, height: 844 },
++    { width: 667, height: 375 },
++  ]) {
++    test(`una vez disparada (${viewport.width}×${viewport.height}), la línea termina aunque la pista salga de pantalla`, async ({
++      page,
++    }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      await waitForHydration(page)
++      const section = page.locator(`#${es.methodology.sectionId}`)
++      await expect(section).toHaveAttribute('data-stage-mode', 'inView')
++      await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(0)
++      const vertical = section.locator('[data-method-line="vertical"]')
++
++      // Borde superior de la pista a media pantalla: se dispara.
++      const trackTop = await vertical.evaluate((line) => line.parentElement!.getBoundingClientRect().top + window.scrollY)
++      await scrollToY(page, trackTop - viewport.height * 0.5)
++      // En cuanto la línea empieza a trazarse (1,6 s en total), salto a la FAQ.
++      const atJump = await vertical.evaluate(async (line, faqId) => {
++        const scaleY = () => {
++          const transform = getComputedStyle(line).transform
++          return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).d
++        }
++        const deadline = performance.now() + 5000
++        while (scaleY() === 0 && performance.now() < deadline) {
++          await new Promise((resolve) => requestAnimationFrame(resolve))
++        }
++        const scale = scaleY()
++        document.getElementById(faqId)!.scrollIntoView({ behavior: 'instant', block: 'start' })
++        return { scale, trackBottom: line.parentElement!.getBoundingClientRect().bottom }
++      }, es.faq.sectionId)
++      expect(atJump.scale, 'la línea arrancó').toBeGreaterThan(0)
++      expect(atJump.scale, 'el salto llega a mitad del trazo').toBeLessThan(1)
++      expect(atJump.trackBottom, 'tras el salto, la pista está por encima de la pantalla').toBeLessThan(0)
++
++      await expect(section.locator('[data-method-phase][data-active="true"]')).toHaveCount(PHASES)
++      await expect.poll(() => vertical.evaluate((el) => getComputedStyle(el).transform)).toMatch(IDENTITY_TRANSFORM)
++    })
++  }
+ })
+ 
+ // ── Sin JavaScript ──────────────────────────────────────────────────────
+@@ -221,12 +365,95 @@ test.describe('T10 · Metodología, Tecnologías y FAQ sin JavaScript', () => {
+       await expect(rows.nth(i)).toHaveCSS('transform', 'none')
+     }
+   })
++
++  // Revisión de T10a (ronda 1): sin JavaScript los paneles salían con `hidden` y los
++  // botones no tienen manejador: el «+» invitaba a abrir y ninguna respuesta se leía.
++  for (const viewport of [
++    { width: 1440, height: 900 },
++    { width: 390, height: 844 },
++  ]) {
++    test(`las respuestas de la FAQ se leen y el «+» no se ofrece (${viewport.width}×${viewport.height})`, async ({ page }) => {
++      await page.setViewportSize(viewport)
++      await page.goto('/es')
++      const faq = page.locator(`#${es.faq.sectionId}`)
++      const panels = faq.getByRole('region')
++      await expect(panels).toHaveCount(es.faq.items.length)
++      for (const [i, item] of es.faq.items.entries()) {
++        const panel = panels.nth(i)
++        await expect(panel).toBeVisible()
++        await expect(panel).toHaveText(item.answer)
++        expect(await effectiveOpacity(panel), `respuesta ${i + 1}`).toBe(1)
++        await expect(panel).toHaveCSS('transform', 'none')
++      }
++      const indicators = faq.locator('h3 > button > [aria-hidden="true"]')
++      await expect(indicators).toHaveCount(es.faq.items.length)
++      for (let i = 0; i < es.faq.items.length; i++) await expect(indicators.nth(i)).toBeHidden()
++    })
++  }
++})
++
++// ── Tecnologías ─────────────────────────────────────────────────────────
++
++test.describe('T10 · Tecnologías', () => {
++  // Revisión de T10a (ronda 1): MotionConfig reducedMotion="user" solo quita el
++  // desplazamiento; las filas entraban con un fundido escalonado y, tras un salto, la
++  // tarjeta se veía vacía casi 1 s. Reducir movimiento pide el estado final (§3.6).
++  test('con reducir movimiento, las filas se ven quietas en cuanto la sección aparece', async ({ page }) => {
++    await page.emulateMedia({ reducedMotion: 'reduce' })
++    await page.setViewportSize({ width: 1440, height: 900 })
++    await page.goto('/es')
++    await waitForHydration(page)
++    const rows = page.locator(`#${es.techStack.sectionId} [data-tech-row]`)
++    await expect(rows).toHaveCount(es.techStack.categories.length)
++    await scrollToY(page, await scrollYFor(page, `#${es.techStack.sectionId} [data-tech-row]`, 0.2))
++    const states = await rows.evaluateAll((elements) =>
++      elements.map((element) => {
++        let opacity = 1
++        for (let node: Element | null = element; node; node = node.parentElement) opacity *= Number(getComputedStyle(node).opacity)
++        return { opacity, transform: getComputedStyle(element).transform }
++      })
++    )
++    expect(states).toEqual(states.map(() => ({ opacity: 1, transform: 'none' })))
++  })
++
++  // Revisión de T10a (ronda 1): a 768 px, «NUBE E INFRAESTRUCTURA» (tracking 0,25em, 3 de
++  // 12 columnas) no cabía y entraba 8 px en la columna de las tecnologías.
++  for (const viewport of [
++    { width: 768, height: 1024 },
++    { width: 1024, height: 768 },
++  ]) {
++    test(`a ${viewport.width} px, la etiqueta de cada categoría no invade la lista`, async ({ page }) => {
++      await page.setViewportSize(viewport)
++      for (const [locale, dict] of [
++        ['es', es],
++        ['en', en],
++      ] as const) {
++        await page.goto(buildLocalePath(locale, '/'))
++        const labels = await page.locator(`#${dict.techStack.sectionId} [data-tech-row]`).evaluateAll((rows) =>
++          rows.map((row) => {
++            const heading = row.querySelector('h3')!
++            const text = document.createRange()
++            text.selectNodeContents(heading)
++            return {
++              category: heading.textContent,
++              overlap: text.getBoundingClientRect().right - row.querySelector('ul')!.getBoundingClientRect().left,
++            }
++          })
++        )
++        expect(labels).toHaveLength(dict.techStack.categories.length)
++        expect(labels.filter(({ overlap }) => overlap > 0), `etiquetas que invaden la lista en /${locale}`).toEqual([])
++      }
++    })
++  }
+ })
+ 
+ // ── Cierre ──────────────────────────────────────────────────────────────
+ 
+ test.describe('T10 · Cierre', () => {
+-  test('la imagen llega como slot del servidor: perezosa, decorativa y sin prioridad', async ({ request }) => {
++  // Que la imagen llegue como slot del servidor (sin next/image ni el import en el JS
++  // de la isla) lo vigila la prueba de P1 de home.spec.ts, «ningún script de /es lleva
++  // un import estático de imagen». Esta mira sus atributos en el HTML.
++  test('la imagen del cierre está en el HTML: perezosa, decorativa y sin prioridad', async ({ request }) => {
+     const html = await (await request.get('/es')).text()
+     const closing = html.slice(html.lastIndexOf('data-cta-media'))
+     const img = closing.match(/<img[^>]*>/)?.[0]
+@@ -236,7 +463,7 @@ test.describe('T10 · Cierre', () => {
+     expect(img).not.toMatch(/fetchpriority/i)
+   })
+ 
+-  test('en escritorio (1440×900) el relieve se desplaza despacio y siempre cubre la sección', async ({ page }) => {
++  test('en escritorio (1440×900) el relieve se desplaza a 0,3× y siempre cubre la sección', async ({ page }) => {
+     await page.setViewportSize({ width: 1440, height: 900 })
+     await page.goto('/es')
+     await waitForHydration(page)
+@@ -252,19 +479,25 @@ test.describe('T10 · Cierre', () => {
+         const box = section.getBoundingClientRect()
+         return { layerTop: layer.top, layerBottom: layer.bottom, top: box.top, bottom: box.bottom, height: box.height }
+       })
+-    const entering = await scrollYFor(page, 'section:has([data-cta-media])', 0.85)
+-    await scrollToY(page, entering)
++    await scrollToY(page, await scrollYFor(page, 'section:has([data-cta-media])', 0.85))
+     await expect.poll(() => closingLayerShift(page)).toBeLessThan(-1)
+-    const early = await closingLayerShift(page)
++    const early = await settledClosingLayerShift(page)
+     const earlyBox = await geometry()
+ 
++    // Sin tope seco (revisión de T10a, ronda 1): al seguir entrando, la capa sigue
++    // moviéndose respecto de la sección. Con un corte a ±20 % quedaba pegada a ella y su
++    // velocidad aparente saltaba de 0,7× a 1× el scroll con la sección a la vista.
++    await scrollToY(page, await scrollYFor(page, 'section:has([data-cta-media])', 0.8))
++    const later = await settledClosingLayerShift(page)
++    expect(later - early, 'desplazamiento de la capa entre el 85 % y el 80 %').toBeGreaterThan(0.5)
++
+     const centered = await closing.evaluate((section) => {
+       const box = section.getBoundingClientRect()
+       return box.top + window.scrollY - (window.innerHeight - box.height) / 2
+     })
+     await scrollToY(page, centered)
+-    await expect.poll(() => closingLayerShift(page)).toBeGreaterThan(early + 1)
+-    const middle = await closingLayerShift(page)
++    await expect.poll(() => closingLayerShift(page)).toBeGreaterThan(later + 1)
++    const middle = await settledClosingLayerShift(page)
+     const middleBox = await geometry()
+ 
+     // Centrada: desplazamiento ≈ 0. Entrando: hacia arriba y como mucho el margen de la capa (20 % del alto).
+@@ -274,6 +507,15 @@ test.describe('T10 · Cierre', () => {
+       expect(box.layerTop).toBeLessThanOrEqual(box.top)
+       expect(box.layerBottom).toBeGreaterThanOrEqual(box.bottom - 0.5)
+     }
++
++    // Velocidad (diseño §5.9, decisión 3): en el tramo central, 0,3 px por px de scroll
++    // respecto de la sección (revisión de T10a, ronda 1: antes ninguna aserción la medía).
++    await scrollToY(page, centered - 50)
++    const above = await settledClosingLayerShift(page)
++    await scrollToY(page, centered + 50)
++    const below = await settledClosingLayerShift(page)
++    const speed = (below - above) / 100
++    expect(Math.abs(speed - 0.3), `velocidad de la capa: ${speed.toFixed(3)} px por px de scroll`).toBeLessThanOrEqual(0.02)
+   })
+ 
+   for (const { name, viewport, reducedMotion, mode } of [
+diff --git a/src/app/globals.css b/src/app/globals.css
+index e84c402..9a8de7a 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -436,13 +436,18 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
+   }
+ }
+ 
+-/* ── Metodología y Tecnologías (home) ────────────────────────────────
+-   Sin JavaScript: el HTML del servidor trae el primer render (scrub, avance
+-   0): línea sin trazar y las cinco fases en gris (#737373). Como en la
+-   portada y en Tesis y Capacidades, se pinta el estado final, el mismo que
+-   con reducir movimiento: línea completa y fases en #0a0a0a (título), #525252
+-   (texto) y punto negro. Las filas de Tecnologías entran con whileInView
+-   desde opacity 0 y sin JavaScript no entrarían nunca: se muestran quietas.
++/* ── Metodología, Tecnologías y FAQ (home) ───────────────────────────
++   - Sin JavaScript: el HTML del servidor trae el primer render (scrub, avance
++     0): línea sin trazar y las cinco fases en gris (#737373). Como en la
++     portada y en Tesis y Capacidades, se pinta el estado final, el mismo que
++     con reducir movimiento: línea completa y fases en #0a0a0a (título),
++     #525252 (texto) y punto negro. Las filas de Tecnologías entran con
++     whileInView desde opacity 0 y sin JavaScript no entrarían nunca: se
++     muestran quietas.
++   - Reducir movimiento: MotionConfig reducedMotion="user" solo quita el
++     desplazamiento, y las filas de Tecnologías seguirían entrando con un
++     fundido escalonado (la tarjeta, vacía casi 1 s tras un salto). Estado
++     final, como pide §3.6.
+    Llevan !important porque motion escribe su escala, su opacidad y su
+    desplazamiento en el atributo style (en SVG basta con ganar a los atributos
+    de presentación; aquí no). */
+@@ -464,6 +469,34 @@ body:has([data-header-start="dark"]) .site-header:not([data-tone])[data-scrolled
+     color: #525252;
+   }
+ }
++@media (prefers-reduced-motion: reduce) {
++  [data-tech-row] {
++    opacity: 1 !important;
++    transform: none !important;
++  }
++}
++/* FAQ sin JavaScript: los paneles salen del servidor con `hidden` (y con la
++   opacidad y el desplazamiento de cerrado en el atributo style) y ningún
++   manejador los abre. Se muestran todos y el «+» se oculta, para que las
++   respuestas se lean y nada invite a pulsar. Va dentro de @layer base: el
++   preflight de Tailwind declara `[hidden] { display: none !important }` en
++   esa capa, y un !important de una capa gana a cualquiera sin capa; dentro de
++   la capa gana este por especificidad. Con JavaScript no cambia nada. */
++@layer base {
++  @media (scripting: none) {
++    [data-faq-panel][hidden] {
++      display: block !important;
++      opacity: 1 !important;
++      transform: none !important;
++    }
++    [data-faq-indicator] {
++      display: none !important;
++    }
++    button:has(> [data-faq-indicator]) {
++      cursor: inherit !important;
++    }
++  }
++}
+ 
+ /* ── Orbexs Live Studio ──────────────────────────────────────────────
+    Broadcast-signal treatments. Scoped to the Live Studio surfaces; the
+diff --git a/src/components/sections/CTA.tsx b/src/components/sections/CTA.tsx
+index 8856d68..4eb665c 100644
+--- a/src/components/sections/CTA.tsx
++++ b/src/components/sections/CTA.tsx
+@@ -18,11 +18,22 @@ interface CTAContent {
+ 
+ /** Paso completo de la sección: 0 = su borde superior toca el inferior del viewport; 1 = su borde inferior sale por arriba. */
+ const OFFSET: StageOffset = ["start end", "end start"]
+-/** La imagen se desplaza, respecto de la sección, 0,3 px por cada px de scroll. */
++/** La imagen se desplaza, respecto de la sección, 0,3 px por cada px de scroll (en el tramo central). */
+ const PARALLAX = 0.3
+-/** Margen de la capa por debajo de la sección (-bottom-[20%]): tope del desplazamiento en ambos sentidos. */
++/** Margen de la capa por debajo de la sección (-bottom-[20%]): cota del desplazamiento en ambos sentidos. */
+ const OVERSCAN = 0.2
+ 
++/**
++ * Desplazamiento de la capa: 0,3× el scroll con la sección centrada y una
++ * saturación suave hacia la cota `limit`, que nunca alcanza. Con un corte seco
++ * (clamp) la capa quedaba pegada a la sección fuera del tramo central y su
++ * velocidad aparente saltaba de 0,7× a 1× el scroll con la sección a la vista;
++ * tanh mantiene la pendiente en el centro y la hace variar de forma continua.
++ */
++function parallaxShift(progress: number, travel: number, limit: number) {
++  return limit === 0 ? 0 : limit * Math.tanh(((progress - 0.5) * travel) / limit)
++}
++
+ /**
+  * Cierre (diseño §5.9): el relieve en su zona inferior, con desplazamiento lento
+  * (0,3× el scroll), detrás de «Hablemos de su próximo sistema.».
+@@ -35,7 +46,8 @@ const OVERSCAN = 0.2
+  *   texto codificado y sin ningún ancestro con opacity 0 (se ve sin JavaScript).
+  * - Contraste AA: un degradado #0a0a0a (sólido arriba y abajo, 80 % en el
+  *   centro) cubre la imagen; ver CTAMedia para la medida sobre el relieve.
+- * - Paralaje: solo translateY de la capa de imagen, y solo en modo "scrub". En
++ * - Paralaje: solo translateY de la capa de imagen, y solo en modo "scrub"
++ *   (parallaxShift: 0,3× en el centro, saturación suave hacia el margen). En
+  *   "inView" (celular: animaciones al entrar, no ligadas al scroll) y "static"
+  *   (reducir movimiento) la capa no se mueve.
+  * - Encuadre inferior: la capa sobresale 50 % por arriba y 20 % por abajo de la
+@@ -60,9 +72,7 @@ export function CTA({
+   // Viven en MotionValues: medir no provoca renders de React.
+   const travel = useMotionValue(0)
+   const limit = useMotionValue(0)
+-  const y = useTransform([progress, travel, limit], ([p, t, l]: number[]) =>
+-    l === 0 ? 0 : Math.min(l, Math.max(-l, (p - 0.5) * t)),
+-  )
++  const y = useTransform([progress, travel, limit], ([p, t, l]: number[]) => parallaxShift(p, t, l))
+ 
+   useEffect(() => {
+     const section = sectionRef.current
+diff --git a/src/components/sections/FAQ.tsx b/src/components/sections/FAQ.tsx
+index 1c29a32..f567be0 100644
+--- a/src/components/sections/FAQ.tsx
++++ b/src/components/sections/FAQ.tsx
+@@ -14,6 +14,9 @@ import { easing } from "@/lib/motion"
+ // - Fondo blanco (antes #f8f8f8) para no encadenar dos secciones grises tras
+ //   Tecnologías; el <h2> se ve desde el servidor (sin RevealText ni una
+ //   sección que entre desde opacity 0).
++// - Sin JavaScript no hay manejador que abra los paneles: globals.css
++//   (`@media (scripting: none)`, data-faq-panel y data-faq-indicator) los
++//   muestra todos y oculta el «+», para que las respuestas se lean.
+ // El JSON-LD FAQPage lo genera src/app/[locale]/page.tsx desde dict.faq.items.
+ 
+ interface FAQContent {
+@@ -43,6 +46,7 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
+           {/* Indicador del estado (se gira a «×»): #737373 da 4,7:1 sobre blanco (WCAG 1.4.11 pide 3:1). */}
+           <m.span
+             aria-hidden="true"
++            data-faq-indicator=""
+             initial={false}
+             animate={{ rotate: isOpen ? 45 : 0 }}
+             transition={{ duration: 0.3, ease: easing.entrance }}
+@@ -56,12 +60,15 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
+         id={panelId}
+         role="region"
+         aria-labelledby={buttonId}
++        data-faq-panel=""
+         hidden={!isOpen}
+         initial={false}
+         animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
+         transition={{ duration: 0.3, ease: easing.entrance }}
+       >
+-        <p className="pb-6 text-base leading-relaxed text-[#525252]">{answer}</p>
++        {/* pt-2: el anillo de foco global (2 px a 4 px del botón) no pisa la primera línea;
++            al abrir con teclado, el foco se queda en el botón. */}
++        <p className="pb-6 pt-2 text-base leading-relaxed text-[#525252]">{answer}</p>
+       </m.div>
+     </div>
+   )
+diff --git a/src/components/sections/TechStack.tsx b/src/components/sections/TechStack.tsx
+index 823f4f6..b8612bd 100644
+--- a/src/components/sections/TechStack.tsx
++++ b/src/components/sections/TechStack.tsx
+@@ -29,7 +29,8 @@ function CategoryRow({
+       transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+       className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8 py-8 border-b border-[#e5e5e5] last:border-b-0"
+     >
+-      <div className="md:col-span-3 flex items-start gap-4">
++      {/* 4 de 12 columnas hasta lg: a 768 px, «NUBE E INFRAESTRUCTURA» (tracking 0,25em) no cabía en 3 y entraba en la lista. */}
++      <div className="md:col-span-4 lg:col-span-3 flex items-start gap-4">
+         <span className="font-mono text-[10px] tracking-[0.2em] text-[#707070] tabular-nums pt-[3px]" aria-hidden="true">
+           {String(index + 1).padStart(2, "0")}
+         </span>
+@@ -38,7 +39,7 @@ function CategoryRow({
+         </h3>
+       </div>
+ 
+-      <ul className="md:col-span-9 flex flex-wrap gap-x-2 gap-y-3">
++      <ul className="md:col-span-8 lg:col-span-9 flex flex-wrap gap-x-2 gap-y-3">
+         {category.items.map((item, i) => (
+           <li key={item} className="flex items-center text-sm font-medium text-[#0a0a0a] whitespace-nowrap">
+             {item}
+diff --git a/src/components/sections/home/MethodologyLine.tsx b/src/components/sections/home/MethodologyLine.tsx
+index f0e323e..8e537e4 100644
+--- a/src/components/sections/home/MethodologyLine.tsx
++++ b/src/components/sections/home/MethodologyLine.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { useEffect, useRef, useState } from "react"
+ import { animateSingleValue, m, useInView, useMotionValue, useMotionValueEvent } from "motion/react"
++import type { UseInViewOptions } from "motion/react"
+ import { InstrumentLabel } from "@/components/ui/InstrumentLabel"
+ import { useStageProgress } from "@/hooks/useStageProgress"
+ import type { StageOffset } from "@/hooks/useStageProgress"
+@@ -27,6 +28,16 @@ const OFFSET: StageOffset = ["start 0.8", "start 0.3"]
+ const REACH = 0.04
+ /** Modo inView (celular): la línea se traza una vez, en 1,6 s, al entrar en pantalla. */
+ const INVIEW_DURATION = 1.6
++/**
++ * Disparo del modo inView, una sola vez: cuando el borde superior de la pista
++ * cruza el 70 % del viewport (margen inferior de −30 % y cualquier fracción
++ * visible). Va por posición y no por fracción visible: con `amount: 0.3`, una
++ * pista más alta que 1 / 0,3 pantallas nunca llegaba a verse en un 30 % y la
++ * línea no arrancaba (zoom del navegador al 400 %, 320×256; letra grande en un
++ * celular apaisado). `once`: una vez disparada, termina aunque la pista salga de
++ * pantalla.
++ */
++const IN_VIEW_TRIGGER: UseInViewOptions = { once: true, margin: "0px 0px -30% 0px" }
+ 
+ /** Fases alcanzadas por una línea trazada hasta `line` (0→1): el nodo de la fase i está en i / total. */
+ function phasesReached(line: number, total: number) {
+@@ -46,7 +57,8 @@ function phasesReached(line: number, total: number) {
+  *   izquierda) sigue al scroll mientras la fila de fases sube del 80 % al 30 %
+  *   del viewport. Sin sticky: el propio desplazamiento de la fila es el recorrido.
+  * - inView (celular, celular apaisado): la línea se traza una sola vez al entrar
+- *   en pantalla. Por debajo de md es vertical (scaleY, origen arriba).
++ *   en pantalla (la pista cruza el 70 % del viewport, IN_VIEW_TRIGGER). Por
++ *   debajo de md es vertical (scaleY, origen arriba).
+  * - static (reducir movimiento): línea completa y las 5 fases activas.
+  *
+  * Solo se anima `transform`; el color de fases, puntos y textos es un cambio de
+@@ -59,7 +71,7 @@ function phasesReached(line: number, total: number) {
+ export function MethodologyLine({ content }: { content: MethodologyContent }) {
+   const trackRef = useRef<HTMLDivElement>(null)
+   const { progress, mode } = useStageProgress(trackRef, OFFSET)
+-  const inView = useInView(trackRef, { once: true, amount: 0.3 })
++  const inView = useInView(trackRef, IN_VIEW_TRIGGER)
+   const line = useMotionValue(0)
+   const total = content.steps.length
+   const [reached, setReached] = useState(0)
+-- 
+2.43.0
+

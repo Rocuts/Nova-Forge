@@ -1,0 +1,446 @@
+From bbb83c7b994af9473f011e1cc03178ff92b8a4b9 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 24 Sep 2026 19:39:20 +0000
+Subject: [PATCH 3/3] =?UTF-8?q?fix(home):=20lista=20negra=20con=20plurales?=
+ =?UTF-8?q?=20y=20secuencia=2001=E2=80=9306=20alineada=20en=20=C2=ABLo=20q?=
+ =?UTF-8?q?ue=20ya=20construimos=C2=BB?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Corrector de la ronda 2 de T9 (lentes de cumplimiento, calidad y visual). La lista negra de RealTy
+detecta también «APIs» y «LLMs», y su filtro tiene una prueba propia. En la secuencia 01–06, el número
+y el texto de cada paso comparten línea base con cualquier letra del navegador, y la lista se anuncia
+como lista también en VoiceOver. A 320 px, la cifra principal de la consola compacta cabe en una línea.
+Las tablas y las órdenes del plan recogen ConsoleFrame.tsx y el spec temporal.
+
+Decisiones:
+- findForbiddenTerms: \b<término>s?\b, con prueba sin navegador en realty.spec.ts. El orden esperado en
+  el ejemplo de la revisión no era el que devuelve la función: primero las raíces y luego las palabras,
+  en el orden de FORBIDDEN_WORDS (['webhook', 'LLM', 'API', '15M']).
+- items-baseline sin pt-[3px] (antes, 1 px de desfase con letra de 16 px y 5 px con 20 px); role="list"
+  en el <ol>, porque el número es aria-hidden.
+- max-[22.5rem]:text-[1.7rem] solo con compact: la cifra ocupa 187 px de 196 (con 1,75rem serían 194 px,
+  demasiado justo). El HTML de /realty no cambia.
+- El comentario de ConsoleFrame ya no nombra las props de resaltado de viz.tsx, así que el grep
+  «2563eb|accent» del paso 3 también sirve para ese archivo.
+- 6 pruebas nuevas y 1 reforzada: todas en rojo con el código anterior salvo la de falsos positivos del
+  filtro, que es de regresión. home-t9: 31, realty: 14, suite completa 204/204.
+- JS de /es: 220 321 → 220 328 B (+7 B; +95 B sobre la base 3644611, con un tope de +2 500 B).
+  check:modern-js OK.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018YauSK8LD8orFVwYrML1H6
+---
+ .../2026-09-23-home-cartografia-soberana.md   | 45 ++++++++-----
+ e2e/helpers.ts                                | 12 ++--
+ e2e/home-t9.spec.ts                           | 65 +++++++++++++++++++
+ e2e/realty.spec.ts                            | 41 +++++++++++-
+ .../sections/home/StudioSequence.tsx          | 13 ++--
+ .../sections/realty/ConsoleFrame.tsx          | 20 ++++--
+ 6 files changed, 165 insertions(+), 31 deletions(-)
+
+diff --git a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+index 8d565a3..f2b2f39 100644
+--- a/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
++++ b/docs/superpowers/plans/2026-09-23-home-cartografia-soberana.md
+@@ -115,9 +115,9 @@ T4 títulos+motion ──┴─────┴─► T5 nav+header ───┘
+ | `e2e/helpers.ts` | T4 (crea), T5–T10 |
+ | `src/lib/page-meta.ts` | T2 (crea), T6 (título de la home) |
+ | `src/components/sections/TechStack.tsx` | T6 (logos), T10 |
+-| `src/components/sections/realty/Hero.tsx` | T5 (`data-header-start`), T9 (exporta `ConsoleFrame`) |
++| `src/components/sections/realty/Hero.tsx` | T5 (`data-header-start`), T9 (importa `ConsoleFrame` de `realty/ConsoleFrame.tsx`, que crea T9; decisión 9 de T9) |
+ | `e2e/a11y.spec.ts` | T5 |
+-| `e2e/realty.spec.ts` | T9 (exporta listas negras a `e2e/helpers.ts`) |
++| `e2e/realty.spec.ts` | T9 (la lista negra y su filtro, `findForbiddenTerms`, pasan a `e2e/helpers.ts`; el filtro se prueba aquí) |
+ 
+ ---
+ 
+@@ -356,7 +356,7 @@ export function ConsoleFrame(props: {
+   demoLabel: string
+   demoSrText: string
+   drawn: boolean
+-  compact?: boolean                    // por defecto false; true = cifra principal y fichas, sin embudo, alineada al inicio (sin centrar) y con la cifra al pie de cada ficha (tarjeta de la home)
++  compact?: boolean                    // por defecto false; true = cifra principal y fichas, sin embudo, alineada al inicio (sin centrar), con la cifra al pie de cada ficha y, por debajo de 22,5rem, la cifra principal a 1,7rem (tarjeta de la home)
+ }): JSX.Element
+ //   Pantalla «Resumen» de la consola de RealTy, con una sola etiqueta de datos de demostración y sin acento azul.
+ //   La importan RealtyHero (isla de /realty) y home/BuiltProof.tsx (servidor): siempre desde este módulo, nunca
+@@ -487,7 +487,7 @@ Fuente y cifras: `docs/superpowers/research/2026-09-24-presupuesto-js.md` (§5:
+ | 6 | Primitivas y portada | `e2e/home.spec.ts` | hook, `InstrumentLabel`, `FocalCover`, `ScrollStage`, `TrustLogos`, `home/{geometry,HomeHero,HeroRoute}` | `sections/Hero.tsx`, `sections/TrustBar.tsx` |
+ | 7 | Tesis y Capacidades | `e2e/home.spec.ts` | `home/{Thesis,CapabilitiesIndex,CapabilitiesMedia}.tsx` | `Services.tsx`, `FlagshipAI.tsx`, clave `flagshipAI`, `.bg-grid` |
+ | 8 | Del papel al dato | `e2e/home.spec.ts` | `home/Dossier.tsx` | — |
+-| 9 | Lo que ya construimos | `e2e/home.spec.ts` | `home/BuiltProof.tsx` (+ islas) | `CaseStudy.tsx`, `LiveStudioTeaser.tsx`, clave `liveStudioTeaser` |
++| 9 | Lo que ya construimos | `e2e/home.spec.ts` (en F3, el spec temporal `e2e/home-t9.spec.ts`), `e2e/realty.spec.ts` (filtro de la lista negra) | `home/{BuiltProof,BuiltStage,BuiltScaleIn,StudioSequence}.tsx`, `realty/ConsoleFrame.tsx` | `CaseStudy.tsx`, `LiveStudioTeaser.tsx`, clave `liveStudioTeaser` |
+ | 10 | Metodología, cierre y FAQ | `e2e/home.spec.ts` | `home/MethodologyLine.tsx` | `Methodology.tsx` |
+ | 11 | Limpieza, docs y verificación final | informe de verificación | `scripts/measure-home.mjs`, `scripts/capture-home.mjs` | claves y archivos muertos |
+ 
+@@ -7704,10 +7704,12 @@ cd /home/user/wt/task9
+ | Crear | `src/components/sections/home/BuiltStage.tsx`: isla, la `<section>` con `data-stage-mode` |
+ | Crear | `src/components/sections/home/BuiltScaleIn.tsx`: isla, tarjeta de RealTy de 0,92 a 1 |
+ | Crear | `src/components/sections/home/StudioSequence.tsx`: isla, capacidades 01–06 que se encienden |
+-| Modificar | `src/components/sections/realty/Hero.tsx`: `export` de `ConsoleFrame` y prop opcional `compact` |
++| Crear | `src/components/sections/realty/ConsoleFrame.tsx`: sin directiva ni hooks, `ConsoleFrame` con la prop opcional `compact` (decisión 9; firma en §3.3) |
++| Modificar | `src/components/sections/realty/Hero.tsx`: importa `ConsoleFrame` de `./ConsoleFrame` y pierde su copia local (decisión 9; sustituye al paso 2.2) |
+ | Modificar | `src/content/dictionaries/es.ts`, `en.ts`: `built`, `caseStudy.ownership`, `caseStudy.summary`; eliminar `liveStudioTeaser` |
+ | Modificar | `src/app/[locale]/page.tsx`: `BuiltProof` sustituye a `CaseStudy` + `LiveStudioTeaser` |
+-| Modificar | `e2e/helpers.ts` (se añaden `FORBIDDEN_STEMS`, `FORBIDDEN_WORDS` y `findForbiddenTerms`), `e2e/realty.spec.ts` (los importa), `e2e/smoke.spec.ts`, `e2e/home.spec.ts` |
++| Modificar | `e2e/helpers.ts` (se añaden `FORBIDDEN_STEMS`, `FORBIDDEN_WORDS` y `findForbiddenTerms`), `e2e/realty.spec.ts` (usa `findForbiddenTerms` y prueba el propio filtro; decisiones 25 y 28), `e2e/smoke.spec.ts`, `e2e/home.spec.ts` |
++| Crear (F3) | `e2e/home-t9.spec.ts`: spec temporal con las pruebas de T9 (decisión 16). El integrador las funde al final de `e2e/home.spec.ts` y borra el archivo |
+ | Borrar | `src/components/sections/CaseStudy.tsx`, `src/components/sections/LiveStudioTeaser.tsx` |
+ 
+ `src/app/llms.txt/route.ts` **no se toca**: sigue leyendo `caseStudy.title/industry/context/solution/outcome`, que no cambian.
+@@ -8123,6 +8125,8 @@ Comprobación: `grep -rn "liveStudioTeaser" src e2e` → sin resultados (el úni
+ 
+ **2.2 `src/components/sections/realty/Hero.tsx`: exportar `ConsoleFrame` con vista compacta opcional.** `RealtyHero` no cambia: no pasa `compact` y el valor por defecto es `false`. Son tres bloques.
+ 
++*Sustituido por la decisión 9: `ConsoleFrame` vive en `src/components/sections/realty/ConsoleFrame.tsx`, sin directiva ni hooks, y `realty/Hero.tsx` solo lo importa. Los bloques de abajo describen la versión inicial.*
++
+ Antes:
+ ```tsx
+ /**
+@@ -8582,14 +8586,14 @@ git rm src/components/sections/CaseStudy.tsx src/components/sections/LiveStudioT
+ cd /home/user/wt/task9
+ npm run lint                     # 0 errores
+ npx tsc --noEmit                 # sin salida
+-PORT=3090 npx playwright test e2e/home.spec.ts -g "T9 ·" --reporter=line                 # 7 passed
+-PORT=3090 npx playwright test e2e/smoke.spec.ts e2e/realty.spec.ts --reporter=line        # todo verde (realty: 12 passed)
++PORT=3090 npx playwright test e2e/home-t9.spec.ts --reporter=line                        # 31 passed (F3; integrada: e2e/home.spec.ts -g "T9 ·")
++PORT=3090 npx playwright test e2e/smoke.spec.ts e2e/realty.spec.ts --reporter=line        # todo verde (realty: 14 passed)
+ PORT=3090 npx playwright test --reporter=line                                             # suite completa en verde
+ grep -rn "liveStudioTeaser\|LiveStudioTeaser\|sections/CaseStudy" src e2e                 # sin resultados
+-grep -rnE "2563eb|accent" src/components/sections/home/Built*.tsx src/components/sections/home/StudioSequence.tsx   # sin resultados
+-grep -rnE "RSDubai|Redminds|Cierre Autónomo|Realty\.ia" src/components/sections/home      # sin resultados
++grep -rnE "2563eb|accent" src/components/sections/home/Built*.tsx src/components/sections/home/StudioSequence.tsx src/components/sections/realty/ConsoleFrame.tsx   # sin resultados
++grep -rnE "RSDubai|Redminds|Cierre Autónomo|Realty\.ia" src/components/sections/home src/components/sections/realty/ConsoleFrame.tsx   # sin resultados
+ git diff --quiet redesign/home -- src/app/llms.txt/route.ts && echo "llms.txt intacto"    # llms.txt intacto
+-git diff redesign/home -- src/components/sections/realty/Hero.tsx                         # solo los 3 bloques de 2.2
++git diff redesign/home -- src/components/sections/realty/Hero.tsx                         # solo el import de ./ConsoleFrame y la copia local que se va (decisión 9)
+ ```
+ Revisión a ojo (el revisor, con `PORT=3090 npm run dev`): `/es#construido` a 1440×900 y 390×844. La tarjeta de RealTy muestra la consola compacta y una sola etiqueta "Datos de demostración". La secuencia 01–06 se enciende al bajar y no parece un registro de eventos. No hay nada azul. `/es/realty` se ve igual que antes, con embudo y el mismo marco.
+ 
+@@ -8600,15 +8604,16 @@ cd /home/user/wt/task9
+ git checkout AGENTS.md 2>/dev/null || true   # por si next dev reescribió su bloque
+ git add src/components/sections/home/BuiltProof.tsx src/components/sections/home/BuiltStage.tsx \
+   src/components/sections/home/BuiltScaleIn.tsx src/components/sections/home/StudioSequence.tsx \
+-  src/components/sections/realty/Hero.tsx src/content/dictionaries/es.ts src/content/dictionaries/en.ts \
+-  "src/app/[locale]/page.tsx" e2e/helpers.ts e2e/realty.spec.ts e2e/smoke.spec.ts e2e/home.spec.ts
++  src/components/sections/realty/ConsoleFrame.tsx src/components/sections/realty/Hero.tsx \
++  src/content/dictionaries/es.ts src/content/dictionaries/en.ts \
++  "src/app/[locale]/page.tsx" e2e/helpers.ts e2e/realty.spec.ts e2e/smoke.spec.ts e2e/home-t9.spec.ts
+ git commit -F- <<'EOF'
+ feat(home): une RealTy y Live Studio en «Lo que ya construimos»
+ 
+ BuiltProof (servidor) reemplaza CaseStudy y LiveStudioTeaser con una sección oscura y tres islas:
+ BuiltStage (data-stage-mode), BuiltScaleIn (la tarjeta de RealTy pasa de escala 0,92 a 1) y
+ StudioSequence (las 6 capacidades del caso, 01–06, se encienden al bajar). La tarjeta de RealTy
+-reutiliza ConsoleFrame, exportado de realty/Hero.tsx, con una sola etiqueta de datos de demostración.
++reutiliza ConsoleFrame (realty/ConsoleFrame.tsx, sin directiva), con una sola etiqueta de datos de demostración.
+ Diccionarios: built, caseStudy.ownership y caseStudy.summary; se elimina liveStudioTeaser.
+ La lista negra de RealTy pasa a e2e/helpers.ts y también se aplica a la tarjeta de la home.
+ 
+@@ -8623,7 +8628,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+ Claude-Session: https://claude.ai/code/session_01BtSmnSxj5Q8cRvASJqqRbX
+ EOF
+ ```
+-El borrado de 2.8 ya quedó en el índice con `git rm`.
++El borrado de 2.8 ya quedó en el índice con `git rm`. En F3 las pruebas van en el spec temporal `e2e/home-t9.spec.ts` (decisión 16): al integrar, el integrador las funde en `e2e/home.spec.ts`, que entra en su commit, y borra el temporal.
+ 
+ ### Decisiones
+ 
+@@ -8676,6 +8681,16 @@ Hallazgos de la revisión con tres lentes (cumplimiento, calidad y visual) y có
+     - letra del navegador a 20 px (CDP `Page.setFontSizes`), a 820 y 1 000 px con reducir movimiento: la consola queda alineada con el h3 de la tarjeta.
+ 27. **JS de `/es`** tras la ronda 1 (`measure-js`, `next start`, 1440×900, mediana de 3): **220 321 B** en 15 scripts. Son +91 B sobre la implementación (220 230 B) y +88 B sobre la base `3644611` (220 233 B), con un tope para T9 de +2 500 B. Solo cambia el chunk de la página (15 255 → 15 346 B), por la medida por posición de `StudioSequence`. `check:modern-js`: OK (let=3529, class=167). En los chunks de `/es` sigue sin haber código de la consola de RealTy. El HTML prerenderizado de `/es/realty` y `/en/realty`, sin scripts ni recursos estáticos, es idéntico al del build de la implementación.
+ 
++### Decisiones (corrector, ronda 2)
++Hallazgos de la ronda 2 (cumplimiento, calidad y visual) y cómo se resolvieron. Manda el código.
++
++28. **La lista negra detecta también el plural de sus siglas y nombres** (`findForbiddenTerms`: `\b<término>s?\b`). Con `\b…\b` pasaban «APIs» y «LLMs», justo la forma que más usa el sitio fuera de RealTy (6 apariciones en `es.ts` y 4 en `en.ts`: «sin dependencias de APIs externas», «Fine-tuning de LLMs Open Source»…). Si una de esas frases llegara al copy de RealTy, ninguna prueba fallaría. Las trampas conocidas siguen sin falsos positivos: «passes», «Adaptador de prueba» y «capital» dan `[]`. También atrapa «15ms», que en el copy de RealTy sería una métrica, ya prohibida. El filtro tiene ahora su propia prueba en `e2e/realty.spec.ts`, sin navegador: cada término en minúsculas y en mayúsculas, cada sigla o nombre en plural, y las trampas y las `statusLabels` de es y en sin resultados. Si el filtro se rompe y devuelve `[]`, esa prueba falla en lugar de dejar en verde las dos pruebas de jerga. En el ejemplo de la revisión, el orden esperado no era el que devuelve la función: primero las raíces y después las palabras, en el orden de `FORBIDDEN_WORDS` (`['webhook', 'LLM', 'API', '15M']`). Con la expresión anterior la prueba falla (no detecta ningún plural) y con la nueva pasa. `realty.spec.ts` pasa a 14 pruebas.
++29. **El número 01–06 y el texto de cada paso comparten línea base** (`items-baseline` en el `<li>`, sin el `pt-[3px]` del número), como en el índice de Capacidades. El número mide 11 px fijos y el texto 0,875rem. Con `items-start` y 3 px fijos, la línea base del texto quedaba 1 px por debajo de la del número con la letra del navegador a 16 px, y 5 px por debajo con 20 px. La línea de 1 px es absoluta y no entra en el flex. La prueba nueva mide la línea base de cada span con un inline-block vacío de alto 0 y exige menos de 0,5 px a 16 y 20 px, a 390 y 1 440 de ancho. Con el código anterior falla: 1 px y 5 px en el primer paso a 390 px (la revisión midió lo mismo en los 6 pasos y a 1 440 px).
++30. **`role="list"` en la `<ol>` de la secuencia.** El preflight de Tailwind pone `list-style: none` en toda lista, y VoiceOver en Safari no anuncia como lista una lista sin viñetas (lo advierte la página de Preflight de Tailwind). La decisión 6 oculta el número porque «el `<ol>` ya da el orden», así que en Safari los seis pasos se leían sin lista y sin numeración. Con el rol explícito, esa premisa también se cumple allí. No se pudo comprobar con VoiceOver: el contenedor no tiene Safari. La prueba de la tarjeta de Live Studio exige el atributo. Capacidades no se toca, porque no oculta sus números.
++31. **A 320 px, la cifra principal de la consola compacta cabe en una línea.** Por debajo de 22,5rem la tarjeta baja a 1rem de relleno (decisión 14), pero la consola conserva su `px-5`. Con su mínimo de 1,85rem (29,6 px), la cifra pedía 206 px en un hueco de 196, y «USD» quedaba en una línea y el importe en la siguiente, en es y en. En `/realty`, al mismo ancho, el hueco es de 230 px y cabe. Se añade `max-[22.5rem]:text-[1.7rem]` solo con `compact`, igual que `COMPACT_TILE_CLASS`. A 27,2 px ocupa 187 px (medido con Geist; con 1,75rem serían 194 px, demasiado justo). De 360 px en adelante no cambia nada. El HTML prerenderizado de `/es/realty` y `/en/realty` es idéntico al de la ronda 1 (comparado sin scripts ni recursos estáticos). La prueba nueva, a 320×568 en es y en, falla con el código anterior: 59 px de alto con 29,6 px de letra, dos líneas.
++32. **Tablas y órdenes del plan al día con las decisiones 9 y 16**, para el integrador (F4) y T11. En §2, las filas de `realty/Hero.tsx` y de `e2e/realty.spec.ts`. En §4, la fila 9: crea `realty/ConsoleFrame.tsx` y las tres islas, y en F3 las pruebas van en `e2e/home-t9.spec.ts`. En esta sección: la tabla «Archivos» (crea `ConsoleFrame.tsx`, `realty/Hero.tsx` solo lo importa, spec temporal), una nota en el paso 2.2, los recuentos del paso 3 (`home-t9`: 31; `realty`: 14), los dos `grep` del paso 3, que ahora también miran `realty/ConsoleFrame.tsx`, y el `git add` del paso 4. Para que el `grep` de «2563eb|accent» sirva también en `ConsoleFrame.tsx`, su comentario de cabecera dice lo mismo sin nombrar las props de resaltado de `viz.tsx`: así el `grep` solo encontraría un uso real.
++33. **JS de `/es` tras la ronda 2** (`measure-js`, `next start`, 1440×900, mediana de 3; las tres ejecuciones iguales): **220 328 B** en 15 scripts. Son +7 B sobre la ronda 1 (220 321 B) y +95 B sobre la base `3644611` (220 233 B), con un tope para T9 de +2 500 B. El chunk de la página pasa de 15 346 a 15 353 B, que es toda la diferencia (`role="list"` y las clases de la lista). `check:modern-js`: OK (let=3529, class=167). En los 14 chunks de `/es` no hay código de la consola de RealTy ni la clase nueva de su cifra. Pruebas: 6 nuevas y 1 reforzada (la de la tarjeta de Live Studio exige `role="list"`). Todas fallan con el código anterior salvo la de falsos positivos del filtro, que es de regresión, y las 7 pasan 21/21 con `--repeat-each=3`. e2e: `e2e/home-t9.spec.ts` 31/31, `e2e/realty.spec.ts` 14/14 y suite completa 204/204. Lint, `tsc` y build en verde.
++
+ ---
+ 
+ ## Tarea 10 — Metodología, cierre y FAQ
+diff --git a/e2e/helpers.ts b/e2e/helpers.ts
+index 8429594..d3ffa91 100644
+--- a/e2e/helpers.ts
++++ b/e2e/helpers.ts
+@@ -156,7 +156,8 @@ export const FORBIDDEN_STEMS = [
+ ] as const
+ 
+ /**
+- * Siglas y nombres propios prohibidos. Coinciden como PALABRA COMPLETA: como
++ * Siglas y nombres propios prohibidos. Coinciden como PALABRA COMPLETA, también
++ * con la "s" del plural ("APIs", "LLMs": la forma que más usa el sitio): como
+  * subcadena producen falsos positivos reales en el copy legítimo — "sse" vive
+  * dentro de "passes" y "dapta" dentro de "Adaptador de prueba", que es una de
+  * las etiquetas de estado obligatorias.
+@@ -179,14 +180,15 @@ export const FORBIDDEN_WORDS = [
+ 
+ /**
+  * Términos de la lista negra presentes en `text`. Es el único filtro: lo usan
+- * e2e/realty.spec.ts y la tarjeta de RealTy de la home. Todo en minúsculas (los
+- * chips en `uppercase` llegan transformados en `innerText`), raíces como
+- * subcadena, palabras con `\b`.
++ * e2e/realty.spec.ts y la tarjeta de RealTy de la home, y tiene su propia prueba
++ * en e2e/realty.spec.ts. Todo en minúsculas (los chips en `uppercase` llegan
++ * transformados en `innerText`), raíces como subcadena, palabras con `\b` y una
++ * "s" opcional al final.
+  */
+ export function findForbiddenTerms(text: string): string[] {
+   const lower = text.toLowerCase()
+   return [
+     ...FORBIDDEN_STEMS.filter((term) => lower.includes(term.toLowerCase())),
+-    ...FORBIDDEN_WORDS.filter((term) => new RegExp(`\\b${term.toLowerCase()}\\b`).test(lower)),
++    ...FORBIDDEN_WORDS.filter((term) => new RegExp(`\\b${term.toLowerCase()}s?\\b`).test(lower)),
+   ]
+ }
+diff --git a/e2e/home-t9.spec.ts b/e2e/home-t9.spec.ts
+index 3ba0c70..5cdf7d4 100644
+--- a/e2e/home-t9.spec.ts
++++ b/e2e/home-t9.spec.ts
+@@ -131,6 +131,10 @@ test.describe('T9 · Lo que ya construimos', () => {
+     await expect(card).toContainText(es.caseStudy.capabilitiesTitle)
+ 
+     expect(es.caseStudy.capabilities).toHaveLength(6)
++    // El número 01–06 es aria-hidden porque el orden lo da la lista. El preflight
++    // de Tailwind quita las viñetas de toda lista (list-style: none), y VoiceOver
++    // en Safari deja entonces de anunciarla como lista: la declara role="list".
++    await expect(card.locator('ol:has([data-studio-step])')).toHaveAttribute('role', 'list')
+     const steps = card.locator('[data-studio-step]')
+     await expect(steps).toHaveCount(6)
+     expect(await steps.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-studio-step')))).toEqual([
+@@ -444,6 +448,48 @@ test.describe('T9 · Lo que ya construimos · letra del navegador a 20 px', () =
+   })
+ })
+ 
++// El número de cada paso (Geist Mono a 11 px fijos) y su texto (0,875rem) tienen
++// tamaños distintos: comparten la línea base con cualquier letra del navegador.
++// Un relleno fijo en px solo los alineaba con la de 16 px (a 20 px, 5 px de desfase).
++test.describe('T9 · Lo que ya construimos · número y texto de cada paso', () => {
++  test.use({ contextOptions: { reducedMotion: 'reduce' } })
++
++  for (const fontSize of [16, 20]) {
++    test(`comparten línea base con la letra del navegador a ${fontSize} px`, async ({ page }) => {
++      const cdp = await page.context().newCDPSession(page)
++      await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize } })
++      for (const width of [390, 1440]) {
++        await page.setViewportSize({ width, height: 900 })
++        await page.goto('/es')
++        expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe(`${fontSize}px`)
++        const steps = builtSection(page).locator('[data-studio-step]')
++        await expect(steps).toHaveCount(6)
++        const gaps = await steps.evaluateAll((items) =>
++          items.map((item) => {
++            // Línea base de la primera línea de un span: el borde inferior de un
++            // inline-block vacío de alto 0 puesto al principio (su línea base es su
++            // borde inferior). Se quita en el acto.
++            const baseline = (span: Element) => {
++              const probe = document.createElement('span')
++              probe.style.cssText = 'display:inline-block;width:0;height:0'
++              span.prepend(probe)
++              const y = probe.getBoundingClientRect().bottom
++              probe.remove()
++              return y
++            }
++            // Hijos de cada paso: la línea (absoluta), el número y el texto.
++            const [, number, label] = Array.from(item.children)
++            return baseline(label) - baseline(number)
++          })
++        )
++        for (const [i, gap] of gaps.entries()) {
++          expect(Math.abs(gap), `${width} px: línea base del número y del texto del paso ${i + 1}`).toBeLessThan(0.5)
++        }
++      }
++    })
++  }
++})
++
+ // La consola de RealTy está pensada para ≥ 272 px de ancho (su portada en
+ // /realty). Dentro de la tarjeta, a 320 px, las fichas se estrechan: ninguna
+ // etiqueta ni sparkline puede salirse de su ficha e invadir la vecina.
+@@ -451,6 +497,25 @@ test.describe('T9 · Lo que ya construimos · 320 px', () => {
+   test.use({ viewport: { width: 320, height: 568 } })
+ 
+   for (const locale of ['es', 'en'] as const) {
++    // Por debajo de 22,5rem la tarjeta baja a 1rem de relleno, pero la consola
++    // conserva el suyo: con el mínimo de 1,85rem, «USD» y la cifra se partían en
++    // dos líneas (en /realty, al mismo ancho, caben en una).
++    test(`${locale}: la cifra principal de la consola cabe en una línea`, async ({ page }) => {
++      await page.goto(`/${locale}`)
++      const dict = locale === 'es' ? es : en
++      const card = page.locator(`#${dict.built.sectionId} [data-built-card="realty"]`)
++      const headline = card.getByText(dict.realty.hero.console.headline.value, { exact: true })
++      await expect(headline).toHaveCount(1)
++      // El ancho depende de la letra: se mide con Geist ya cargada, no con la de respaldo.
++      await page.evaluate(() => document.fonts.ready.then(() => true))
++      const { height, fontSize } = await headline.evaluate((element) => ({
++        height: element.getBoundingClientRect().height,
++        fontSize: parseFloat(getComputedStyle(element).fontSize),
++      }))
++      // leading-none: una línea mide lo que la letra; dos, el doble.
++      expect(height, `${locale}: alto de la cifra (${fontSize} px de letra)`).toBeLessThan(fontSize * 1.5)
++    })
++
+     test(`${locale}: nada de la consola de RealTy se sale de su ficha`, async ({ page }) => {
+       await page.goto(`/${locale}`)
+       const dict = locale === 'es' ? es : en
+diff --git a/e2e/realty.spec.ts b/e2e/realty.spec.ts
+index bcb233d..ad5e1e8 100644
+--- a/e2e/realty.spec.ts
++++ b/e2e/realty.spec.ts
+@@ -1,7 +1,7 @@
+ import { test, expect } from '@playwright/test'
+ import es from '../src/content/dictionaries/es'
+ import en from '../src/content/dictionaries/en'
+-import { findForbiddenTerms } from './helpers'
++import { FORBIDDEN_STEMS, FORBIDDEN_WORDS, findForbiddenTerms } from './helpers'
+ 
+ /**
+  * Gate de la landing de RealTy (v2).
+@@ -23,8 +23,9 @@ const dictionaries = { es, en } as const
+ type LocaleKey = keyof typeof dictionaries
+ 
+ // La lista negra (FORBIDDEN_STEMS como subcadena, FORBIDDEN_WORDS como palabra
+-// completa) y su filtro, findForbiddenTerms, viven en e2e/helpers.ts: la tarjeta
+-// de RealTy de la home (e2e/home.spec.ts) aplica la misma regla, escrita una vez.
++// completa, también en plural) y su filtro, findForbiddenTerms, viven en
++// e2e/helpers.ts: la tarjeta de RealTy de la home (e2e/home.spec.ts) aplica la
++// misma regla, escrita una vez. El propio filtro se prueba al final del archivo.
+ 
+ /** Secciones con ancla, en el orden en el que la narrativa las presenta. */
+ const SECTION_IDS = ['outcomes', 'journey', 'voice', 'console', 'channels', 'status', 'faq'] as const
+@@ -117,3 +118,37 @@ for (const locale of ['es', 'en'] as LocaleKey[]) {
+     })
+   })
+ }
++
++/**
++ * El filtro de la lista negra, sin navegador. Es el único: si se rompiera y
++ * devolviera [], la prueba de jerga de esta landing y la de la tarjeta de RealTy
++ * de la home seguirían en verde sin avisar.
++ */
++test.describe('findForbiddenTerms (lista negra de RealTy)', () => {
++  test('detecta cada término, también en mayúsculas y en plural', () => {
++    for (const term of FORBIDDEN_STEMS) {
++      expect(findForbiddenTerms(`texto con ${term.toUpperCase()} dentro`), term).toEqual([term])
++    }
++    for (const term of FORBIDDEN_WORDS) {
++      expect(findForbiddenTerms(`texto con ${term} dentro`), term).toEqual([term])
++      expect(findForbiddenTerms(`texto con ${term.toUpperCase()}s dentro`), `${term} en plural`).toEqual([term])
++    }
++    // El plural es la forma que más usa el sitio fuera de RealTy («sin
++    // dependencias de APIs externas», «Fine-tuning de LLMs»).
++    expect(findForbiddenTerms('sin dependencias de APIs externas · LLMs · webhook · USD 15M')).toEqual([
++      'webhook',
++      'LLM',
++      'API',
++      '15M',
++    ])
++  })
++
++  test('no confunde el copy de negocio que contiene una sigla dentro de una palabra', () => {
++    // "sse" vive en "passes", "dapta" en "Adaptador de prueba" y "api" en "capital".
++    expect(findForbiddenTerms('passes · Adaptador de prueba · capital')).toEqual([])
++    for (const locale of ['es', 'en'] as LocaleKey[]) {
++      const labels = Object.values(dictionaries[locale].realty.statusLabels).join(' · ')
++      expect(findForbiddenTerms(labels), `statusLabels de ${locale}`).toEqual([])
++    }
++  })
++})
+diff --git a/src/components/sections/home/StudioSequence.tsx b/src/components/sections/home/StudioSequence.tsx
+index a24bb02..f6b19dd 100644
+--- a/src/components/sections/home/StudioSequence.tsx
++++ b/src/components/sections/home/StudioSequence.tsx
+@@ -25,7 +25,9 @@
+ //
+ // Encender = número y texto de #a3a3a3 a blanco (cambio de estado discreto,
+ // sin transition-colors; AA en ambos) y una línea de 1 px que se traza con
+-// scaleX. Nada azul.
++// scaleX. Nada azul. El número (11 px fijos) y el texto (0,875rem) se alinean
++// por su línea base (items-baseline, como en Capacidades): un relleno fijo en px
++// solo los alineaba con la letra del navegador a 16 px.
+ import { useCallback, useEffect, useRef, useState } from "react"
+ import { useInView, useMotionValueEvent } from "motion/react"
+ import { useStageProgress } from "@/hooks/useStageProgress"
+@@ -111,7 +113,10 @@ export function StudioSequence({
+       <h4 className="text-balance font-mono text-[10px] uppercase tracking-[0.3em] text-[#a3a3a3] md:text-[11px]">
+         {title}
+       </h4>
+-      <ol ref={listRef} className="mt-6 border-t border-[#1a1a1a]">
++      {/* role="list": el preflight de Tailwind quita las viñetas (list-style: none) y
++          VoiceOver en Safari deja de anunciarla como lista. El número de cada paso es
++          aria-hidden porque el orden lo da la lista. */}
++      <ol ref={listRef} role="list" className="mt-6 border-t border-[#1a1a1a]">
+         {items.map((item, i) => {
+           const on = i < lit
+           const num = String(i + 1).padStart(2, "0")
+@@ -120,7 +125,7 @@ export function StudioSequence({
+               key={item}
+               data-studio-step={num}
+               data-lit={on ? "true" : "false"}
+-              className="relative flex items-start gap-5 border-b border-[#1a1a1a] py-4"
++              className="relative flex items-baseline gap-5 border-b border-[#1a1a1a] py-4"
+             >
+               <span
+                 aria-hidden="true"
+@@ -130,7 +135,7 @@ export function StudioSequence({
+               />
+               <span
+                 aria-hidden="true"
+-                className={`pt-[3px] font-mono text-[11px] tabular-nums tracking-[0.2em] noscript:text-white ${
++                className={`font-mono text-[11px] tabular-nums tracking-[0.2em] noscript:text-white ${
+                   on ? "text-white" : "text-[#a3a3a3]"
+                 }`}
+               >
+diff --git a/src/components/sections/realty/ConsoleFrame.tsx b/src/components/sections/realty/ConsoleFrame.tsx
+index fa0d664..5dd17d4 100644
+--- a/src/components/sections/realty/ConsoleFrame.tsx
++++ b/src/components/sections/realty/ConsoleFrame.tsx
+@@ -16,6 +16,13 @@ import { Funnel, StatTile } from "./viz"
+ // string (and /realty's HTML) stays exactly as it was.
+ const COMPACT_TILE_CLASS = " flex flex-col [&>:first-child]:grow"
+ 
++// Compact view only, below 22.5rem (360 px): the home card drops to 1rem of
++// padding but the console keeps its own, so at 320 px the hero figure has 196 px
++// and, at its 1.85rem floor (≈ 206 px of text), "USD" and the amount broke onto
++// two lines. At 1.7rem it takes ≈ 187 px and stays on one. Appended the same way
++// as COMPACT_TILE_CLASS, so /realty's HTML does not change.
++const COMPACT_HEADLINE_CLASS = " max-[22.5rem]:text-[1.7rem]"
++
+ /**
+  * The console "Overview" screen, rendered as the hero visual: hero figure,
+  * a 2×2 grid of stat tiles with sparklines, and the pipeline funnel underneath.
+@@ -25,9 +32,10 @@ const COMPACT_TILE_CLASS = " flex flex-col [&>:first-child]:grow"
+  * hero figure and tiles, no funnel, aligned to the start of its container at
+  * every width (the full view centres itself below lg, which suits /realty's
+  * hero but not a left-aligned card), with each tile's value at the foot of the
+- * tile. Both views keep the frame's single demo tag and never paint the accent
+- * hue (no `accent` on the tiles, no `accentIndex` on the funnel), so the home
+- * section stays blue-free.
++ * tile and, below 22.5rem, a smaller hero figure that still fits on one line.
++ * Both views keep the frame's single demo tag and never paint viz.tsx's one
++ * highlighted series in blue (no tile and no funnel stage is flagged), so the
++ * home section stays blue-free.
+  */
+ export function ConsoleFrame({
+   console: overview,
+@@ -67,7 +75,11 @@ export function ConsoleFrame({
+           <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#a3a3a3]">
+             {overview.headline.label}
+           </p>
+-          <p className="mt-3 font-heading text-[clamp(1.85rem,4.5vw,2.6rem)] font-bold leading-none tracking-tight text-white">
++          <p
++            className={`mt-3 font-heading text-[clamp(1.85rem,4.5vw,2.6rem)] font-bold leading-none tracking-tight text-white${
++              compact ? COMPACT_HEADLINE_CLASS : ""
++            }`}
++          >
+             {overview.headline.value}
+           </p>
+           <p className="mt-3 text-xs leading-relaxed text-[#a3a3a3]">{overview.headline.caption}</p>
+-- 
+2.43.0
+
